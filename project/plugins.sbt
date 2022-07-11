@@ -1,5 +1,5 @@
 val scalaJSVersion = sys.env.getOrElse("SCALAJS_VERSION", "1.10.0")
-addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.1.0")
+addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.2.0")
 
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % scalaJSVersion)
 addSbtPlugin("org.scala-js" % "sbt-jsdependencies" % "1.0.2")
@@ -22,7 +22,7 @@ addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % "0.20.0")
 
 // GRPC
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
-addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.5")
+addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.6")
 libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.7"
 //https://mvnrepository.com/artifact/com.thesamet.scalapb.grpcweb/scalapb-grpcweb
 libraryDependencies += "com.thesamet.scalapb.grpcweb" %% "scalapb-grpcweb-code-gen" % "0.6.4"
@@ -34,14 +34,14 @@ resolvers += MavenRepository("sonatype-s01-snapshots", "https://s01.oss.sonatype
 addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta38")
 
 // Utils Buildinfo
-addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.10.0")
+addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.11.0")
 
 // CI
 addSbtPlugin("com.geirsson" % "sbt-ci-release" % "1.5.7")
-addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.1") // sbt> dependencyUpdates
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.3") // sbt> dependencyUpdates
 
 // PUBLISH
-addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.10")
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.13")
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.1.2") //https://github.com/sbt/sbt-pgp#sbt-pgp
 
 // Revolver use for command 'reStart' (like the command 'run' but run on the backgroun by forking the app from sbt)
@@ -49,7 +49,7 @@ addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
 
 // https://zio.dev/howto/migrate/zio-2.x-migration-guide%20v0.9.31
 //sbt "scalafixEnable; scalafixAll github:zio/zio/Zio2Upgrade?sha=series/2.x"
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.33")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.34")
 
 // mdoc
 addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.3.2")

@@ -36,8 +36,8 @@ lazy val V = new {
   // val scalajsLogging = "1.1.2-SNAPSHOT" //"1.1.2"
 
   // https://mvnrepository.com/artifact/dev.zio/zio
-  val zio = "2.0.0-RC6"
-  val zioJson = "0.3.0-RC8"
+  val zio = "2.0.0"
+  val zioJson = "0.3.0-RC10"
 
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time
   val scalaJavaTime = "2.3.0"
@@ -47,7 +47,7 @@ lazy val V = new {
 
   val laminar = "0.14.2"
   val waypoint = "0.5.0"
-  val upickle = "1.4.3"
+  val upickle = "1.4.4"
   // https://www.npmjs.com/package/material-components-web
   val materialComponents = "12.0.0"
 }
