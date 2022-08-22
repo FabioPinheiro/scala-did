@@ -204,7 +204,7 @@ lazy val did = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.71", // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
     libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.71", // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
     // TODO libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.23", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt/9.23
-    libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.16-preview.1", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt/9.23
+    libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.24.2", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt/9.23
 
     // Needed for nimbus-jose-jwt with Ed25519Signer
     // BUT have vulnerabilities in the dependencies: CVE-2022-25647
