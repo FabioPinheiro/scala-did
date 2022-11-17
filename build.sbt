@@ -256,7 +256,7 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.72", // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
     libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.72", // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
     // TODO libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.23", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt/9.23
-    libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.16-preview.1", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt/9.23
+    libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.25.6", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt/9.23
 
     // Needed for nimbus-jose-jwt with Ed25519Signer
     // BUT have vulnerabilities in the dependencies: CVE-2022-25647
@@ -302,7 +302,7 @@ lazy val didResolverPeer = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "org.didcommx" % "peerdid" % "0.3.0" % Test,
     libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.72" % Test,
     libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.72" % Test,
-    libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.16-preview.1" % Test,
+    libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.25.6" % Test,
   )
   .dependsOn(did, multibase)
 
