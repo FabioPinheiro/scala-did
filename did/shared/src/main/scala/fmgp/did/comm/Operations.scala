@@ -18,11 +18,16 @@ trait Operations {
 
   def authEncrypt(msg: PlaintextMessage): ZIO[Agent & Resolver, DidFail, EncryptedMessage]
 
+  def anonDecryptRaw(msg: EncryptedMessage): ZIO[Agent, DidFail, Array[Byte]]
+  def authDecryptRaw(msg: EncryptedMessage): ZIO[Agent & Resolver, DidFail, Array[Byte]]
+
   /** decrypt */
-  def anonDecrypt(msg: EncryptedMessage): ZIO[Agent, DidFail, Message]
+  def anonDecrypt(msg: EncryptedMessage): ZIO[Agent, DidFail, Message] =
+    anonDecryptRaw(msg).flatMap(Operations.parseMessage(_))
 
   /** decrypt verify sender */
-  def authDecrypt(msg: EncryptedMessage): ZIO[Agent & Resolver, DidFail, Message]
+  def authDecrypt(msg: EncryptedMessage): ZIO[Agent & Resolver, DidFail, Message] =
+    authDecryptRaw(msg).flatMap(Operations.parseMessage(_))
 
   def verify2PlaintextMessage(
       msg: SignedMessage
@@ -71,8 +76,23 @@ object Operations {
   ): ZIO[Operations & Agent & Resolver, DidFail, Message] =
     ZIO.serviceWithZIO[Operations](_.authDecrypt(msg))
 
+  def anonDecryptRaw(msg: EncryptedMessage): ZIO[Operations & Agent, DidFail, Array[Byte]] =
+    ZIO.serviceWithZIO[Operations](_.anonDecryptRaw(msg))
+
+  def authDecryptRaw(msg: EncryptedMessage): ZIO[Operations & Agent & Resolver, DidFail, Array[Byte]] =
+    ZIO.serviceWithZIO[Operations](_.authDecryptRaw(msg))
+
+  // REMOVE ?
   def metaData(msg: EncryptedMessage) = msg.`protected`.obj match
     case AnonProtectedHeader(epk, apv, typ, enc, alg)            =>
     case AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) =>
+
+  def parseMessage(data: Array[Byte]) =
+    ZIO.fromEither {
+      String(data)
+        .fromJson[Message]
+        .left
+        .map(info => FailToParse(s"Decoding into a Message: $info"))
+    }
 
 }

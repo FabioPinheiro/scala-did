@@ -17,17 +17,26 @@ object MyRouter {
   case object KeysPage extends Page("Keys", "key")
   // case object DIDPage extends Page("DID", "visibility")
   case object AgentDBPage extends Page("DB", "folder_open")
-  case object ResolverPage extends Page("Resolver", "dns")
+  case class ResolverPage(did: String) extends Page("Resolver", "dns")
   case object EncryptPage extends Page("Encrypt", "enhanced_encryption")
   case object DecryptPage extends Page("Decrypt", "email")
   case object BasicMessagePage extends Page("BasicMessage", "message")
   case object TrustPingPage extends Page("TrustPing", "network_ping")
   case object TapIntoStreamPage extends Page("TapIntoStream", "chat")
-
   case object DAppStorePage extends Page("DAppStore", "share")
 
-  given HomePageRW: ReadWriter[HomePage.type] = macroRW
+  given homePageRW: ReadWriter[HomePage.type] = macroRW
   given oobPageRW: ReadWriter[OOBPage] = macroRW
+  given docPageRW: ReadWriter[DocPage.type] = macroRW
+  given keysPageRW: ReadWriter[KeysPage.type] = macroRW
+  given agentDBPageRW: ReadWriter[AgentDBPage.type] = macroRW
+  given resolverPageRW: ReadWriter[ResolverPage] = macroRW
+  given encryptPageRW: ReadWriter[EncryptPage.type] = macroRW
+  given decryptPageRW: ReadWriter[DecryptPage.type] = macroRW
+  given basicMessagePageRW: ReadWriter[BasicMessagePage.type] = macroRW
+  given trustPingPageRW: ReadWriter[TrustPingPage.type] = macroRW
+  given tapIntoStreamPageRW: ReadWriter[TapIntoStreamPage.type] = macroRW
+  given dAppStorePageRW: ReadWriter[DAppStorePage.type] = macroRW
   given rw: ReadWriter[Page] = macroRW
 
   private val routes = List(
@@ -35,16 +44,20 @@ object MyRouter {
     Route.onlyQuery[OOBPage, String]( // OOB
       encode = page => page.query_oob,
       decode = arg => OOBPage(query_oob = arg),
-      pattern = (root / endOfSegments) ? (param[String]("_oob"))
+      pattern = (root / endOfSegments) ? (param[String]("_oob")),
+      Router.localFragmentBasePath
+    ),
+    Route[ResolverPage, String](
+      encode = page => page.did,
+      decode = arg => ResolverPage(did = arg),
+      pattern = root / "resolver" / segment[String] / endOfSegments,
+      Router.localFragmentBasePath
     ),
     Route.static(HomePage, root / endOfSegments, Router.localFragmentBasePath),
     Route.static(DocPage, root / "doc" / endOfSegments, Router.localFragmentBasePath),
     Route.static(KeysPage, root / "keys" / endOfSegments, Router.localFragmentBasePath),
-    // Route.static(DIDPage, root / "did" / endOfSegments, Router.localFragmentBasePath),
     Route.static(AgentDBPage, root / "db" / endOfSegments, Router.localFragmentBasePath),
-    Route.static(ResolverPage, root / "resolver" / endOfSegments, Router.localFragmentBasePath),
     Route.static(EncryptPage, root / "encrypt" / endOfSegments, Router.localFragmentBasePath),
-    Route.static(DecryptPage, root / "didcomm" / endOfSegments, Router.localFragmentBasePath),
     Route.static(DecryptPage, root / "decrypt" / endOfSegments, Router.localFragmentBasePath),
     Route.static(BasicMessagePage, root / "basicmessage" / endOfSegments, Router.localFragmentBasePath),
     Route.static(TrustPingPage, root / "trustping" / endOfSegments, Router.localFragmentBasePath),

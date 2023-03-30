@@ -7,6 +7,7 @@ import fmgp.crypto.error._
 import fmgp.did._
 import fmgp.did.comm._
 import fmgp.did.comm.Operations._
+import fmgp.did.comm.protocol._
 import fmgp.did.comm.protocol.basicmessage2._
 import fmgp.did.comm.protocol.trustping2._
 
@@ -14,33 +15,37 @@ import fmgp.did.comm.protocol.trustping2._
 
 trait ProtocolExecuter[-R] {
 
-  /** @return can return a Sync Reply Msg */
-  def execute[R1 <: R](
-      plaintextMessage: PlaintextMessage,
-      // context: Context
-  ): ZIO[R1, DidFail, Option[EncryptedMessage]] = program(plaintextMessage) *> ZIO.none
+  def suportedPIURI: Seq[PIURI]
 
-  def program[R1 <: R](
-      plaintextMessage: PlaintextMessage,
-      // context: Context
-  ): ZIO[R1, DidFail, Option[PlaintextMessage]]
+  /** @return can return a Sync Reply Msg */
+  def execute[R1 <: R](plaintextMessage: PlaintextMessage): ZIO[R1, DidFail, Option[EncryptedMessage]] =
+    program(plaintextMessage) *> ZIO.none
+
+  def program[R1 <: R](plaintextMessage: PlaintextMessage): ZIO[R1, DidFail, Action]
 }
 
 object ProtocolExecuter {
-
   type Services = Resolver & Agent & Operations & MessageDispatcher
+}
+case class ProtocolExecuterCollection[-R](executers: ProtocolExecuter[R]*) extends ProtocolExecuter[R] {
 
-  def getExecuteFor(piuri: PIURI): ProtocolExecuter[Services] = {
-    // the val is from the match to be definitely stable
-    val piuriBasicMessage = BasicMessage.piuri
-    val piuriTrustPing = TrustPing.piuri
-    val piuriTrustPingResponse = TrustPingResponse.piuri
-    piuri match
-      case `piuriBasicMessage`      => BasicMessageExecuter
-      case `piuriTrustPing`         => new TrustPingExecuter
-      case `piuriTrustPingResponse` => new TrustPingExecuter
-      case anyPiuri                 => NullProtocolExecute
-  }
+  override def suportedPIURI: Seq[PIURI] = executers.flatMap(_.suportedPIURI)
+
+  def selectExecutersFor(piuri: PIURI) = executers.find(_.suportedPIURI.contains(piuri))
+
+  override def execute[R1 <: R](
+      plaintextMessage: PlaintextMessage,
+  ): ZIO[R1, DidFail, Option[EncryptedMessage]] =
+    selectExecutersFor(plaintextMessage.`type`) match
+      case None     => NullProtocolExecute.execute(plaintextMessage)
+      case Some(px) => px.execute(plaintextMessage)
+
+  override def program[R1 <: R](
+      plaintextMessage: PlaintextMessage,
+  ): ZIO[R1, DidFail, Action] =
+    selectExecutersFor(plaintextMessage.`type`) match
+      case None     => NullProtocolExecute.program(plaintextMessage)
+      case Some(px) => px.program(plaintextMessage)
 }
 
 trait ProtocolExecuterWithServices[-R <: ProtocolExecuter.Services] extends ProtocolExecuter[R] {
@@ -50,10 +55,11 @@ trait ProtocolExecuterWithServices[-R <: ProtocolExecuter.Services] extends Prot
       // context: Context
   ): ZIO[R1, DidFail, Option[EncryptedMessage]] =
     program(plaintextMessage)
-      .tap(v => ZIO.logDebug(v.toJsonPretty)) // DEBUG
+      .tap(v => ZIO.logDebug(v.toString)) // DEBUG
       .flatMap {
-        case None => ZIO.none
-        case Some(reply) =>
+        case _: NoReply.type => ZIO.succeed(None)
+        case action: AnyReply /*@ AnyReply(reply)*/ =>
+          val reply = action.msg
           for {
             msg <- reply.from match
               case Some(value) => authEncrypt(reply)
@@ -77,8 +83,7 @@ trait ProtocolExecuterWithServices[-R <: ProtocolExecuter.Services] extends Prot
                               case s: Seq[URI] @unchecked         => s.head
                               case s: Map[String, URI] @unchecked => s.head._2
                         }
-                      _ <- ZIO.log(s"Send to url: $url")
-                      job <- messageDispatcher
+                      jobToRun = ZIO.log(s"Send to url: $url") *> messageDispatcher
                         .send(
                           msg,
                           url, // "http://localhost:8080", // FIXME REMOVE (use for local env)
@@ -89,6 +94,10 @@ trait ProtocolExecuterWithServices[-R <: ProtocolExecuter.Services] extends Prot
                           //     Some(url.drop(8).split(':').head.split('/').head)
                           //   case _ => None
                         )
+                      _ <- action match
+                        case Reply(_)          => jobToRun
+                        case SyncReplyOnly(_)  => ZIO.unit
+                        case AsyncReplyOnly(_) => jobToRun
                     } yield ()
                   ) *> ZIO
                   .succeed(msg)
@@ -107,27 +116,33 @@ trait ProtocolExecuterWithServices[-R <: ProtocolExecuter.Services] extends Prot
   override def program[R1 <: R](
       plaintextMessage: PlaintextMessage,
       // context: Context
-  ): ZIO[R1, DidFail, Option[PlaintextMessage]]
+  ): ZIO[R1, DidFail, Action]
 }
 
 object NullProtocolExecute extends ProtocolExecuter[Any] {
+
+  override def suportedPIURI = Seq()
   override def program[R1 <: Any](plaintextMessage: PlaintextMessage) =
     ZIO.fail(MissingProtocol(plaintextMessage.`type`))
 }
 
 object BasicMessageExecuter extends ProtocolExecuter[Any] {
+
+  override def suportedPIURI: Seq[PIURI] = Seq(BasicMessage.piuri)
   override def program[R1 <: Any](plaintextMessage: PlaintextMessage) = for {
     job <- BasicMessage.fromPlaintextMessage(plaintextMessage) match
       case Left(error) => ZIO.fail(FailToParse(error))
       case Right(bm)   => Console.printLine(bm.toString).mapError(ex => SomeThrowable(ex))
-  } yield None
+  } yield NoReply
 }
 
 class TrustPingExecuter extends ProtocolExecuterWithServices[ProtocolExecuter.Services] {
 
+  override def suportedPIURI: Seq[PIURI] = Seq(TrustPing.piuri, TrustPingResponse.piuri)
+
   override def program[R1 <: Agent](
       plaintextMessage: PlaintextMessage
-  ): ZIO[R1, DidFail, Option[PlaintextMessage]] = {
+  ): ZIO[R1, DidFail, Action] = {
     // the val is from the match to be definitely stable
     val piuriTrustPing = TrustPing.piuri
     val piuriTrustPingResponse = TrustPingResponse.piuri
@@ -136,19 +151,19 @@ class TrustPingExecuter extends ProtocolExecuterWithServices[ProtocolExecuter.Se
       case `piuriTrustPing` =>
         TrustPing.fromPlaintextMessage(plaintextMessage) match
           case Left(error)                                    => ZIO.fail(FailToParse(error))
-          case Right(ping: TrustPingWithOutRequestedResponse) => ZIO.logInfo(ping.toString()) *> ZIO.none
+          case Right(ping: TrustPingWithOutRequestedResponse) => ZIO.logInfo(ping.toString()) *> ZIO.succeed(NoReply)
           case Right(ping: TrustPingWithRequestedResponse) =>
             for {
               _ <- ZIO.logInfo(ping.toString())
               agent <- ZIO.service[Agent]
               ret = ping.makeRespond
-            } yield Some(ret.toPlaintextMessage)
+            } yield Reply(ret.toPlaintextMessage)
       case `piuriTrustPingResponse` =>
         for {
           job <- TrustPingResponse.fromPlaintextMessage(plaintextMessage) match
             case Left(error) => ZIO.fail(FailToParse(error))
             case Right(ping) => ZIO.logInfo(ping.toString())
-        } yield None
+        } yield NoReply
   }
 
 }

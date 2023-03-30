@@ -88,15 +88,15 @@ lazy val V = new {
   val munit = "1.0.0-M7" // "0.7.29"
 
   // https://mvnrepository.com/artifact/org.scala-js/scalajs-dom
-  val scalajsDom = "2.3.0"
+  val scalajsDom = "2.4.0"
   // val scalajsLogging = "1.1.2-SNAPSHOT" //"1.1.2"
 
   // https://mvnrepository.com/artifact/dev.zio/zio
-  val zio = "2.0.9"
+  val zio = "2.0.10"
   val zioJson = "0.4.2"
   val zioMunitTest = "0.1.1"
   val zioHttp = "0.0.4"
-  val zioPrelude = "1.0.0-RC16"
+  val zioPrelude = "1.0.0-RC18"
 
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time
   val scalaJavaTime = "2.3.0"
@@ -108,7 +108,7 @@ lazy val V = new {
 
   val laminar = "0.14.5"
   val waypoint = "0.5.0"
-  val upickle = "2.0.0"
+  val upickle = "3.0.0"
   // https://www.npmjs.com/package/material-components-web
   val materialComponents = "12.0.0"
 }
@@ -327,7 +327,7 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings( // Add JVM-specific settings here
     libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.72", // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
     libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.72", // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
-    libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.30.2", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt/9.23
+    libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.31", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt/9.23
 
     // BUT have vulnerabilities in the dependencies: CVE-2022-25647
     libraryDependencies += "com.google.crypto.tink" % "tink" % "1.7.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.6.1

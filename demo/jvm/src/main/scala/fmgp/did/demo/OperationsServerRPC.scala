@@ -7,6 +7,8 @@ import fmgp.did.comm._
 import zio._
 import zio.json._
 import fmgp.did.resolver.peer._
+import fmgp.did.resolver.hardcode.HardcodeResolver
+import fmgp.did.resolver.uniresolver.Uniresolver
 
 object OperationsServerRPC {
 
@@ -35,11 +37,11 @@ object OperationsServerRPC {
                 .provideEnvironment(ZEnvironment(agent, resolver))
                 .mapBoth(ex => AuthEncryptOpOutput(Left(ex)), e => AuthEncryptOpOutput(Right(e)))
                 .merge
-            case AuthDecryptOpInput(agent, msg) =>
+            case AuthDecryptRawOpInput(agent, msg) =>
               operations
-                .authDecrypt(msg)
+                .authDecryptRaw(msg)
                 .provideEnvironment(ZEnvironment(agent, resolver))
-                .mapBoth(ex => AuthDecryptOpOutput(Left(ex)), e => AuthDecryptOpOutput(Right(e)))
+                .mapBoth(ex => AuthDecryptRawOpOutput(Left(ex)), e => AuthDecryptRawOpOutput(Right(e)))
                 .merge
             case AnonEncryptOpInput(msg) =>
               operations
@@ -47,17 +49,25 @@ object OperationsServerRPC {
                 .provideEnvironment(ZEnvironment(resolver))
                 .mapBoth(ex => AnonEncryptOpOutput(Left(ex)), e => AnonEncryptOpOutput(Right(e)))
                 .merge
-            case AnonDecryptOpInput(agent, msg) =>
+            case AnonDecryptRawOpInput(agent, msg) =>
               operations
-                .anonDecrypt(msg)
+                .anonDecryptRaw(msg)
                 .provideEnvironment(ZEnvironment(agent))
-                .mapBoth(ex => AnonDecryptOpOutput(Left(ex)), e => AnonDecryptOpOutput(Right(e)))
+                .mapBoth(ex => AnonDecryptRawOpOutput(Left(ex)), e => AnonDecryptRawOpOutput(Right(e)))
                 .merge
           }
         } yield (result.toJson)
         tmp
           .provideSomeLayer(Operations.layerDefault)
-          .provideSomeLayer(DidPeerResolver.layer)
+          .provideSomeLayer(
+            ZLayer.succeed(
+              MultiResolver(
+                HardcodeResolver.default,
+                Uniresolver.default,
+                DidPeerResolver.default,
+              )
+            )
+          )
     }
 
 }
