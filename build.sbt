@@ -329,9 +329,10 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.72", // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
     libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.31", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt/9.23
 
-    // BUT have vulnerabilities in the dependencies: CVE-2022-25647
-    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.8.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.6.1
-    // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-25647
+    // tink was moved to https://github.com/tink-crypto/tink-java/releases/tag/v1.8.0
+    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.8.0",
+    libraryDependencies += "androidx.annotation" % "annotation" % "1.3.0" % "runtime", // dependency tink (needed becuase it fail to find dependency automatically)
+    // To fix vulnerabilitie  https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-25647 (tink before 1.8.0) but can be remove now
     libraryDependencies += "com.google.code.gson" % "gson" % "2.10.1",
     libraryDependencies += "com.google.protobuf" % "protobuf-java" % "3.22.2",
   )
