@@ -1,5 +1,5 @@
 val scalaJSVersion = sys.env.getOrElse("SCALAJS_VERSION", "1.13.0")
-addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.2.0")
+addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.3.0")
 
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % scalaJSVersion)
 addSbtPlugin("org.scala-js" % "sbt-jsdependencies" % "1.0.2")
@@ -41,7 +41,7 @@ addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.11.0")
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.4") // sbt> dependencyUpdates
 
 // TEST COVERAGE
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.0.6") // Needs scala version 3.2.2
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.0.7") // Needs scala version 3.2.2
 
 // PUBLISH
 addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.5.11")

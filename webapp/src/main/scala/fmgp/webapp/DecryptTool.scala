@@ -22,6 +22,7 @@ object DecryptTool {
   val dataVar: Var[String] = Var(initial = "")
   val encryptedMessageVar: Signal[Either[String, EncryptedMessage]] =
     dataVar.signal.map(_.fromJson[EncryptedMessage])
+  val decryptDataVar: Var[Option[Array[Byte]]] = Var(initial = None)
   val decryptMessageVar: Var[Option[Either[DidFail, Message]]] = Var(initial = None)
 
   def job(owner: Owner) =
@@ -32,19 +33,32 @@ object DecryptTool {
       )
       .map {
         case (None, _) =>
-          decryptMessageVar.update(_ => None)
+          decryptMessageVar.set(None) // side effect!
         case (Some(agent), Left(error)) =>
-          decryptMessageVar.update(_ => Some(Left(FailToParse("Fail to parse Encrypted Message: " + error))))
+          decryptMessageVar.set(Some(Left(FailToParse("Fail to parse Encrypted Message: " + error)))) // side effect!
         case (Some(agent), Right(msg)) =>
           val program = {
             msg.`protected`.obj match
               case AnonProtectedHeader(epk, apv, typ, enc, alg) =>
-                OperationsClientRPC.anonDecrypt(msg)
+                OperationsClientRPC
+                  .anonDecryptRaw(msg)
+                  .flatMap { data =>
+                    decryptDataVar.set(Some(data)) // side effect!
+                    Operations.parseMessage(data)
+                  }
               case AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) =>
-                OperationsClientRPC.authDecrypt(msg)
+                OperationsClientRPC
+                  .authDecryptRaw(msg)
+                  .flatMap { data =>
+                    decryptDataVar.set(Some(data)) // side effect!
+                    Operations.parseMessage(data)
+                  }
           }.mapBoth(
-            error => decryptMessageVar.update(_ => Some(Left(error))),
-            msg => decryptMessageVar.update(_ => Some(Right(msg)))
+            error => {
+              decryptDataVar.set(None) // side effect!
+              decryptMessageVar.set(Some(Left(error))) // side effect!
+            },
+            msg => decryptMessageVar.set(Some(Right(msg))) // side effect!
           )
           Unsafe.unsafe { implicit unsafe => // Run side efect
             Runtime.default.unsafe.fork(
@@ -75,6 +89,27 @@ object DecryptTool {
       value <-- dataVar,
       inContext { thisNode => onInput.map(_ => thisNode.ref.value) --> dataVar }
     ),
+    p("Encrypted Message Protected Header (parsed):"),
+    div(
+      children <-- encryptedMessageVar.map { mMsg =>
+        mMsg.toSeq
+          .map(_.`protected`.obj.toJsonPretty)
+          .map(p(_))
+      },
+    ),
+    p("Recipients:"),
+    div(
+      children <-- encryptedMessageVar.map { mMsg =>
+        mMsg.toSeq
+          .flatMap(_.recipients.toSeq.map(_.header.kid.value))
+          .map(e => p(s" - kid: $e"))
+      },
+    ),
+    p("Raw Data (as UTF8) after decrypting:"),
+    pre(code(child.text <-- decryptDataVar.signal.map {
+      case None        => "<none>"
+      case Some(bytes) => String(bytes)
+    })),
     p("Message after decrypting:"),
     pre(code(child.text <-- decryptMessageVar.signal.map {
       case None                => "<none>"

@@ -12,7 +12,7 @@ import fmgp.did.comm.mediator.MediatorAgent
 import zio.http.model.Headers
 import zio.http.model.headers.HeaderNames
 
-object MyHeaders extends HeaderNames {
+object MyHeaders { // extends HeaderNames {
   final val xForwardedHost: CharSequence = "x-forwarded-host"
 }
 
@@ -35,10 +35,16 @@ object AgentByHost {
     } yield ()
 
   def hostFromRequest(req: Request): Option[Host] =
-    req
-      .header(MyHeaders.xForwardedHost)
-      .orElse(req.header(MyHeaders.host))
-      .map(e => Host(e.value.toString))
+    req.headers
+      .get(MyHeaders.xForwardedHost)
+      .orElse(req.headers.host)
+      .map(_.toString) // CharSequence -> String
+      .map { // A bit of a hack to support a not standards http client
+        case str if str.endsWith(":443") => str.dropRight(4)
+        case str if str.endsWith(":80")  => str.dropRight(3)
+        case str                         => str
+      }
+      .map(Host(_))
 
   val layer = ZLayer(
     for {
