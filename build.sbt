@@ -92,7 +92,7 @@ lazy val V = new {
   // val scalajsLogging = "1.1.2-SNAPSHOT" //"1.1.2"
 
   // https://mvnrepository.com/artifact/dev.zio/zio
-  val zio = "2.0.11"
+  val zio = "2.0.13"
   val zioJson = "0.4.2"
   val zioMunitTest = "0.1.1"
   val zioHttp = "0.0.5"
@@ -325,15 +325,15 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
   .settings(name := "did-imp")
   .settings(libraryDependencies += D.zioMunitTest.value)
   .jvmSettings( // Add JVM-specific settings here
-    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.72", // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
-    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.72", // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
+    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.73", // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
+    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.73", // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
     libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.31", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt/9.23
 
     // BUT have vulnerabilities in the dependencies: CVE-2022-25647
     libraryDependencies += "com.google.crypto.tink" % "tink" % "1.7.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.6.1
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-25647
     libraryDependencies += "com.google.code.gson" % "gson" % "2.10.1",
-    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "3.22.2",
+    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "3.22.3",
   )
   .jsConfigure(scalaJSBundlerConfigure)
   .jsSettings( // Add JS-specific settings here
@@ -373,8 +373,8 @@ lazy val didResolverPeer = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings( // See dependencyTree ->  didResolverPeerJVM/Test/dependencyTree
     libraryDependencies += "org.didcommx" % "didcomm" % "0.3.2" % Test,
     libraryDependencies += "org.didcommx" % "peerdid" % "0.3.0" % Test,
-    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.72" % Test,
-    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.72" % Test,
+    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.73" % Test,
+    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.73" % Test,
     libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.16-preview.1" % Test,
   )
   .jsConfigure(scalaJSBundlerConfigure)
