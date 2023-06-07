@@ -129,7 +129,7 @@ final case class KeylistResponse(
           .Body(updated =
             updated.map(e =>
               KeylistResponse.Updated(
-                routing_did = e._1,
+                recipient_did = e._1,
                 action = e._2,
                 result = e._3
               )
@@ -143,7 +143,7 @@ final case class KeylistResponse(
 object KeylistResponse {
   def piuri = PIURI("https://didcomm.org/coordinate-mediation/2.0/keylist-update-response")
 
-  protected final case class Updated(routing_did: FROMTO, action: KeylistAction, result: KeylistResult) {
+  protected final case class Updated(recipient_did: FROMTO, action: KeylistAction, result: KeylistResult) {
 
     /** toJSON_RFC7159 MUST not fail! */
     def toJSON_RFC7159: JSON_RFC7159 = this.toJsonAST.flatMap(_.as[JSON_RFC7159]).getOrElse(JSON_RFC7159())
@@ -185,7 +185,7 @@ object KeylistResponse {
                           thid = thid,
                           from = from,
                           to = firstTo,
-                          updated = body.updated.map(e => (e.routing_did, e.action, e.result))
+                          updated = body.updated.map(e => (e.recipient_did, e.action, e.result))
                         )
                       )
 
