@@ -14,8 +14,8 @@ Start an isolated environment to experiment with some code samples (3/5 mins)
 scala-cli repl \
   --dependency app.fmgp::did::@VERSION@ \
   --dependency app.fmgp::did-imp::@VERSION@ \
-  --dependency app.fmgp::did-resolver-peer::@VERSION@ \
-  --repo https://oss.sonatype.org/content/repositories/snapshots
+  --dependency app.fmgp::did-method-peer::@VERSION@ \
+  --repo https://oss.sonatype.org/content/repositories/releases
 
 # For snapshots use
 # --repo https://oss.sonatype.org/content/repositories/snapshots
@@ -44,9 +44,9 @@ In a crossProject for the JSPlatform and JVMPlatform this shoud use this instead
 ## Coursier Download
 
 ```bash 
-coursier fetch app.fmgp:scala-did:@VERSION@ -r sonatype:snapshots
+coursier fetch app.fmgp:did_3:@VERSION@ -r sonatype:snapshots
 # -r https://oss.sonatype.org/content/repositories/snapshots
 
-coursier fetch app.fmgp:scala-did:@VERSION@ -r sonatype:public
+coursier fetch app.fmgp:did_3:@VERSION@ -r sonatype:public
 # -r https://oss.sonatype.org/content/repositories/releases
 ```
