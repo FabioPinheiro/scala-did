@@ -46,19 +46,3 @@ jobs:
           author-name: ${{ steps.import_gpg.outputs.name }}
           sign-commits: true
           signing-key: ${{ secrets.GPG_SIGNING_KEY_ID }}
-          max-buffer-size: 25000
-
-
-# docker pull fthomas/scala-steward
-docker run -v /home/fabio/workspace/scala-steward-workspace:/opt/scala-steward -it fthomas/scala-steward:latest \
-  -DLOG_LEVEL=TRACE \
-  --do-not-fork \
-  --workspace  "/opt/scala-steward/workspace" \
-  --repos-file "/opt/scala-steward/repos.md" \
-  --repo-config "/opt/scala-steward/default.scala-steward.conf" \
-  --git-author-email "fabiomgpinheiro@gmail.com" \
-  --forge-api-host "https://api.github.com" \
-  --forge-login FabioPinheiro \
-  --git-ask-pass "/opt/scala-steward/FabioPinheiro.sh" \
-  --sign-commits \
-  --max-buffer-size 25000
