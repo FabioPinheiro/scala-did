@@ -38,10 +38,27 @@ jobs:
           echo "email:       ${{ steps.import_gpg.outputs.email }}"
 
       - name: Launch Scala Steward
-        uses: scala-steward-org/scala-steward-action@v2
+        # uses: scala-steward-org/scala-steward-action@v2
+        uses: FabioPinheiro/scala-steward-action@b2d3539f5a99aa69a62581898e187c36fa33b742
         with:
           github-token: ${{ secrets.REPO_GITHUB_TOKEN }}
           author-email: ${{ steps.import_gpg.outputs.email }}
           author-name: ${{ steps.import_gpg.outputs.name }}
           sign-commits: true
           signing-key: ${{ secrets.GPG_SIGNING_KEY_ID }}
+          max-buffer-size: 25000
+
+
+# docker pull fthomas/scala-steward
+docker run -v /home/fabio/workspace/scala-steward-workspace:/opt/scala-steward -it fthomas/scala-steward:latest \
+  -DLOG_LEVEL=TRACE \
+  --do-not-fork \
+  --workspace  "/opt/scala-steward/workspace" \
+  --repos-file "/opt/scala-steward/repos.md" \
+  --repo-config "/opt/scala-steward/default.scala-steward.conf" \
+  --git-author-email "fabiomgpinheiro@gmail.com" \
+  --forge-api-host "https://api.github.com" \
+  --forge-login FabioPinheiro \
+  --git-ask-pass "/opt/scala-steward/FabioPinheiro.sh" \
+  --sign-commits \
+  --max-buffer-size 25000
