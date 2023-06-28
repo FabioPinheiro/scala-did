@@ -376,8 +376,8 @@ lazy val didResolverPeer = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings( // See dependencyTree ->  didResolverPeerJVM/Test/dependencyTree
     libraryDependencies += "org.didcommx" % "didcomm" % "0.3.2" % Test,
     libraryDependencies += "org.didcommx" % "peerdid" % "0.3.0" % Test,
-    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.73" % Test,
-    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.73" % Test,
+    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.75" % Test,
+    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.75" % Test,
     libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.16-preview.1" % Test,
   )
   .jsConfigure(scalaJSBundlerConfigure)
