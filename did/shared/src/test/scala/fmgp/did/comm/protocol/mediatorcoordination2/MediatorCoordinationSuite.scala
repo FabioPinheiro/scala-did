@@ -10,7 +10,7 @@ import fmgp.did.comm._
   */
 class MediatorCoordinationSuite extends FunSuite {
 
-  val msg = """{
+  val msgKeylistUpdateExample = """{
     |  "id" : "3687298f-7830-4e43-87e2-ea67c1ae7f85",
     |  "type" : "https://didcomm.org/coordinate-mediation/2.0/keylist-update",
     |  "to" : [
@@ -31,7 +31,7 @@ class MediatorCoordinationSuite extends FunSuite {
 
   test("Parse a keylist-update example") {
 
-    val fMsg = msg
+    val fMsg = msgKeylistUpdateExample
       .fromJson[PlaintextMessage]
       .getOrElse(fail("FAIL to parse PlaintextMessage"))
       .toKeylistUpdate
@@ -40,8 +40,8 @@ class MediatorCoordinationSuite extends FunSuite {
       case Right(msg) =>
         assertEquals(msg.id.value, "3687298f-7830-4e43-87e2-ea67c1ae7f85")
         msg.updates match
-          case Seq((fromto, keylistAction)) =>
-            assertEquals(keylistAction, KeylistAction.add)
+          case Seq((fromto, action)) =>
+            assertEquals(action, KeylistAction.add)
             assertEquals(
               fromto,
               FROMTO(
@@ -50,6 +50,69 @@ class MediatorCoordinationSuite extends FunSuite {
             )
           case _ => fail("body.updates must have one element")
 
+      case Left(error) => fail(s"fMsg MUST be Right but is ${Left(error)}")
+    }
+
+  }
+
+  val msgKeylistQueryExample = """{
+    |  "id": "1234567890",
+    |  "type": "https://didcomm.org/coordinate-mediation/2.0/keylist-query",
+    |  "body": {"paginate": {"limit": 30,"offset": 0}},
+    |
+    |  "to" : ["did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ"],
+    |  "from" : "did:peer:2.Ez6LSqZd7Zrp9LcHBEiyMLvKVUxFYb3hNWRxq8cCXbfx4zs6u.Vz6MksTvq16LvtvSqTg8ru7XEXf65Um8WKP7Zm3Vrv4incAhb.SW10"
+    |}""".stripMargin
+
+  test("Parse a keylist-query example") {
+    val fMsg = msgKeylistQueryExample
+      .fromJson[PlaintextMessage]
+      .getOrElse(fail("FAIL to parse PlaintextMessage"))
+      .toKeylistQuery
+
+    (fMsg) match {
+      case Right(msg) =>
+        assertEquals(msg.id.value, "1234567890")
+        msg.paginate match
+          case Some(paginate) =>
+            assertEquals(paginate.limit, 30)
+            assertEquals(paginate.offset, 0)
+          case _ => fail("body.updates must have one element")
+      case Left(error) => fail(s"fMsg MUST be Right but is ${Left(error)}")
+    }
+
+  }
+
+  val msgKeylistExample = """{
+    |  "id": "1234567891",
+    |  "thid": "1234567890",
+    |  "type": "https://didcomm.org/coordinate-mediation/2.0/keylist",
+    |  "body": {
+    |    "keys": [{"recipient_did": "did:peer:2.Ez6LSqZd7Zrp9LcHBEiyMLvKVUxFYb3hNWRxq8cCXbfx4zs6u.Vz6MksTvq16LvtvSqTg8ru7XEXf65Um8WKP7Zm3Vrv4incAhb.SW10"}],
+    |    "pagination": {"count": 30,"offset": 30,"remaining": 100}
+    |  },
+    |
+    |  "to" : ["did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ"],
+    |  "from" : "did:peer:2.Ez6LSqZd7Zrp9LcHBEiyMLvKVUxFYb3hNWRxq8cCXbfx4zs6u.Vz6MksTvq16LvtvSqTg8ru7XEXf65Um8WKP7Zm3Vrv4incAhb.SW10"
+    |}""".stripMargin
+
+  test("Parse a keylist-query example") {
+    val fMsg = msgKeylistExample
+      .fromJson[PlaintextMessage]
+      .getOrElse(fail("FAIL to parse PlaintextMessage"))
+      .toKeylist
+
+    (fMsg) match {
+      case Right(msg) =>
+        assertEquals(msg.id.value, "1234567891")
+        assertEquals(msg.thid.value, "1234567890")
+        assertEquals(msg.keys.size, 1)
+        msg.pagination match
+          case Some(pagination) =>
+            assertEquals(pagination.count, 30)
+            assertEquals(pagination.offset, 30)
+            assertEquals(pagination.remaining, 100)
+          case _ => fail("body.updates must have one element")
       case Left(error) => fail(s"fMsg MUST be Right but is ${Left(error)}")
     }
 

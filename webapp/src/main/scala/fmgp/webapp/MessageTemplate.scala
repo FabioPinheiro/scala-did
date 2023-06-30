@@ -64,7 +64,7 @@ object MessageTemplate {
   def exBasicMessage = BasicMessage(from = mFrom, to = Set(to), content = "Hello, World!")
 
   def exMediateRequest = MediateRequest(from = from, to = to)
-  def exMediateGrant = MediateGrant(from = from, to = to, thid = thid, routing_did = Seq(from.asFROMTO))
+  def exMediateGrant = MediateGrant(from = from, to = to, thid = thid, routing_did = from.asFROMTO)
   def exMediateDeny = MediateDeny(from = from, to = to, thid = thid)
   def exKeylistUpdate = KeylistUpdate(from = from, to = to, updates = Seq(anotherDid -> KeylistAction.add))
   def exKeylistResponse =

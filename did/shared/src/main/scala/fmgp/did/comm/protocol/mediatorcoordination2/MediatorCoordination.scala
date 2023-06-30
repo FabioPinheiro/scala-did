@@ -29,7 +29,13 @@ final case class MediateRequest(id: MsgID = MsgID(), from: FROM, to: TO) {
       to = Some(Set(to)),
       from = Some(from),
     )
-  def makeRespondMediateGrant = MediateGrant(thid = id, to = from.asTO, from = to.asFROM, Seq(to.asFROMTO))
+  def makeRespondMediateGrant =
+    MediateGrant(
+      thid = id,
+      to = from.asTO,
+      from = to.asFROM,
+      routing_did = to.asFROMTO,
+    )
   def makeRespondMediateDeny = MediateDeny(thid = id, to = from.asTO, from = to.asFROM)
 }
 object MediateRequest {
@@ -111,11 +117,11 @@ object MediateDeny {
   * {
   *   "id": "123456780",
   *   "type": "https://didcomm.org/coordinate-mediation/2.0/mediate-grant",
-  *   "body": {"routing_did": ["did:peer:z6Mkfriq1MqLBoPWecGoDLjguo1sB9brj6wT3qZ5BxkKpuP6"]}
+  *   "body": {"routing_did": "did:peer:z6Mkfriq1MqLBoPWecGoDLjguo1sB9brj6wT3qZ5BxkKpuP6"}
   * }
   * }}}
   */
-final case class MediateGrant(id: MsgID = MsgID(), thid: MsgID, from: FROM, to: TO, routing_did: Seq[FROMTO]) {
+final case class MediateGrant(id: MsgID = MsgID(), thid: MsgID, from: FROM, to: TO, routing_did: FROMTO) {
   def piuri = MediateGrant.piuri
   def toPlaintextMessage: PlaintextMessage =
     PlaintextMessageClass(
@@ -124,12 +130,12 @@ final case class MediateGrant(id: MsgID = MsgID(), thid: MsgID, from: FROM, to: 
       thid = Some(thid),
       to = Some(Set(to)),
       from = Some(from),
-      body = Some(MediateGrant.Body(routing_did.head).toJSON_RFC7159) // FIXME FIX Body
+      body = Some(MediateGrant.Body(routing_did).toJSON_RFC7159)
     )
 }
 object MediateGrant {
   def piuri = PIURI("https://didcomm.org/coordinate-mediation/2.0/mediate-grant")
-  protected final case class Body(routing_did: FROMTO) { // FIXME Seq[FROMTO] // temporary to mitigate limitations on other libraries
+  protected final case class Body(routing_did: FROMTO) {
 
     /** toJSON_RFC7159 MUST not fail! */
     def toJSON_RFC7159: JSON_RFC7159 = this.toJsonAST.flatMap(_.as[JSON_RFC7159]).getOrElse(JSON_RFC7159())
@@ -161,7 +167,7 @@ object MediateGrant {
                             thid = thid,
                             from = from,
                             to = firstTo,
-                            routing_did = Seq(body.routing_did) // FIXME FIX Body
+                            routing_did = body.routing_did
                           )
                         )
               }

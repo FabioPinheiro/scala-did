@@ -30,7 +30,7 @@ The future version of [**DID Comm v2.1**](https://identity.foundation/didcomm-me
   - Also see https://didcomm.org/book/v2/routing
 - [TODO] `Action Menu 2.0` - https://didcomm.org/action-menu/2.0
 - [DONE] `BasicMessage 2.0` - https://didcomm.org/basicmessage/2.0
-- [WIP] `MediatorCoordination 2.0` - https://didcomm.org/mediator-coordination/2.0
+- [DONE] `MediatorCoordination 2.0` - https://didcomm.org/mediator-coordination/2.0
 - [DONE] `Pickup 3` - https://didcomm.org/pickup/3.0
 - [WIP] `OutOfBand 2.0` - https://didcomm.org/out-of-band/2.0
 - [TODO]`ReportProblem 2.0` - https://didcomm.org/report-problem/2.0

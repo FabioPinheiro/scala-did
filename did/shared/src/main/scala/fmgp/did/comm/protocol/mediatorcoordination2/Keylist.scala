@@ -4,12 +4,11 @@ import zio.json._
 import fmgp.did._
 import fmgp.did.comm._
 
-//TOOD
 extension (msg: PlaintextMessage)
   def toKeylistUpdate: Either[String, KeylistUpdate] = KeylistUpdate.fromPlaintextMessage(msg)
   def toKeylistResponse: Either[String, KeylistResponse] = KeylistResponse.fromPlaintextMessage(msg)
-  def toKeylistQuery: Either[String, KeylistQuery] = ??? // KeylistQuery.fromPlaintextMessage(msg)
-  def toKeylist: Either[String, Keylist] = ??? // Keylist.fromPlaintextMessage(msg)
+  def toKeylistQuery: Either[String, KeylistQuery] = KeylistQuery.fromPlaintextMessage(msg)
+  def toKeylist: Either[String, Keylist] = Keylist.fromPlaintextMessage(msg)
 
 enum KeylistAction:
   case add extends KeylistAction
@@ -18,7 +17,8 @@ enum KeylistAction:
 object KeylistAction {
   given decoder: JsonDecoder[KeylistAction] =
     JsonDecoder.string.mapOrFail(e => fmgp.util.safeValueOf(KeylistAction.valueOf(e)))
-  given encoder: JsonEncoder[KeylistAction] = JsonEncoder.string.contramap((e: KeylistAction) => e.toString)
+  given encoder: JsonEncoder[KeylistAction] =
+    JsonEncoder.string.contramap((e: KeylistAction) => e.toString)
 }
 
 enum KeylistResult:
@@ -188,18 +188,197 @@ object KeylistResponse {
                           updated = body.updated.map(e => (e.recipient_did, e.action, e.result))
                         )
                       )
-
             case firstTo +: tail => Left(s"'$piuri' MUST have field 'to' with only one element")
 }
 
-final case class KeylistQuery(id: MsgID = MsgID(), from: FROM, to: TO)
-//TODO
+/** {{{
+  * {
+  *   "id": "123456780",
+  *   "type": "https://didcomm.org/coordinate-mediation/2.0/keylist-query",
+  *   "body": {"paginate": {"limit": 30,"offset": 0}}
+  * }
+  * }}}
+  *
+  * @param id
+  * @param from
+  * @param to
+  * @param paginate
+  *   is optional, and if present must include limit and offset.
+  */
+final case class KeylistQuery(
+    id: MsgID = MsgID(),
+    from: FROM,
+    to: TO,
+    paginate: Option[KeylistQuery.Paginate],
+) {
+  def piuri = KeylistQuery.piuri
+  def toPlaintextMessage: PlaintextMessage =
+    PlaintextMessageClass(
+      id = id,
+      `type` = piuri,
+      to = Some(Set(to)),
+      from = Some(from),
+      body = Some(
+        KeylistQuery
+          .Body(paginate = paginate)
+          .toJSON_RFC7159
+      ),
+    )
+}
 object KeylistQuery {
   def piuri = PIURI("https://didcomm.org/coordinate-mediation/2.0/keylist-query")
+
+  protected final case class Paginate(limit: Int, offset: Int) {
+
+    /** toJSON_RFC7159 MUST not fail! */
+    def toJSON_RFC7159: JSON_RFC7159 = this.toJsonAST.flatMap(_.as[JSON_RFC7159]).getOrElse(JSON_RFC7159())
+  }
+  object Paginate {
+    given decoder: JsonDecoder[Paginate] = DeriveJsonDecoder.gen[Paginate]
+    given encoder: JsonEncoder[Paginate] = DeriveJsonEncoder.gen[Paginate]
+  }
+
+  protected final case class Body(paginate: Option[Paginate]) {
+
+    /** toJSON_RFC7159 MUST not fail! */
+    def toJSON_RFC7159: JSON_RFC7159 = this.toJsonAST.flatMap(_.as[JSON_RFC7159]).getOrElse(JSON_RFC7159())
+  }
+  object Body {
+    given decoder: JsonDecoder[Body] = DeriveJsonDecoder.gen[Body]
+    given encoder: JsonEncoder[Body] = DeriveJsonEncoder.gen[Body]
+  }
+
+  def fromPlaintextMessage(msg: PlaintextMessage): Either[String, KeylistQuery] =
+    if (msg.`type` != piuri) Left(s"No able to create KeylistQuery from a Message of type '${msg.`type`}'")
+    else
+      msg.to.toSeq.flatten match // Note: toSeq is from the match
+        case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+        case firstTo +: Seq() =>
+          msg.from match
+            case None => Left(s"'$piuri' MUST have field 'from' with one element")
+            case Some(from) =>
+              msg.body.map(_.as[Body]) match
+                case None              => Left(s"'$piuri' MUST have a 'body'")
+                case Some(Left(value)) => Left(s"'$piuri' MUST have valid 'body'. Fail due: $value")
+                case Some(Right(body)) =>
+                  Right(
+                    KeylistQuery(
+                      id = msg.id,
+                      from = from,
+                      to = firstTo,
+                      paginate = body.paginate
+                    )
+                  )
+        case firstTo +: tail => Left(s"'$piuri' MUST have field 'to' with only one element")
 }
 
-final case class Keylist(id: MsgID = MsgID(), from: FROM, to: TO)
-//TODO
+/** {{{
+  * {
+  *   "id": "123456780",
+  *   "type": "https://didcomm.org/coordinate-mediation/2.0/keylist",
+  *   "body": {
+  *     "keys": [{"recipient_did": ...}]
+  *     "pagination": {"count": 30,"offset": 30,"remaining": 100}
+  *   }
+  * }
+  * }}}
+  *
+  * @param id
+  * @param thid
+  * @param from
+  * @param to
+  * @param keys
+  * @param pagination
+  *   is optional, and if present must include count, offset and remaining
+  */
+final case class Keylist(
+    id: MsgID = MsgID(),
+    thid: MsgID,
+    from: FROM,
+    to: TO,
+    keys: Seq[Keylist.RecipientDID],
+    pagination: Option[Keylist.Pagination],
+    // count: Int,
+    // offset: Int,
+    // remaining: Int,
+) {
+  def piuri = Keylist.piuri
+  def toPlaintextMessage: PlaintextMessage =
+    PlaintextMessageClass(
+      id = id,
+      thid = Some(thid),
+      `type` = piuri,
+      to = Some(Set(to)),
+      from = Some(from),
+      body = Some(
+        Keylist
+          .Body(
+            keys = keys,
+            pagination = pagination,
+          )
+          .toJSON_RFC7159
+      ),
+    )
+}
+
 object Keylist {
   def piuri = PIURI("https://didcomm.org/coordinate-mediation/2.0/keylist")
+
+  protected final case class Pagination(count: Int, offset: Int, remaining: Int) {
+
+    /** toJSON_RFC7159 MUST not fail! */
+    def toJSON_RFC7159: JSON_RFC7159 = this.toJsonAST.flatMap(_.as[JSON_RFC7159]).getOrElse(JSON_RFC7159())
+  }
+  object Pagination {
+    given decoder: JsonDecoder[Pagination] = DeriveJsonDecoder.gen[Pagination]
+    given encoder: JsonEncoder[Pagination] = DeriveJsonEncoder.gen[Pagination]
+  }
+
+  protected final case class RecipientDID(recipient_did: FROMTO) {
+
+    /** toJSON_RFC7159 MUST not fail! */
+    def toJSON_RFC7159: JSON_RFC7159 = this.toJsonAST.flatMap(_.as[JSON_RFC7159]).getOrElse(JSON_RFC7159())
+  }
+  object RecipientDID {
+    given decoder: JsonDecoder[RecipientDID] = DeriveJsonDecoder.gen[RecipientDID]
+    given encoder: JsonEncoder[RecipientDID] = DeriveJsonEncoder.gen[RecipientDID]
+  }
+
+  protected final case class Body(keys: Seq[RecipientDID], pagination: Option[Pagination]) {
+
+    /** toJSON_RFC7159 MUST not fail! */
+    def toJSON_RFC7159: JSON_RFC7159 = this.toJsonAST.flatMap(_.as[JSON_RFC7159]).getOrElse(JSON_RFC7159())
+  }
+  object Body {
+    given decoder: JsonDecoder[Body] = DeriveJsonDecoder.gen[Body]
+    given encoder: JsonEncoder[Body] = DeriveJsonEncoder.gen[Body]
+  }
+
+  def fromPlaintextMessage(msg: PlaintextMessage): Either[String, Keylist] =
+    if (msg.`type` != piuri) Left(s"No able to create Keylist from a Message of type '${msg.`type`}'")
+    else
+      msg.thid match
+        case None => Left(s"'$piuri' MUST have field 'thid'")
+        case Some(thid) =>
+          msg.to.toSeq.flatten match // Note: toSeq is from the match
+            case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+            case firstTo +: Seq() =>
+              msg.from match
+                case None => Left(s"'$piuri' MUST have field 'from' with one element")
+                case Some(from) =>
+                  msg.body.map(_.as[Body]) match
+                    case None              => Left(s"'$piuri' MUST have a 'body'")
+                    case Some(Left(value)) => Left(s"'$piuri' MUST have valid 'body'. Fail due: $value")
+                    case Some(Right(body)) =>
+                      Right(
+                        Keylist(
+                          id = msg.id,
+                          thid = thid,
+                          from = from,
+                          to = firstTo,
+                          keys = body.keys,
+                          pagination = body.pagination,
+                        )
+                      )
+            case firstTo +: tail => Left(s"'$piuri' MUST have field 'to' with only one element")
 }
