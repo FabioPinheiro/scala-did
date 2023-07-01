@@ -1,4 +1,4 @@
-package fmgp.did.comm.protocol.mediatorcoordination2
+package fmgp.did.comm.protocol.mediatorcoordination3
 
 import munit._
 import zio.json._
@@ -6,13 +6,13 @@ import zio.json.ast.Json
 
 import fmgp.did.comm._
 
-/** didJVM/testOnly fmgp.did.comm.protocol.mediatorcoordination2.MediatorCoordinationSuite
+/** didJVM/testOnly fmgp.did.comm.protocol.mediatorcoordination3.MediatorCoordinatio3Suite
   */
-class MediatorCoordinationSuite extends FunSuite {
+class MediatorCoordination3Suite extends FunSuite {
 
-  val msgKeylistUpdateExample = """{
+  val msgRecipientUpdateExample = """{
     |  "id" : "3687298f-7830-4e43-87e2-ea67c1ae7f85",
-    |  "type" : "https://didcomm.org/coordinate-mediation/2.0/keylist-update",
+    |  "type" : "https://didcomm.org/coordinate-mediation/3.0/recipient-update",
     |  "to" : [
     |    "did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ"
     |  ],
@@ -31,17 +31,17 @@ class MediatorCoordinationSuite extends FunSuite {
 
   test("Parse a keylist-update example") {
 
-    val fMsg = msgKeylistUpdateExample
+    val fMsg = msgRecipientUpdateExample
       .fromJson[PlaintextMessage]
       .getOrElse(fail("FAIL to parse PlaintextMessage"))
-      .toKeylistUpdate
+      .toRecipientUpdate
 
     (fMsg) match {
       case Right(msg) =>
         assertEquals(msg.id.value, "3687298f-7830-4e43-87e2-ea67c1ae7f85")
         msg.updates match
           case Seq((fromto, action)) =>
-            assertEquals(action, KeylistAction.add)
+            assertEquals(action, RecipientAction.add)
             assertEquals(
               fromto,
               FROMTO(
@@ -55,9 +55,9 @@ class MediatorCoordinationSuite extends FunSuite {
 
   }
 
-  val msgKeylistQueryExample = """{
+  val msgRecipientQueryExample = """{
     |  "id": "1234567890",
-    |  "type": "https://didcomm.org/coordinate-mediation/2.0/keylist-query",
+    |  "type": "https://didcomm.org/coordinate-mediation/3.0/recipient-query",
     |  "body": {"paginate": {"limit": 30,"offset": 0}},
     |
     |  "to" : ["did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ"],
@@ -65,10 +65,10 @@ class MediatorCoordinationSuite extends FunSuite {
     |}""".stripMargin
 
   test("Parse a keylist-query example") {
-    val fMsg = msgKeylistQueryExample
+    val fMsg = msgRecipientQueryExample
       .fromJson[PlaintextMessage]
       .getOrElse(fail("FAIL to parse PlaintextMessage"))
-      .toKeylistQuery
+      .toRecipientQuery
 
     (fMsg) match {
       case Right(msg) =>
@@ -83,12 +83,12 @@ class MediatorCoordinationSuite extends FunSuite {
 
   }
 
-  val msgKeylistExample = """{
+  val msgRecipientExample = """{
     |  "id": "1234567891",
     |  "thid": "1234567890",
-    |  "type": "https://didcomm.org/coordinate-mediation/2.0/keylist",
+    |  "type": "https://didcomm.org/coordinate-mediation/3.0/recipient",
     |  "body": {
-    |    "keys": [{"recipient_did": "did:peer:2.Ez6LSqZd7Zrp9LcHBEiyMLvKVUxFYb3hNWRxq8cCXbfx4zs6u.Vz6MksTvq16LvtvSqTg8ru7XEXf65Um8WKP7Zm3Vrv4incAhb.SW10"}],
+    |    "dids": [{"recipient_did": "did:peer:2.Ez6LSqZd7Zrp9LcHBEiyMLvKVUxFYb3hNWRxq8cCXbfx4zs6u.Vz6MksTvq16LvtvSqTg8ru7XEXf65Um8WKP7Zm3Vrv4incAhb.SW10"}],
     |    "pagination": {"count": 30,"offset": 30,"remaining": 100}
     |  },
     |
@@ -97,16 +97,16 @@ class MediatorCoordinationSuite extends FunSuite {
     |}""".stripMargin
 
   test("Parse a keylist-query example") {
-    val fMsg = msgKeylistExample
+    val fMsg = msgRecipientExample
       .fromJson[PlaintextMessage]
       .getOrElse(fail("FAIL to parse PlaintextMessage"))
-      .toKeylist
+      .toRecipient
 
     (fMsg) match {
       case Right(msg) =>
         assertEquals(msg.id.value, "1234567891")
         assertEquals(msg.thid.value, "1234567890")
-        assertEquals(msg.keys.size, 1)
+        assertEquals(msg.dids.size, 1)
         msg.pagination match
           case Some(pagination) =>
             assertEquals(pagination.count, 30)
