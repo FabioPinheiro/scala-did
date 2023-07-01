@@ -204,62 +204,104 @@ object EncryptTool {
             onClick --> Observer(_ => dataTextVar.set(MessageTemplate.exBasicMessage.toPlaintextMessage.toJsonPretty))
           ),
         ),
-        li(
-          button(
-            "MediateRequest",
-            onClick --> Observer(_ => dataTextVar.set(MessageTemplate.exMediateRequest.toPlaintextMessage.toJsonPretty))
-          ),
-          button(
-            "MediateGrant",
-            onClick --> Observer(_ => dataTextVar.set(MessageTemplate.exMediateGrant.toPlaintextMessage.toJsonPretty))
-          ),
-          button(
-            "MediateDeny",
-            onClick --> Observer(_ => dataTextVar.set(MessageTemplate.exMediateDeny.toPlaintextMessage.toJsonPretty))
-          ),
-          button(
-            "KeylistUpdate",
-            onClick --> Observer(_ => dataTextVar.set(MessageTemplate.exKeylistUpdate.toPlaintextMessage.toJsonPretty))
-          ),
-          button(
-            "KeylistResponse",
-            onClick --> Observer(_ =>
-              dataTextVar.set(MessageTemplate.exKeylistResponse.toPlaintextMessage.toJsonPretty)
+        // Mediator Coordination V2.0
+        {
+          import MessageTemplate.Mediatorcoordination2._
+          li(
+            button(
+              "MediateRequest2",
+              onClick --> Observer(_ => dataTextVar.set(exMediateRequest2.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "MediateGrant2",
+              onClick --> Observer(_ => dataTextVar.set(exMediateGrant2.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "MediateDeny2",
+              onClick --> Observer(_ => dataTextVar.set(exMediateDeny2.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "KeylistUpdate2",
+              onClick --> Observer(_ => dataTextVar.set(exKeylistUpdate2.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "KeylistResponse2",
+              onClick --> Observer(_ => dataTextVar.set(exKeylistResponse2.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "KeylistQuery2",
+              onClick --> Observer(_ => dataTextVar.set(exKeylistQuery2.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "Keylist2",
+              onClick --> Observer(_ => dataTextVar.set(exKeylist2.toPlaintextMessage.toJsonPretty))
             )
           )
-        ),
-        li(
-          button(
-            "DeliveryRequest",
-            onClick --> Observer(_ =>
-              dataTextVar.set(MessageTemplate.exDeliveryRequest.toPlaintextMessage.toJsonPretty)
+        },
+        // Mediator Coordination V3.0
+        {
+          import MessageTemplate.Mediatorcoordination3._
+          li(
+            button(
+              "MediateRequest3",
+              onClick --> Observer(_ => dataTextVar.set(exMediateRequest3.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "MediateGrant3",
+              onClick --> Observer(_ => dataTextVar.set(exMediateGrant3.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "MediateDeny3",
+              onClick --> Observer(_ => dataTextVar.set(exMediateDeny3.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "RecipientUpdate3",
+              onClick --> Observer(_ => dataTextVar.set(exRecipientUpdate3.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "RecipientResponse3",
+              onClick --> Observer(_ => dataTextVar.set(exRecipientResponse3.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "RecipientQuery3",
+              onClick --> Observer(_ => dataTextVar.set(exRecipientQuery3.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "Recipient3",
+              onClick --> Observer(_ => dataTextVar.set(exRecipient3.toPlaintextMessage.toJsonPretty))
             )
-          ),
-          button(
-            "MessageDelivery",
-            onClick --> Observer(_ =>
-              dataTextVar.set(MessageTemplate.exMessageDelivery.toPlaintextMessage.toJsonPretty)
-            )
-          ),
-          button(
-            "MessagesReceived",
-            onClick --> Observer(_ =>
-              dataTextVar.set(MessageTemplate.exMessagesReceived.toPlaintextMessage.toJsonPretty)
-            )
-          ),
-          button(
-            "Status",
-            onClick --> Observer(_ => dataTextVar.set(MessageTemplate.exStatus.toPlaintextMessage.toJsonPretty))
-          ),
-          button(
-            "StatusRequest",
-            onClick --> Observer(_ => dataTextVar.set(MessageTemplate.exStatusRequest.toPlaintextMessage.toJsonPretty))
-          ),
-          button(
-            "LiveModeChange",
-            onClick --> Observer(_ => dataTextVar.set(MessageTemplate.exLiveModeChange.toPlaintextMessage.toJsonPretty))
-          ),
-        )
+          )
+        },
+        // Pickup V3.0
+        {
+          import MessageTemplate.Pickup3._
+          li(
+            button(
+              "DeliveryRequest",
+              onClick --> Observer(_ => dataTextVar.set(exDeliveryRequest.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "MessageDelivery",
+              onClick --> Observer(_ => dataTextVar.set(exMessageDelivery.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "MessagesReceived",
+              onClick --> Observer(_ => dataTextVar.set(exMessagesReceived.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "Status",
+              onClick --> Observer(_ => dataTextVar.set(exStatus.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "StatusRequest",
+              onClick --> Observer(_ => dataTextVar.set(exStatusRequest.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "LiveModeChange",
+              onClick --> Observer(_ => dataTextVar.set(exLiveModeChange.toPlaintextMessage.toJsonPretty))
+            ),
+          )
+        }
       ),
     ),
     textArea(

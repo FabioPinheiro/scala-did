@@ -7,8 +7,6 @@ import fmgp.did._
 import fmgp.did.comm._
 import fmgp.did.comm.extension._
 import fmgp.did.comm.protocol.basicmessage2._
-import fmgp.did.comm.protocol.mediatorcoordination2._
-import fmgp.did.comm.protocol.pickup3._
 import fmgp.did.comm.protocol.routing2._
 import fmgp.did.comm.protocol.trustping2._
 import fmgp.util.Base64
@@ -63,43 +61,88 @@ object MessageTemplate {
   def exTrustPingResponse = TrustPingResponse(thid = MsgID("some_thid_123"), from = mFrom, to = to)
   def exBasicMessage = BasicMessage(from = mFrom, to = Set(to), content = "Hello, World!")
 
-  def exMediateRequest = MediateRequest(from = from, to = to)
-  def exMediateGrant = MediateGrant(from = from, to = to, thid = thid, routing_did = from.asFROMTO)
-  def exMediateDeny = MediateDeny(from = from, to = to, thid = thid)
-  def exKeylistUpdate = KeylistUpdate(from = from, to = to, updates = Seq(anotherDid -> KeylistAction.add))
-  def exKeylistResponse =
-    KeylistResponse(
+  object Mediatorcoordination2 {
+    import fmgp.did.comm.protocol.mediatorcoordination2._
+
+    def exMediateRequest2 = MediateRequest(from = from, to = to)
+    def exMediateGrant2 = MediateGrant(from = from, to = to, thid = thid, routing_did = from.asFROMTO)
+    def exMediateDeny2 = MediateDeny(from = from, to = to, thid = thid)
+    def exKeylistUpdate2 = KeylistUpdate(from = from, to = to, updates = Seq(anotherDid -> KeylistAction.add))
+    def exKeylistResponse2 = KeylistResponse(
       from = from,
       to = to,
       thid = thid,
       updated = Seq((anotherDid, KeylistAction.add, KeylistResult.success))
     )
-  // def exKeylistQuery
-  // def exKeylist
-  def exStatusRequest = StatusRequest(from = from, to = to, recipient_did = Some(FROMTO("did:recipient_did:123")))
-  def exStatus = Status(
-    from = from,
-    to = to,
-    thid = thid,
-    recipient_did = Some(FROMTO("did:recipient_did:123")),
-    message_count = 5,
-    longest_waited_seconds = Some(3600),
-    newest_received_time = Some(1658085169),
-    oldest_received_time = Some(1658084293),
-    total_bytes = Some(8096),
-    live_delivery = Some(false),
-  )
-  def exDeliveryRequest =
-    DeliveryRequest(from = from, to = to, limit = 5, recipient_did = Some(FROMTO("did:recipient_did:123")))
-  def exMessageDelivery = MessageDelivery(
-    from = from,
-    to = to,
-    thid = thid,
-    recipient_did = Some(FROMTO("did:recipient_did:123")),
-    attachments = Map("321" -> obj_encryptedMessage_ECDHES_X25519_XC20P)
-  )
-  def exMessagesReceived = MessagesReceived(from = from, to = to, thid = thid, message_id_list = Seq("321"))
-  def exLiveModeChange = LiveModeChange(from = from, to = to, live_delivery = true)
+    def exKeylistQuery2 = KeylistQuery(
+      from = from,
+      to = to,
+      paginate = Some(KeylistQuery.Paginate(limit = 10, offset = 0)),
+    )
+    def exKeylist2 = Keylist(
+      thid = thid,
+      from = from,
+      to = to,
+      keys = Seq(Keylist.RecipientDID(to.asFROMTO)),
+      pagination = Some(Keylist.Pagination(count = 10, offset = 0, remaining = 40)),
+    )
+  }
+
+  object Mediatorcoordination3 {
+    import fmgp.did.comm.protocol.mediatorcoordination3._
+
+    def exMediateRequest3 = MediateRequest(from = from, to = to)
+    def exMediateGrant3 = MediateGrant(from = from, to = to, thid = thid, routing_did = Seq(from.asFROMTO))
+    def exMediateDeny3 = MediateDeny(from = from, to = to, thid = thid)
+    def exRecipientUpdate3 = RecipientUpdate(from = from, to = to, updates = Seq(anotherDid -> RecipientAction.add))
+    def exRecipientResponse3 = RecipientResponse(
+      from = from,
+      to = to,
+      thid = thid,
+      updated = Seq((anotherDid, RecipientAction.add, RecipientResult.success))
+    )
+    def exRecipientQuery3 = RecipientQuery(
+      from = from,
+      to = to,
+      paginate = Some(RecipientQuery.Paginate(limit = 10, offset = 0)),
+    )
+    def exRecipient3 = Recipient(
+      thid = thid,
+      from = from,
+      to = to,
+      dids = Seq(Recipient.RecipientDID(to.asFROMTO)),
+      pagination = Some(Recipient.Pagination(count = 10, offset = 0, remaining = 40)),
+    )
+  }
+
+  object Pickup3 {
+    import fmgp.did.comm.protocol.pickup3._
+
+    def exStatusRequest = StatusRequest(from = from, to = to, recipient_did = Some(FROMTO("did:recipient_did:123")))
+    def exStatus = Status(
+      from = from,
+      to = to,
+      thid = thid,
+      recipient_did = Some(FROMTO("did:recipient_did:123")),
+      message_count = 5,
+      longest_waited_seconds = Some(3600),
+      newest_received_time = Some(1658085169),
+      oldest_received_time = Some(1658084293),
+      total_bytes = Some(8096),
+      live_delivery = Some(false),
+    )
+    def exDeliveryRequest =
+      DeliveryRequest(from = from, to = to, limit = 5, recipient_did = Some(FROMTO("did:recipient_did:123")))
+    def exMessageDelivery = MessageDelivery(
+      from = from,
+      to = to,
+      thid = thid,
+      recipient_did = Some(FROMTO("did:recipient_did:123")),
+      attachments = Map("321" -> obj_encryptedMessage_ECDHES_X25519_XC20P)
+    )
+    def exMessagesReceived = MessagesReceived(from = from, to = to, thid = thid, message_id_list = Seq("321"))
+    def exLiveModeChange = LiveModeChange(from = from, to = to, live_delivery = true)
+  }
 
   import fmgp.util._
   import fmgp.crypto._
