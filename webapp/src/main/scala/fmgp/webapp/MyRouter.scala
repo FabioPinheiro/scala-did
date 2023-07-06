@@ -21,7 +21,7 @@ object MyRouter {
   case object EncryptPage extends Page("Encrypt", "enhanced_encryption")
   case object DecryptPage extends Page("Decrypt", "email")
   case object BasicMessagePage extends Page("BasicMessage", "message")
-  case object TrustPingPage extends Page("TrustPing", "network_ping`")
+  case object TrustPingPage extends Page("TrustPing", "network_ping")
   case object TapIntoStreamPage extends Page("TapIntoStream", "chat")
   case object DAppStorePage extends Page("DAppStore", "share")
   case object MediatorPage extends Page("Mediator", "diversity_3")

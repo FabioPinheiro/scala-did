@@ -66,7 +66,11 @@ object AppServer extends ZIOAppDefault {
     Throwable
   ] = MediatorMultiAgent.didCommApp ++ Http
     .collectZIO[Request] {
-      case Method.GET -> !! / "hello" => ZIO.succeed(Response.text("Hello World! DEMO DID APP")).debug
+      case req @ Method.GET -> !! / "headers" =>
+        val data = req.headersAsList.toSeq.map(e => (e.key.toString(), e.value.toString()))
+        ZIO.succeed(Response.text("HEADERS:\n" + data.mkString("\n") + "\nRemoteAddress:" + req.remoteAddress)).debug
+      case Method.GET -> !! / "hello"        => ZIO.succeed(Response.text("Hello World! DEMO DID APP")).debug
+      case req @ Method.GET -> !! / "health" => ZIO.succeed(Response.ok)
       // http://localhost:8080/oob?_oob=eyJ0eXBlIjoiaHR0cHM6Ly9kaWRjb21tLm9yZy9vdXQtb2YtYmFuZC8yLjAvaW52aXRhdGlvbiIsImlkIjoiNTk5ZjM2MzgtYjU2My00OTM3LTk0ODctZGZlNTUwOTlkOTAwIiwiZnJvbSI6ImRpZDpleGFtcGxlOnZlcmlmaWVyIiwiYm9keSI6eyJnb2FsX2NvZGUiOiJzdHJlYW1saW5lZC12cCIsImFjY2VwdCI6WyJkaWRjb21tL3YyIl19fQ
       case req @ Method.GET -> !! / "oob" =>
         for {
@@ -111,10 +115,6 @@ object AppServer extends ZIOAppDefault {
               } *> ZIO.succeed(Response.text(s"message sended"))
           }
         } yield (ret)
-      case req @ Method.GET -> !! / "headers" =>
-        val data = req.headersAsList.toSeq.map(e => (e.key.toString(), e.value.toString()))
-        ZIO.succeed(Response.text("HEADERS:\n" + data.mkString("\n") + "\nRemoteAddress:" + req.remoteAddress)).debug
-      case req @ Method.GET -> !! / "healthz" => ZIO.succeed(Response.ok)
       case req @ Method.POST -> !! / "ops" =>
         req.body.asString
           .tap(e => ZIO.log("ops"))
@@ -135,19 +135,39 @@ object AppServer extends ZIOAppDefault {
   } ++ Http.fromResource(s"sw.js").when {
     case Method.GET -> !! / "sw.js" => true
     case _                          => false
-  } ++ Http.fromResource(s"public/fmgp-webapp-fastopt-library.js").when {
-    case Method.GET -> !! / "public" / "fmgp-webapp-fastopt-library.js" => true
-    case _                                                              => false
   } ++ {
-    Http.fromResource(s"public/fmgp-webapp-fastopt-bundle.js").when {
-      case Method.GET -> !! / "public" / path => true
-      // Response(
-      //   body = Body.fromStream(ZStream.fromIterator(Source.fromResource(s"public/$path").iter).map(_.toByte)),
-      //   headers = Headers(HeaderNames.contentType, HeaderValues.applicationJson),
-      // )
-      case _ => false
-    }
+    //  ++ Http.fromResource(s"public/fmgp-webapp-fastopt-bundle.js").when {
+    //   case Method.GET -> !! / "public" / "fmgp-webapp-fastopt-bundle.js" => true
+    //   case _                                                             => false
+    // }
+
+    Http
+      .fromResource(s"public/fmgp-webapp-fastopt-bundle.js.gz")
+      .map(e =>
+        e.setHeaders(
+          Headers(
+            e.headers.filter(_.key != "content-encoding") ++ Seq(
+              Header("content-type", "application/javascript"),
+              Header("content-encoding", "gzip"),
+            )
+          )
+        )
+      )
+      .when {
+        case Method.GET -> !! / "public" / "fmgp-webapp-fastopt-bundle.js" => true
+        case _                                                             => false
+      }
   }
+  // ++ {
+  //   Http.fromResource(s"public/fmgp-webapp-fastopt-bundle.js").when {
+  //     case Method.GET -> !! / "public" / path => true
+  //     // Response(
+  //     //   body = Body.fromStream(ZStream.fromIterator(Source.fromResource(s"public/$path").iter).map(_.toByte)),
+  //     //   headers = Headers(HeaderNames.contentType, HeaderValues.applicationJson),
+  //     // )
+  //     case _ => false
+  //   }
+  // }
 
   override val run = for {
     _ <- Console.printLine(
@@ -193,7 +213,7 @@ object AppServer extends ZIOAppDefault {
             ++ mdocHTML
             ++ DidPeerUniresolverDriver.resolverPeer
         ).annotateLogs
-          .tapUnhandledZIO(ZIO.logError("Unhandled Endpoint"))
+          .tapUnhandledZIO(ZIO.logWarning("Unhandled Endpoint"))
           .tapErrorCauseZIO(cause => ZIO.logErrorCause(cause)) // THIS is to log all the erros
           .mapError(err =>
             Response(

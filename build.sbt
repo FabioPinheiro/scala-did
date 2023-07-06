@@ -518,7 +518,7 @@ lazy val demo = crossProject(JSPlatform, JVMPlatform)
       * all tasks for production, including Scala.js fullOptJS task and source maps scalaJSDev task runs all tasks for
       * development, including Scala.js fastOptJS task and source maps.
       */
-    Assets / pipelineStages := Seq(scalaJSPipeline),
+    Assets / pipelineStages := Seq(scalaJSPipeline, gzip),
     // pipelineStages ++= Seq(digest, gzip), //Compression - If you serve your Scala.js application from a web server, you should additionally gzip the resulting .js files.
     Compile / unmanagedResourceDirectories += baseDirectory.value / "src" / "main" / "extra-resources",
     // Compile / unmanagedResourceDirectories += (baseDirectory.value.toPath.getParent.getParent / "docs-build" / "target" / "api").toFile,
@@ -532,9 +532,11 @@ lazy val demo = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(did, didImp, didResolverPeer, didResolverWeb, didUniresolver, didExample, httpUtils, mediator)
   .enablePlugins(WebScalaJSBundlerPlugin)
 
+val webjarsPattern = "(META-INF/resources/webjars/.*)".r
 ThisBuild / assemblyMergeStrategy := {
   case "META-INF/versions/9/module-info.class" => MergeStrategy.first
   case "META-INF/io.netty.versions.properties" => MergeStrategy.first
+  case webjarsPattern(file)                    => MergeStrategy.discard
 //   case PathList("javax", "servlet", xs @ _*)         => MergeStrategy.first
 //   case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
 //   case "application.conf"                            => MergeStrategy.concat

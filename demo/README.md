@@ -22,6 +22,7 @@ docker run --rm -p 8080:8080 --memory="100m" --cpus="1.0" scala_did_demo
 
 ```
 jar tf /home/fabio/workspace/ScalaDID/demo/jvm/target/scala-3.3.0/scala-did-demo-server.jar | less
+jar tvf /home/fabio/workspace/ScalaDID/demo/jvm/target/scala-3.3.0/scala-did-demo-server.jar | sort -rnk 1 | less
 java -jar /home/fabio/workspace/ScalaDID/demo/jvm/target/scala-3.3.0/scala-did-demo-server.jar
 ```
 

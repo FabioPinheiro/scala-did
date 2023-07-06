@@ -58,6 +58,7 @@ object AgentProvider {
     "ivan" -> ivan,
     "pat" -> pat,
     "victor" -> victor,
+    "iohkMediator" -> iohkMediator,
     "exampleAlice" -> exampleAlice,
     "exampleBob" -> exampleBob,
     "exampleSicpaAlice" -> exampleSicpaAlice,
@@ -170,6 +171,15 @@ object AgentProvider {
       keyAuthentication("mnMNIGXhYLiIEzk4KjCewN5QTtEHgSd_V5dAvpy1-_M", "uzRMEeJho3oGJUiJWi_YvVwTlUrDpJ4Z2LZcqmseZCM")
     ),
     Seq(DIDPeerServiceEncoded(s = "http://localhost:8080"))
+  )
+
+  // did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9rOHMtaW50LmF0YWxhcHJpc20uaW8vbWVkaWF0b3IiLCJyIjpbXSwiYSI6WyJkaWRjb21tL3YyIl19
+  val iohkMediator = DIDPeer2.makeAgent(
+    Seq(
+      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
+      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
+    ),
+    Seq(DIDPeerServiceEncoded(s = "https://k8s-int.atalaprism.io/mediator"))
   )
 
   val exampleAlice = new Agent {

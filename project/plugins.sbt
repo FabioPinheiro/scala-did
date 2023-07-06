@@ -66,3 +66,4 @@ addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.3.7")
 
 // Deploy demo - https://github.com/sbt/sbt-assembly/tags
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.1.1")
+addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.2")
