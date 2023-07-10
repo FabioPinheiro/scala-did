@@ -14,10 +14,12 @@ import zio.json._
 import fmgp.did._
 import fmgp.did.comm._
 import fmgp.did.comm.protocol.basicmessage2.BasicMessage
+import fmgp.did.comm.protocol.oobinvitation.*
 import fmgp.did.method.peer.DIDPeer._
 import fmgp.did.method.peer.DidPeerResolver
 import fmgp.crypto.error._
 import fmgp.webapp.MyRouter.OOBPage
+import com.raquo.laminar.nodes.ReactiveElement
 
 object OutOfBandTool {
 
@@ -46,11 +48,47 @@ object OutOfBandTool {
               }
             }
           ),
-          p("Message:"),
-          OutOfBand.safeBase64(e.query_oob) match
-            case Left(value)                          => value
-            case Right(OutOfBandPlaintext(msg, data)) => pre(code(msg.toJsonPretty))
-            case Right(OutOfBandSigned(msg, data))    => pre(code(msg.toJsonPretty))
+          (
+            OutOfBand.safeBase64(e.query_oob) match
+              case Left(value)                       => value
+              case Right(OutOfBandSigned(msg, data)) => pre(code(msg.toJsonPretty))
+              case Right(OutOfBandPlaintext(msg, data)) =>
+                Seq(
+                  p("Message:"),
+                  pre(code(msg.toJsonPretty)),
+                  msg.toOOBInvitation match
+                    case Left(value) => p(s"The OBB is not a invitation due to: $value")
+                    case Right(oobInvitation) =>
+                      Seq(
+                        p(
+                          "This is a OutOfBand Invitation of the type '",
+                          code(oobInvitation.goal_code),
+                          "'",
+                          oobInvitation.goal
+                            .map(g =>
+                              Seq(
+                                textToTextNode(", this was the goal of: "),
+                                code(g),
+                                textToTextNode(".")
+                              ): Modifier[ReactiveElement.Base]
+                            )
+                            .getOrElse(Modifier.empty),
+                          "."
+                        ),
+                        oobInvitation.goal match
+                          case None => p("goal code is missing")
+                          case Some(goal) =>
+                            if (OOBInvitation.wellKnowGoal(goal))
+                              p("'", code(goal), "' is a well know goal")
+                            else
+                              p(
+                                "'",
+                                code(goal),
+                                "' is a not a well know goal (this app is not prepared to executive goal"
+                              )
+                      ): Modifier[ReactiveElement.Base]
+                )
+          ),
         )
       })
     ),

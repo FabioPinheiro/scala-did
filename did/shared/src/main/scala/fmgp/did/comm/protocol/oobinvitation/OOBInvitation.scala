@@ -48,6 +48,8 @@ final case class OOBInvitation(
       // FIXME lang: NotRequired[String] = lang,
     )
 
+  /** Utils method */
+  def wellKnowGoal = goal.map(OOBInvitation.wellKnowGoal _)
 }
 
 object OOBInvitation {
@@ -87,6 +89,11 @@ object OOBInvitation {
                   accept = body.accept,
                 )
               )
+  }
 
+  def wellKnowGoal(goal: String) = goal match {
+    case "streamlined-vp"   => true
+    case "request-mediate'" => true
+    case _                  => false
   }
 }
