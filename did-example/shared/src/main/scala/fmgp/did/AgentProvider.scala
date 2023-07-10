@@ -59,6 +59,7 @@ object AgentProvider {
     "pat" -> pat,
     "victor" -> victor,
     "iohkMediator" -> iohkMediator,
+    "iohkMediatorHolder" -> iohkMediatorHolder,
     "exampleAlice" -> exampleAlice,
     "exampleBob" -> exampleBob,
     "exampleSicpaAlice" -> exampleSicpaAlice,
@@ -67,6 +68,8 @@ object AgentProvider {
     "exampleSicpaMediator1" -> exampleSicpaMediator1,
     "exampleSicpaMediator2" -> exampleSicpaMediator2,
     "exampleSicpaMediator3" -> exampleSicpaMediator3,
+    "localhost8080Alice" -> localhost8080Alice,
+    "localhost9000Alice" -> localhost9000Alice,
   )
 
   def allIdentities: Map[String, DID] =
@@ -173,13 +176,20 @@ object AgentProvider {
     Seq(DIDPeerServiceEncoded(s = "http://localhost:8080"))
   )
 
-  // did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9rOHMtaW50LmF0YWxhcHJpc20uaW8vbWVkaWF0b3IiLCJyIjpbXSwiYSI6WyJkaWRjb21tL3YyIl19
   val iohkMediator = DIDPeer2.makeAgent(
     Seq(
       keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
       keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
     ),
-    Seq(DIDPeerServiceEncoded(s = "https://k8s-int.atalaprism.io/mediator"))
+    Seq(DIDPeerServiceEncoded(s = "https://mediator-test-env.atalaprism.io/mediator"))
+  )
+
+  val iohkMediatorHolder = DIDPeer2.makeAgent(
+    Seq(
+      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
+      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
+    ),
+    Seq(DIDPeerServiceEncoded(s = "https://sit-prism-stack-holder.atalaprism.io/mediator"))
   )
 
   val exampleAlice = new Agent {
@@ -217,4 +227,21 @@ object AgentProvider {
     override def id: DID = DidExampleSicpaRustMediator3.mediator3DIDDocument.id
     override def keys: Seq[fmgp.crypto.PrivateKey] = DidExampleSicpaRustMediator3.mediator3Secrets.keys.toSeq
   }
+
+  val localhost8080Alice = DIDPeer2.makeAgent(
+    Seq(
+      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
+      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
+    ),
+    Seq(DIDPeerServiceEncoded(s = "http://localhost:8080"))
+  )
+
+  val localhost9000Alice = DIDPeer2.makeAgent(
+    Seq(
+      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
+      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
+    ),
+    Seq(DIDPeerServiceEncoded(s = "http://localhost:9000"))
+  )
+
 }
