@@ -87,6 +87,26 @@ object OutOfBandTool {
                                 "' is a not a well know goal (this app is not prepared to executive goal"
                               )
                       ): Modifier[ReactiveElement.Base]
+                  ,
+                  msg.from
+                    .map(from =>
+                      p(
+                        "Use the ",
+                        b("DID Resolver Tool"),
+                        s" on the sender 'from': ",
+                        a(code(from.toDID.did), MyRouter.navigateTo(MyRouter.ResolverPage(from.toDID.did))),
+                      )
+                    )
+                    .getOrElse(Modifier.empty),
+                  msg.to.toSeq.flatten
+                    .map(to =>
+                      p(
+                        "Use the ",
+                        b("DID Resolver Tool"),
+                        s" on the reciver 'to': ",
+                        a(code(to.toDID.did), MyRouter.navigateTo(MyRouter.ResolverPage(to.toDID.did)))
+                      )
+                    ): Modifier[ReactiveElement.Base],
                 )
           ),
         )

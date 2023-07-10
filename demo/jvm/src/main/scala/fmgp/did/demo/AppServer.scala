@@ -142,7 +142,7 @@ object AppServer extends ZIOAppDefault {
     // }
 
     Http
-      .fromResource(s"public/fmgp-webapp-fastopt-bundle.js.gz")
+      .fromResource(s"public/fmgp-webapp-fastopt-bundle.js.gz") // ".gz" becuase of 0
       .map(e =>
         e.setHeaders(
           Headers(
