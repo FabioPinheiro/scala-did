@@ -326,6 +326,7 @@ lazy val didExtra = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.zioMunitTest.value,
   )
   .dependsOn(did % "compile;test->test")
+  .jsConfigure(scalaJSBundlerConfigure) // Because of didJS now uses NPM libs
   .configure(docConfigure)
 
 lazy val didImp = crossProject(JSPlatform, JVMPlatform)
