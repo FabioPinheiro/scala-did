@@ -92,8 +92,9 @@ object OOBInvitation {
   }
 
   def wellKnowGoal(goal: String) = goal match {
-    case "streamlined-vp"   => true
-    case "request-mediate'" => true
-    case _                  => false
+    case "streamlined-vp"        => true
+    case "request-mediate'"      => true
+    case "io.atalaprism.connect" => true
+    case _                       => false
   }
 }
