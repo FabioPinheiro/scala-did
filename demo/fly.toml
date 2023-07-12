@@ -1,47 +1,45 @@
-# fly.toml file generated for scala-did-demo on 2022-12-05T01:41:26Z
+# fly.toml app configuration file generated for scala-did-demo on 2023-07-12T18:21:38+01:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
 app = "scala-did-demo"
+primary_region = "mad"
 kill_signal = "SIGINT"
-kill_timeout = 5
-processes = []
-
-[env]
+kill_timeout = "5s"
 
 [experimental]
-  allowed_public_ports = []
   auto_rollback = true
 
 [[services]]
+  protocol = "tcp"
   internal_port = 8080
   processes = ["app"]
-  protocol = "tcp"
-  script_checks = []
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
   [services.concurrency]
+    type = "connections"
     hard_limit = 25
     soft_limit = 20
-    type = "connections"
-
-  [[services.ports]]
-    force_https = true
-    handlers = ["http"]
-    port = 80
-
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = 443
 
   [[services.tcp_checks]]
-    grace_period = "1s"
     interval = "15s"
-    restart_limit = 0
     timeout = "2s"
+    grace_period = "1s"
+    restart_limit = 0
 
   [[services.http_checks]]
-    interval = 120000
+    interval = "1m0s"
+    timeout = "2s"
     grace_period = "10s"
+    restart_limit = 3
     method = "get"
     path = "/health"
     protocol = "http"
-    restart_limit = 3
-    timeout = 2000
-    tls_skip_verify = false
