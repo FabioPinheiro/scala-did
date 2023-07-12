@@ -15,4 +15,13 @@ package object util {
     scala.util.Try(block).toEither match
       case Right(value)                                       => Right(value)
       case Left(ex /*: java.lang.IllegalArgumentException*/ ) => Left(ex.getMessage)
+
+  /** bytes to Hex String */
+  inline def bytes2Hex(bytes: Array[Byte]): String = bytes.map { b =>
+    String.format("%02x", Integer.valueOf(b & 0xff))
+  }.mkString
+
+  inline def hex2bytes(hex: String): Array[Byte] = {
+    hex.replaceAll("[^0-9A-Fa-f]", "").sliding(2, 2).toArray.map(Integer.parseInt(_, 16).toByte)
+  }
 }

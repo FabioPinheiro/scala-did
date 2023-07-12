@@ -172,6 +172,9 @@ lazy val NPM = new {
   // val nodeJose = Seq("node-jose" -> "2.1.1", "@types/node-jose" -> "1.1.10")
   // val elliptic = Seq("elliptic" -> "6.5.4", "@types/elliptic" -> "6.4.14")
   val jose = Seq("jose" -> "4.8.3")
+
+  val sha1 = Seq("js-sha1" -> "0.6.0", "@types/js-sha1" -> "0.6.0")
+  val sha256 = Seq("js-sha256" -> "0.9.0")
 }
 
 inThisBuild(
@@ -306,6 +309,11 @@ lazy val did = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.zioMunitTest.value,
   )
   .jsSettings(libraryDependencies += D.scalajsJavaSecureRandom.value.cross(CrossVersion.for3Use2_13))
+  .jsConfigure(scalaJSBundlerConfigure)
+  .jsSettings( // Add JS-specific settings here
+    stShortModuleNames := true,
+    Compile / npmDependencies ++= NPM.sha1 ++ NPM.sha256,
+  )
   .configure(docConfigure)
 
 lazy val didExtra = crossProject(JSPlatform, JVMPlatform)

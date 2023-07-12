@@ -4,7 +4,7 @@ import zio.json._
 import fmgp.did._
 import fmgp.did.comm.extension._
 import fmgp.util._
-import fmgp.crypto.OKP_EC_Key
+import fmgp.crypto._
 import zio.json.ast.Json
 import zio.json.ast.JsonCursor
 
@@ -223,6 +223,7 @@ trait EncryptedMessage extends Message {
   // extra
   def recipientsSubject = recipients.map(_.recipientSubject).toSet
   def recipientsKid = recipients.map(_.recipientKid).toSet
+  def sha1 = SHA1.digestToHex(this.toJson)
 }
 
 // trait AnonEncryptedMessage //TODO and make EncryptedMessage a sealed trait
