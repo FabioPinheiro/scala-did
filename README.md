@@ -38,10 +38,16 @@ The future version of [**DID Comm v2.1**](https://identity.foundation/didcomm-me
     - `diff did/shared/src/main/scala/fmgp/did/comm/protocol/mediatorcoordination3/MediatorCoordination.scala did/shared/src/main/scala/fmgp/did/comm/protocol/mediatorcoordination2/MediatorCoordination.scala`
     - `diff did/shared/src/main/scala/fmgp/did/comm/protocol/mediatorcoordination3/Recipient.scala did/shared/src/main/scala/fmgp/did/comm/protocol/mediatorcoordination2/Keylist.scala`
 - [DONE] `Pickup 3` - https://didcomm.org/pickup/3.0
-- [WIP] `OutOfBand 2.0` - https://didcomm.org/out-of-band/2.0
-- [TODO]`ReportProblem 2.0` - https://didcomm.org/report-problem/2.0
+- [DONE] `OutOfBand 2.0` - https://didcomm.org/out-of-band/2.0
+- [TODO] `ReportProblem 2.0` - https://didcomm.org/report-problem/2.0
 - [DONE] `TrustPing 2.0` - https://didcomm.org/trust-ping/2.0/
-- [TODO] `DiscoverFeatures 2.0` - https://didcomm.org/discover-features/2.0
+- [DONE] `DiscoverFeatures 2.0` - https://didcomm.org/discover-features/2.0
+- [NOT_ATM] `Data-agreement 1.0`:
+  - [NOT_TODO_(DIDCommV1?)] `data-agreement-context-decorator` - https://didcomm.org/data-agreement-context-decorator/1.0/
+  - [Maybe] `data-agreement-negotiation` - https://didcomm.org/data-agreement-negotiation/1.0/
+  - [NOT_TODO_(+-DIDCommV1?)]`data-agreement-proofs` - https://didcomm.org/data-agreement-proofs/1.0/
+  - [Maybe] `data-agreement-termination` - https://didcomm.org/data-agreement-termination/1.0/
+  - [Maybe] `data-disclosure-agreement` - https://didcomm.org/data-disclosure-agreement/1.0/
 - Create new protocol `PreSetValue`
 - Create new protocol `PseudoRandom`
   - https://www.stat.berkeley.edu/~stark/Java/Html/sha256Rand.htm
