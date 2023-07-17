@@ -47,15 +47,25 @@ class EncryptedMessageSuite extends ZSuite {
   // ###############
 
   val expeted = PlaintextMessageClass(
-    MsgID("1234567890"),
-    PIURI("http://example.com/protocols/lets_do_lunch/1.0/proposal"),
-    Some(Set(TO("did:example:bob"))),
-    Some(FROM("did:example:alice")),
-    None,
-    Some(1516269022),
-    Some(1516385931),
-    Some(Json.Obj("messagespecificattribute" -> Json.Str("and its value"))),
-    None
+    id = MsgID("1234567890"),
+    `type` = PIURI("http://example.com/protocols/lets_do_lunch/1.0/proposal"),
+    to = Some(Set(TO("did:example:bob"))),
+    from = Some(FROM("did:example:alice")),
+    thid = None,
+    pthid = None,
+    ack = None,
+    created_time = Some(1516269022),
+    expires_time = Some(1516385931),
+    body = Some(Json.Obj("messagespecificattribute" -> Json.Str("and its value"))),
+    attachments = None,
+    from_prior = None,
+    return_route = None,
+    `accept-lang` = None,
+    lang = None,
+    l10n = None,
+    sender_order = None,
+    sent_count = None,
+    received_orders = None,
   )
 
   def test_anonDecrypt(msg: String) =
@@ -244,15 +254,26 @@ class EncryptedMessageSuite extends ZSuite {
   // ###############
 
   val example2encrypt = PlaintextMessageClass(
-    MsgID("987654321"),
-    PIURI("https://app.fmgp/protocols/chat/1.0/message"),
-    Some(Set(TO("did:example:bob"))),
-    Some(FROM("did:example:alice")),
-    None,
-    Some(1516269022),
-    Some(1516385931),
-    Some(Json.Obj("text" -> Json.Str("Hey Bob"))),
-    None
+    id = MsgID("987654321"),
+    `type` = PIURI("https://app.fmgp/protocols/chat/1.0/message"),
+    to = Some(Set(TO("did:example:bob"))),
+    from = Some(FROM("did:example:alice")),
+    thid = None,
+    pthid = None,
+    ack = None,
+    created_time = Some(1516269022),
+    expires_time = Some(1516385931),
+    body = Some(Json.Obj("text" -> Json.Str("Hey Bob"))),
+    attachments = None,
+    from_prior = None,
+    return_route = None,
+    `accept-lang` = None,
+    lang = None,
+    l10n = None,
+    sender_order = None,
+    sent_count = None,
+    received_orders = None,
+    typ = None,
   )
 
   testZ("encrypt with ECDHES_X25519_A256CBCHS512".tag(fmgp.JsUnsupported)) { // FIXME ECDHES_X25519_XC20P

@@ -11,6 +11,8 @@ case class PlaintextMessageClass(
     to: NotRequired[Set[TO]] = None,
     from: NotRequired[FROM] = None,
     thid: NotRequired[MsgID] = None,
+    pthid: NotRequired[MsgID] = None,
+    ack: NotRequired[Seq[MsgID]] = None,
     created_time: NotRequired[UTCEpoch] = None,
     expires_time: NotRequired[UTCEpoch] = None,
     body: NotRequired[JSON_RFC7159] = Some( // TODO change to None in Future
