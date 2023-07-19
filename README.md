@@ -30,6 +30,7 @@ The future version of [**DID Comm v2.1**](https://identity.foundation/didcomm-me
   - Also see https://didcomm.org/book/v2/routing
 - [TODO] `Action Menu 2.0` - https://didcomm.org/action-menu/2.0
 - [DONE] `BasicMessage 2.0` - https://didcomm.org/basicmessage/2.0
+- [DONE] `DiscoverFeatures 2.0` - https://didcomm.org/discover-features/2.0
 - [DONE] `MediatorCoordination 2.0` - https://didcomm.org/mediator-coordination/2.0
 - [DONE] `MediatorCoordination 3.0` - https://didcomm.org/mediator-coordination/3.0
   - Compare [specs](https://github.com/decentralized-identity/didcomm.org/tree/main) with previous version
@@ -37,11 +38,10 @@ The future version of [**DID Comm v2.1**](https://identity.foundation/didcomm-me
   - Compare code with previous version
     - `diff did/shared/src/main/scala/fmgp/did/comm/protocol/mediatorcoordination3/MediatorCoordination.scala did/shared/src/main/scala/fmgp/did/comm/protocol/mediatorcoordination2/MediatorCoordination.scala`
     - `diff did/shared/src/main/scala/fmgp/did/comm/protocol/mediatorcoordination3/Recipient.scala did/shared/src/main/scala/fmgp/did/comm/protocol/mediatorcoordination2/Keylist.scala`
-- [DONE] `Pickup 3` - https://didcomm.org/pickup/3.0
+- [DONE] `Pickup 3.0` - https://didcomm.org/pickup/3.0
 - [DONE] `OutOfBand 2.0` - https://didcomm.org/out-of-band/2.0
-- [TODO] `ReportProblem 2.0` - https://didcomm.org/report-problem/2.0
+- [DONE] `ReportProblem 2.0` - https://didcomm.org/report-problem/2.0 - See [specs](https://identity.foundation/didcomm-messaging/spec/#problem-reports)
 - [DONE] `TrustPing 2.0` - https://didcomm.org/trust-ping/2.0/
-- [DONE] `DiscoverFeatures 2.0` - https://didcomm.org/discover-features/2.0
 - [NOT_ATM] `Data-agreement 1.0`:
   - [NOT_TODO_(DIDCommV1?)] `data-agreement-context-decorator` - https://didcomm.org/data-agreement-context-decorator/1.0/
   - [Maybe] `data-agreement-negotiation` - https://didcomm.org/data-agreement-negotiation/1.0/

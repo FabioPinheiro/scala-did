@@ -187,6 +187,7 @@ object DIDPeer {
     case regexPeer1(all, z: "z", data) => Right(DIDPeer1(all.drop(1)))
     case regexPeer2(all, str: _*)      => DIDPeer2.fromDID(did)
     case any if regexPeer.matches(any) => Left(s"Not a did:peer '$any'") // FIXME make Error type
+    // FIXME what about case any ??? //TODO add test in DIDPeerSuite
   }
 
   def decodeKey(data: String): String = {
