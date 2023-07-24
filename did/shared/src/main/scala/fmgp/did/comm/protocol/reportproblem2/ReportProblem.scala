@@ -64,6 +64,28 @@ case class ProblemReport(
     args: Option[Seq[String]],
     escalate_to: Option[String],
 ) {
+  def piuri = ProblemReport.piuri
+
+  def toPlaintextMessage: PlaintextMessage =
+    PlaintextMessageClass(
+      id = id,
+      `type` = piuri,
+      to = Some(to),
+      from = Some(from),
+      pthid = Some(pthid),
+      ack = ack,
+      body = Some(
+        ProblemReport
+          .Body(
+            code = code,
+            comment = comment,
+            args = args,
+            escalate_to = escalate_to,
+          )
+          .toJSON_RFC7159
+      ),
+    )
+
   def commentWithArgs = (comment, args) match
     case (None, _)       => None
     case (Some(c), None) => Some(c)

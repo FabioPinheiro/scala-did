@@ -36,7 +36,18 @@ case class FeatureQuery(
     to: Set[TO],
     from: FROM,
     queries: Seq[FeatureQuery.Query],
-)
+) {
+  def piuri = FeatureQuery.piuri
+
+  def toPlaintextMessage: PlaintextMessage =
+    PlaintextMessageClass(
+      id = id,
+      `type` = piuri,
+      to = Some(to),
+      from = Some(from),
+      body = Some(FeatureQuery.Body(queries = queries).toJSON_RFC7159),
+    )
+}
 
 object FeatureQuery {
   def piuri = PIURI("https://didcomm.org/discover-features/2.0/queries")
