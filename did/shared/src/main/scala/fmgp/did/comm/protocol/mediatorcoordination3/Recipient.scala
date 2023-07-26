@@ -91,7 +91,7 @@ object RecipientUpdate {
         case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from' with one element")
+            case None => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.body.map(_.as[Body]) match
                 case None              => Left(s"'$piuri' MUST have a 'body'")
@@ -173,7 +173,7 @@ object RecipientResponse {
             case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
             case firstTo +: Seq() =>
               msg.from match
-                case None => Left(s"'$piuri' MUST have field 'from' with one element")
+                case None => Left(s"'$piuri' MUST have field 'from'")
                 case Some(from) =>
                   msg.body.map(_.as[Body]) match
                     case None              => Left(s"'$piuri' MUST have a 'body'")
@@ -255,7 +255,7 @@ object RecipientQuery {
         case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from' with one element")
+            case None => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.body.map(_.as[Body]) match
                 case None              => Left(s"'$piuri' MUST have a 'body'")
@@ -364,7 +364,7 @@ object Recipient {
             case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
             case firstTo +: Seq() =>
               msg.from match
-                case None => Left(s"'$piuri' MUST have field 'from' with one element")
+                case None => Left(s"'$piuri' MUST have field 'from'")
                 case Some(from) =>
                   msg.body.map(_.as[Body]) match
                     case None              => Left(s"'$piuri' MUST have a 'body'")

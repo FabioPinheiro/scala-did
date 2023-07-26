@@ -115,7 +115,7 @@ object ProblemReport {
     if (msg.`type` != piuri) Left(s"No able to create ProblemReport from a Message of the type '${msg.`type`}'")
     else
       msg.from match
-        case None => Left(s"'$piuri' MUST have field 'from' with one element")
+        case None => Left(s"'$piuri' MUST have field 'from'")
         case Some(from) =>
           msg.pthid match
             case None => Left(s"'$piuri' MUST have field 'pthid'")

@@ -94,7 +94,7 @@ object Status {
                   case None => Left(s"'$piuri' MUST have field 'thid'")
                   case Some(thid) =>
                     msg.from match
-                      case None => Left(s"'$piuri' MUST have field 'from' with one element")
+                      case None => Left(s"'$piuri' MUST have field 'from'")
                       case Some(from) =>
                         Right(
                           Status(

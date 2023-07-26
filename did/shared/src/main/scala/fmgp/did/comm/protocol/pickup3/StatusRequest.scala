@@ -49,7 +49,7 @@ object StatusRequest {
             case Some(b) =>
               b.as[Body].flatMap { body =>
                 msg.from match
-                  case None => Left(s"'$piuri' MUST have field 'from' with one element")
+                  case None => Left(s"'$piuri' MUST have field 'from'")
                   case Some(from) =>
                     Right(
                       StatusRequest(

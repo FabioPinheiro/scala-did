@@ -48,7 +48,7 @@ object MediateRequest {
         case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from' with one element")
+            case None => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               Right(
                 MediateRequest(
@@ -93,7 +93,7 @@ object MediateDeny {
             case None => Left(s"'$piuri' MUST have field 'thid'")
             case Some(thid) =>
               msg.from match
-                case None => Left(s"'$piuri' MUST have field 'from' with one element")
+                case None => Left(s"'$piuri' MUST have field 'from'")
                 case Some(from) =>
                   Right(
                     MediateDeny(
@@ -159,7 +159,7 @@ object MediateGrant {
                   case None => Left(s"'$piuri' MUST have field 'thid'")
                   case Some(thid) =>
                     msg.from match
-                      case None => Left(s"'$piuri' MUST have field 'from' with one element")
+                      case None => Left(s"'$piuri' MUST have field 'from'")
                       case Some(from) =>
                         Right(
                           MediateGrant(

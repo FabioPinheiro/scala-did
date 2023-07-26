@@ -91,7 +91,7 @@ object KeylistUpdate {
         case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from' with one element")
+            case None => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.body.map(_.as[Body]) match
                 case None              => Left(s"'$piuri' MUST have a 'body'")
@@ -173,7 +173,7 @@ object KeylistResponse {
             case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
             case firstTo +: Seq() =>
               msg.from match
-                case None => Left(s"'$piuri' MUST have field 'from' with one element")
+                case None => Left(s"'$piuri' MUST have field 'from'")
                 case Some(from) =>
                   msg.body.map(_.as[Body]) match
                     case None              => Left(s"'$piuri' MUST have a 'body'")
@@ -255,7 +255,7 @@ object KeylistQuery {
         case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from' with one element")
+            case None => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.body.map(_.as[Body]) match
                 case None              => Left(s"'$piuri' MUST have a 'body'")
@@ -364,7 +364,7 @@ object Keylist {
             case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
             case firstTo +: Seq() =>
               msg.from match
-                case None => Left(s"'$piuri' MUST have field 'from' with one element")
+                case None => Left(s"'$piuri' MUST have field 'from'")
                 case Some(from) =>
                   msg.body.map(_.as[Body]) match
                     case None              => Left(s"'$piuri' MUST have a 'body'")
