@@ -203,6 +203,13 @@ object EncryptTool {
             "BasicMessage",
             onClick --> Observer(_ => dataTextVar.set(MessageTemplate.exBasicMessage.toPlaintextMessage.toJsonPretty))
           ),
+          // ReportProblem V2.0
+          button(
+            "ProblemReport",
+            onClick --> Observer(_ =>
+              dataTextVar.set(MessageTemplate.ReportProblem2.exProblemReport.toPlaintextMessage.toJsonPretty)
+            )
+          ),
         ),
         // Mediator Coordination V2.0
         {
@@ -301,7 +308,21 @@ object EncryptTool {
               onClick --> Observer(_ => dataTextVar.set(exLiveModeChange.toPlaintextMessage.toJsonPretty))
             ),
           )
-        }
+        },
+        // DiscoverFeatures V2.0
+        {
+          import MessageTemplate.DiscoverFeatures2._
+          li(
+            button(
+              "FeatureQuery",
+              onClick --> Observer(_ => dataTextVar.set(exFeatureQuery.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "FeatureDisclose",
+              onClick --> Observer(_ => dataTextVar.set(exFeatureDisclose.toPlaintextMessage.toJsonPretty))
+            ),
+          )
+        },
       ),
     ),
     textArea(

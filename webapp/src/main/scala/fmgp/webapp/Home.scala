@@ -20,7 +20,7 @@ object Home {
 
   def apply(): HtmlElement = // rootElement
     div(
-      p("Sandbox for DID Comm v2"),
+      p("Sandbox for DID Comm v2.1"),
       p("Navigate to ", b("OOB Tool "), MyRouter.navigateTo(MyRouter.OOBPage(App.oobExample))),
       p("Navigate to ", b("DID Resolver Tool "), MyRouter.navigateTo(MyRouter.ResolverPage(App.didExample))),
       p("Navigate to ", b("Encrypt Tool "), MyRouter.navigateTo(MyRouter.EncryptPage)),

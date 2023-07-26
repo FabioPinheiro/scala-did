@@ -9,6 +9,8 @@ import fmgp.did.comm.extension._
 import fmgp.did.comm.protocol.basicmessage2._
 import fmgp.did.comm.protocol.routing2._
 import fmgp.did.comm.protocol.trustping2._
+import fmgp.did.comm.protocol.reportproblem2._
+import fmgp.did.comm.protocol.discoverfeatures2._
 import fmgp.util.Base64
 
 object MessageTemplate {
@@ -142,6 +144,54 @@ object MessageTemplate {
     )
     def exMessagesReceived = MessagesReceived(from = from, to = to, thid = thid, message_id_list = Seq("321"))
     def exLiveModeChange = LiveModeChange(from = from, to = to, live_delivery = true)
+  }
+
+  object DiscoverFeatures2 {
+    def exFeatureQuery = FeatureQuery(
+      from = from,
+      to = Set(to),
+      queries = Seq(
+        FeatureQuery.Query(
+          `feature-type` = "protocol",
+          `match` = "https://didcomm.org/tictactoe/1.*",
+        ),
+        FeatureQuery.Query(
+          `feature-type` = "goal-code",
+          `match` = "org.didcomm.*",
+        ),
+      ),
+    )
+
+    def exFeatureDisclose = FeatureDisclose(
+      from = from,
+      to = Set(to),
+      thid = Some(MsgID()),
+      disclosures = Seq(
+        FeatureDisclose.Disclose(
+          `feature-type` = "protocol",
+          id = "https://didcomm.org/tictactoe/1.0",
+          roles = Some(Seq("player"))
+        ),
+        FeatureDisclose.Disclose(
+          `feature-type` = "goal-code",
+          id = "org.didcomm.sell.goods.consumer",
+          roles = None
+        ),
+      ),
+    )
+  }
+
+  object ReportProblem2 {
+    def exProblemReport = ProblemReport(
+      from = from,
+      to = Set(to),
+      pthid = MsgID(),
+      ack = Some(Seq(MsgID())),
+      code = ProblemCode.ErroFail("any"),
+      comment = Some("Some problem happen {1}"),
+      args = Some(Seq(".")),
+      escalate_to = Some("fabiomgpinheiro@gmail.com"),
+    )
   }
 
   import fmgp.util._

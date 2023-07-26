@@ -48,6 +48,7 @@ The future version of [**DID Comm v2.1**](https://identity.foundation/didcomm-me
   - [NOT_TODO_(+-DIDCommV1?)]`data-agreement-proofs` - https://didcomm.org/data-agreement-proofs/1.0/
   - [Maybe] `data-agreement-termination` - https://didcomm.org/data-agreement-termination/1.0/
   - [Maybe] `data-disclosure-agreement` - https://didcomm.org/data-disclosure-agreement/1.0/
+- Create new protocol `DidResolver`
 - Create new protocol `PreSetValue`
 - Create new protocol `PseudoRandom`
   - https://www.stat.berkeley.edu/~stark/Java/Html/sha256Rand.htm
