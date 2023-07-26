@@ -123,7 +123,19 @@ case class FeatureDisclose(
     from: FROM,
     thid: Option[MsgID],
     disclosures: Seq[FeatureDisclose.Disclose],
-)
+) {
+  def piuri = FeatureDisclose.piuri
+
+  def toPlaintextMessage: PlaintextMessage =
+    PlaintextMessageClass(
+      id = id,
+      `type` = piuri,
+      to = Some(to),
+      from = Some(from),
+      thid = thid,
+      body = Some(FeatureDisclose.Body(disclosures = disclosures).toJSON_RFC7159),
+    )
+}
 
 object FeatureDisclose {
   def piuri = PIURI("https://didcomm.org/discover-features/2.0/disclose")
