@@ -59,7 +59,7 @@ object AgentProvider {
     "pat" -> pat,
     "victor" -> victor,
     "iohkMediator" -> iohkMediator,
-    "iohkMediatorHolder" -> iohkMediatorHolder,
+    "iohkMediatorSit" -> iohkMediatorSit,
     "exampleAlice" -> exampleAlice,
     "exampleBob" -> exampleBob,
     "exampleSicpaAlice" -> exampleSicpaAlice,
@@ -184,12 +184,12 @@ object AgentProvider {
     Seq(DIDPeerServiceEncoded(s = "https://mediator-test-env.atalaprism.io/mediator"))
   )
 
-  val iohkMediatorHolder = DIDPeer2.makeAgent(
+  val iohkMediatorSit = DIDPeer2.makeAgent(
     Seq(
       keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
       keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
     ),
-    Seq(DIDPeerServiceEncoded(s = "https://sit-prism-stack-holder.atalaprism.io/mediator"))
+    Seq(DIDPeerServiceEncoded(s = "https://sit-prism-mediator.atalaprism.io"))
   )
 
   val exampleAlice = new Agent {
