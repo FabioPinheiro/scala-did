@@ -64,17 +64,18 @@ The future version of [**DID Comm v2.1**](https://identity.foundation/didcomm-me
   - support `from_prior`
   - support `sub` `iss` on JWT https://datatracker.ietf.org/doc/html/rfc7519
 - create module for protocols
-- method `did:jwk` https://github.com/quartzjer/did-jwk
 - routing:
   - implement a mediator [WIP]
-    - websocket
-    - HTTP POST
-    - push notification
+    - [WIP] websocket
+    - [DONE] HTTP POST
+    - [WIP] push notification
   - implement a relay
     - [WIP-stop] NFC
     - [WIP] websocket
     - bluetooth
-- maybe implement ["KERI lite"](https://docs.google.com/presentation/d/1ksqVxeCAvqLjr67htWZ4JYaSnI8TUZIO7tDMF5npHTo/edit#slide=id.g1ca1fd90f33_0_0)
+- maybe implement method `did:peer.3` (this is an extension)
+- maybe implement method `did:jwk` https://github.com/quartzjer/did-jwk
+- maybe implement methods ["KERI lite"](https://docs.google.com/presentation/d/1ksqVxeCAvqLjr67htWZ4JYaSnI8TUZIO7tDMF5npHTo/edit#slide=id.g1ca1fd90f33_0_0)
 - be part of the Adopters in https://github.com/sbt/sbt-ci-release/
 - Remove field `kty` from `ECPublicKey` and `OKPPublicKey`. Make custom json encoder/decoder
 

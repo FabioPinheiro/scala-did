@@ -76,7 +76,7 @@ object Websocket {
             // .getOrThrowFiberFailure()
           }
         }
-        tmpWS.onerror = { (ev: Event) => // TODO ErrorEvent
+        tmpWS.onerror = { (ev: Event) =>
           val message = ev
             .asInstanceOf[js.Dynamic]
             .message
