@@ -21,4 +21,11 @@ class EnumTypesSuite extends FunSuite {
       case Right(obj)  => assertEquals(obj, ReturnRoute.thread)
     }
   }
+
+  test("Parse ReturnRoute 'none'") {
+    "\"none\"".fromJson[ReturnRoute] match {
+      case Left(error) => fail(error)
+      case Right(obj)  => assertEquals(obj, ReturnRoute.thread)
+    }
+  }
 }

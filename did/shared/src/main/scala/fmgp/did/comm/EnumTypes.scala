@@ -16,6 +16,9 @@ enum ReturnRoute:
   /** Send all messages matching the DID and thread specified in the return_route_thread attribute. */
   case thread extends ReturnRoute
 
+  /** No messages should be returned over this connection. If return_route is omitted, this is the default value. */
+  case none extends ReturnRoute // Default
+
 object ReturnRoute {
   given decoder: JsonDecoder[ReturnRoute] =
     JsonDecoder.string.mapOrFail(e => fmgp.util.safeValueOf(ReturnRoute.valueOf(e)))
