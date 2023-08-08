@@ -25,7 +25,7 @@ class EnumTypesSuite extends FunSuite {
   test("Parse ReturnRoute 'none'") {
     "\"none\"".fromJson[ReturnRoute] match {
       case Left(error) => fail(error)
-      case Right(obj)  => assertEquals(obj, ReturnRoute.thread)
+      case Right(obj)  => assertEquals(obj, ReturnRoute.none)
     }
   }
 }
