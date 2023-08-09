@@ -6,6 +6,8 @@ import scala.util.chaining._
 
 import fmgp.did._
 import java.net.{URI, URL}
+import fmgp.util.Base64
+import fmgp.did.comm.Payload.base64url
 
 /** didJVM/testOnly fmgp.did.comm.OutOfBandSuite */
 class OutOfBandSuite extends FunSuite {
@@ -34,22 +36,42 @@ class OutOfBandSuite extends FunSuite {
       case Right(OutOfBandSigned(msg, data))    => fail("Must be a OutOfBandPlaintext")
   }
 
-  val tmp = "e30=" // oobMessageBase64
+  test(s"OutOfBand invitation as PlaintextMessage from Mediator") {
+    val qrcode =
+      "https://did.fmgp.app/#/?_oob=eyJpZCI6IjJkNDYwNTA5LTlhN2UtNGJmYi05ZWRjLTAwNTAyOTlkZWM4MSIsInR5cGUiOiJodHRwczovL2RpZGNvbW0ub3JnL291dC1vZi1iYW5kLzIuMC9pbnZpdGF0aW9uIiwiZnJvbSI6ImRpZDpwZWVyOjIuRXo2TFNnaHdTRTQzN3duREUxcHQzWDZoVkRVUXpTanNIemlucFgzWEZ2TWpSQW03eS5WejZNa2hoMWU1Q0VZWXE2SkJVY1RaNkNwMnJhbkNXUnJ2N1lheDNMZTRONTlSNmRkLlNleUowSWpvaVpHMGlMQ0p6SWpvaWFIUjBjSE02THk5aGJHbGpaUzVrYVdRdVptMW5jQzVoY0hBdklpd2ljaUk2VzEwc0ltRWlPbHNpWkdsa1kyOXRiUzkyTWlKZGZRIiwiYm9keSI6eyJnb2FsX2NvZGUiOiJyZXF1ZXN0LW1lZGlhdGUiLCJnb2FsIjoiUmVxdWVzdE1lZGlhdGUiLCJhY2NlcHQiOlsiZGlkY29tbS92MiJdfSwidHlwIjoiYXBwbGljYXRpb24vZGlkY29tbS1wbGFpbitqc29uIn0"
+
+    assert(OutOfBand.oob(qrcode).isRight)
+  }
+
+  val tmp = "e30=" // oobMessageBase64 '{}'
+  val tmp2 = "eyJubyI6MH0=" // oobMessageBase64 '{"no":0}'
   Seq(
     (s"""?_oob=$tmp""", true), // +- undefined behavior => because is not really a complete url
     (s"""https://d?_oob=$tmp""", true),
     (s"""https://d?_oob=$tmp&none""", true),
     (s"""https://d?_oob=$tmp&_oob=""", true),
+    (s"""https://d?_oob=$tmp&_oob=$tmp2""", true), //  finding the '_oob' must be greedy
     (s"""https://d/path?_oob=$tmp""", true),
     (s"""https://d/path?oob=$tmp""", false), // missing '_' from _oob
-    ("""https://d/path?_oob=""", false), // missing data for _oob
+    (s"""https://d/path?_oob=""", false), // missing data for _oob
     (s"""https://d/path?_oob=$tmp#""", true),
     (s"""https://d/path?_oob=$tmp#f""", true),
     (s"""https://d/path?_oob=$tmp#""", true),
+    (s"https://d?_oob=$tmp#_oob=$tmp2", true),
+
+    // TODO Behavior may change if issues doesn't go through. See https://github.com/decentralized-identity/didcomm-messaging/issues/443
+    (s"https://d/path#_oob=$tmp", true),
+    (s"#_oob=$tmp", true),
+    (s"https://d/path#_oob=$tmp", true),
+    (s"https://d/path#_oob=$tmp&", true),
+    (s"https://d/path#_oob=$tmp&_oob=$tmp2", true), // finding the '_oob' must be greedy
+    (s"https://d/path#_oob=$tmp&test=1", true),
+    (s"https://d/path#test=1&_oob=$tmp", true),
+    (s"https://d/path#test=1&test2=$tmp", false),
   ).foreach {
     case (uri, true) =>
       test(s"OutOfBand oob will parse '$uri'") {
-        assert(OutOfBand.parse(uri).isDefined)
+        assertEquals(OutOfBand.parse(uri).map(_.basicBase64), Some(tmp))
       }
     case (uri, false) =>
       test(s"OutOfBand oob will NOT parse '$uri'") {

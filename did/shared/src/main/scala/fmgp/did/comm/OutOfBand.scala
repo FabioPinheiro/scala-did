@@ -38,6 +38,11 @@ object OutOfBand {
       .map(error => s"'_oob' $error")
       .flatMap(data => OutOfBandSigned.from(data).orElse(OutOfBandPlaintext.from(data)))
 
+  /** Parse a out-of-band URI into a OutOfBand message
+    *
+    * @param str
+    *   out-of-band link (URI) as a String
+    */
   def oob(str: String): Either[String, OutOfBand] =
     oobSigned(str)
       .orElse(oobPlaintext(str))
@@ -52,10 +57,24 @@ object OutOfBand {
       case None         => errorInfo
       case Some(base64) => OutOfBandSigned.from(base64)
 
-  def parse(str: String): Option[Base64] = parseURI(str)
-  private val pattern = """^[^\?\#\s]*\?[^\#\s:]*_oob=([^\#&\s:]+)[^\#\s:]*(\#[^\s]*)?$""".r
-  private inline def parseURI(id: String) = id match {
-    case pattern(oob, fragment) => Option(oob).filterNot(_.isEmpty()).map(Base64.fromBase64url(_))
-    case _                      => None
+  /** TODO Behavior may change if issues doesn't go through. See
+    * https://github.com/decentralized-identity/didcomm-messaging/issues/443
+    */
+  def parse(str: String): Option[Base64] = parseParameter(str).orElse(parseFragment(str))
+  def parseParameter(str: String): Option[Base64] = extractURIParameter(str)
+  def parseFragment(str: String): Option[Base64] = extractURIFragment(str)
+
+  /** Note finding the '_oob' must be greedy */
+  private val patternParameter = """^[^\?\#\s]*\?[^\#\s:]*?_oob=([^\#&\s:]+)[^\#\s:]*(\#[^\s]*)?$""".r
+  inline def extractURIParameter(id: String) = id match {
+    case patternParameter(_oob, fragment) => Option(_oob).filterNot(_.isEmpty()).map(Base64.fromBase64url(_))
+    case _                                => None
+  }
+
+  /** Note finding the '_oob' must be greedy */
+  private val patternFragment = """^[^\#\s]*\#.*?&?_oob=([^\#&\s:]+)[^\s]*$""".r
+  inline def extractURIFragment(id: String) = id match {
+    case patternFragment(_oobFragment) => Option(_oobFragment).filterNot(_.isEmpty()).map(Base64.fromBase64url(_))
+    case _                             => None
   }
 }
