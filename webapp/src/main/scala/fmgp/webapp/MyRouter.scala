@@ -4,6 +4,8 @@ import com.raquo.laminar.api.L.{_, given}
 import com.raquo.waypoint._
 import org.scalajs.dom
 import upickle.default._
+import fmgp.did.comm.OutOfBand
+import fmgp.did.comm.Payload.base64url
 
 object MyRouter {
   sealed abstract class Page(
@@ -13,6 +15,8 @@ object MyRouter {
 
   case object HomePage extends Page("Home", "home")
   case class OOBPage(query_oob: String) extends Page("OutOfBand", "app_shortcut")
+  object OOBPage { def apply(oob: OutOfBand) = new OOBPage(oob.data.urlBase64) }
+  case object QRcodeScannerPage extends Page("QRcodeScanner", "qr_code_scanner")
   case object DocPage extends Page("Doc", "menu_book")
   case object AgentKeysPage extends Page("AgentKeys", "key")
   // case object DIDPage extends Page("DID", "visibility")
@@ -28,6 +32,7 @@ object MyRouter {
 
   given homePageRW: ReadWriter[HomePage.type] = macroRW
   given oobPageRW: ReadWriter[OOBPage] = macroRW
+  given qrcodeScannerPageRW: ReadWriter[QRcodeScannerPage.type] = macroRW
   given docPageRW: ReadWriter[DocPage.type] = macroRW
   given keysPageRW: ReadWriter[AgentKeysPage.type] = macroRW
   given agentDBPageRW: ReadWriter[AgentDBPage.type] = macroRW
@@ -58,6 +63,7 @@ object MyRouter {
     ),
     Route.static(HomePage, root / endOfSegments, Router.localFragmentBasePath),
     Route.static(DocPage, root / "doc" / endOfSegments, Router.localFragmentBasePath),
+    Route.static(QRcodeScannerPage, root / "scanner" / endOfSegments, Router.localFragmentBasePath),
     Route.static(AgentKeysPage, root / "agentkeys" / endOfSegments, Router.localFragmentBasePath),
     Route.static(AgentDBPage, root / "db" / endOfSegments, Router.localFragmentBasePath),
     Route.static(EncryptPage, root / "encrypt" / endOfSegments, Router.localFragmentBasePath),

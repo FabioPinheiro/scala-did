@@ -164,6 +164,8 @@ lazy val NPM = new {
 
   // https://www.npmjs.com/package/qrcode-generator
   val qrcode = Seq("qrcode-generator" -> "1.4.4")
+  val qrcodeScanner = Seq("qr-scanner" -> "1.4.2") // 524 kB // https://www.npmjs.com/package/qr-scanner
+  // val qrcode = Seq("html5-qrcode" -> "2.3.8") // 2.63 MB // https://www.npmjs.com/package/html5-qrcode
 
   val materialDesign = Seq("material-components-web" -> V.materialComponents)
 
@@ -464,7 +466,7 @@ lazy val webapp = project
   .settings(
     libraryDependencies ++= Seq(D.laminar.value, D.waypoint.value, D.upickle.value),
     libraryDependencies ++= Seq(D.zio.value, D.zioJson.value),
-    Compile / npmDependencies ++= NPM.mermaid ++ NPM.qrcode ++ NPM.materialDesign ++ NPM.ipfsClient,
+    Compile / npmDependencies ++= NPM.mermaid ++ NPM.qrcode ++ NPM.qrcodeScanner ++ NPM.materialDesign ++ NPM.ipfsClient,
     // ++ List("ms" -> "2.1.1"),
     // stIgnore ++= List("ms") // https://scalablytyped.org/docs/conversion-options
   )

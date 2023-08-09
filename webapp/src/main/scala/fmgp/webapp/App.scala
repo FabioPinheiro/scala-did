@@ -64,6 +64,7 @@ object App {
   private val $selectedApp = SplitRender(MyRouter.router.currentPageSignal)
     .collectStatic(HomePage)(Home())
     .collectSignal[OOBPage](page => OutOfBandTool(page))
+    .collectStatic(QRcodeScannerPage)(QRcodeScannerTool())
     .collectStatic(DocPage)(Doc())
     .collectStatic(AgentKeysPage)(AgentKeys())
     .collectStatic(AgentDBPage)(AgentDB())
@@ -79,6 +80,7 @@ object App {
   private val linkPages: List[Page] = List(
     HomePage,
     OOBPage(oobExample),
+    QRcodeScannerPage,
     ResolverPage(didExample),
     EncryptPage,
     DecryptPage,

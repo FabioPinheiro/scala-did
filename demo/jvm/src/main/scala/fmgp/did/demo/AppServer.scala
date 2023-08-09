@@ -157,6 +157,25 @@ object AppServer extends ZIOAppDefault {
         case Method.GET -> !! / "public" / "fmgp-webapp-fastopt-bundle.js" => true
         case _                                                             => false
       }
+  } ++ {
+    Http
+      .fromResource(
+        s"public/vendors-node_modules_qr-scanner_qr-scanner-worker_min_js-library.js.gz"
+      )
+      .map(e =>
+        e.setHeaders(
+          Headers(
+            e.headers.filter(_.key != "content-encoding") ++ Seq(
+              Header("content-type", "application/javascript"),
+              Header("content-encoding", "gzip"),
+            )
+          )
+        )
+      )
+      .when {
+        case Method.GET -> !! / "public" / "vendors-node_modules_qr-scanner_qr-scanner-worker_min_js-library.js" => true
+        case _ => false
+      }
   }
   // ++ {
   //   Http.fromResource(s"public/fmgp-webapp-fastopt-bundle.js").when {
