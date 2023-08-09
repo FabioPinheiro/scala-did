@@ -49,8 +49,8 @@ object Base64:
   def safeBase64url(str: String): Either[String, Base64] =
     Try(Base64.urlDecoder.decode(str)).toEither match // try to par
       case Right(value)                       => Right(unsafeBase64url(str))
-      case Left(ex: IllegalArgumentException) => Left("Fail to decode base64: " + ex.getMessage)
-      case Left(ex) /*should never happen*/   => Left("Fail to decode base64: " + ex.getMessage)
+      case Left(ex: IllegalArgumentException) => Left("Fail to decode base64 (url): " + ex.getMessage)
+      case Left(ex) /*should never happen*/   => Left("Fail unexpected to decode base64 (url): " + ex.getMessage)
 
   inline def encode(str: String): Base64 = urlEncoder.encode(str.getBytes).toVector
   inline def encode(data: Array[Byte]): Base64 = urlEncoder.encode(data).toVector
