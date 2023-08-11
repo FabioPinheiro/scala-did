@@ -20,7 +20,9 @@ import fmgp.did.method.peer.DidPeerResolver
 import fmgp.crypto.error._
 import fmgp.webapp.MyRouter.OOBPage
 import com.raquo.laminar.nodes.ReactiveElement
+
 import typings.qrScanner.mod.QrScanner
+import typings.qrScanner.mod.QrScanner.Camera
 import typings.qrScanner.mod.QrScanner.ScanResult
 import typings.qrScanner.mod.{default as QrScannerDefault}
 import typings.qrScanner.anon.CalculateScanRegion
@@ -42,42 +44,90 @@ object QRcodeScannerTool {
 
   val videoContainer = videoTag()
 
-  /// http://localhost:8080/public/vendors-node_modules_qr-scanner_qr-scanner-worker_min_js-library.js
+  // When sarting will download the file: ./public/vendors-node_modules_qr-scanner_qr-scanner-worker_min_js-library.js
   var qrScanner: Option[QrScanner] = None
 
   @js.annotation.JSExport
-  def startQrScanner = {
-    qrScanner = Some(
-      QrScannerDefault(
-        video = videoContainer.ref, // : HTMLVideoElement,
-        onDecode = (qrCode: ScanResult) => {
-          qrcodeVar.set(Some(qrCode.data))
-          stopQrScanner
-          ()
-        },
-        CalculateScanRegion()
-          .setHighlightCodeOutline(true)
-          .setHighlightScanRegion(true)
-      )
+  def initQrScanner = {
+    val tmp = QrScannerDefault(
+      video = videoContainer.ref, // : HTMLVideoElement,
+      onDecode = (qrCode: ScanResult) => {
+        qrcodeVar.set(Some(qrCode.data))
+        stopQrScanner
+        ()
+      },
+      CalculateScanRegion()
+        .setHighlightCodeOutline(true)
+        .setHighlightScanRegion(true)
     )
-    qrScanner.map(_.start())
+    qrScanner = Some(tmp) // side effect
+    updateListOfCameras // side effect
+    startQrScanner() // side effect
+  }
+
+  @js.annotation.JSExport
+  def startQrScanner(cameraId: Option[String] = None) = {
+    (qrScanner, cameraId) match
+      case (None, _) =>
+        print(s"Missing QrScanner") // DEBUG
+      case (Some(scanner), None) =>
+        print(s"Start Camera") // DEBUG
+        scanner.start()
+      case (Some(scanner), Some(id)) =>
+        scanner.start()
+        print(s"Select Camera id=$id") // DEBUG
+        scanner.setCamera(id)
   }
 
   @js.annotation.JSExport
   def stopQrScanner = {
     qrScanner.map(_.stop())
-    qrScanner = None
+    cameraSelectedVar.set(None)
+  }
+
+  @js.annotation.JSExport
+  def destroyQrScanner = {
+    qrScanner.map(_.destroy())
+    cameraSelectedVar.set(None)
+  }
+
+  val camerasVar = Var[Seq[Camera]](initial = Seq.empty)
+  val cameraSelectedVar = Var[Option[Camera]](initial = None)
+
+  def updateListOfCameras = {
+    implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+    QrScannerDefault.listCameras(true).toFuture.map(e => e.toSeq).map { c =>
+      camerasVar.set(c) // side effect
+      cameraSelectedVar.set(c.headOption) // side effect
+    }
   }
 
   def apply(): HtmlElement = div(
     onMountCallback { ctx =>
-      startQrScanner
+      initQrScanner
       // job(ctx.owner)
     },
     onUnmountCallback { ctx =>
-      stopQrScanner
+      destroyQrScanner
     },
     div(code("QrCode Scanner Tool Page")),
+    div(
+      child <-- camerasVar.signal.map { cameras =>
+        select(
+          value <-- cameraSelectedVar.signal.map(_.map(_.id).getOrElse("None")),
+          onChange.mapToValue.map {
+            case "None" =>
+              println(s"Deselect Camera") // DEBUG
+              stopQrScanner // side effect
+              None
+            case id =>
+              startQrScanner(cameraId = Some(id))
+              cameras.find(_.id == id)
+          } --> cameraSelectedVar,
+          cameras.map { camera => option(value := camera.id, camera.label) } :+ option(value := "None", "None")
+        )
+      }
+    ),
     div(videoContainer),
     div(child <-- qrcodeVar.signal.map {
       case None        => p("No QRcode detected")
