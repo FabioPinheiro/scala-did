@@ -17,7 +17,7 @@ import fmgp.did.comm._
   */
 final case class MessagesReceived(
     id: MsgID = MsgID(),
-    thid: MsgID,
+    thid: Option[MsgID],
     from: FROM,
     to: TO,
     message_id_list: Seq[String], // Seq[MsgID],
@@ -27,7 +27,7 @@ final case class MessagesReceived(
     PlaintextMessageClass(
       `type` = piuri,
       id = id,
-      thid = Some(thid),
+      thid = thid,
       to = Some(Set(to)),
       from = Some(from),
       body = Some(MessagesReceived.Body(message_id_list = message_id_list).toJSON_RFC7159)
@@ -56,21 +56,18 @@ object MessagesReceived {
             case None => Left(s"'$piuri' MUST have field 'body'")
             case Some(b) =>
               b.as[Body].flatMap { body =>
-                msg.thid match
-                  case None => Left(s"'$piuri' MUST have field 'thid'")
-                  case Some(thid) =>
-                    msg.from match
-                      case None => Left(s"'$piuri' MUST have field 'from'")
-                      case Some(from) =>
-                        Right(
-                          MessagesReceived(
-                            id = msg.id,
-                            thid = thid,
-                            from = from,
-                            to = firstTo,
-                            message_id_list = body.message_id_list,
-                          )
-                        )
+                msg.from match
+                  case None => Left(s"'$piuri' MUST have field 'from'")
+                  case Some(from) =>
+                    Right(
+                      MessagesReceived(
+                        id = msg.id,
+                        thid = msg.thid,
+                        from = from,
+                        to = firstTo,
+                        message_id_list = body.message_id_list,
+                      )
+                    )
               }
         case firstTo +: tail => Left(s"'$piuri' MUST have field 'to' with only one element")
 }
