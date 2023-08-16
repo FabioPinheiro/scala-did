@@ -46,7 +46,7 @@ object OutOfBand {
   def oob(str: String): Either[String, OutOfBand] =
     oobSigned(str)
       .orElse(oobPlaintext(str))
-      .orElse(oob(str).map(Right(_)).getOrElse(errorInfo))
+    // .orElse(oob(str).map(Right(_)).getOrElse(errorInfo))
 
   def oobPlaintext(str: String): Either[String, OutOfBandPlaintext] =
     parse(str) match
