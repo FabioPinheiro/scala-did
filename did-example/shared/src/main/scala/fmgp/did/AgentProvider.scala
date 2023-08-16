@@ -82,6 +82,15 @@ object AgentProvider {
         )
         .toOption
         .map("rootsid" -> _) // https://mediator.rootsid.cloud/oob_url
+        .toMap ++
+      DIDPeer
+        .fromDID(
+          DIDSubject(
+            "did:peer:2.Ez6LSeUYyDHMTbWoMGCKyqntPR95TB3N6ic2A27YLmwZHchxY.Vz6MkgRyq89zDCmXEcg8LmdqKjoaanxK4MUVbbtembDa4fLpK.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLmJsb2NrdHJ1c3QuZGV2LyIsInIiOltdLCJhIjpbImRpZGNvbW0vdjIiXX0"
+          ).toDID
+        )
+        .toOption
+        .map("blocktrust" -> _) // https://mediator.blocktrust.dev/
         .toMap
 
   private def aliceURL = s"https://alice.did.fmgp.app/"
