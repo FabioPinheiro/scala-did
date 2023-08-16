@@ -65,6 +65,7 @@ object App {
     .collectStatic(HomePage)(Home())
     .collectSignal[OOBPage](page => OutOfBandTool(page))
     .collectStatic(QRcodeScannerPage)(QRcodeScannerTool())
+    .collectStatic(NFCScannerPage)(NFCScannerTool())
     .collectStatic(DocPage)(Doc())
     .collectStatic(AgentKeysPage)(AgentKeys())
     .collectStatic(AgentDBPage)(AgentDB())
@@ -81,6 +82,7 @@ object App {
     HomePage,
     OOBPage(oobExample),
     QRcodeScannerPage,
+    NFCScannerPage,
     ResolverPage(didExample),
     EncryptPage,
     DecryptPage,
