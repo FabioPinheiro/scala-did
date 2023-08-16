@@ -30,7 +30,8 @@ final case class MessagesReceived(
       thid = thid,
       to = Some(Set(to)),
       from = Some(from),
-      body = Some(MessagesReceived.Body(message_id_list = message_id_list).toJSON_RFC7159)
+      body = Some(MessagesReceived.Body(message_id_list = message_id_list).toJSON_RFC7159),
+      return_route = Some(ReturnRoute.all), // Protocol expect recipient to get reply on the same channel
     )
 }
 object MessagesReceived {

@@ -52,6 +52,7 @@ final case class RecipientUpdate(id: MsgID = MsgID(), from: FROM, to: TO, update
           )
           .toJSON_RFC7159
       ),
+      return_route = Some(ReturnRoute.all), // Protocol expect recipient to get reply on the same channel
     )
   def makeRecipientResponse(updated: Seq[(FROMTO, RecipientAction, RecipientResult)]) =
     RecipientResponse(thid = id, to = from.asTO, from = to.asFROM, updated)
@@ -223,6 +224,7 @@ final case class RecipientQuery(
           .Body(paginate = paginate)
           .toJSON_RFC7159
       ),
+      return_route = Some(ReturnRoute.all), // Protocol expect recipient to get reply on the same channel
     )
 }
 object RecipientQuery {

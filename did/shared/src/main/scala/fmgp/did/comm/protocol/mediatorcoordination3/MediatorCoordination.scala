@@ -28,6 +28,7 @@ final case class MediateRequest(id: MsgID = MsgID(), from: FROM, to: TO) {
       `type` = piuri,
       to = Some(Set(to)),
       from = Some(from),
+      return_route = Some(ReturnRoute.all), // Protocol expect recipient to get reply on the same channel
     )
   def makeRespondMediateGrant =
     MediateGrant(

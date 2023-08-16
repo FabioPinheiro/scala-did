@@ -23,7 +23,8 @@ final case class LiveModeChange(id: MsgID = MsgID(), from: FROM, to: TO, live_de
       id = id,
       to = Some(Set(to)),
       from = Some(from),
-      body = Some(LiveModeChange.Body(live_delivery = live_delivery).toJSON_RFC7159)
+      body = Some(LiveModeChange.Body(live_delivery = live_delivery).toJSON_RFC7159),
+      return_route = Some(ReturnRoute.all), // Protocol expect recipient to get reply on the same channel
     )
 }
 object LiveModeChange {

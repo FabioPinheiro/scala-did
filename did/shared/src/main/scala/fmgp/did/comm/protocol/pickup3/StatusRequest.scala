@@ -23,6 +23,7 @@ final case class StatusRequest(id: MsgID = MsgID(), from: FROM, to: TO, recipien
       `type` = piuri,
       to = Some(Set(to)),
       from = Some(from),
+      return_route = Some(ReturnRoute.all), // Protocol expect recipient to get reply on the same channel
     )
 }
 object StatusRequest {
