@@ -284,6 +284,14 @@ object EncryptTool {
           import MessageTemplate.Pickup3._
           li(
             button(
+              "Status",
+              onClick --> Observer(_ => dataTextVar.set(exStatus.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "StatusRequest",
+              onClick --> Observer(_ => dataTextVar.set(exStatusRequest.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
               "DeliveryRequest",
               onClick --> Observer(_ => dataTextVar.set(exDeliveryRequest.toPlaintextMessage.toJsonPretty))
             ),
@@ -294,14 +302,6 @@ object EncryptTool {
             button(
               "MessagesReceived",
               onClick --> Observer(_ => dataTextVar.set(exMessagesReceived.toPlaintextMessage.toJsonPretty))
-            ),
-            button(
-              "Status",
-              onClick --> Observer(_ => dataTextVar.set(exStatus.toPlaintextMessage.toJsonPretty))
-            ),
-            button(
-              "StatusRequest",
-              onClick --> Observer(_ => dataTextVar.set(exStatusRequest.toPlaintextMessage.toJsonPretty))
             ),
             button(
               "LiveModeChange",

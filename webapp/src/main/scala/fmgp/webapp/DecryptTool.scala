@@ -92,16 +92,36 @@ object DecryptTool {
     div(
       children <-- encryptedMessageVar.map { mMsg =>
         mMsg.toSeq
-          .map(_.`protected`.obj.toJsonPretty)
-          .map(p(_))
+          .flatMap {
+            _.`protected`.obj match
+              case header @ AnonProtectedHeader(epk, apv, typ, enc, alg) =>
+                Seq(
+                  p("Anoncrypt:"),
+                  pre(code(header.toJsonPretty)),
+                )
+              case header @ AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) =>
+                Seq(
+                  p(
+                    "Authcrypt from: ",
+                    code(
+                      a(skid.did.string, MyRouter.navigateTo(MyRouter.ResolverPage(skid.did.string))),
+                      "#",
+                      skid.fragment
+                    )
+                  ),
+                  pre(code(header.toJsonPretty))
+                )
+          }
       },
     ),
-    p("Recipients:"),
-    div(
+    p("Recipients kid:"),
+    ul(
       children <-- encryptedMessageVar.map { mMsg =>
         mMsg.toSeq
-          .flatMap(_.recipients.toSeq.map(_.header.kid.value))
-          .map(e => p(s" - kid: $e"))
+          .flatMap(_.recipients.toSeq.map(_.header.kid))
+          .map(kid =>
+            li(code(a(kid.did.string, MyRouter.navigateTo(MyRouter.ResolverPage(kid.did.string))), "#", kid.fragment))
+          )
       },
     ),
     p("Raw Data (as UTF8) after decrypting:"),

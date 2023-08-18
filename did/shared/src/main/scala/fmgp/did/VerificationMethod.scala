@@ -50,6 +50,7 @@ case class VerificationMethodReferenced(value: String) extends VerificationMetho
   def did = DIDSubject(value.split('#').head)
   def fromto = FROMTO(value.split('#').head) // FIXME
   def id = value // TODO rename value to id
+  def fragment = value.split("#", 2).drop(1).head // TODO make it type safe
 }
 object VerificationMethodReferenced {
   given decoder: JsonDecoder[VerificationMethodReferenced] = JsonDecoder.string.map(VerificationMethodReferenced.apply)
