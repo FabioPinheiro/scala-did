@@ -37,7 +37,6 @@ final case class MessageDelivery(
       attachments = Some(
         attachments.toSeq.map(e => Attachment(id = Some(e._1), data = AttachmentDataBase64(Base64.encode(e._2.toJson))))
       ),
-      return_route = Some(ReturnRoute.all), // Protocol expect recipient to get reply on the same channel
     )
 }
 object MessageDelivery {

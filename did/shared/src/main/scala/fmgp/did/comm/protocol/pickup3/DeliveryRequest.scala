@@ -33,7 +33,8 @@ final case class DeliveryRequest(
       id = id,
       to = Some(Set(to)),
       from = Some(from),
-      body = Some(DeliveryRequest.Body(limit = limit, recipient_did = recipient_did).toJSON_RFC7159)
+      body = Some(DeliveryRequest.Body(limit = limit, recipient_did = recipient_did).toJSON_RFC7159),
+      return_route = Some(ReturnRoute.all), // Protocol expect recipient to get reply on the same channel
     )
 }
 object DeliveryRequest {

@@ -11,7 +11,8 @@ import fmgp.did.comm._
   * {
   *   "id": "123456780",
   *   "type": "https://didcomm.org/messagepickup/3.0/messages-received",
-  *   "body": { "message_id_list": ["123","456"] }
+  *   "body": { "message_id_list": ["123","456"] },
+  *   "return_route": "all"
   * }
   * }}}
   */
