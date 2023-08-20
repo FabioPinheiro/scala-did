@@ -7,7 +7,7 @@ import scala.scalajs.js.annotation.JSGlobal
   * or could be written to an NFC tag. An instance is acquired by calling the NDEFMessage() constructor or from the
   * NDEFReadingEvent.message property, which is passed to the reading event.
   *
-  * @param records\
+  * @param records
   *   The records property of NDEFMessage interface represents a list of NDEFRecords present in the NDEF message.
   */
 @js.native

@@ -2,7 +2,6 @@ package org.scalajs.dom
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
-import scala.scalajs.js.|
 
 /** The [[NDEFReader]] interface of the Web NFC API (https://developer.mozilla.org/en-US/docs/Web/API/Web_NFC_API) is
   * used to read from and write data to compatible NFC devices, e.g. NFC tags supporting NDEF, when these devices are
@@ -35,10 +34,17 @@ class NDEFReader() extends EventTarget {
     *   a Promise that either resolves when a message has been written to the tag or rejects if a hardware or permission
     *   error is encountered.
     */
-  def write(
-      message: String | js.typedarray.ArrayBuffer | /* js.typedarray.TypedArray[NDEFRecord, ???] */ js.typedarray.DataView |
-        js.Array[NDEFRecord], options: NDEFWriteOptions = js.native
-  ): js.Promise[js.Any] = js.native
+  def write(message: String, options: NDEFWriteOptions): js.Promise[js.Any] = js.native
+  def write(message: js.typedarray.ArrayBuffer, options: NDEFWriteOptions): js.Promise[js.Any] = js.native
+  // def write(message:js.typedarray.TypedArray[NDEFRecord, ???] , options: NDEFWriteOptions = js.native): js.Promise[js.Any] = js.native
+  def write(message: js.typedarray.DataView, options: NDEFWriteOptions): js.Promise[js.Any] = js.native
+  def write(message: js.Array[NDEFRecord], options: NDEFWriteOptions): js.Promise[js.Any] = js.native
+
+  def write(message: String): js.Promise[js.Any] = js.native
+  def write(message: js.typedarray.ArrayBuffer): js.Promise[js.Any] = js.native
+  // def write(message:js.typedarray.TypedArray[NDEFRecord, ???]): js.Promise[js.Any] = js.native
+  def write(message: js.typedarray.DataView): js.Promise[js.Any] = js.native
+  def write(message: js.Array[NDEFRecord]): js.Promise[js.Any] = js.native
 
   /** The reading event of the NDEFReader interface is fired whenever a new reading is available from compatible NFC
     * devices (e.g. NFC tags supporting NDEF) when these devices are within the reader's magnetic induction field.
