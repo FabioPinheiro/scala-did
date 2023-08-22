@@ -7,7 +7,6 @@
     ```shell
     export NODE_OPTIONS=--openssl-legacy-provider
     ```
-    OR use Node v18
 
 - Missing jsdom
 
