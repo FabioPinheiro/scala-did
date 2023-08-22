@@ -14,7 +14,8 @@ curl localhost:8080/demo
 
 ## docker
 ```shell
-NODE_OPTIONS=--openssl-legacy-provider sbt demoJVM/assembly
+# NODE_OPTIONS=--openssl-legacy-provider sbt demoJVM/assembly # if using nodejs v16
+sbt demoJVM/assembly # if using nodejs v18
 java -jar jvm/target/scala-3.3.0/scala-did-demo-server.jar
 docker build --tag scala_did_demo .
 docker run --rm -p 8080:8080 --memory="100m" --cpus="1.0" scala_did_demo
@@ -37,14 +38,16 @@ java -jar /home/fabio/workspace/ScalaDID/demo/jvm/target/scala-3.3.0/scala-did-d
 **deploy with flyctl**
 
 ```shell
-NODE_OPTIONS=--openssl-legacy-provider sbt demoJVM/assembly
+# NODE_OPTIONS=--openssl-legacy-provider sbt demoJVM/assembly # if using nodejs v16
+sbt demoJVM/assembly # if using nodejs v18
 flyctl deploy ./demo/
 ```
 
 **[WIP] deploy by pushing docker image**
 
 ```shell
-NODE_OPTIONS=--openssl-legacy-provider sbt demoJVM/assembly
+# NODE_OPTIONS=--openssl-legacy-provider sbt demoJVM/assembly # if using nodejs v16
+sbt demoJVM/assembly # if using nodejs v18
 docker build --tag scala_did_demo ./demo/
 docker tag scala_did_demo registry.fly.io/scala-did-demo
 # flyctl auth docker

@@ -422,8 +422,8 @@ lazy val didUniresolver = crossProject(JSPlatform, JVMPlatform)
   // .enablePlugins(ScalaJSBundlerPlugin).jsSettings(Test / npmDependencies += "node-fetch" -> "3.3.0")
   .jsSettings( // TODO https://scalacenter.github.io/scalajs-bundler/reference.html#jsdom
     libraryDependencies += D.dom.value,
-    jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
-    Test / requireJsDomEnv := true,
+    // jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
+    // Test / requireJsDomEnv := true,
   )
   .dependsOn(did)
   .configure(docConfigure)

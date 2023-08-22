@@ -7,7 +7,8 @@ Run sbt with the following NODE_OPTIONS.
 This will prevent `Error: error:0308010C:digital envelope routines::unsupported`. See [Troubleshooting (Node v17)](../README.md#Troubleshooting)
 
 ```shell
-NODE_OPTIONS=--openssl-legacy-provider sbt
+sbt # if using nodejs v18
+NODE_OPTIONS=--openssl-legacy-provider sbt # if using nodejs v16
 ```
 
 ## build and run app (open chrome)
