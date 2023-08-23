@@ -14,6 +14,7 @@ object MyRouter {
   )
 
   case object HomePage extends Page("Home", "home")
+  case object SettingsPage extends Page("Settings", "settings")
   case class OOBPage(query_oob: String) extends Page("OutOfBand", "app_shortcut")
   object OOBPage { def apply(oob: OutOfBand) = new OOBPage(oob.data.urlBase64) }
   case object QRcodeScannerPage extends Page("QRcodeScanner", "qr_code_scanner")
@@ -32,6 +33,7 @@ object MyRouter {
   case object MediatorPage extends Page("Mediator", "diversity_3")
 
   given homePageRW: ReadWriter[HomePage.type] = macroRW
+  given settingsPageRW: ReadWriter[SettingsPage.type] = macroRW
   given oobPageRW: ReadWriter[OOBPage] = macroRW
   given qrcodeScannerPageRW: ReadWriter[QRcodeScannerPage.type] = macroRW
   given nfcScannerPageRW: ReadWriter[NFCScannerPage.type] = macroRW
@@ -64,6 +66,7 @@ object MyRouter {
       Router.localFragmentBasePath
     ),
     Route.static(HomePage, root / endOfSegments, Router.localFragmentBasePath),
+    Route.static(SettingsPage, root / "settings" / endOfSegments, Router.localFragmentBasePath),
     Route.static(DocPage, root / "doc" / endOfSegments, Router.localFragmentBasePath),
     Route.static(QRcodeScannerPage, root / "scanner" / endOfSegments, Router.localFragmentBasePath),
     Route.static(NFCScannerPage, root / "nfc" / endOfSegments, Router.localFragmentBasePath),

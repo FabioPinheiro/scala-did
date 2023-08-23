@@ -33,7 +33,7 @@ object App {
         AppUtils.drawer(linkPages, MyRouter.router.currentPageSignal),
         AppUtils.drawerScrim,
         AppUtils.topBarHeader(MyRouter.router.currentPageSignal.map {
-          case p: HomePage.type => "scala-did sandbox - DID Comm v2"
+          case p: HomePage.type => "DID Comm v2 - Playground"
           case p                => p.title
         }),
         mainTag(
@@ -63,6 +63,7 @@ object App {
 
   private val $selectedApp = SplitRender(MyRouter.router.currentPageSignal)
     .collectStatic(HomePage)(Home())
+    .collectStatic(SettingsPage)(SandboxSettings())
     .collectSignal[OOBPage](page => OutOfBandTool(page))
     .collectStatic(QRcodeScannerPage)(QRcodeScannerTool())
     .collectStatic(NFCScannerPage)(NFCScannerTool())

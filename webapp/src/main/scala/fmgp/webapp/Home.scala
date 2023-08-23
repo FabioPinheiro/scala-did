@@ -21,6 +21,7 @@ object Home {
   def apply(): HtmlElement = // rootElement
     div(
       p("Sandbox for DID Comm v2.1"),
+      p("Navigate to ", b("Settings Page"), MyRouter.navigateTo(MyRouter.SettingsPage)),
       p("Navigate to ", b("OOB Tool "), MyRouter.navigateTo(MyRouter.OOBPage(App.oobExample))),
       p("Navigate to ", b("QRcode Scanner Tool "), MyRouter.navigateTo(MyRouter.QRcodeScannerPage)),
       p("Navigate to ", b("NFC Scanner Tool "), MyRouter.navigateTo(MyRouter.NFCScannerPage)),
