@@ -27,7 +27,6 @@ class NDEFRecord extends js.Object {
 
   /** Returns a DataView containing the raw bytes of the record's payload. */
   var data: js.typedarray.DataView = js.native
-  // var data: DataView = js.native
 
   /** Returns the encoding of a textual payload, or null otherwise. */
   var encoding: js.UndefOr[String] = js.native
