@@ -81,6 +81,7 @@ object App {
 
   private val linkPages: List[Page] = List(
     HomePage,
+    SettingsPage,
     OOBPage(oobExample),
     QRcodeScannerPage,
     NFCScannerPage,

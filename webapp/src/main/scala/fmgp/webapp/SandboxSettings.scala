@@ -1,19 +1,16 @@
 package fmgp.webapp
 
 import org.scalajs.dom
-import org.scalajs.dom.HTMLElement
 import com.raquo.laminar.api.L._
-import com.raquo.laminar.nodes.ReactiveHtmlElement
-import typings.std.stdStrings.text
-import typings.mermaid
 
+import fmgp.ServiceWorkerUtils
 import fmgp.did._
-import org.scalajs.dom.Window
 object SandboxSettings {
 
   def apply(): HtmlElement = // rootElement
     div(
       p("Sandbox Settings"),
+      h2("Protocol handler (only work on desktop browsers)"),
       div(
         button(
           "Register URL protocol handler: web",
@@ -65,6 +62,16 @@ object SandboxSettings {
           nbsp,
           code("""<a href="web+did:peer:...">Alice DID</a>""")
         )
+      ),
+
+      // ### ServiceWorker ###
+      h2("ServiceWorker"),
+      div(
+        button(
+          "Register Service Worker",
+          onClick --> { _ => ServiceWorkerUtils.registerServiceWorker },
+        ),
+        "Done by default"
       ),
     )
 

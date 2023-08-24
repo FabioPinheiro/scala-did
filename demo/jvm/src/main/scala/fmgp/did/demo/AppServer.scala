@@ -132,6 +132,9 @@ object AppServer extends ZIOAppDefault {
     } ++ Http.fromResource(s"public/favicon.ico").when {
     case Method.GET -> !! / "favicon.ico" => true
     case _                                => false
+  } ++ Http.fromResource(s"public/manifest.json").when {
+    case Method.GET -> !! / "manifest.json" => true
+    case _                                  => false
   } ++ Http.fromResource(s"sw.js").when {
     case Method.GET -> !! / "sw.js" => true
     case _                          => false

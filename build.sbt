@@ -283,8 +283,9 @@ addCommandAlias(
     "multiformatsJS/test"
 )
 addCommandAlias("testAll", ";testJVM;testJS")
-addCommandAlias("compileAll", "docs/mdoc;compile")
+addCommandAlias("compileAll", "docs/mdoc;serviceworker/fastLinkJS;compile")
 addCommandAlias("cleanAll", "clean;docs/clean")
+addCommandAlias("live", "compileAll;~demoJVM/reStart")
 
 lazy val root = project
   .in(file("."))
