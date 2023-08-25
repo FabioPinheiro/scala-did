@@ -386,6 +386,8 @@ object EncryptTool {
           case Some(Right((_, eMsg))) => eMsg.toJson
       )
     ),
+    h2("DIDCommMessaging"),
+    p("DIDCommMessaging is the DID Comm transmission specified by the service endpoint in the DID Document"),
     p(code(child.text <-- curlCommandVar.signal.map(_.getOrElse("curl")))),
     div(
       child <-- curlCommandVar.signal

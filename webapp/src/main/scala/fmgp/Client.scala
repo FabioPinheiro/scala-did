@@ -22,7 +22,7 @@ object Client {
 
   // curl 'http://localhost:8080/db' -H "host: alice.did.fmgp.app"
   def getDB(url: String = "/db"): IO[DidFail, Option[MessageDB]] =
-    Global.agent2Host(Global.agentVar.now()) match
+    Global.agent2Host match
       case None =>
         ZIO.succeed(None)
       case Some(value) =>

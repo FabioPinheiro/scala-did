@@ -47,7 +47,7 @@ object AppUtils {
         // ),
         span(className("mdc-list-item__text"), didName),
         onClick --> Observer[org.scalajs.dom.MouseEvent](onNext =
-          ev => Global.agentVar.update(e => Global.provider.getAgentByName(didName)),
+          ev => Global.agentVar.update(e => Global.providerNow.getAgentByName(didName)),
         )
       )
 
@@ -65,7 +65,7 @@ object AppUtils {
           li(
             ul(
               className("mdc-menu__selection-group"),
-              Global.dids.map { did => makeLi(did, "person_outline") }
+              children <-- Global.dids.map(_.map { did => makeLi(did, "person_outline") })
             )
           ),
         )
@@ -103,9 +103,9 @@ object AppUtils {
           //   "search"
           // ),
           select(
-            value <-- Global.agentVar.signal.map(Global.getAgentName(_)),
-            onChange.mapToValue.map(e => Global.provider.getAgentByName(e)) --> Global.agentVar,
-            Global.dids.map { step => option(value := step, step) }
+            value <-- Global.selectAgent,
+            onChange.mapToValue.map(e => Global.providerNow.getAgentByName(e)) --> Global.agentVar,
+            children <-- Global.dids.map(_.map { step => option(value := step, step) })
           ),
           div(
             className("mdc-menu-surface--anchor"),
