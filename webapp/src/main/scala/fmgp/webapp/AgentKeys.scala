@@ -15,6 +15,11 @@ import com.raquo.laminar.CollectionCommand
 
 object AgentKeys {
 
+  def nameVar = Global.agentVar.signal.map {
+    case None        => "none"
+    case Some(agent) => agent.id
+  }
+
   def keyStoreVar = Global.agentVar.signal.map {
     case None        => KeyStore(Set.empty)
     case Some(agent) => agent.keyStore
@@ -30,40 +35,43 @@ object AgentKeys {
   }
 
   val rootElement = div(
-    /*
-    code("Keys Page"),
-    div(
-      div(
-        p(
-          "You can use folowing website to ",
-          a(href := "https://8gwifi.org/jwkfunctions.jsp", target := "_blank", "Generate test Keys"),
-          ": X25519; Ed25519; P-256; P-384; P-521; P-256K (secp256k1)",
-        ),
-        p(
-          "You can also use this website to ",
-          a(href := "https://mkjwk.org/", target := "_blank", "Generate test Keys"),
-        )
-      ),
-      div(
-        input(
-          placeholder("Add new key (JWT format)"),
-          autoFocus(true),
-          inContext { thisNode =>
-            // Note: mapTo below accepts parameter by-name, evaluating it on every enter key press
-            AppUtils.onEnterPress.mapTo(thisNode.ref.value).filter(_.nonEmpty) -->
-              commandObserver.contramap[String] { text =>
-                thisNode.ref.value = "" // clear input
-                text
-              }
-          }
-        )
-      )
-    ),
+    code("Agent Management"),
+    // button(
+    //   "Create a new agent",
+    //   onClick --> Observer(_ => dataTextVar.set(MessageTemplate.exPlaintextMessage.toJsonPretty))
+    // ),
+
+    // div(
+    //   div(
+    //     p(
+    //       "You can use folowing website to ",
+    //       a(href := "https://8gwifi.org/jwkfunctions.jsp", target := "_blank", "Generate test Keys"),
+    //       ": X25519; Ed25519; P-256; P-384; P-521; P-256K (secp256k1)",
+    //     ),
+    //     p(
+    //       "You can also use this website to ",
+    //       a(href := "https://mkjwk.org/", target := "_blank", "Generate test Keys"),
+    //     )
+    //   ),
+    //   div(
+    //     input(
+    //       placeholder("Add new key (JWT format)"),
+    //       autoFocus(true),
+    //       inContext { thisNode =>
+    //         // Note: mapTo below accepts parameter by-name, evaluating it on every enter key press
+    //         AppUtils.onEnterPress.mapTo(thisNode.ref.value).filter(_.nonEmpty) -->
+    //           commandObserver.contramap[String] { text =>
+    //             thisNode.ref.value = "" // clear input
+    //             text
+    //           }
+    //       }
+    //     )
+    //   )
+    // ),
     div(
       div(child.text <-- keyStoreVar.map(_.keys.size).map(c => s"KeyStore (with $c keys):")),
       div(children <-- childrenSignal)
     ),
-     */
     table(
       tr(th("type"), th("isPointOnCurve"), th("Keys Id")),
       children <-- keyStoreVar.map(
@@ -86,6 +94,10 @@ object AgentKeys {
           }
       ),
     ),
+    div(
+      h2("KeyStore:"),
+      child <-- keyStoreVar.map(keyStore => pre(code(keyStore.keys.toJsonPretty)))
+    )
   )
   def apply(): HtmlElement = rootElement
 }

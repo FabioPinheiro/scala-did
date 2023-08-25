@@ -8,7 +8,42 @@ import fmgp.did.method.peer.DIDPeerServiceEncoded
 import fmgp.did.method.peer.DIDPeer
 import fmgp.did.method.hardcode.HardcodeResolver
 
+import fmgp.did.AgentProvider._
+
+case class AgentProvider(agents: Seq[AgentWithShortName], identities: Seq[DIDWithShortName]) {
+  def getAgentByName(name: String): Option[Agent] = agents.find(_.name == name).map(_.value)
+  def getDIDByName(name: String): Option[DID] =
+    getAgentByName(name)
+      .map(_.id)
+      .orElse(
+        identities.find(_.name == name).map(_.value)
+      )
+
+  def nameOfAgent(id: DID): Option[String] = agents.find(_.value.id.string == id.string).map(_.name)
+  def nameOfIdentity(id: DID): Option[String] =
+    nameOfAgent(id)
+      .orElse(
+        identities.find(_.value.string == id.string).map(_.name)
+      )
+
+  def agetnsNames = agents.map(_.name)
+  def identitiesNames = agents.map(_.name) ++ identities.map(_.name)
+}
+
 object AgentProvider {
+
+  case class AgentWithShortName(name: String, value: Agent) extends Agent {
+    override def id = value.id
+    override def keys = value.keys
+    override def keyStore = value.keyStore
+
+    def toDIDWithShortName = DIDWithShortName(name, value.id)
+  }
+
+  case class DIDWithShortName(name: String, value: DID) extends DID {
+    override def namespace: String = value.namespace
+    override def specificId: String = value.specificId
+  }
 
   /** https://mermaid.live/edit#pako:eNpVkMFqwzAMhl_F6Ny-gA-FbVmht8LKLnEPaqwsooltFDswSt-9cpvDdpD8S__3G-MbdNETWPgRTIM5NS4Y8zZyR2a73Zkj5lbLuZAkLiTnar_Hy9NscKG_82HB0NamOM9zWfGPAWXk132fC7VaCpCGZy8xpRUz1XxCe8Fw_b_65i5HaV-HpvUp3POa3OOFYxWePWxgIplQlYVbXTrIA03kwKr01GMZswMX7opiyfHrN3RgsxTaQEkeMzWM-hsT2B7Hme4PPpxgwQ
     */
@@ -47,51 +82,56 @@ object AgentProvider {
   |  click local "#/resolver/${local.id.did}" "Link to local DID Document"
   |""".stripMargin
 
-  def allAgents: Map[String, Agent] = Map(
-    "local" -> local,
-    "alice" -> alice,
-    "bob" -> bob,
-    "charlie" -> charlie,
-    "dave" -> dave,
-    "eve" -> eve,
-    "frank" -> frank,
-    "ivan" -> ivan,
-    "pat" -> pat,
-    "victor" -> victor,
-    "iohkMediator" -> iohkMediator,
-    "iohkMediatorSit" -> iohkMediatorSit,
-    "exampleAlice" -> exampleAlice,
-    "exampleBob" -> exampleBob,
-    "exampleSicpaAlice" -> exampleSicpaAlice,
-    "exampleSicpaBob" -> exampleSicpaBob,
-    "exampleSicpaCharlie" -> exampleSicpaCharlie,
-    "exampleSicpaMediator1" -> exampleSicpaMediator1,
-    "exampleSicpaMediator2" -> exampleSicpaMediator2,
-    "exampleSicpaMediator3" -> exampleSicpaMediator3,
-    "localhost8080Alice" -> localhost8080Alice,
-    "localhost9000Alice" -> localhost9000Alice,
+  def provider = AgentProvider(
+    Seq(
+      AgentWithShortName("local", local),
+      AgentWithShortName("alice", alice),
+      AgentWithShortName("bob", bob),
+      AgentWithShortName("charlie", charlie),
+      AgentWithShortName("dave", dave),
+      AgentWithShortName("eve", eve),
+      AgentWithShortName("frank", frank),
+      AgentWithShortName("ivan", ivan),
+      AgentWithShortName("pat", pat),
+      AgentWithShortName("victor", victor),
+      AgentWithShortName("iohkMediator", iohkMediator),
+      AgentWithShortName("iohkMediatorSit", iohkMediatorSit),
+      AgentWithShortName("exampleAlice", exampleAlice),
+      AgentWithShortName("exampleBob", exampleBob),
+      AgentWithShortName("exampleSicpaAlice", exampleSicpaAlice),
+      AgentWithShortName("exampleSicpaBob", exampleSicpaBob),
+      AgentWithShortName("exampleSicpaCharlie", exampleSicpaCharlie),
+      AgentWithShortName("exampleSicpaMediator1", exampleSicpaMediator1),
+      AgentWithShortName("exampleSicpaMediator2", exampleSicpaMediator2),
+      AgentWithShortName("exampleSicpaMediator3", exampleSicpaMediator3),
+      AgentWithShortName("localhost8080Alice", localhost8080Alice),
+      AgentWithShortName("localhost9000Alice", localhost9000Alice),
+    ),
+    Seq(
+      DIDWithShortName(
+        "rootsid",
+        DIDPeer
+          .fromDID(
+            DIDSubject( // https://mediator.rootsid.cloud/oob_url
+              "did:peer:2.Ez6LSms555YhFthn1WV8ciDBpZm86hK9tp83WojJUmxPGk1hZ.Vz6MkmdBjMyB4TS5UbbQw54szm8yvMMf1ftGV2sQVYAxaeWhE.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLnJvb3RzaWQuY2xvdWQiLCJhIjpbImRpZGNvbW0vdjIiXX0"
+            ).toDID
+          )
+          .toOption
+          .get
+      ),
+      DIDWithShortName(
+        "blocktrust",
+        DIDPeer
+          .fromDID(
+            DIDSubject( // https://mediator.blocktrust.dev/
+              "did:peer:2.Ez6LSeUYyDHMTbWoMGCKyqntPR95TB3N6ic2A27YLmwZHchxY.Vz6MkgRyq89zDCmXEcg8LmdqKjoaanxK4MUVbbtembDa4fLpK.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLmJsb2NrdHJ1c3QuZGV2LyIsInIiOltdLCJhIjpbImRpZGNvbW0vdjIiXX0"
+            ).toDID
+          )
+          .toOption
+          .get
+      ),
+    )
   )
-
-  def allIdentities: Map[String, DID] =
-    allAgents.view.mapValues(_.id).toMap ++
-      DIDPeer
-        .fromDID(
-          DIDSubject(
-            "did:peer:2.Ez6LSms555YhFthn1WV8ciDBpZm86hK9tp83WojJUmxPGk1hZ.Vz6MkmdBjMyB4TS5UbbQw54szm8yvMMf1ftGV2sQVYAxaeWhE.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLnJvb3RzaWQuY2xvdWQiLCJhIjpbImRpZGNvbW0vdjIiXX0"
-          ).toDID
-        )
-        .toOption
-        .map("rootsid" -> _) // https://mediator.rootsid.cloud/oob_url
-        .toMap ++
-      DIDPeer
-        .fromDID(
-          DIDSubject(
-            "did:peer:2.Ez6LSeUYyDHMTbWoMGCKyqntPR95TB3N6ic2A27YLmwZHchxY.Vz6MkgRyq89zDCmXEcg8LmdqKjoaanxK4MUVbbtembDa4fLpK.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLmJsb2NrdHJ1c3QuZGV2LyIsInIiOltdLCJhIjpbImRpZGNvbW0vdjIiXX0"
-          ).toDID
-        )
-        .toOption
-        .map("blocktrust" -> _) // https://mediator.blocktrust.dev/
-        .toMap
 
   private def aliceURL = s"https://alice.did.fmgp.app/"
   private def bobURL = s"https://bob.did.fmgp.app/"

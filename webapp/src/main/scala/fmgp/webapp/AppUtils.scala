@@ -47,7 +47,7 @@ object AppUtils {
         // ),
         span(className("mdc-list-item__text"), didName),
         onClick --> Observer[org.scalajs.dom.MouseEvent](onNext =
-          ev => Global.agentVar.update(e => fmgp.did.AgentProvider.allAgents.get(didName)),
+          ev => Global.agentVar.update(e => Global.provider.getAgentByName(didName)),
         )
       )
 
@@ -104,7 +104,7 @@ object AppUtils {
           // ),
           select(
             value <-- Global.agentVar.signal.map(Global.getAgentName(_)),
-            onChange.mapToValue.map(e => fmgp.did.AgentProvider.allAgents.get(e)) --> Global.agentVar,
+            onChange.mapToValue.map(e => Global.provider.getAgentByName(e)) --> Global.agentVar,
             Global.dids.map { step => option(value := step, step) }
           ),
           div(

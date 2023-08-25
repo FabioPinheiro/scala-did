@@ -53,13 +53,13 @@ object ServiceEndpoint {
 }
 
 trait DID {
-  def scheme: String = "did"
+  final def scheme: String = "did"
   def namespace: String // methodName
   def specificId: String
 
   /** This is the full identifier */
-  def string = s"$scheme:$namespace:$specificId"
-  def did = string
+  final def string = s"$scheme:$namespace:$specificId"
+  final def did = string
 
   // override def toString(): String = string
 }
