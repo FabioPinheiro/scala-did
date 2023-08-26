@@ -106,6 +106,16 @@ object DIDPeer2 {
 
   // case class Element(code: Purposecode, value: String) { def encode = "" + code + value }
 
+  /** {{{
+    * DIDPeer2(
+    *   Seq(
+    *     fmgp.crypto.KeyGenerator.unsafeX25519,
+    *     fmgp.crypto.KeyGenerator.unsafeEd25519
+    *   ),
+    *   Seq(DIDPeerServiceEncoded(s = "http://localhost:8080"))
+    * ).did
+    * }}}
+    */
   def apply(keys: Seq[PrivateKey], service: Seq[DIDPeerServiceEncoded] = Seq.empty): DIDPeer2 =
     DIDPeer2(keys.map(keyToElement(_)) ++ service.map(ElementService(_)))
 

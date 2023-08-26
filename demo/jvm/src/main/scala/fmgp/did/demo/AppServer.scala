@@ -23,6 +23,8 @@ import fmgp.did.comm.mediator._
 import fmgp.did.comm.protocol._
 import fmgp.did.method.DidPeerUniresolverDriver
 import fmgp.did.method.peer.DidPeerResolver
+import fmgp.crypto.Curve
+import fmgp.crypto.KeyGenerator
 
 /** demoJVM/runMain fmgp.did.demo.AppServer
   *
@@ -121,6 +123,30 @@ object AppServer extends ZIOAppDefault {
           .tap(e => ZIO.logTrace(s"ops: $e"))
           .flatMap(e => OperationsServerRPC.ops(e))
           .map(e => Response.text(e))
+
+      // ### MAKE KEYS ###
+      case req @ Method.POST -> !! / "makeKey" =>
+        req.body.asString
+          .tap(e => ZIO.log("makeKey"))
+          .tap(e => ZIO.logTrace(s"makeKey: $e"))
+          .flatMap(e =>
+            e.fromJson[Curve] match
+              case Left(parseError)     => ZIO.fail(DidException(CryptoFailToParse(parseError)))
+              case Right(Curve.X25519)  => KeyGenerator.makeX25519.mapError(e => DidException(e))
+              case Right(Curve.Ed25519) => KeyGenerator.makeEd25519.mapError(e => DidException(e))
+              case Right(curve) =>
+                ZIO.fail(DidException(WrongCurve(obtained = curve, expected = Set(Curve.X25519, Curve.Ed25519))))
+          )
+          .map(e => Response.text(e.toJson))
+      case req @ Method.GET -> !! / "makeKey" / "X25519" =>
+        KeyGenerator.makeX25519
+          .mapError(e => DidException(e))
+          .map(e => Response.text(e.toJson))
+      case req @ Method.GET -> !! / "makeKey" / "Ed25519" =>
+        KeyGenerator.makeEd25519
+          .mapError(e => DidException(e))
+          .map(e => Response.text(e.toJson))
+
       case Method.GET -> !! / "resolver" / did =>
         DIDSubject.either(did) match
           case Left(error)  => ZIO.succeed(Response.text(error.error).setStatus(Status.BadRequest)).debug
