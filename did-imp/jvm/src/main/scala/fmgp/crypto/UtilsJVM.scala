@@ -136,12 +136,12 @@ object UtilsJVM {
       )
     }
 
-    def sign(plaintext: PlaintextMessage, alg: JWAAlgorithm): SignedMessage = { // TODO use PlaintextMessage
+    def sign(payload: Array[Byte], alg: JWAAlgorithm): SignedMessage = {
       require(ecKey.isPrivate(), "EC JWK must include the private key (d)")
 
       val signer: JWSSigner = new ECDSASigner(ecKey) // Create the EC signer
       val haeder: JWSHeader = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(ecKey.getKeyID()).build()
-      val payloadObj = new JosePayload(plaintext.toJson)
+      val payloadObj = new JosePayload(payload)
       val jwsObject: JWSObject = new JWSObject(haeder, payloadObj) // Creates the JWS object with payload
 
       jwsObject.sign(signer)
@@ -169,12 +169,12 @@ object UtilsJVM {
       )
     }
 
-    def sign(plaintext: PlaintextMessage, alg: JWAAlgorithm): SignedMessage = { // TODO use PlaintextMessage
+    def sign(payload: Array[Byte], alg: JWAAlgorithm): SignedMessage = { // TODO use PlaintextMessage
       require(okpKey.isPrivate(), "EC JWK must include the private key (d)")
 
       val signer: JWSSigner = new Ed25519Signer(okpKey) // Create the OKP signer
       val haeder: JWSHeader = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(okpKey.getKeyID()).build()
-      val payloadObj = new JosePayload(plaintext.toJson)
+      val payloadObj = new JosePayload(payload)
 
       val jwsObject: JWSObject = new JWSObject(haeder, payloadObj) // Creates the JWS object with payload
 
@@ -251,11 +251,11 @@ object UtilsJVM {
   }
 
   extension (key: OKP_EC_Key) {
-    def sign(plaintext: PlaintextMessageClass): Future[SignedMessage] =
+    def sign(payload: Array[Byte]): Future[SignedMessage] =
       Future.successful( // TODO use PlaintextMessageClass
         key.toJWK match {
-          case ecKey: JWKECKey      => ecKey.sign(plaintext, key.jwaAlgorithmtoSign)
-          case okpKey: OctetKeyPair => okpKey.sign(plaintext, key.jwaAlgorithmtoSign)
+          case ecKey: JWKECKey      => ecKey.sign(payload, key.jwaAlgorithmtoSign)
+          case okpKey: OctetKeyPair => okpKey.sign(payload, key.jwaAlgorithmtoSign)
         }
       )
   }

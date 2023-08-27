@@ -11,10 +11,10 @@ import fmgp.crypto.UtilsJVM._
 
 object PlatformSpecificOperations {
 
-  def sign(key: PrivateKey, plaintext: PlaintextMessage): UIO[SignedMessage] =
+  def sign(key: PrivateKey, payload: Array[Byte]): UIO[SignedMessage] =
     ZIO.succeed(key.match {
-      case okp: OKPPrivateKey => okp.toJWK.sign(plaintext, key.jwaAlgorithmtoSign)
-      case ec: ECPrivateKey   => ec.toJWK.sign(plaintext, key.jwaAlgorithmtoSign)
+      case okp: OKPPrivateKey => okp.toJWK.sign(payload, key.jwaAlgorithmtoSign)
+      case ec: ECPrivateKey   => ec.toJWK.sign(payload, key.jwaAlgorithmtoSign)
     })
 
   def verify(key: PublicKey, jwm: SignedMessage): UIO[Boolean] =

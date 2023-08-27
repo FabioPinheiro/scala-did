@@ -111,8 +111,8 @@ object UtilsJS {
   }
 
   extension (key: PrivateKey) {
-    def sign(plaintext: PlaintextMessage): IO[CryptoFailed, SignedMessage] = { // TODO use PlaintextMessage
-      val data = js.typedarray.Uint8Array.from(plaintext.toJson.map(_.toShort).toJSIterable)
+    def sign(payload: Array[Byte]): IO[CryptoFailed, SignedMessage] = {
+      val data = js.typedarray.Uint8Array.from(payload.toSeq.map(_.toShort).toJSIterable)
 
       key.toKeyLike
         .flatMap { (thisKey, alg) =>

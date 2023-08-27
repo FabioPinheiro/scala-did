@@ -17,6 +17,11 @@ trait CryptoOperations {
   def sign(
       key: PrivateKey,
       plaintext: PlaintextMessage
+  ): IO[CryptoFailed, SignedMessage] = sign(key, plaintext.toJson.getBytes)
+
+  def sign(
+      key: PrivateKey,
+      payload: Array[Byte]
   ): IO[CryptoFailed, SignedMessage]
 
   def verify(

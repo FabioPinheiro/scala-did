@@ -14,8 +14,8 @@ import scala.util.chaining._
 /** https://identity.foundation/didcomm-messaging/spec/#key-wrapping-algorithms */
 object CryptoOperationsImp extends CryptoOperations {
 
-  override def sign(key: PrivateKey, plaintext: PlaintextMessage): IO[CryptoFailed, SignedMessage] =
-    PlatformSpecificOperations.sign(key, plaintext)
+  override def sign(key: PrivateKey, payload: Array[Byte]): IO[CryptoFailed, SignedMessage] =
+    PlatformSpecificOperations.sign(key, payload)
 
   override def verify(key: PublicKey, jwm: SignedMessage): IO[CryptoFailed, Boolean] =
     PlatformSpecificOperations.verify(key, jwm)

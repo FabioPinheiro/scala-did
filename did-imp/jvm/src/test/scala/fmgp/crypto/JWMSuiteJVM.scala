@@ -24,7 +24,7 @@ class JWMSuiteJVM extends FunSuite {
       .d(Base64.fromBase64url("N3Hm1LXA210YVGGsXw_GklMwcLu_bMgnzDese6YQIyA"))
       .build()
 
-    val jwsObject = ecJWK.sign(DIDCommExamples.plaintextMessageObj, JWAAlgorithm.ES256K)
+    val jwsObject = ecJWK.sign(DIDCommExamples.plaintextMessageObj.toJson.getBytes, JWAAlgorithm.ES256K)
 
     val ecPublicJWK: ECKey = ecJWK.toPublicJWK()
     assert(ecPublicJWK.verify(jwsObject, JWAAlgorithm.ES256K))

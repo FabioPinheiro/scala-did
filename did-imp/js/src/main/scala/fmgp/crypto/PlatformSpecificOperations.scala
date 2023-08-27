@@ -8,8 +8,9 @@ import fmgp.crypto.UtilsJS._
 import fmgp.crypto.error._
 
 object PlatformSpecificOperations {
-  def sign(key: PrivateKey, plaintext: PlaintextMessage): IO[CryptoFailed, SignedMessage] =
-    key.sign(plaintext)
+  def sign(key: PrivateKey, payload: Array[Byte]): IO[CryptoFailed, SignedMessage] =
+    key.sign(payload)
+
   def verify(key: PublicKey, jwm: SignedMessage): IO[CryptoFailed, Boolean] =
     key.verify(jwm)
 }
