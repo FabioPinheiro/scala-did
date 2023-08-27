@@ -28,6 +28,10 @@ case class AgentProvider(agents: Seq[AgentWithShortName], identities: Seq[DIDWit
 
   def agetnsNames = agents.map(_.name)
   def identitiesNames = agents.map(_.name) ++ identities.map(_.name)
+
+  def agentsAndIdentities = agents ++ identities
+
+  def withAgent(newAgent: AgentWithShortName) = this.copy(agents = agents :+ newAgent)
 }
 
 object AgentProvider {
