@@ -22,6 +22,7 @@ import fmgp.did.comm.protocol.routing2.ForwardMessage
 object EncryptTool {
 
   val encryptedMessageVar: Var[Option[Either[DidFail, (PlaintextMessage, EncryptedMessage)]]] = Var(initial = None)
+  val signMessageVar: Var[Option[Either[DidFail, (PlaintextMessage, SignedMessage)]]] = Var(initial = None)
   val dataTextVar = Var(initial = MessageTemplate.exPlaintextMessage.toJsonPretty)
   val curlCommandVar: Var[Option[String]] = Var(initial = None)
   val outputFromCallVar = Var[Option[EncryptedMessage]](initial = None)
@@ -72,11 +73,12 @@ object EncryptTool {
       plaintextMessage
     )
     .map {
-      case (_, Left(_)) =>
-        encryptedMessageVar.update(_ => None)
+      case (_, Left(_))                                              => encryptedMessageVar.set(None)
+      case (_, Right(pMsg)) if pMsg.to.flatMap(_.headOption).isEmpty => encryptedMessageVar.set(None)
       case (None, Right(pMsg)) =>
         val program = OperationsClientRPC
-          .anonEncrypt(pMsg)
+          // .encrypt(pMsg) // always use the message data (FROM/TO) to Encrypt
+          .anonEncrypt(pMsg) // if the agent is not seleted the message is encrypted anonymously
           .either
           .map(_.map((pMsg, _)))
           .map(e => encryptedMessageVar.update(_ => Some(e)))
@@ -91,9 +93,36 @@ object EncryptTool {
           .either
           .map(_.map((pMsg, _)))
           .map(e => encryptedMessageVar.update(_ => Some(e)))
+
         Unsafe.unsafe { implicit unsafe => // Run side efect
           Runtime.default.unsafe.fork(
-            program.provideSomeLayer(ResolverTool.resolverLayer).provideEnvironment(ZEnvironment(agent))
+            program
+              .provideSomeLayer(ResolverTool.resolverLayer)
+              .provideEnvironment(ZEnvironment(agent))
+          )
+        }
+    }
+    .observe(owner)
+
+  def callSignViaRPC(owner: Owner) = Signal
+    .combine(
+      Global.agentVar,
+      plaintextMessage
+    )
+    .map {
+      case (_, Left(_))        => signMessageVar.set(None)
+      case (None, Right(pMsg)) => signMessageVar.set(None)
+      case (Some(agent), Right(pMsg)) =>
+        val programSign = OperationsClientRPC
+          .sign(pMsg)
+          .either
+          .map(_.map((pMsg, _)))
+          .map(e => signMessageVar.update(_ => Some(e)))
+        Unsafe.unsafe { implicit unsafe => // Run side efect
+          Runtime.default.unsafe.fork(
+            programSign
+              .provideSomeLayer(ResolverTool.resolverLayer)
+              .provideEnvironment(ZEnvironment(agent))
           )
         }
     }
@@ -150,6 +179,7 @@ object EncryptTool {
 
   val rootElement = div(
     onMountCallback { ctx =>
+      callSignViaRPC(ctx.owner) // side effect
       callEncryptedViaRPC(ctx.owner) // side effect
       jobNextForward(ctx.owner) // side effect
       curlCommand(ctx.owner) // side effect
@@ -368,6 +398,18 @@ object EncryptTool {
       case Some(Right((_, eMsg))) => pre(code(eMsg.toJsonPretty))
 
     },
+    p(
+      "Sign Message",
+      "(NOTE: This is executed as a RPC call to the JVM server, since the JS version has not yet been fully implemented)"
+    ),
+    child <-- signMessageVar.signal.map {
+      case None                   => "None"
+      case Some(Left(error))      => "Error when signing " + error.toJsonPretty
+      case Some(Right((_, eMsg))) => pre(code(eMsg.toJsonPretty))
+
+    },
+    h2("DIDCommMessaging"),
+    p("DIDCommMessaging is the DID Comm transmission specified by the service endpoint in the DID Document"),
     child <-- forwardMessageVar.signal.map {
       case None => "No ForwardMessage"
       case Some(forwardMsg) =>
@@ -386,8 +428,6 @@ object EncryptTool {
           case Some(Right((_, eMsg))) => eMsg.toJson
       )
     ),
-    h2("DIDCommMessaging"),
-    p("DIDCommMessaging is the DID Comm transmission specified by the service endpoint in the DID Document"),
     p(code(child.text <-- curlCommandVar.signal.map(_.getOrElse("curl")))),
     div(
       child <-- curlCommandVar.signal

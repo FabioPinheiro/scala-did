@@ -69,6 +69,7 @@ package error {
   }
   // type CurveError = CryptoFailed
 
+  case class UnsupportedCurve(obtained: Curve, supported: Set[Curve]) extends CurveError // rename
   case class WrongCurve(obtained: Curve, expected: Set[Curve]) extends CurveError
   case class MissingCurve(expected: Set[Curve]) extends CurveError
   case class MultiCurvesTypes(obtained: Set[Curve], expected: Set[Curve]) extends CurveError

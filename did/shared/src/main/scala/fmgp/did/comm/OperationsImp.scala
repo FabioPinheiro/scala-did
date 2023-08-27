@@ -19,8 +19,10 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
   def sign(msg: PlaintextMessage): ZIO[Agent, CryptoFailed, SignedMessage] =
     for {
       agent <- ZIO.service[Agent]
-      // FIXME get the correct keys
-      key = agent.keys.head // FIXME
+      key = agent.keys.filter {
+        case OKPPrivateKey(kty, Curve.X25519, d, x, kid) => false // TODO UnsupportedCurve
+        case _                                           => true
+      }.head // FIXME head
       ret <- cryptoOperations.sign(key, msg)
     } yield ret
 

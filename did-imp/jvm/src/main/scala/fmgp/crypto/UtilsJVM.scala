@@ -128,9 +128,9 @@ object UtilsJVM {
     def verify(jwm: SignedMessage, alg: JWAAlgorithm): Boolean = {
       val _key = ecKey.toPublicJWK
       val verifier = new ECDSAVerifier(_key.toPublicJWK);
-      val haeder = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(_key.getKeyID()).build()
+      val header = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(_key.getKeyID()).build()
       verifier.verify(
-        haeder,
+        header,
         (jwm.base64noSignature).getBytes(StandardCharset.UTF_8),
         Base64.fromBase64url(jwm.signatures.head.signature) // FIXME .head
       )
@@ -140,9 +140,9 @@ object UtilsJVM {
       require(ecKey.isPrivate(), "EC JWK must include the private key (d)")
 
       val signer: JWSSigner = new ECDSASigner(ecKey) // Create the EC signer
-      val haeder: JWSHeader = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(ecKey.getKeyID()).build()
+      val header: JWSHeader = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(ecKey.getKeyID()).build()
       val payloadObj = new JosePayload(payload)
-      val jwsObject: JWSObject = new JWSObject(haeder, payloadObj) // Creates the JWS object with payload
+      val jwsObject: JWSObject = new JWSObject(header, payloadObj) // Creates the JWS object with payload
 
       jwsObject.sign(signer)
       jwsObject.serialize().split('.') match {
@@ -151,7 +151,7 @@ object UtilsJVM {
           assert(signature == jwsObject.getSignature.toString) // redundant check
           SignedMessage(
             payload = Payload.fromBase64url(payload),
-            Seq(JWMSignatureObj(`protected` = `protectedValue`, signature = signature)) // TODO haeder
+            Seq(JWMSignatureObj(`protected` = `protectedValue`, signature = signature)) // TODO header
           )
       }
     }
@@ -161,22 +161,22 @@ object UtilsJVM {
     def verify(jwm: SignedMessage, alg: JWAAlgorithm): Boolean = {
       val _key = okpKey.toPublicJWK
       val verifier = new Ed25519Verifier(_key.toPublicJWK);
-      val haeder = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(_key.getKeyID()).build()
+      val header = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(_key.getKeyID()).build()
       verifier.verify(
-        haeder,
+        header,
         (jwm.base64noSignature).getBytes(StandardCharset.UTF_8),
         Base64.fromBase64url(jwm.signatures.head.signature) // FIXME .head
       )
     }
 
-    def sign(payload: Array[Byte], alg: JWAAlgorithm): SignedMessage = { // TODO use PlaintextMessage
+    def signWithEd25519(payload: Array[Byte], alg: JWAAlgorithm): SignedMessage = {
       require(okpKey.isPrivate(), "EC JWK must include the private key (d)")
 
       val signer: JWSSigner = new Ed25519Signer(okpKey) // Create the OKP signer
-      val haeder: JWSHeader = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(okpKey.getKeyID()).build()
+      val header: JWSHeader = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(okpKey.getKeyID()).build()
       val payloadObj = new JosePayload(payload)
 
-      val jwsObject: JWSObject = new JWSObject(haeder, payloadObj) // Creates the JWS object with payload
+      val jwsObject: JWSObject = new JWSObject(header, payloadObj) // Creates the JWS object with payload
 
       jwsObject.sign(signer)
       jwsObject.serialize().split('.') match {
@@ -185,7 +185,7 @@ object UtilsJVM {
           assert(signature == jwsObject.getSignature.toString) // redundant check
           SignedMessage(
             payload = Payload.fromBase64url(payload),
-            Seq(JWMSignatureObj(`protected` = `protectedValue`, signature = signature)) // TODO haeder
+            Seq(JWMSignatureObj(`protected` = `protectedValue`, signature = signature)) // TODO header
           )
       }
     }
@@ -252,12 +252,15 @@ object UtilsJVM {
 
   extension (key: OKP_EC_Key) {
     def sign(payload: Array[Byte]): Future[SignedMessage] =
-      Future.successful( // TODO use PlaintextMessageClass
-        key.toJWK match {
-          case ecKey: JWKECKey      => ecKey.sign(payload, key.jwaAlgorithmtoSign)
-          case okpKey: OctetKeyPair => okpKey.sign(payload, key.jwaAlgorithmtoSign)
-        }
-      )
+      key.toJWK match {
+        case ecKey: JWKECKey =>
+          Future.successful(ecKey.sign(payload, key.jwaAlgorithmtoSign))
+        case okpKey: OctetKeyPair if key.crv == Curve.Ed25519 =>
+          Future.successful(okpKey.signWithEd25519(payload, key.jwaAlgorithmtoSign))
+        case okpKey: OctetKeyPair =>
+          Future.failed(NotImplementedError()) // TODO other curves are not suported ATM
+      }
+
   }
 
 }
