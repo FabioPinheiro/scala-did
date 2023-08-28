@@ -70,11 +70,19 @@ object Base64:
     def decodeToBigInt = BigInt(1, bytes.decode)
     def decodeToHex = bytes.decode.map("%02X".format(_)).mkString
 
+    def asObj[T](using jsonDecoder: JsonDecoder[T]): Either[String, Base64Obj[T]] =
+      decodeToString.fromJson[T].map(t => Base64Obj(t, Some(bytes)))
+    def unsafeAsObj[T](using jsonDecoder: JsonDecoder[T]): Base64Obj[T] = asObj[T] match
+      case Right(value) => value
+      case Left(error) =>
+        throw new java.lang.AssertionError("assumption failed: " + s"Base64($urlBase64).unsafeAsObj: $error")
+
 /** Base64Obj keep the original base64 encoder (useful to preserve data for doing MAC checks) */
 case class Base64Obj[T](obj: T, original: Option[Base64] = None) {
-  def base64url(using jsonEncoder: JsonEncoder[T]): String = Base64.encode(obj.toJson).urlBase64
+  def base64url(using jsonEncoder: JsonEncoder[T]): String = original.getOrElse(Base64.encode(obj.toJson)).urlBase64
 }
 object Base64Obj {
+
   given decoder[T](using jsonDecoder: JsonDecoder[T]): JsonDecoder[Base64Obj[T]] =
     Base64.decoder.mapOrFail { original =>
       original.decodeToString
