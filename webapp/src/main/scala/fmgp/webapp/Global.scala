@@ -18,8 +18,9 @@ object Global {
   val agentVar = Var[Option[Agent]](initial = None)
   val recipientVar = Var[Option[TO]](initial = None)
 
-  val dids = agentProvider.signal.map(_.agetnsNames.sorted :+ "<none>")
-  val didsTO = agentProvider.signal.map(_.identitiesNames.sorted :+ "<none>")
+  val noneOption = "<none>"
+  val dids = agentProvider.signal.map(_.agetnsNames.sorted)
+  val didsTO = agentProvider.signal.map(_.identitiesNames.sorted)
 
   def agent2Host: Option[String] = {
     Global.agentVar
@@ -35,26 +36,30 @@ object Global {
   }
 
   def selectAgent: Signal[String] = Global.agentVar.signal.combineWith(agentProvider.signal).map {
-    case (Some(agent), agentProvider) => agentProvider.nameOfAgent(agent.id).getOrElse("<none>")
-    case (None, agentProvider)        => "<none>"
+    case (Some(agent), agentProvider) => agentProvider.nameOfAgent(agent.id).getOrElse(noneOption)
+    case (None, agentProvider)        => noneOption
   }
 
   def getIdentitiesName(mDID: Option[DID], agentProvider: AgentProvider): String =
-    mDID.flatMap(did => agentProvider.nameOfIdentity(did)).getOrElse("<none>")
+    mDID.flatMap(did => agentProvider.nameOfIdentity(did)).getOrElse(noneOption)
 
   def makeSelectElementDID(didVar: Var[Option[DID]]) = select(
     value <-- didVar.signal
       .combineWith(agentProvider.signal)
       .map { (mDID, agentProvider) => getIdentitiesName(mDID, agentProvider) },
     onChange.mapToValue.map(e => providerNow.getDIDByName(e)) --> didVar,
-    children <-- Global.didsTO.map(_.map { step => option(value := step, step) })
+    children <-- Global.didsTO.map {
+      _.map { step => option(value := step, step) } :+ option(value := noneOption, selected := true, noneOption)
+    }
   )
   def makeSelectElementTO(didVar: Var[Option[TO]]) = select(
     value <-- didVar.signal
       .combineWith(agentProvider.signal)
       .map { (mDID, agentProvider) => getIdentitiesName(mDID.map(_.toDID), agentProvider) },
     onChange.mapToValue.map(e => providerNow.getDIDByName(e)).map(_.map(e => e: TO)) --> didVar,
-    children <-- Global.didsTO.map(_.map { step => option(value := step, step) })
+    children <-- Global.didsTO.map {
+      _.map { step => option(value := step, step) } :+ option(value := noneOption, selected := true, noneOption)
+    }
   )
 
   def clipboardSideEffect(text: => String): Any => Unit =

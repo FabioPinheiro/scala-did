@@ -65,7 +65,10 @@ object AppUtils {
           li(
             ul(
               className("mdc-menu__selection-group"),
-              children <-- Global.dids.map(_.map { did => makeLi(did, "person_outline") })
+              children <-- Global.dids.map {
+                _.map { did => makeLi(did, "person_outline") } :+
+                  makeLi(Global.noneOption, "person_outline")
+              }
             )
           ),
         )
@@ -105,7 +108,10 @@ object AppUtils {
           select(
             value <-- Global.selectAgent,
             onChange.mapToValue.map(e => Global.providerNow.getAgentByName(e)) --> Global.agentVar,
-            children <-- Global.dids.map(_.map { step => option(value := step, step) })
+            children <-- Global.dids.map {
+              _.map { step => option(value := step, step) } :+
+                option(value := Global.noneOption, selected := true, Global.noneOption)
+            }
           ),
           div(
             className("mdc-menu-surface--anchor"),

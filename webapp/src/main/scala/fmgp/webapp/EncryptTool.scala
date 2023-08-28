@@ -190,14 +190,14 @@ object EncryptTool {
       overflowWrap.:=("anywhere"),
       "Agent: ",
       " ",
-      code(child.text <-- Global.agentVar.signal.map(_.map(_.id.string).getOrElse("none")))
+      code(child.text <-- Global.agentVar.signal.map(_.map(_.id.string).getOrElse(Global.noneOption)))
     ),
     p(
       overflowWrap.:=("anywhere"),
       "Send TO (used by Templates): ",
       Global.makeSelectElementTO(Global.recipientVar),
       " ",
-      code(child.text <-- Global.recipientVar.signal.map(_.map(_.toDID.string).getOrElse("none"))),
+      code(child.text <-- Global.recipientVar.signal.map(_.map(_.toDID.string).getOrElse(Global.noneOption))),
     ),
     p(
       "Templates:",
@@ -388,26 +388,40 @@ object EncryptTool {
       case Right(msg)  => msg.toJsonPretty
       case Left(error) => s"Error: $error"
     })),
-    p(
-      "Encrypted Message",
-      "(NOTE: This is executed as a RPC call to the JVM server, since the JS version has not yet been fully implemented)"
+    div(
+      h2("Encrypted Message"),
+      children <-- encryptedMessageVar.signal.map {
+        case None              => Seq(code("None"))
+        case Some(Left(error)) => Seq(code("Error when encrypting " + error.toJsonPretty))
+        case Some(Right((_, eMsg))) =>
+          Seq(
+            h6(
+              "(NOTE: This is executed as a RPC call to the JVM server, since the JS version has not yet been fully implemented)"
+            ),
+            pre(code(eMsg.toJsonPretty)),
+            button(
+              "Copy Encrypted Message to clipboard",
+              onClick --> Global.clipboardSideEffect(eMsg.toJson)
+            )
+          )
+      },
     ),
-    child <-- encryptedMessageVar.signal.map {
-      case None                   => "None"
-      case Some(Left(error))      => "Error when encrypting " + error.toJsonPretty
-      case Some(Right((_, eMsg))) => pre(code(eMsg.toJsonPretty))
-
-    },
-    p(
-      "Sign Message",
-      "(NOTE: This is executed as a RPC call to the JVM server, since the JS version has not yet been fully implemented)"
+    div(
+      h2("Sign Message"),
+      children <-- signMessageVar.signal.map {
+        case None              => Seq(code("None"))
+        case Some(Left(error)) => Seq(code("Error when signing " + error.toJsonPretty))
+        case Some(Right((_, sMsg))) =>
+          Seq(
+            h6("(NOTE: This is executed as a RPC call to the JVM server)"),
+            pre(code(sMsg.toJsonPretty)),
+            button(
+              "Copy Sign Message to clipboard",
+              onClick --> Global.clipboardSideEffect(sMsg.toJson)
+            )
+          )
+      }
     ),
-    child <-- signMessageVar.signal.map {
-      case None                   => "None"
-      case Some(Left(error))      => "Error when signing " + error.toJsonPretty
-      case Some(Right((_, eMsg))) => pre(code(eMsg.toJsonPretty))
-
-    },
     h2("DIDCommMessaging"),
     p("DIDCommMessaging is the DID Comm transmission specified by the service endpoint in the DID Document"),
     child <-- forwardMessageVar.signal.map {
@@ -419,15 +433,6 @@ object EncryptTool {
           pre(code(pMsg))
         )
     },
-    button(
-      "Copy EncryptedMessage to clipboard",
-      onClick --> Global.clipboardSideEffect(
-        encryptedMessageVar.now() match
-          case None                   => "None"
-          case Some(Left(error))      => "Error when encrypting " + error.toJson
-          case Some(Right((_, eMsg))) => eMsg.toJson
-      )
-    ),
     p(code(child.text <-- curlCommandVar.signal.map(_.getOrElse("curl")))),
     div(
       child <-- curlCommandVar.signal
