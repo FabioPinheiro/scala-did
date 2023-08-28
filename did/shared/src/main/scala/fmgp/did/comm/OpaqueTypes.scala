@@ -96,3 +96,14 @@ object Payload:
     def base64url: String = data.urlBase64
   given decoder: JsonDecoder[Payload] = Base64.decoder
   given encoder: JsonEncoder[Payload] = Base64.encoder
+
+/** JWM_SIGNATURE is a Base64 url encode */
+opaque type SignatureJWM = String
+object SignatureJWM:
+  def apply(value: String): SignatureJWM = value
+  extension (signature: SignatureJWM)
+    def value: String = signature
+    def base64: Base64 = Base64.fromBase64url(signature.value)
+
+  given decoder: JsonDecoder[SignatureJWM] = JsonDecoder.string.map(SignatureJWM(_))
+  given encoder: JsonEncoder[SignatureJWM] = JsonEncoder.string.contramap[SignatureJWM](_.value)
