@@ -26,11 +26,11 @@ libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
 addSbtPlugin("ch.epfl.scala" % "sbt-web-scalajs-bundler" % "0.21.1")
 
 // GRPC
-//resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
-//addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.19")
-//libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.12"
+// resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.6") // 1.0.19
+libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.13"
 ////https://mvnrepository.com/artifact/com.thesamet.scalapb.grpcweb/scalapb-grpcweb
-//libraryDependencies += "com.thesamet.scalapb.grpcweb" %% "scalapb-grpcweb-code-gen" % "0.6.4"
+libraryDependencies += "com.thesamet.scalapb.grpcweb" %% "scalapb-grpcweb-code-gen" % "0.7.0"
 
 //https://scalablytyped.org/docs/plugin
 //https://github.com/ScalablyTyped/Converter/tags

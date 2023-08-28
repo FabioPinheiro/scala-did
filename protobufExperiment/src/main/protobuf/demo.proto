@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package scalapb.protos;
+
+message Body {
+  bool response_requested = 1;
+}
+
+message Plaintext {
+  string id = 1;
+  string type = 2;
+  repeated string to = 3;
+  string from = 4;
+  Body body = 5;
+}

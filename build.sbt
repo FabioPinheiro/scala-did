@@ -574,3 +574,19 @@ def makeDocSources = Def.task {
   }
   Seq(sourceFile)
 }
+
+lazy val protobufExperiment = project
+  .in(file("protobufExperiment"))
+  .settings(publish / skip := true)
+  .settings(
+    name := "did-demo",
+    Compile / PB.targets := Seq(
+      scalapb.gen() -> (Compile / sourceManaged).value / "scalapb"
+    ),
+
+    // (optional) If you need scalapb/scalapb.proto or anything from
+    // google/protobuf/*.proto
+    // libraryDependencies ++= Seq(
+    //   "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
+    // )
+  )
