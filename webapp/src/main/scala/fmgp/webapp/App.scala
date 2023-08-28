@@ -14,6 +14,7 @@ import fmgp.webapp.Home
 import fmgp.did.DidExample
 import org.scalajs.dom.ServiceWorkerRegistration
 import scala.scalajs.js.JSON
+import fmgp.webapp.AgentManagement
 object App {
 
   val oobExample =
@@ -68,7 +69,7 @@ object App {
     .collectStatic(QRcodeScannerPage)(QRcodeScannerTool())
     .collectStatic(NFCScannerPage)(NFCScannerTool())
     .collectStatic(DocPage)(Doc())
-    .collectStatic(AgentKeysPage)(AgentKeys())
+    .collectStatic(AgentManagementPage)(AgentManagement())
     .collectStatic(AgentDBPage)(AgentDB())
     .collectSignal[ResolverPage](page => ResolverTool(page))
     .collectStatic(EncryptPage)(EncryptTool())
@@ -90,7 +91,7 @@ object App {
     DecryptPage,
     BasicMessagePage,
     TrustPingPage,
-    AgentKeysPage,
+    AgentManagementPage,
     TapIntoStreamPage,
     AgentDBPage,
     DocPage,

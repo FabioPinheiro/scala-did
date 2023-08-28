@@ -15,7 +15,7 @@ import fmgp.crypto.error._
 import fmgp.did.method.peer._
 import fmgp.did.AgentProvider.AgentWithShortName
 
-object AgentKeys {
+object AgentManagement {
 
   def nameVar = Global.agentVar.signal.map {
     case None        => "none"
