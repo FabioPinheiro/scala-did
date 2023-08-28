@@ -17,6 +17,22 @@ import fmgp.util.Base64Obj
 //   val age: Int
 // }
 
+case class SignProtectedHeader(
+    kid: Option[VerificationMethodReferenced], // option because example in fmgp.did.comm.SignedMessageSuite_Parse
+    alg: SigningAlgorithm,
+    typ: Option[MediaTypes], // MediaTypes.SIGNED
+) {
+  assert(
+    !typ.exists(_ != MediaTypes.SIGNED),
+    s"The field 'typ' if present MUST be ${MediaTypes.SIGNED} instead of ${typ.get}"
+  )
+}
+
+object SignProtectedHeader {
+  given decoder: JsonDecoder[SignProtectedHeader] = DeriveJsonDecoder.gen[SignProtectedHeader] // TODO check `typ`
+  given encoder: JsonEncoder[SignProtectedHeader] = DeriveJsonEncoder.gen[SignProtectedHeader]
+}
+
 sealed trait ProtectedHeaderTMP {
   // def epk: Option[PublicKey]
   def apv: APV
@@ -137,4 +153,16 @@ enum KWAlgorithm {
 object KWAlgorithm {
   given decoder: JsonDecoder[KWAlgorithm] = JsonDecoder.string.mapOrFail(e => safeValueOf(KWAlgorithm.valueOf(e)))
   given encoder: JsonEncoder[KWAlgorithm] = JsonEncoder.string.contramap((e: KWAlgorithm) => e.toString)
+}
+
+/** Key Signing Algorithms */
+enum SigningAlgorithm {
+  case `EdDSA` extends SigningAlgorithm
+  case `ES256` extends SigningAlgorithm
+  case `ES256K` extends SigningAlgorithm
+}
+object SigningAlgorithm {
+  given decoder: JsonDecoder[SigningAlgorithm] =
+    JsonDecoder.string.mapOrFail(e => safeValueOf(SigningAlgorithm.valueOf(e)))
+  given encoder: JsonEncoder[SigningAlgorithm] = JsonEncoder.string.contramap((e: SigningAlgorithm) => e.toString)
 }
