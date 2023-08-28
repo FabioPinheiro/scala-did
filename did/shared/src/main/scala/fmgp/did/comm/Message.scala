@@ -154,8 +154,10 @@ case class SignedMessage(
     payload: Payload,
     signatures: Seq[JWMSignatureObj]
 ) extends Message {
-  def base64 = signatures.head.`protected` + "." + payload.base64url + "." + signatures.head.signature
-  def base64noSignature = signatures.head.`protected` + "." + payload.base64url
+  def base64noSignature = signatures.head.`protected`.base64url + "." + payload.base64url
+  def base64 = base64noSignature + "." + signatures.head.signature.value
+
+  def sha1 = SHA1.digestToHex(this.toJson)
 }
 
 object SignedMessage {
@@ -163,7 +165,11 @@ object SignedMessage {
   given encoder: JsonEncoder[SignedMessage] = DeriveJsonEncoder.gen[SignedMessage]
 }
 
-case class JWMSignatureObj(`protected`: JWM_PROTECTED, signature: JWM_SIGNATURE, header: Option[JWMHeader] = None)
+case class JWMSignatureObj(
+    `protected`: Base64Obj[SignProtectedHeader],
+    signature: SignatureJWM,
+    header: Option[JWMHeader] = None
+)
 object JWMSignatureObj {
   given decoder: JsonDecoder[JWMSignatureObj] = DeriveJsonDecoder.gen[JWMSignatureObj]
   given encoder: JsonEncoder[JWMSignatureObj] = DeriveJsonEncoder.gen[JWMSignatureObj]

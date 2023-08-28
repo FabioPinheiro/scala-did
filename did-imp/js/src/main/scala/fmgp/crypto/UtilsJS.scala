@@ -131,7 +131,12 @@ object UtilsJS {
               SignedMessage(
                 payload = Payload.fromBase64url(generalJWS.payload),
                 generalJWS.signatures.toSeq
-                  .map(v => JWMSignatureObj(`protected` = v.`protected`.get, signature = v.signature))
+                  .map(v =>
+                    JWMSignatureObj(
+                      `protected` = Base64(v.`protected`.get).unsafeAsObj[SignProtectedHeader],
+                      signature = SignatureJWM(v.signature)
+                    )
+                  )
               )
             )
             .orElseFail(UnknownError)

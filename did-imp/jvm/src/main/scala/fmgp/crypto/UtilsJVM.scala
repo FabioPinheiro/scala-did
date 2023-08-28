@@ -132,7 +132,7 @@ object UtilsJVM {
       verifier.verify(
         header,
         (jwm.base64noSignature).getBytes(StandardCharset.UTF_8),
-        Base64.fromBase64url(jwm.signatures.head.signature) // FIXME .head
+        jwm.signatures.head.signature.base64 // FIXME .head
       )
     }
 
@@ -151,7 +151,13 @@ object UtilsJVM {
           assert(signature == jwsObject.getSignature.toString) // redundant check
           SignedMessage(
             payload = Payload.fromBase64url(payload),
-            Seq(JWMSignatureObj(`protected` = `protectedValue`, signature = signature)) // TODO header
+            Seq(
+              JWMSignatureObj(
+                `protected` = Base64(protectedValue).unsafeAsObj[SignProtectedHeader],
+                signature = SignatureJWM(signature),
+                header = None // TODO Some(JWMHeader(kid = ))
+              )
+            )
           )
       }
     }
@@ -165,7 +171,7 @@ object UtilsJVM {
       verifier.verify(
         header,
         (jwm.base64noSignature).getBytes(StandardCharset.UTF_8),
-        Base64.fromBase64url(jwm.signatures.head.signature) // FIXME .head
+        jwm.signatures.head.signature.base64 // FIXME .head
       )
     }
 
@@ -185,7 +191,13 @@ object UtilsJVM {
           assert(signature == jwsObject.getSignature.toString) // redundant check
           SignedMessage(
             payload = Payload.fromBase64url(payload),
-            Seq(JWMSignatureObj(`protected` = `protectedValue`, signature = signature)) // TODO header
+            Seq(
+              JWMSignatureObj(
+                `protected` = Base64(protectedValue).unsafeAsObj[SignProtectedHeader],
+                signature = SignatureJWM(signature),
+                header = None // TODO Some(JWMHeader(kid = ))
+              )
+            )
           )
       }
     }

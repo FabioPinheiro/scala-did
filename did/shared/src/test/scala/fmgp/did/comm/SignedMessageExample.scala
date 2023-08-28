@@ -1,5 +1,9 @@
 package fmgp.did.comm
 
+import zio._
+import zio.json._
+import fmgp.util.{Base64, Base64Obj}
+
 object SignedMessageExample {
 
   def allSignedMessage_json = Seq(
@@ -31,8 +35,10 @@ object SignedMessageExample {
     ),
     Seq(
       JWMSignatureObj(
-        `protected` = "eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRWREU0EifQ",
-        signature = "FW33NnvOHV0Ted9-F7GZbkia-vYAfBKtH4oBxbrttWAhBZ6UFJMxcGjL3lwOl4YohI3kyyd08LHPWNMgP2EVCQ",
+        `protected` = Base64("eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRWREU0EifQ")
+          .unsafeAsObj[SignProtectedHeader],
+        signature =
+          SignatureJWM("FW33NnvOHV0Ted9-F7GZbkia-vYAfBKtH4oBxbrttWAhBZ6UFJMxcGjL3lwOl4YohI3kyyd08LHPWNMgP2EVCQ"),
         header = Some(JWMHeader("did:example:alice#key-1")),
       )
     )
@@ -57,8 +63,10 @@ object SignedMessageExample {
     ),
     Seq(
       JWMSignatureObj(
-        `protected` = "eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYifQ",
-        signature = "gcW3lVifhyR48mLHbbpnGZQuziskR5-wXf6IoBlpa9SzERfSG9I7oQ9pssmHZwbvJvyMvxskpH5oudw1W3X5Qg",
+        `protected` = Base64("eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYifQ")
+          .unsafeAsObj[SignProtectedHeader],
+        signature =
+          SignatureJWM("gcW3lVifhyR48mLHbbpnGZQuziskR5-wXf6IoBlpa9SzERfSG9I7oQ9pssmHZwbvJvyMvxskpH5oudw1W3X5Qg"),
         header = Some(JWMHeader("did:example:alice#key-2")),
       )
     )
@@ -85,8 +93,10 @@ object SignedMessageExample {
     ),
     Seq(
       JWMSignatureObj(
-        `protected` = "eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTZLIn0",
-        signature = "EGjhIcts6tqiJgqtxaTiTY3EUvL-_rLjn9lxaZ4eRUwa1-CS1nknZoyJWbyY5NQnUafWh5nvCtQpdpMyzH3blw",
+        `protected` = Base64("eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTZLIn0")
+          .unsafeAsObj[SignProtectedHeader],
+        signature =
+          SignatureJWM("EGjhIcts6tqiJgqtxaTiTY3EUvL-_rLjn9lxaZ4eRUwa1-CS1nknZoyJWbyY5NQnUafWh5nvCtQpdpMyzH3blw"),
         header = Some(JWMHeader("did:example:alice#key-3")),
       )
     )
@@ -99,8 +109,10 @@ object SignedMessageExample {
     ),
     Seq(
       JWMSignatureObj(
-        `protected` = "eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRWREU0EifQ",
-        signature = "gcW3lVifhyR48mLHbbpnGZQuziskR5-wXf6IoBlpa9SzERfSG9I7oQ9pssmHZwbvJvyMvxskpH5oudw1W3X5Qg",
+        `protected` = Base64("eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRWREU0EifQ")
+          .unsafeAsObj[SignProtectedHeader],
+        signature =
+          SignatureJWM("gcW3lVifhyR48mLHbbpnGZQuziskR5-wXf6IoBlpa9SzERfSG9I7oQ9pssmHZwbvJvyMvxskpH5oudw1W3X5Qg"),
         header = Some(JWMHeader("did:example:alice#key-1")),
       )
     )
