@@ -62,12 +62,17 @@ trait DID {
   final def did = string
 
   // override def toString(): String = string
+
+  def asDIDSubject = DIDSubject(scheme + ":" + namespace + ":" + specificId)
+  def asTO = TO.unsafe_apply(scheme + ":" + namespace + ":" + specificId)
+  def asFROM = FROM.unsafe_apply(scheme + ":" + namespace + ":" + specificId)
+  def asFROMTO = FROMTO.unsafe_apply(scheme + ":" + namespace + ":" + specificId)
 }
 object DID {
-  given Conversion[DID, DIDSubject] = did => DIDSubject(did.scheme + ":" + did.namespace + ":" + did.specificId)
-  given Conversion[DID, TO] = did => TO.unsafe_apply(did.scheme + ":" + did.namespace + ":" + did.specificId)
-  given Conversion[DID, FROM] = did => FROM.unsafe_apply(did.scheme + ":" + did.namespace + ":" + did.specificId)
-  given Conversion[DID, FROMTO] = did => FROMTO.unsafe_apply(did.scheme + ":" + did.namespace + ":" + did.specificId)
+  given Conversion[DID, DIDSubject] = _.asDIDSubject // FIXME REMOVE
+  given Conversion[DID, TO] = _.asTO // FIXME REMOVE
+  given Conversion[DID, FROM] = _.asFROM // FIXME REMOVE
+  given Conversion[DID, FROMTO] = _.asFROMTO // FIXME REMOVE
 }
 
 type DIDSyntax = String //FIXME

@@ -46,18 +46,35 @@ object DecryptTool {
                   .anonDecryptRaw(msg)
                   .flatMap { data =>
                     decryptDataVar.set(Some(data)) // side effect!
-                    Operations.parseMessage(data)
+                    Operations
+                      .parseMessage(data)
+                      .map((msg, _))
                   }
               case AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) =>
                 OperationsClientRPC
                   .authDecryptRaw(msg)
                   .flatMap { data =>
                     decryptDataVar.set(Some(data)) // side effect!
-                    Operations.parseMessage(data)
+                    Operations
+                      .parseMessage(data)
+                      .map((msg, _))
                   }
           }.mapBoth(
             error => decryptMessageVar.set(Some(Left(error))), // side effect!
-            msg => decryptMessageVar.set(Some(Right(msg))) // side effect!
+            msg =>
+              decryptMessageVar.set(Some(Right(msg._2))) // side effect!
+              msg match
+                case (eMsg, plaintext: PlaintextMessage) =>
+                  AgentMessageStorage.messageRecive(eMsg, plaintext) // side effect!
+                case (eMsg, sMsg: SignedMessage) =>
+                  sMsg.payload.content.fromJson[Message] match
+                    case Left(value) => println("ERROR: " + value)
+                    case Right(plaintext: PlaintextMessage) =>
+                      AgentMessageStorage.messageRecive(eMsg, plaintext) // side effect!
+                    case Right(value: SignedMessage)    => println("ERROR: Double Sign: " + value)
+                    case Right(value: EncryptedMessage) => println("ERROR: Sign and Encrypted: " + value)
+
+                case (oldEMsg, newEMsg: EncryptedMessage) => println("ERROR: Double Encrypted: " + value)
           )
           Unsafe.unsafe { implicit unsafe => // Run side efect
             Runtime.default.unsafe.fork(

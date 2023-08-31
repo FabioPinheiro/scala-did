@@ -23,6 +23,7 @@ object MyRouter {
   case object AgentManagementPage extends Page("AgentManagement", "key")
   // case object DIDPage extends Page("DID", "visibility")
   case object AgentDBPage extends Page("MessageDB", "folder_open")
+  case object AgentMessageStoragePage extends Page("AgentMessageStorage", "widgets")
   case class ResolverPage(did: String) extends Page("Resolver", "dns")
   case object EncryptPage extends Page("Encrypt", "enhanced_encryption")
   case object DecryptPage extends Page("Decrypt", "email")
@@ -40,6 +41,7 @@ object MyRouter {
   given docPageRW: ReadWriter[DocPage.type] = macroRW
   given keysPageRW: ReadWriter[AgentManagementPage.type] = macroRW
   given agentDBPageRW: ReadWriter[AgentDBPage.type] = macroRW
+  given agentMessageStoragePageRW: ReadWriter[AgentMessageStoragePage.type] = macroRW
   given resolverPageRW: ReadWriter[ResolverPage] = macroRW
   given encryptPageRW: ReadWriter[EncryptPage.type] = macroRW
   given decryptPageRW: ReadWriter[DecryptPage.type] = macroRW
@@ -72,6 +74,7 @@ object MyRouter {
     Route.static(NFCScannerPage, root / "nfc" / endOfSegments, Router.localFragmentBasePath),
     Route.static(AgentManagementPage, root / "agentkeys" / endOfSegments, Router.localFragmentBasePath),
     Route.static(AgentDBPage, root / "db" / endOfSegments, Router.localFragmentBasePath),
+    Route.static(AgentMessageStoragePage, root / "agent" / endOfSegments, Router.localFragmentBasePath),
     Route.static(EncryptPage, root / "encrypt" / endOfSegments, Router.localFragmentBasePath),
     Route.static(DecryptPage, root / "decrypt" / endOfSegments, Router.localFragmentBasePath),
     Route.static(BasicMessagePage, root / "basicmessage" / endOfSegments, Router.localFragmentBasePath),

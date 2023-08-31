@@ -42,6 +42,7 @@ object Home {
         " (only works for alice, bob and charlie)",
         MyRouter.navigateTo(MyRouter.AgentDBPage)
       ),
+      p("Navigate to ", b("Agent Message DB"), MyRouter.navigateTo(MyRouter.AgentDBPage)),
       p("Navigate to ", b("Mediator (Alice)"), MyRouter.navigateTo(MyRouter.MediatorPage)),
       p("Navigate to ", b("Agent Management"), MyRouter.navigateTo(MyRouter.AgentManagementPage)),
       p("Navigate to ", b("Documentation for scala-did lib"), MyRouter.navigateTo(MyRouter.MediatorPage)),

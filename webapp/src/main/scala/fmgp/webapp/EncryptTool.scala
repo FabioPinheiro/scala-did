@@ -153,7 +153,7 @@ object EncryptTool {
     })
     .observe(owner)
 
-  def curlProgram(msg: EncryptedMessage) = {
+  def curlProgram(msg: EncryptedMessage, plaintext: PlaintextMessage) = {
     val program = for {
       resolver <- ZIO.service[Resolver]
       doc <- resolver.didDocument(TO(msg.recipientsSubject.head.string))
@@ -162,6 +162,11 @@ object EncryptTool {
       call <- mURI match
         case None => ZIO.unit
         case Some(uri) =>
+          AgentMessageStorage.messageSend(
+            msg,
+            Global.agentVar.now().map(_.id.asFROM).getOrElse(???),
+            plaintext
+          ) // side efect
           Client
             .makeDIDCommPost(msg, uri)
             .map(_.fromJson[EncryptedMessage])
@@ -383,11 +388,20 @@ object EncryptTool {
             )
           case Some(value) => new CommentNode("")
     }),
-    p("Plaintext Message (Or error report):"),
-    pre(code(child.text <-- plaintextMessage.map {
-      case Right(msg)  => msg.toJsonPretty
-      case Left(error) => s"Error: $error"
-    })),
+    div(
+      h2("Plaintext Message"),
+      children <-- plaintextMessage.map {
+        case Left(error) => Seq(pre(code(s"Error: $error")))
+        case Right(msg) =>
+          Seq(
+            pre(code(msg.toJsonPretty)),
+            button(
+              "Copy Plaintext Message to clipboard",
+              onClick --> Global.clipboardSideEffect(msg.toJson)
+            )
+          )
+      }
+    ),
     div(
       h2("Encrypted Message"),
       children <-- encryptedMessageVar.signal.map {
@@ -444,8 +458,8 @@ object EncryptTool {
                 "Make HTTP POST",
                 onClick --> Sink.jsCallbackToSink(_ =>
                   encryptedMessageVar.now() match {
-                    case Some(Right((_, eMsg))) => curlProgram(eMsg)
-                    case _                      => // None
+                    case Some(Right((plaintext, eMsg))) => curlProgram(eMsg, plaintext)
+                    case _                              => // None
                   }
                 )
               )

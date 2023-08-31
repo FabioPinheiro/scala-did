@@ -71,6 +71,7 @@ object App {
     .collectStatic(DocPage)(Doc())
     .collectStatic(AgentManagementPage)(AgentManagement())
     .collectStatic(AgentDBPage)(AgentDB())
+    .collectStatic(AgentMessageStoragePage)(AgentMessageStorage())
     .collectSignal[ResolverPage](page => ResolverTool(page))
     .collectStatic(EncryptPage)(EncryptTool())
     .collectStatic(DecryptPage)(DecryptTool())
@@ -94,6 +95,7 @@ object App {
     AgentManagementPage,
     TapIntoStreamPage,
     AgentDBPage,
+    AgentMessageStoragePage,
     DocPage,
     MediatorPage,
     // DAppStorePage,
