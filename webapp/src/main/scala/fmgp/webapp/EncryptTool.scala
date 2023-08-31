@@ -153,7 +153,7 @@ object EncryptTool {
     })
     .observe(owner)
 
-  def curlProgram(msg: EncryptedMessage, plaintext: PlaintextMessage) = {
+  def curlProgram(msg: EncryptedMessage) = {
     val program = for {
       resolver <- ZIO.service[Resolver]
       doc <- resolver.didDocument(TO(msg.recipientsSubject.head.string))
@@ -162,11 +162,6 @@ object EncryptTool {
       call <- mURI match
         case None => ZIO.unit
         case Some(uri) =>
-          AgentMessageStorage.messageSend(
-            msg,
-            Global.agentVar.now().map(_.id.asFROM).getOrElse(???),
-            plaintext
-          ) // side efect
           Client
             .makeDIDCommPost(msg, uri)
             .map(_.fromJson[EncryptedMessage])
@@ -407,7 +402,7 @@ object EncryptTool {
       children <-- encryptedMessageVar.signal.map {
         case None              => Seq(code("None"))
         case Some(Left(error)) => Seq(code("Error when encrypting " + error.toJsonPretty))
-        case Some(Right((_, eMsg))) =>
+        case Some(Right((plaintext, eMsg))) =>
           Seq(
             h6(
               "(NOTE: This is executed as a RPC call to the JVM server, since the JS version has not yet been fully implemented)"
@@ -415,7 +410,14 @@ object EncryptTool {
             pre(code(eMsg.toJsonPretty)),
             button(
               "Copy Encrypted Message to clipboard",
-              onClick --> Global.clipboardSideEffect(eMsg.toJson)
+              onClick --> {
+                AgentMessageStorage.messageSend(
+                  eMsg,
+                  Global.agentVar.now().map(_.id.asFROM).getOrElse(???),
+                  plaintext
+                ) // side efect
+                Global.clipboardSideEffect(eMsg.toJson)
+              }
             )
           )
       },
@@ -425,13 +427,20 @@ object EncryptTool {
       children <-- signMessageVar.signal.map {
         case None              => Seq(code("None"))
         case Some(Left(error)) => Seq(code("Error when signing " + error.toJsonPretty))
-        case Some(Right((_, sMsg))) =>
+        case Some(Right((plaintext, sMsg))) =>
           Seq(
             h6("(NOTE: This is executed as a RPC call to the JVM server)"),
             pre(code(sMsg.toJsonPretty)),
             button(
               "Copy Sign Message to clipboard",
-              onClick --> Global.clipboardSideEffect(sMsg.toJson)
+              onClick --> {
+                AgentMessageStorage.messageSend(
+                  sMsg,
+                  Global.agentVar.now().map(_.id.asFROM).getOrElse(???),
+                  plaintext
+                ) // side efect
+                Global.clipboardSideEffect(sMsg.toJson)
+              }
             )
           )
       }
@@ -458,8 +467,14 @@ object EncryptTool {
                 "Make HTTP POST",
                 onClick --> Sink.jsCallbackToSink(_ =>
                   encryptedMessageVar.now() match {
-                    case Some(Right((plaintext, eMsg))) => curlProgram(eMsg, plaintext)
-                    case _                              => // None
+                    case Some(Right((plaintext, eMsg))) =>
+                      AgentMessageStorage.messageSend(
+                        eMsg,
+                        Global.agentVar.now().map(_.id.asFROM).getOrElse(???),
+                        plaintext
+                      ) // side efect
+                      curlProgram(eMsg)
+                    case _ => // None
                   }
                 )
               )

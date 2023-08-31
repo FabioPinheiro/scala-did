@@ -20,9 +20,9 @@ object AgentMessageStorage {
 
   val messageStorageVar = Var[MessageStorage](initial = MessageStorage.example)
 
-  def messageSend(msg: EncryptedMessage, from: FROM, plaintext: PlaintextMessage) =
+  def messageSend(msg: SignedMessage | EncryptedMessage, from: FROM, plaintext: PlaintextMessage) =
     messageStorageVar.update(_.messageSend(msg, from, plaintext))
-  def messageRecive(msg: EncryptedMessage, plaintext: PlaintextMessage) =
+  def messageRecive(msg: SignedMessage | EncryptedMessage, plaintext: PlaintextMessage) =
     messageStorageVar.update(_.messageRecive(msg, plaintext))
 
   val rootElement = div(
@@ -30,9 +30,9 @@ object AgentMessageStorage {
       // job(ctx.owner)
       ()
     },
-    code("AgentMessageStorage"),
-    p("Agent Message Storage of ", child <-- Global.agentVar.signal.map(_.map(_.id.string).getOrElse("NONE"))),
-    br(),
+    // code("AgentMessageStorage"),
+    // p("Agent Message Storage of ", child <-- Global.agentVar.signal.map(_.map(_.id.string).getOrElse("NONE"))),
+    // br(),
     div( // container
       padding := "12pt",
       // outgoingMgs(
@@ -47,13 +47,13 @@ object AgentMessageStorage {
             case StorageItem(msg, plaintext, from, to, timestamp) if from.contains(agent.id.asFROM) =>
               outgoingMgs(
                 msgId = plaintext.id,
-                did = from,
+                to = to,
                 content = plaintext.`type`.value
               )
             case StorageItem(msg, plaintext, from, to, timestamp) if to.contains(agent.id.asTO) =>
               incomeMgs(
                 msgId = plaintext.id,
-                did = from,
+                from = from,
                 content = plaintext.`type`.value
               )
             case storageItem =>
@@ -65,7 +65,7 @@ object AgentMessageStorage {
 
   def apply(): HtmlElement = rootElement
 
-  def incomeMgs(msgId: MsgID, did: Option[FROM], content: String) = div(
+  def incomeMgs(msgId: MsgID, from: Option[FROM], content: String) = div(
     display.flex,
     div( // message row Left (income)
       className := "mdc-card",
@@ -77,14 +77,20 @@ object AgentMessageStorage {
       div(padding := "8pt", paddingBottom := "6pt", i(className("material-icons"), "face")), // avatar
       div(
         width := "90%",
-        div(" - ", code(msgId.value)),
-        div(overflowWrap.breakWord, did.map(_.value).getOrElse("")),
+        div(" MsgID - ", code(msgId.value)),
+        div(
+          overflowWrap.breakWord,
+          // overflow.hidden,
+          // textOverflow.ellipsis,
+          "FROM: ",
+          code(from.map(_.value).getOrElse(""))
+        ),
         div(content),
       )
     )
   )
 
-  def outgoingMgs(msgId: MsgID, did: Option[FROM], content: String) = div(
+  def outgoingMgs(msgId: MsgID, to: Set[TO], content: String) = div(
     display.flex,
     flexDirection.rowReverse,
     div( // message row Right (outgoing)
@@ -97,8 +103,14 @@ object AgentMessageStorage {
       div(padding := "8pt", paddingBottom := "6pt", i(className("material-icons"), "face")), // avatar
       div(
         width := "90%",
-        div(" - ", code(msgId.value)),
-        div(overflowWrap.breakWord, code(did.map(_.value).getOrElse(""))),
+        div(" MsgID - ", code(msgId.value)),
+        div(
+          overflowWrap.breakWord,
+          // overflow.hidden,
+          // textOverflow.ellipsis,
+          "TO: ",
+          code(to.map(_.value).mkString(";"))
+        ),
         div(content),
         // div(
         //   className := "mdc-card__primary-action",

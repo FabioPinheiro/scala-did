@@ -8,7 +8,7 @@ import fmgp.did.AgentProvider
 type HASH = String
 
 case class StorageItem(
-    original: Option[ /*SignedMessage |*/ EncryptedMessage],
+    original: Option[SignedMessage | EncryptedMessage],
     plaintext: PlaintextMessage,
     from: Option[FROM],
     to: Set[TO],
@@ -16,31 +16,40 @@ case class StorageItem(
 )
 
 case class MessageStorage(storageItems: Seq[StorageItem] = Seq.empty) {
-  def messageSend(msg: EncryptedMessage, from: FROM, plaintext: PlaintextMessage) = {
-    assert(plaintext.from.isEmpty || plaintext.from.contains(from))
-    MessageStorage(
-      // plaintextItems = plaintextItems + (plaintext.id -> plaintext),
-      storageItems = storageItems :+ StorageItem(
-        original = Some(msg),
-        plaintext = plaintext,
-        from = Some(from), // Extra
-        to = msg.recipientsSubject.map(_.toDID),
-        timestamp = 0
+  def messageSend(msg: SignedMessage | EncryptedMessage, from: FROM, plaintext: PlaintextMessage) =
+    if (storageItems.exists(_.plaintext.id == plaintext.id)) this
+    else {
+      assert(plaintext.from.isEmpty || plaintext.from.contains(from))
+      MessageStorage(
+        storageItems = storageItems :+ StorageItem(
+          original = Some(msg),
+          plaintext = plaintext,
+          from = Some(from), // Extra
+          to = msg match
+            case s: SignedMessage =>
+              s.payload.content.fromJson[PlaintextMessage].toOption.flatMap(_.to).getOrElse(Set.empty)
+            case e: EncryptedMessage => e.recipientsSubject.map(_.toDID.asTO)
+          ,
+          timestamp = 0
+        )
       )
-    )
-  }
-  def messageRecive(msg: EncryptedMessage, plaintext: PlaintextMessage) = MessageStorage(
-    // plaintextItems = mPlaintext
-    //   .foreach(plaintext => plaintextItems + (plaintext.id -> plaintext))
-    //   .getOrElse(plaintextItems),
-    storageItems = storageItems :+ StorageItem(
-      original = Some(msg),
-      plaintext = plaintext,
-      from = plaintext.from,
-      to = msg.recipientsSubject.map(_.toDID),
-      timestamp = 0
-    )
-  )
+    }
+  def messageRecive(msg: SignedMessage | EncryptedMessage, plaintext: PlaintextMessage) =
+    if (storageItems.exists(_.plaintext.id == plaintext.id)) this
+    else
+      MessageStorage(
+        storageItems = storageItems :+ StorageItem(
+          original = Some(msg),
+          plaintext = plaintext,
+          from = plaintext.from,
+          to = msg match
+            case s: SignedMessage =>
+              s.payload.content.fromJson[PlaintextMessage].toOption.flatMap(_.to).getOrElse(Set.empty)
+            case e: EncryptedMessage => e.recipientsSubject.map(_.toDID.asTO)
+          ,
+          timestamp = 0
+        )
+      )
 }
 
 object MessageStorage {
