@@ -96,7 +96,7 @@ object MediatorStandalone extends ZIOAppDefault {
     inboundHub <- Hub.bounded[String](5)
     myServer <- Server
       .serve(
-        app.annotateLogs
+        (app @@ MiddlewareUtils.all)
           .tapUnhandledZIO(ZIO.logError("Unhandled Endpoint"))
           .tapErrorCauseZIO(cause => ZIO.logErrorCause(cause)) // THIS is to log all the erros
           .mapError(err =>
