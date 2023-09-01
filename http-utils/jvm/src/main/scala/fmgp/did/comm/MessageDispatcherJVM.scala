@@ -1,9 +1,10 @@
 package fmgp.did.comm
 
+import scala.util.chaining._
+
 import zio._
 import zio.json._
-import zio.http._
-import zio.http.model._
+import zio.http.{MediaType => ZMediaType, _}
 
 import fmgp.did._
 import fmgp.did.comm._
@@ -26,14 +27,17 @@ class MessageDispatcherJVM(client: Client) extends MessageDispatcher {
       destination: String,
       xForwardedHost: Option[String],
   ): ZIO[Any, DidFail, String] = {
-    val contentTypeHeader = Headers.contentType(msg.`protected`.obj.typ.getOrElse(MediaTypes.ENCRYPTED).typ)
-    val xForwardedHostHeader = Headers(xForwardedHost.map(x => Header(MyHeaders.xForwardedHost, x)))
+    val contentTypeHeader = msg.`protected`.obj.typ
+      .getOrElse(MediaTypes.ENCRYPTED)
+      .pipe(e => Header.ContentType(ZMediaType(e.mainType, e.subType)))
+    val xForwardedHostHeader = xForwardedHost.map(x => Header.Custom(customName = MyHeaders.xForwardedHost, x))
+
     for {
       res <- Client
         .request(
           url = destination,
           method = Method.POST,
-          headers = contentTypeHeader ++ xForwardedHostHeader,
+          headers = Headers(Seq(Some(contentTypeHeader), xForwardedHostHeader).flatten),
           content = Body.fromCharSequence(msg.toJson),
         )
         .tapError(ex => ZIO.logWarning(s"Fail when calling '$destination': ${ex.toString}"))

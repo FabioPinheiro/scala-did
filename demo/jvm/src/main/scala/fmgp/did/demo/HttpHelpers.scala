@@ -10,7 +10,7 @@ extension [R, Err](app: HttpApp[R, Err])
           http: Http[R, Err, Request, Response],
       )(implicit trace: Trace): Http[R, Err, Request, Response] =
         http.mapZIO { request =>
-          val headers = request.headers.toSeq.map(e => (e.key.toString.toLowerCase, e.value)).toMap
+          val headers = request.headers.toSeq.map(h => (h.headerName.toLowerCase, h.renderedValue)).toMap
           inline def composeAnnotate(
               inline headerName: String,
               inline logName: String,

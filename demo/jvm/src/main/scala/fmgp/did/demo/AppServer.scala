@@ -4,9 +4,6 @@ import zio._
 import zio.json._
 import zio.stream._
 import zio.http._
-import zio.http.model._
-import zio.http.socket._
-import zio.http.Http.{Empty, Static}
 import zio.http.ZClient.ClientLive
 
 import scala.io.Source
@@ -42,11 +39,11 @@ import fmgp.crypto.KeyGenerator
   */
 object AppServer extends ZIOAppDefault {
 
-  val mdocMarkdown = Http.collectRoute[Request] { case req @ Method.GET -> !! / "mdoc" / path =>
+  val mdocMarkdown = Http.collectHttp[Request] { case req @ Method.GET -> Root / "mdoc" / path =>
     Http.fromResource(s"$path")
   }
 
-  val mdocHTML = Http.collectRoute[Request] { case req @ Method.GET -> !! / "doc" / path =>
+  val mdocHTML = Http.collectHttp[Request] { case req @ Method.GET -> Root / "doc" / path =>
     val transformer = Transformer
       .from(Markdown)
       .to(HTML)
@@ -68,13 +65,13 @@ object AppServer extends ZIOAppDefault {
     Throwable
   ] = MediatorMultiAgent.didCommApp ++ Http
     .collectZIO[Request] {
-      case req @ Method.GET -> !! / "headers" =>
-        val data = req.headersAsList.toSeq.map(e => (e.key.toString(), e.value.toString()))
+      case req @ Method.GET -> Root / "headers" =>
+        val data = req.headers.toSeq.map(e => (e.headerName, e.renderedValue))
         ZIO.succeed(Response.text("HEADERS:\n" + data.mkString("\n") + "\nRemoteAddress:" + req.remoteAddress)).debug
-      case Method.GET -> !! / "hello"        => ZIO.succeed(Response.text("Hello World! DEMO DID APP")).debug
-      case req @ Method.GET -> !! / "health" => ZIO.succeed(Response.ok)
+      case Method.GET -> Root / "hello"        => ZIO.succeed(Response.text("Hello World! DEMO DID APP")).debug
+      case req @ Method.GET -> Root / "health" => ZIO.succeed(Response.ok)
       // http://localhost:8080/oob?_oob=eyJ0eXBlIjoiaHR0cHM6Ly9kaWRjb21tLm9yZy9vdXQtb2YtYmFuZC8yLjAvaW52aXRhdGlvbiIsImlkIjoiNTk5ZjM2MzgtYjU2My00OTM3LTk0ODctZGZlNTUwOTlkOTAwIiwiZnJvbSI6ImRpZDpleGFtcGxlOnZlcmlmaWVyIiwiYm9keSI6eyJnb2FsX2NvZGUiOiJzdHJlYW1saW5lZC12cCIsImFjY2VwdCI6WyJkaWRjb21tL3YyIl19fQ
-      case req @ Method.GET -> !! / "oob" =>
+      case req @ Method.GET -> Root / "oob" =>
         for {
           _ <- ZIO.log("oob")
           ret <- ZIO.succeed(OutOfBand.oob(req.url.encode) match
@@ -83,21 +80,21 @@ object AppServer extends ZIOAppDefault {
             case Right(OutOfBandSigned(msg, data))    => Response.json(msg.payload.content)
           )
         } yield (ret)
-      case req @ Method.GET -> !! / "db" =>
+      case req @ Method.GET -> Root / "db" =>
         for {
           _ <- ZIO.log("db")
           agent <- AgentByHost.getAgentFor(req)
           db <- agent.messageDB.get
           ret <- ZIO.succeed(Response.json(db.toJsonPretty))
         } yield (ret)
-      case req @ Method.GET -> !! / "socket" =>
+      case req @ Method.GET -> Root / "socket" =>
         for {
           _ <- ZIO.log("socket")
           agent <- AgentByHost.getAgentFor(req)
           sm <- agent.didSocketManager.get
           ret <- ZIO.succeed(Response.text(sm.toJsonPretty))
         } yield (ret)
-      case req @ Method.POST -> !! / "socket" / id =>
+      case req @ Method.POST -> Root / "socket" / id =>
         for {
           hub <- ZIO.service[Hub[String]]
           agent <- AgentByHost.getAgentFor(req)
@@ -117,7 +114,7 @@ object AppServer extends ZIOAppDefault {
               } *> ZIO.succeed(Response.text(s"message sended"))
           }
         } yield (ret)
-      case req @ Method.POST -> !! / "ops" =>
+      case req @ Method.POST -> Root / "ops" =>
         req.body.asString
           .tap(e => ZIO.log("ops"))
           .tap(e => ZIO.logTrace(s"ops: $e"))
@@ -125,7 +122,7 @@ object AppServer extends ZIOAppDefault {
           .map(e => Response.text(e))
 
       // ### MAKE KEYS ###
-      case req @ Method.POST -> !! / "makeKey" =>
+      case req @ Method.POST -> Root / "makeKey" =>
         req.body.asString
           .tap(e => ZIO.log("makeKey"))
           .tap(e => ZIO.logTrace(s"makeKey: $e"))
@@ -138,84 +135,50 @@ object AppServer extends ZIOAppDefault {
                 ZIO.fail(DidException(WrongCurve(obtained = curve, expected = Set(Curve.X25519, Curve.Ed25519))))
           )
           .map(e => Response.text(e.toJson))
-      case req @ Method.GET -> !! / "makeKey" / "X25519" =>
+      case req @ Method.GET -> Root / "makeKey" / "X25519" =>
         KeyGenerator.makeX25519
           .mapError(e => DidException(e))
           .map(e => Response.text(e.toJson))
-      case req @ Method.GET -> !! / "makeKey" / "Ed25519" =>
+      case req @ Method.GET -> Root / "makeKey" / "Ed25519" =>
         KeyGenerator.makeEd25519
           .mapError(e => DidException(e))
           .map(e => Response.text(e.toJson))
 
-      case Method.GET -> !! / "resolver" / did =>
+      case Method.GET -> Root / "resolver" / did =>
         DIDSubject.either(did) match
-          case Left(error)  => ZIO.succeed(Response.text(error.error).setStatus(Status.BadRequest)).debug
+          case Left(error)  => ZIO.succeed(Response.text(error.error).copy(status = Status.BadRequest)).debug
           case Right(value) => ZIO.succeed(Response.text("DID:" + value)).debug
-      case req @ Method.GET -> !! => { // html.Html.fromDomElement()
+      case req @ Method.GET -> Root => { // html.Html.fromDomElement()
         val data = Source.fromResource(s"public/index.html").mkString("")
         ZIO.log("index.html") *> ZIO.succeed(Response.html(data))
       }
     } ++ Http.fromResource(s"public/favicon.ico").when {
-    case Method.GET -> !! / "favicon.ico" => true
-    case _                                => false
-  } ++ Http.fromResource(s"public/manifest.json").when {
-    case Method.GET -> !! / "manifest.json" => true
+    case Method.GET -> Root / "favicon.ico" => true
     case _                                  => false
+  } ++ Http.fromResource(s"public/manifest.json").when {
+    case Method.GET -> Root / "manifest.json" => true
+    case _                                    => false
   } ++ Http.fromResource(s"sw.js").when {
-    case Method.GET -> !! / "sw.js" => true
-    case _                          => false
+    case Method.GET -> Root / "sw.js" => true
+    case _                            => false
   } ++ {
-    //  ++ Http.fromResource(s"public/fmgp-webapp-fastopt-bundle.js").when {
-    //   case Method.GET -> !! / "public" / "fmgp-webapp-fastopt-bundle.js" => true
-    //   case _                                                             => false
-    // }
-
     Http
       .fromResource(s"public/fmgp-webapp-fastopt-bundle.js.gz") // ".gz" becuase of 0
-      .map(e =>
-        e.setHeaders(
-          Headers(
-            e.headers.filter(_.key != "content-encoding") ++ Seq(
-              Header("content-type", "application/javascript"),
-              Header("content-encoding", "gzip"),
-            )
-          )
-        )
-      )
+      .map(_.setHeaders(Headers(Header.ContentType(MediaType.application.javascript), Header.ContentEncoding.GZip)))
       .when {
-        case Method.GET -> !! / "public" / "fmgp-webapp-fastopt-bundle.js" => true
-        case _                                                             => false
+        case Method.GET -> Root / "public" / "fmgp-webapp-fastopt-bundle.js" => true
+        case _                                                               => false
       }
   } ++ {
     Http
-      .fromResource(
-        s"public/vendors-node_modules_qr-scanner_qr-scanner-worker_min_js-library.js.gz"
-      )
-      .map(e =>
-        e.setHeaders(
-          Headers(
-            e.headers.filter(_.key != "content-encoding") ++ Seq(
-              Header("content-type", "application/javascript"),
-              Header("content-encoding", "gzip"),
-            )
-          )
-        )
-      )
+      .fromResource(s"public/vendors-node_modules_qr-scanner_qr-scanner-worker_min_js-library.js.gz")
+      .map(_.setHeaders(Headers(Header.ContentType(MediaType.application.javascript), Header.ContentEncoding.GZip)))
       .when {
-        case Method.GET -> !! / "public" / "vendors-node_modules_qr-scanner_qr-scanner-worker_min_js-library.js" => true
+        case Method.GET -> Root / "public" / "vendors-node_modules_qr-scanner_qr-scanner-worker_min_js-library.js" =>
+          true
         case _ => false
       }
   }
-  // ++ {
-  //   Http.fromResource(s"public/fmgp-webapp-fastopt-bundle.js").when {
-  //     case Method.GET -> !! / "public" / path => true
-  //     // Response(
-  //     //   body = Body.fromStream(ZStream.fromIterator(Source.fromResource(s"public/$path").iter).map(_.toByte)),
-  //     //   headers = Headers(HeaderNames.contentType, HeaderValues.applicationJson),
-  //     // )
-  //     case _ => false
-  //   }
-  // }
 
   override val run = for {
     _ <- Console.printLine(
@@ -246,17 +209,12 @@ object AppServer extends ZIOAppDefault {
       }
       .map(_.flatMap(_.toIntOption).getOrElse(8080))
     _ <- ZIO.log(s"Starting server on port: $port")
-    server = {
-      val config = ServerConfig(address = new java.net.InetSocketAddress(port))
-      ServerConfig.live(config)(using Trace.empty) >>> Server.live
-    }
     client = Scope.default >>> Client.default
     inboundHub <- Hub.bounded[String](5)
     myServer <- Server
       .serve(
         (
-          Http.Empty
-            ++ app
+          app
             ++ mdocMarkdown
             ++ mdocHTML
             ++ DidPeerUniresolverDriver.resolverPeer
@@ -277,7 +235,7 @@ object AppServer extends ZIOAppDefault {
       .provideSomeLayer(client >>> MessageDispatcherJVM.layer)
       .provideSomeLayer(ZLayer.fromZIO(Ref.make[MediatorDB](MediatorDB.empty))) // TODO move into AgentByHost
       .provideSomeEnvironment { (env: ZEnvironment[Server]) => env.add(myHub) }
-      .provide(server)
+      .provide(Server.defaultWithPort(port))
       .debug
       .fork
     _ <- ZIO.log(s"Server Started")

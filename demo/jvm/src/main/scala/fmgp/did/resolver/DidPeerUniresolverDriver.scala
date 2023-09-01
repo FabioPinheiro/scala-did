@@ -4,17 +4,17 @@ import zio._
 import zio.json._
 import zio.json.ast.Json
 import zio.http._
-import zio.http.model._
 import fmgp.did.method.peer.DidPeerResolver
 import fmgp.did.comm.FROMTO
 import fmgp.crypto.error.DidFail
 import fmgp.did.DIDDocument
 import fmgp.did.uniresolver.DIDResolutionResult
+import zio.http.MediaTypes
 
 object DidPeerUniresolverDriver {
 
   val resolverPeer: Http[DidPeerResolver, Nothing, Request, Response] =
-    Http.collectZIO[Request] { case Method.GET -> !! / "resolver" / "peer" / did =>
+    Http.collectZIO[Request] { case Method.GET -> Root / "resolver" / "peer" / did =>
       for {
         resolver <- ZIO.service[DidPeerResolver]
         response <-
@@ -31,7 +31,7 @@ object DidPeerUniresolverDriver {
             .map(didResolutionResult =>
               Response(
                 status = Status.Ok,
-                headers = Headers(HeaderNames.contentType, HeaderValues.applicationJson),
+                headers = Headers(Header.ContentType(MediaType.application.json)),
                 body = Body.fromCharSequence(didResolutionResult.toJsonPretty),
               )
             )
