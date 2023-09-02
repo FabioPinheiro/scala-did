@@ -134,64 +134,92 @@ case class MediatorAgent(
       }
       .provideSomeLayer( /*resolverLayer ++ indentityLayer ++*/ protocolHandlerLayer)
 
-  // def createSocketApp(
-  //     annotationMap: Seq[LogAnnotation]
-  // ): ZIO[
-  //   MediatorAgent & Resolver & Operations & MessageDispatcher & Ref[MediatorDB],
-  //   Nothing,
-  //   zio.http.Response
-  // ] = {
-  //   val SOCKET_ID = "SocketID"
-  //   val appAux = SocketApp {
-  //     case ChannelEvent(ch, ChannelEvent.UserEventTriggered(ChannelEvent.UserEvent.HandshakeComplete)) =>
-  //       ZIO.logAnnotate(LogAnnotation(SOCKET_ID, ch.id), annotationMap: _*) {
-  //         DIDSocketManager.registerSocket(ch)
-  //       }
-  //     case ChannelEvent(ch, ChannelEvent.ChannelRead(WebSocketFrame.Text(text))) =>
-  //       ZIO.logAnnotate(LogAnnotation(SOCKET_ID, ch.id), annotationMap: _*) {
-  //         DIDSocketManager
-  //           .newMessage(ch, text)
-  //           .flatMap { case (socketID, encryptedMessage) => receiveMessage(encryptedMessage, Some(socketID)) }
-  //           .mapError(ex => DidException(ex))
-  //       }
-  //     case ChannelEvent(ch, ChannelEvent.ChannelUnregistered) =>
-  //       ZIO.logAnnotate(LogAnnotation(SOCKET_ID, ch.id), annotationMap: _*) {
-  //         DIDSocketManager.unregisterSocket(ch)
-  //       }
-  //     case channelEvent =>
-  //       ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelEvent.channel.id), annotationMap: _*) {
-  //         ZIO.logError(s"Unknown event type: ${channelEvent.event}")
-  //       }
-  //   }
-  //   appAux.toResponse.provideSomeEnvironment { (env) => env.add(env.get[MediatorAgent].didSocketManager) }
-  // }
+  def createSocketApp(
+      annotationMap: Seq[LogAnnotation]
+  ): ZIO[MediatorAgent & Resolver & Operations & MessageDispatcher & Ref[MediatorDB], Nothing, zio.http.Response] = {
+    import zio.http.ChannelEvent._
+    val SOCKET_ID = "SocketID"
+    Handler
+      .webSocket { channel => // WebSocketChannel = Channel[ChannelEvent[WebSocketFrame], ChannelEvent[WebSocketFrame]]
+        val channelId = scala.util.Random.nextLong().toString
+        channel.receiveAll {
+          case UserEventTriggered(UserEvent.HandshakeComplete) =>
+            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
+              ZIO.log(s"HandshakeComplete $channelId") *>
+                DIDSocketManager.registerSocket(channel, channelId)
+            }
+          case UserEventTriggered(UserEvent.HandshakeTimeout) =>
+            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
+              ZIO.logWarning(s"HandshakeTimeout $channelId")
+            }
+          case ChannelEvent.Registered =>
+            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
+              DIDSocketManager.registerSocket(channel, channelId)
+            }
+          case ChannelEvent.Unregistered =>
+            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
+              DIDSocketManager.unregisterSocket(channel, channelId)
+            }
+          case ChannelEvent.Read(WebSocketFrame.Text(text)) =>
+            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
+              DIDSocketManager
+                .newMessage(channel, text, channelId)
+                .flatMap { case (socketID, encryptedMessage) => receiveMessage(encryptedMessage, Some(socketID)) }
+                .mapError(ex => DidException(ex))
+            }
+          case ChannelEvent.Read(any) =>
+            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
+              ZIO.logError(s"Unknown event type from '${channelId}': " + any.getClass())
+            }
+          case ChannelEvent.ExceptionCaught(ex) =>
+            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
+              ZIO.log(ex.getMessage())
+            }
+        }
+      }
+      .toResponse
+      .provideSomeEnvironment { (env) => env.add(env.get[MediatorAgent].didSocketManager) }
+  }
 
-  // def websocketListenerApp(
-  //     annotationMap: Seq[LogAnnotation]
-  // ): ZIO[MediatorAgent & Operations & MessageDispatcher, Nothing, zio.http.Response] = {
-  //   val SOCKET_ID = "SocketID"
-  //   SocketApp {
-  //     case ChannelEvent(ch, ChannelEvent.UserEventTriggered(ChannelEvent.UserEvent.HandshakeComplete)) =>
-  //       ZIO.logAnnotate(LogAnnotation(SOCKET_ID, ch.id), annotationMap: _*) {
-  //         // ch.writeAndFlush(WebSocketFrame.text("Greetings!")) *>
-  //         //   ch.writeAndFlush(WebSocketFrame.text(s"Tap into ${id.did}")) *>
-  //         DIDSocketManager.tapSocket(id, ch)
-  //       }
-  //     case ChannelEvent(ch, ChannelEvent.ChannelRead(WebSocketFrame.Text(text))) =>
-  //       ZIO.logAnnotate(LogAnnotation(SOCKET_ID, ch.id), annotationMap: _*) {
-  //         ZIO.logWarning(s"Ignored Message from '${ch.id}'")
-  //       }
-  //     case ChannelEvent(ch, ChannelEvent.ChannelUnregistered) =>
-  //       ZIO.logAnnotate(LogAnnotation(SOCKET_ID, ch.id), annotationMap: _*) {
-  //         DIDSocketManager.unregisterSocket(ch)
-  //       }
-  //     case channelEvent =>
-  //       ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelEvent.channel.id), annotationMap: _*) {
-  //         ZIO.logError(s"Unknown event type: ${channelEvent.event}")
-  //       }
-  //   }.toResponse
-  //     .provideSomeEnvironment { (env) => env.add(env.get[MediatorAgent].didSocketManager) }
-  // }
+  def websocketListenerApp(
+      annotationMap: Seq[LogAnnotation]
+  ): ZIO[MediatorAgent & Operations & MessageDispatcher, Nothing, zio.http.Response] = {
+    import zio.http.ChannelEvent._
+    val SOCKET_ID = "SocketID"
+    Handler
+      .webSocket { channel => // WebSocketChannel = Channel[ChannelEvent[WebSocketFrame], ChannelEvent[WebSocketFrame]]
+        val channelId = scala.util.Random.nextLong().toString
+        channel.receiveAll {
+          case UserEventTriggered(UserEvent.HandshakeComplete) =>
+            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
+              ZIO.log(s"HandshakeComplete $channelId") *>
+                DIDSocketManager.tapSocket(id, channel, channelId)
+            }
+          case UserEventTriggered(UserEvent.HandshakeTimeout) =>
+            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
+              ZIO.logWarning(s"HandshakeTimeout $channelId")
+            }
+          case ChannelEvent.Registered =>
+            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
+              DIDSocketManager.registerSocket(channel, channelId)
+            }
+          case ChannelEvent.Unregistered =>
+            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
+              DIDSocketManager.unregisterSocket(channel, channelId)
+            }
+          case ChannelEvent.Read(any) =>
+            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
+              ZIO.logWarning(s"Ignored Message from '${channelId}'")
+            }
+          case ChannelEvent.ExceptionCaught(ex) =>
+            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
+              ZIO.log(ex.getMessage())
+            }
+        }
+      }
+      .toResponse
+      .provideSomeEnvironment { (env) => env.add(env.get[MediatorAgent].didSocketManager) }
+  }
 }
 
 object MediatorAgent {
@@ -208,26 +236,24 @@ object MediatorAgent {
 
   def didCommApp = {
     Http.collectZIO[Request] {
-      // FIXME
-      // case req @ Method.GET -> Root
-      //     if req
-      //       .header(Header.ContentType)
-      //       .exists { h =>
-      //         h.mediaType.mainType == MediaTypes.mainType &&
-      //         (h.mediaType.subType == MediaTypes.SIGNED.subType || h.mediaType.subType == MediaTypes.ENCRYPTED.subType)
-      //       } =>
-      //   for {
-      //     agent <- ZIO.service[MediatorAgent]
-      //     annotationMap <- ZIO.logAnnotations.map(_.map(e => LogAnnotation(e._1, e._2)).toSeq)
-      //     ret <- agent.createSocketApp(annotationMap)
-      //   } yield (ret)
-      // FIXME
-      // case Method.GET -> Root / "tap" => // TODO only on dev mode
-      //   for {
-      //     agent <- ZIO.service[MediatorAgent]
-      //     annotationMap <- ZIO.logAnnotations.map(_.map(e => LogAnnotation(e._1, e._2)).toSeq)
-      //     ret <- agent.websocketListenerApp(annotationMap)
-      // } yield (ret)
+      case req @ Method.GET -> Root
+          if req
+            .header(Header.ContentType)
+            .exists { h =>
+              h.mediaType.mainType == MediaTypes.mainType &&
+              (h.mediaType.subType == MediaTypes.SIGNED.subType || h.mediaType.subType == MediaTypes.ENCRYPTED.subType)
+            } =>
+        for {
+          agent <- ZIO.service[MediatorAgent]
+          annotationMap <- ZIO.logAnnotations.map(_.map(e => LogAnnotation(e._1, e._2)).toSeq)
+          ret <- agent.createSocketApp(annotationMap)
+        } yield (ret)
+      case Method.GET -> Root / "tap" => // TODO only on dev mode
+        for {
+          agent <- ZIO.service[MediatorAgent]
+          annotationMap <- ZIO.logAnnotations.map(_.map(e => LogAnnotation(e._1, e._2)).toSeq)
+          ret <- agent.websocketListenerApp(annotationMap)
+        } yield (ret)
       case req @ Method.POST -> Root
           if req
             .header(Header.ContentType)
@@ -274,15 +300,5 @@ object MediatorAgent {
         allowedMethods = AccessControlAllowMethods(Method.GET, Method.POST, Method.OPTIONS),
       )
     )
-  // TODO TEST NAME REMOVE
-  // @@ HttpAppMiddleware.updateHeaders(headers =>
-  //   Headers(
-  //     headers.map(h =>
-  //       if (h.key == HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN) {
-  //         Header(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*")
-  //       } else h
-  //     )
-  //   )
-  // )
 
 }

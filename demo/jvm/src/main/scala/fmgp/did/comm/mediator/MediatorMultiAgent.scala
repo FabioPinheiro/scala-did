@@ -299,14 +299,4 @@ object MediatorMultiAgent {
         allowedMethods = AccessControlAllowMethods(Method.GET, Method.POST, Method.OPTIONS),
       )
     )
-  // TODO TEST NAME REMOVE
-  // @@ HttpAppMiddleware.updateHeaders(headers =>
-  //   Headers(
-  //     headers.map(h =>
-  //       if (h.key == HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN) {
-  //         Header(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*")
-  //       } else h
-  //     )
-  //   )
-  // )
 }
