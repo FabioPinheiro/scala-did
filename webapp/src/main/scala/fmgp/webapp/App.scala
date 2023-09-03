@@ -70,7 +70,7 @@ object App {
     .collectStatic(NFCScannerPage)(NFCScannerTool())
     .collectStatic(DocPage)(Doc())
     .collectStatic(AgentManagementPage)(AgentManagement())
-    .collectStatic(AgentDBPage)(AgentDB())
+    // .collectStatic(AgentDBPage)(AgentDB())
     .collectStatic(AgentMessageStoragePage)(AgentMessageStorage())
     .collectSignal[ResolverPage](page => ResolverTool(page))
     .collectStatic(EncryptPage)(EncryptTool())
@@ -94,7 +94,7 @@ object App {
     TrustPingPage,
     AgentManagementPage,
     TapIntoStreamPage,
-    AgentDBPage,
+    // AgentDBPage,
     AgentMessageStoragePage,
     DocPage,
     MediatorPage,

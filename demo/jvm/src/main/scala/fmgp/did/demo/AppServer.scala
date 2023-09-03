@@ -22,6 +22,7 @@ import fmgp.did.method.DidPeerUniresolverDriver
 import fmgp.did.method.peer.DidPeerResolver
 import fmgp.crypto.Curve
 import fmgp.crypto.KeyGenerator
+import fmgp.util.MiddlewareUtils
 
 /** demoJVM/runMain fmgp.did.demo.AppServer
   *
@@ -61,7 +62,7 @@ object AppServer extends ZIOAppDefault {
   }
 
   val app: HttpApp[ // type HttpApp[-R, +Err] = Http[R, Err, Request, Response]
-    Hub[String] & AgentByHost & Operations & MessageDispatcher & Ref[MediatorDB] & DidPeerResolver,
+    Hub[String] & AgentByHost & Operations & MessageDispatcher & DidPeerResolver,
     Throwable
   ] = MediatorMultiAgent.didCommApp ++ Http
     .collectZIO[Request] {
@@ -79,13 +80,6 @@ object AppServer extends ZIOAppDefault {
             case Right(OutOfBandPlaintext(msg, data)) => Response.json(msg.toJsonPretty)
             case Right(OutOfBandSigned(msg, data))    => Response.json(msg.payload.content)
           )
-        } yield (ret)
-      case req @ Method.GET -> Root / "db" =>
-        for {
-          _ <- ZIO.log("db")
-          agent <- AgentByHost.getAgentFor(req)
-          db <- agent.messageDB.get
-          ret <- ZIO.succeed(Response.json(db.toJsonPretty))
         } yield (ret)
       case req @ Method.GET -> Root / "socket" =>
         for {
@@ -228,7 +222,6 @@ object AppServer extends ZIOAppDefault {
       .provideSomeLayer(AgentByHost.layer)
       .provideSomeLayer(Operations.layerDefault)
       .provideSomeLayer(client >>> MessageDispatcherJVM.layer)
-      .provideSomeLayer(ZLayer.fromZIO(Ref.make[MediatorDB](MediatorDB.empty))) // TODO move into AgentByHost
       .provideSomeEnvironment { (env: ZEnvironment[Server]) => env.add(myHub) }
       .provide(Server.defaultWithPort(port))
       .debug

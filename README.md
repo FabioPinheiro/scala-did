@@ -25,6 +25,16 @@ The future version of [**DID Comm v2.1**](https://identity.foundation/didcomm-me
 - [docs](docs/) - Base folder of the library documentation website.
   - [docs/readme.md - **Scala-DID Documentation**](docs/readme.md)
 
+## Adopters
+
+Following is a partial list of companies and project using DID Comm to craft applications.
+
+Want to see your project here? [Submit a PR]
+
+- [DID Comm - Playground](https://did.fmgp.app/)
+- [Atala PRISM](https://atalaprism.io/)
+  - [DID Comm Mediator](https://github.com/input-output-hk/atala-prism-mediator)
+
 ## Protocols
 - [WIP] `Routing`- https://didcomm.org/routing/2.0
   - Also see https://didcomm.org/book/v2/routing
@@ -65,14 +75,12 @@ The future version of [**DID Comm v2.1**](https://identity.foundation/didcomm-me
   - support `sub` `iss` on JWT https://datatracker.ietf.org/doc/html/rfc7519
 - create module for protocols
 - routing:
-  - implement a mediator [WIP]
-    - [WIP] websocket
+  - implement utilities for DID Agents [WIP]
     - [DONE] HTTP POST
     - [WIP] push notification
-  - implement a relay
-    - [WIP-stop] NFC
     - [WIP] websocket
-    - bluetooth
+    - [WIP-stop] NFC
+    - [TODO] bluetooth
 - maybe implement method `did:peer.3` (this is an extension)
 - maybe implement method `did:jwk` https://github.com/quartzjer/did-jwk
 - maybe implement methods ["KERI lite"](https://docs.google.com/presentation/d/1ksqVxeCAvqLjr67htWZ4JYaSnI8TUZIO7tDMF5npHTo/edit#slide=id.g1ca1fd90f33_0_0)
@@ -98,30 +106,30 @@ I usually say if it compiles it probably also works!
 flowchart BT
 
   zhttp --> zio
-  zio-json --> zio
   did --> zio
+  zio-json --> zio
   did --> zio-json
   did-mediator ---> zhttp:::JVM
+  did-mediator --> did 
   did-resolver-web ----> zhttp:::JVM
-  
-  did-example ----> did
-  did-example --> did-imp
-  demo --> did-imp 
 
   subgraph fmgp libraries
-    did-mediator --> did 
+    did-resolver-peer --> multibase
     subgraph platform specific
       did-imp
       did-imp-hw:::Others -.-> did-imp
       did-imp_js:::JS ==>|compiles together| did-imp
       did-imp_jvm:::JVM ==>|compiles together| did-imp
     end
-    did-resolver-peer --> multibase
     did-resolver-peer --> did
     did-resolver-web --> did
     did-extra --> did
     did-imp --> did
   end
+
+  did-example ----> did
+  did-example --> did-imp
+  demo --> did-imp 
 
   did-imp_jvm:::JVM ----> nimbus-jose-jwt:::JVM --> google-tink:::JVM
   did-imp_jvm:::JVM ---> google-tink
@@ -129,10 +137,10 @@ flowchart BT
   did-imp_js ----> jose:::JS
 
   %% subgraph demo/docs
-    demo --> did-mediator
+    webapp:::JS --> did-extra
+    demo --> did-extra
     demo --> did-resolver-web
     demo --> did-resolver-peer
-    webapp:::JS --> did-mediator
     webapp:::JS --> did-imp_js
     webapp:::JS  --> did-resolver-web
     webapp:::JS  --> did-resolver-peer

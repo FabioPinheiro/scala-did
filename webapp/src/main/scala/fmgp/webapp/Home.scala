@@ -36,13 +36,13 @@ object Home {
         MyRouter.navigateTo(MyRouter.TapIntoStreamPage),
         " (tap into all Alice's income messages)"
       ),
-      p(
-        "Navigate to ",
-        b("Message DB"),
-        " (only works for alice, bob and charlie)",
-        MyRouter.navigateTo(MyRouter.AgentDBPage)
-      ),
-      p("Navigate to ", b("Agent Message DB"), MyRouter.navigateTo(MyRouter.AgentDBPage)),
+      // p(
+      //   "Navigate to ",
+      //   b("Message DB"),
+      //   " (only works for alice, bob and charlie)",
+      //   MyRouter.navigateTo(MyRouter.AgentDBPage)
+      // ),
+      // p("Navigate to ", b("Agent Message DB"), MyRouter.navigateTo(MyRouter.AgentDBPage)),
       p("Navigate to ", b("Mediator (Alice)"), MyRouter.navigateTo(MyRouter.MediatorPage)),
       p("Navigate to ", b("Agent Management"), MyRouter.navigateTo(MyRouter.AgentManagementPage)),
       p("Navigate to ", b("Documentation for scala-did lib"), MyRouter.navigateTo(MyRouter.MediatorPage)),

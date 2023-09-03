@@ -292,6 +292,7 @@ lazy val root = project
   .settings(publish / skip := true)
   .aggregate(did.js, did.jvm) // publish
   .aggregate(didExtra.js, didExtra.jvm) // publish
+  .aggregate(didExperiments.js, didExperiments.jvm) // NOT publish
   .aggregate(didImp.js, didImp.jvm) // publish
   .aggregate(multiformats.js, multiformats.jvm) // publish
   .aggregate(didResolverPeer.js, didResolverPeer.jvm) // publish
@@ -299,6 +300,7 @@ lazy val root = project
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
   .aggregate(didExample.js, didExample.jvm)
   .aggregate(demo.jvm, demo.js)
+  .aggregate(mediator.jvm, mediator.js)
   .aggregate(webapp, serviceworker)
 
 lazy val did = crossProject(JSPlatform, JVMPlatform)
@@ -319,16 +321,30 @@ lazy val did = crossProject(JSPlatform, JVMPlatform)
   )
   .configure(docConfigure)
 
-lazy val didExtra = crossProject(JSPlatform, JVMPlatform)
-  .in(file("did-extra"))
-  .configure(notYetPublishedConfigure)
+lazy val didExperiments = crossProject(JSPlatform, JVMPlatform)
+  .in(file("did-experiments"))
+  .settings(publish / skip := true)
   .settings(Test / scalacOptions -= "-Ysafe-init") // TODO REMOVE Cannot prove the method argument is hot.
   .settings(
-    name := "did-extra",
+    name := "did-experiments",
     libraryDependencies += D.zioPrelude.value, // just for the hash (is this over power?)
     libraryDependencies += D.zioMunitTest.value,
   )
   .dependsOn(did % "compile;test->test")
+  .jsConfigure(scalaJSBundlerConfigure) // Because of didJS now uses NPM libs
+  .configure(docConfigure)
+
+lazy val didExtra = crossProject(JSPlatform, JVMPlatform)
+  .in(file("did-extra"))
+  .configure(notYetPublishedConfigure) // FIXME
+  .settings(
+    name := "did-extra",
+    libraryDependencies += D.zioMunitTest.value,
+  )
+  .dependsOn(did % "compile;test->test")
+  .jvmSettings(
+    libraryDependencies += D.ziohttp.value,
+  )
   .jsConfigure(scalaJSBundlerConfigure) // Because of didJS now uses NPM libs
   .configure(docConfigure)
 
@@ -462,7 +478,7 @@ lazy val webapp = project
   .settings(name := "fmgp-webapp")
   .configure(scalaJSBundlerConfigure)
   .configure(buildInfoConfigure)
-  .dependsOn(did.js, didExample.js, mediator.js)
+  .dependsOn(did.js, didExample.js)
   .dependsOn(serviceworker)
   .settings(
     libraryDependencies ++= Seq(D.laminar.value, D.waypoint.value, D.upickle.value),
@@ -486,16 +502,7 @@ lazy val webapp = project
 lazy val didExample = crossProject(JSPlatform, JVMPlatform)
   .in(file("did-example"))
   .settings(publish / skip := true)
-  .dependsOn(did, didImp, didResolverPeer, didResolverWeb, didUniresolver)
-
-lazy val httpUtils = crossProject(JSPlatform, JVMPlatform) // project
-  .in(file("http-utils"))
-  .settings(publish / skip := true)
-  .settings(name := "zhttp-utils")
-  .jvmSettings(
-    libraryDependencies += D.ziohttp.value,
-  )
-  .dependsOn(did)
+  .dependsOn(did, didImp, didExtra, didResolverPeer, didResolverWeb, didUniresolver)
 
 lazy val mediator = crossProject(JSPlatform, JVMPlatform)
   .in(file("did-mediator"))
@@ -504,8 +511,7 @@ lazy val mediator = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     libraryDependencies += D.ziohttp.value,
   )
-  // .jvmConfigure(e => e.dependsOn(httpUtils))
-  .dependsOn(did, didImp, didResolverPeer, httpUtils)
+  .dependsOn(did, didImp, didExtra, didResolverPeer)
 
 lazy val demo = crossProject(JSPlatform, JVMPlatform)
   .in(file("demo"))
@@ -540,7 +546,7 @@ lazy val demo = crossProject(JSPlatform, JVMPlatform)
     Assets / WebKeys.packagePrefix := "public/",
     Runtime / managedClasspath += (Assets / packageBin).value,
   )
-  .dependsOn(did, didImp, didResolverPeer, didResolverWeb, didUniresolver, didExample, httpUtils, mediator)
+  .dependsOn(did, didImp, didExtra, didResolverPeer, didResolverWeb, didUniresolver, didExample)
   .enablePlugins(WebScalaJSBundlerPlugin)
 
 val webjarsPattern = "(META-INF/resources/webjars/.*)".r

@@ -1,3 +1,4 @@
+/*
 package fmgp.webapp
 
 import org.scalajs.dom
@@ -21,7 +22,7 @@ import fmgp.did.method.peer.DidPeerResolver
 import fmgp.crypto.error._
 
 import fmgp.did.AgentProvider
-import fmgp.did.{HashEncryptedMessage, MessageDB}
+// import fmgp.did.HashEncryptedMessage, MessageDB}
 object AgentDB {
   val dbVar: Var[Option[MessageDB]] = Var(initial = None)
 
@@ -111,3 +112,4 @@ object AgentDB {
 
   def apply(): HtmlElement = rootElement
 }
+ */

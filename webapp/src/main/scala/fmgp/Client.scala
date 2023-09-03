@@ -14,7 +14,6 @@ import fmgp.webapp.Global
 import fmgp.did.comm.EncryptedMessage
 
 import fmgp._
-import fmgp.did.MessageDB
 
 @scala.scalajs.js.annotation.JSExportTopLevel("HttpClient")
 object Client {
@@ -33,22 +32,22 @@ object Client {
     ) // .getOrThrowFiberFailure()
   }
 
-  // curl 'http://localhost:8080/db' -H "host: alice.did.fmgp.app"
-  def getDB(url: String = "/db"): IO[DidFail, Option[MessageDB]] =
-    Global.agent2Host match
-      case None =>
-        ZIO.succeed(None)
-      case Some(value) =>
-        val header = new Headers()
-        header.append("x-forwarded-host", value)
-        ZIO
-          .fromPromiseJS(fetch(url, new RequestInit { method = HttpMethod.GET; headers = header }))
-          .flatMap(e => ZIO.fromPromiseJS(e.text()))
-          .catchAll(ex => ZIO.fail(SomeThrowable(ex)))
-          .flatMap(_.fromJson[MessageDB] match
-            case Left(error) => ZIO.fail(FailToParse(error))
-            case Right(db)   => ZIO.succeed(Some(db))
-          )
+  // // curl 'http://localhost:8080/db' -H "host: alice.did.fmgp.app"
+  // def getDB(url: String = "/db"): IO[DidFail, Option[MessageDB]] =
+  //   Global.agent2Host match
+  //     case None =>
+  //       ZIO.succeed(None)
+  //     case Some(value) =>
+  //       val header = new Headers()
+  //       header.append("x-forwarded-host", value)
+  //       ZIO
+  //         .fromPromiseJS(fetch(url, new RequestInit { method = HttpMethod.GET; headers = header }))
+  //         .flatMap(e => ZIO.fromPromiseJS(e.text()))
+  //         .catchAll(ex => ZIO.fail(SomeThrowable(ex)))
+  //         .flatMap(_.fromJson[MessageDB] match
+  //           case Left(error) => ZIO.fail(FailToParse(error))
+  //           case Right(db)   => ZIO.succeed(Some(db))
+  //         )
 
   def makeOps(
       data: String,
