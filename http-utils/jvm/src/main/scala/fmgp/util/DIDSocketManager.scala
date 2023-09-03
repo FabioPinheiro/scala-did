@@ -2,8 +2,8 @@ package fmgp.util
 
 import zio._
 import zio.json._
-import zio.http.{Channel, ChannelEvent}
-import zio.http.socket._
+import zio.http._
+import zio.http.ChannelEvent.Read
 import zio.stream._
 
 import fmgp.did._
@@ -58,40 +58,39 @@ object DIDSocketManager {
 
   def make = Ref.make(DIDSocketManager())
 
-  def tapSocket(didSubject: DIDSubject, channel: Channel[WebSocketFrame]) =
+  def tapSocket(didSubject: DIDSubject, channel: WebSocketChannel, channelId: String) =
     for {
       socketManager <- ZIO.service[Ref[DIDSocketManager]]
       hub <- Hub.bounded[String](outBoundSize)
-      myChannel = MyChannel(channel.id, hub)
-      _ <- socketManager.update { _.registerSocket(myChannel).tap(socketID = channel.id) }
-      sink = ZSink.foreach((value: String) => channel.writeAndFlush(WebSocketFrame.text(value)))
+      myChannel = MyChannel(channelId, hub)
+      _ <- socketManager.update { _.registerSocket(myChannel).tap(socketID = channelId) }
+      sink = ZSink.foreach((value: String) => channel.send(Read(WebSocketFrame.text(value))))
       _ <- ZIO.log(s"Tapping into channel")
       _ <- ZStream.fromHub(myChannel.socketOutHub).run(sink) // TODO .fork does not work!!!
       _ <- ZIO.log(s"Tap channel concluded")
     } yield ()
 
-  def registerSocket(channel: Channel[WebSocketFrame]) =
+  def registerSocket(channel: WebSocketChannel, channelId: String) =
     for {
       socketManager <- ZIO.service[Ref[DIDSocketManager]]
       hub <- Hub.bounded[String](outBoundSize)
-      myChannel = MyChannel(channel.id, hub)
+      myChannel = MyChannel(channelId, hub)
       _ <- socketManager.update { _.registerSocket(myChannel) }
-      sink = ZSink.foreach((value: String) => channel.writeAndFlush(WebSocketFrame.text(value)))
+      sink = ZSink.foreach((value: String) => channel.send(Read(WebSocketFrame.text(value))))
       _ <- ZIO.log(s"Registering channel")
       _ <- ZStream.fromHub(myChannel.socketOutHub).run(sink) // TODO .fork does not work!!!
       _ <- ZIO.log(s"Channel concluded")
     } yield ()
 
-  def newMessage(channel: Channel[WebSocketFrame], data: String) =
+  def newMessage(channel: WebSocketChannel, data: String, channelId: String) =
     for {
       socketManager <- ZIO.service[Ref[DIDSocketManager]]
-      id = channel.id
-    } yield (id, data)
+    } yield (channelId, data)
 
-  def unregisterSocket(channel: Channel[WebSocketFrame]) =
+  def unregisterSocket(channel: WebSocketChannel, channelId: String) =
     for {
       socketManager <- ZIO.service[Ref[DIDSocketManager]]
-      _ <- socketManager.update { case sm: DIDSocketManager => sm.unregisterSocket(channel.id) }
+      _ <- socketManager.update { case sm: DIDSocketManager => sm.unregisterSocket(channelId) }
       _ <- ZIO.log(s"Channel unregisterSocket")
     } yield ()
 

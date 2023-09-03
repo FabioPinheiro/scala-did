@@ -4,8 +4,6 @@ import zio._
 import zio.json._
 import zio.stream._
 import zio.http._
-import zio.http.model._
-import zio.http.socket._
 import zio.http.ZClient.ClientLive
 import zio.http.Http.Empty
 import zio.http.Http.Static
@@ -28,7 +26,7 @@ object MediatorStandalone extends ZIOAppDefault {
     Throwable
   ] = MediatorAgent.didCommApp
     ++ Http
-      .collectZIO[Request] { case Method.GET -> !! / "hello" =>
+      .collectZIO[Request] { case Method.GET -> Root / "hello" =>
         ZIO.succeed(Response.text("Hello World! DID Comm Mediator APP")).debug
       }
 
@@ -94,15 +92,11 @@ object MediatorStandalone extends ZIOAppDefault {
       }
       .map(_.flatMap(_.toIntOption).getOrElse(8080))
     _ <- ZIO.log(s"Starting server on port: $port")
-    server = {
-      val config = ServerConfig(address = new java.net.InetSocketAddress(port))
-      ServerConfig.live(config)(using Trace.empty) >>> Server.live
-    }
     client = Scope.default >>> Client.default
     inboundHub <- Hub.bounded[String](5)
     myServer <- Server
       .serve(
-        app.annotateLogs
+        (app @@ MiddlewareUtils.all)
           .tapUnhandledZIO(ZIO.logError("Unhandled Endpoint"))
           .tapErrorCauseZIO(cause => ZIO.logErrorCause(cause)) // THIS is to log all the erros
           .mapError(err =>
@@ -119,7 +113,7 @@ object MediatorStandalone extends ZIOAppDefault {
       .provideSomeLayer(client >>> MessageDispatcherJVM.layer)
       .provideSomeLayer(ZLayer.fromZIO(Ref.make[MediatorDB](MediatorDB.empty))) // TODO move into AgentByHost
       .provideSomeEnvironment { (env: ZEnvironment[Server]) => env.add(myHub) }
-      .provide(server)
+      .provide(Server.defaultWithPort(port))
       .debug
       .fork
     _ <- ZIO.log(s"Mediator Started")

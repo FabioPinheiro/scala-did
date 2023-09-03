@@ -9,8 +9,7 @@ import fmgp.crypto.error._
 import fmgp.did._
 import fmgp.did.comm._
 import fmgp.did.comm.mediator.MediatorMultiAgent
-import zio.http.model.Headers
-import zio.http.model.headers.HeaderNames
+import zio.http.Header
 
 object MyHeaders { // extends HeaderNames {
   final val xForwardedHost: CharSequence = "x-forwarded-host"
@@ -37,13 +36,13 @@ object AgentByHost {
   def hostFromRequest(req: Request): Option[Host] =
     req.headers
       .get(MyHeaders.xForwardedHost)
-      .orElse(req.headers.host)
-      .map(_.toString) // CharSequence -> String
+      .map(_.toString()) // CharSequence -> String
       .map { // A bit of a hack to support a not standards http client
         case str if str.endsWith(":443") => str.dropRight(4)
         case str if str.endsWith(":80")  => str.dropRight(3)
         case str                         => str
       }
+      .orElse(req.header(Header.Host).map(_.hostAddress))
       .map(Host(_))
 
   val layer = ZLayer(
