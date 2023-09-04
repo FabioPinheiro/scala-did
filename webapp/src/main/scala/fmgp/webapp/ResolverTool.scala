@@ -26,7 +26,7 @@ object ResolverTool {
   val resolverLayer = ZLayer.succeed(
     MultiResolver(
       HardcodeResolver.default,
-      Uniresolver.default,
+      // Uniresolver.default, //FIX -> has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource
       DidPeerResolver.default,
     )
   )
@@ -62,8 +62,9 @@ object ResolverTool {
     },
     code("DID Resolver Page"),
     p(
-      "Supports 'did:peer' and any did method on the  ",
-      a(href := "https://dev.uniresolver.io/", target := "_blank", "Universal Resolver")
+      "The supports any did method from the ",
+      a(href := "https://dev.uniresolver.io/", target := "_blank", "Universal Resolver"),
+      " is disabled due to the CORS policy been blocked. But is still access directly."
     ),
     p(
       "Agent: ",
