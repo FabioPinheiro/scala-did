@@ -284,6 +284,7 @@ addCommandAlias(
 )
 addCommandAlias("testAll", ";testJVM;testJS")
 addCommandAlias("compileAll", "docs/mdoc;serviceworker/fastLinkJS;compile")
+addCommandAlias("assemblyAll", "docs/mdoc;serviceworker/fastLinkJS;compile;demoJVM/assembly")
 addCommandAlias("cleanAll", "clean;docs/clean")
 addCommandAlias("live", "compileAll;~demoJVM/reStart")
 
