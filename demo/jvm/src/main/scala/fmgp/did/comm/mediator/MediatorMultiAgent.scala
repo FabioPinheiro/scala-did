@@ -219,10 +219,15 @@ object MediatorMultiAgent {
     Http.collectZIO[Request] {
       case req @ Method.GET -> Root
           if req
-            .header(Header.ContentType)
+            // FIXME after https://github.com/zio/zio-http/issues/2416
+            // .header(Header.ContentType)
+            // .exists { h =>
+            //   h.mediaType.mainType == MediaTypes.mainType &&
+            //   (h.mediaType.subType == MediaTypes.SIGNED.subType || h.mediaType.subType == MediaTypes.ENCRYPTED.subType)
+            .headers
+            .get("content-type")
             .exists { h =>
-              h.mediaType.mainType == MediaTypes.mainType &&
-              (h.mediaType.subType == MediaTypes.SIGNED.subType || h.mediaType.subType == MediaTypes.ENCRYPTED.subType)
+              h == MediaTypes.SIGNED.typ || h == MediaTypes.ENCRYPTED.typ
             } =>
         for {
           agent <- AgentByHost.getAgentFor(req)
@@ -241,10 +246,15 @@ object MediatorMultiAgent {
         } yield (ret)
       case req @ Method.POST -> Root
           if req
-            .header(Header.ContentType)
+            // FIXME after https://github.com/zio/zio-http/issues/2416
+            // .header(Header.ContentType)
+            // .exists { h =>
+            //   h.mediaType.mainType == MediaTypes.mainType &&
+            //   (h.mediaType.subType == MediaTypes.SIGNED.subType || h.mediaType.subType == MediaTypes.ENCRYPTED.subType)
+            .headers
+            .get("content-type")
             .exists { h =>
-              h.mediaType.mainType == MediaTypes.mainType &&
-              (h.mediaType.subType == MediaTypes.SIGNED.subType || h.mediaType.subType == MediaTypes.ENCRYPTED.subType)
+              h == MediaTypes.SIGNED.typ || h == MediaTypes.ENCRYPTED.typ
             } =>
         for {
           agent <- AgentByHost.getAgentFor(req)
