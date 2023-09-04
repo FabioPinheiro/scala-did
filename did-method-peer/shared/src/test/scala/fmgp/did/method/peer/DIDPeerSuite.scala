@@ -31,6 +31,14 @@ class DIDPeerSuite extends ZSuite {
     assert(DIDPeer.regexPeer2.matches(d))
   }
 
+  test("Check regex for peer (method 2) - aliceWithMultiService") {
+    val d = aliceWithMultiService
+    assert(DIDPeer.regexPeer.matches(d))
+    assert(!DIDPeer.regexPeer0.matches(d))
+    assert(!DIDPeer.regexPeer1.matches(d))
+    assert(DIDPeer.regexPeer2.matches(d))
+  }
+
   test("Create DIDPeer apply ex5_peer1") {
     val s = DIDSubject(ex5_peer1)
     DIDPeer.fromDID(s) match
@@ -141,6 +149,27 @@ class DIDPeerSuite extends ZSuite {
       case obj @ DIDPeer2(elements) =>
         assertEquals(obj.did, testDid(service))
         assertNotEquals(obj.did, testDid(defaultService))
+  }
+
+  test("Support did:peer:2 with multi services (DIDCommMessaging and others types)") {
+    val s = DIDSubject(aliceWithMultiService)
+    DIDPeer2.fromDID(s) match
+      case Left(value) => fail(value)
+      case Right(did) =>
+        assertEquals(did.string, s.string)
+        assertEquals(did.document.service.toSeq.flatten.size, 4)
+        did.document.service.map(_.toSeq) match
+          case None => fail("Must have two servies instated of none")
+          case Some(Seq(s1, s2, s3, s4)) =>
+            assertEquals(s1.`type`, "DIDCommMessaging")
+            assertEquals(s2.`type`, "DIDCommMessaging")
+            assertEquals(s3.`type`, "DIDCommMessaging")
+            assertEquals(s4.`type`, "SeriveType123")
+            assert(s1.id.endsWith("#didcommmessaging-0"))
+            assert(s2.id.endsWith("#didcommmessaging-1"))
+            assert(s3.id.endsWith("#didcommmessaging-2"))
+            assert(s4.id.endsWith("#serivetype123-3"))
+          case Some(services) => fail(s"Must have only two servies instated of ${services.size}")
   }
 
 }

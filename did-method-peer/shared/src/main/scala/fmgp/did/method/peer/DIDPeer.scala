@@ -5,7 +5,6 @@ import fmgp.did._
 import fmgp.util._
 import fmgp.multibase._
 import fmgp.crypto._
-import fmgp.crypto.error.DidMethodNotSupported
 import zio.json._
 import javax.lang.model.element.Element
 import fmgp.multibase.Base.Base58BTC
@@ -72,12 +71,14 @@ case class DIDPeer2(elements: Seq[DIDPeer2.Element]) extends DIDPeer {
     ),
     service = Some(
       elements
-        .collect { case e: DIDPeer2.ElementService =>
+        .collect { case e: DIDPeer2.ElementService => e }
+        .zipWithIndex
+        .map { (e: DIDPeer2.ElementService, index) =>
           val data = String(Base64.basicDecoder.decode(e.base64))
           data
             .fromJson[DIDPeerServiceEncoded]
             .toOption // TODO deal with errors
-            .map { x => x.getDIDService(DIDSubject(this.string)) }
+            .map { x => x.getDIDService(DIDSubject(this.string), index) }
         }
         .flatten
         .toSet
@@ -184,11 +185,11 @@ object DIDPeer {
   }
 
   def regexPeer =
-    "^did:peer:(([01](z)([1-9a-km-zA-HJ-NP-Z]{46,47}))|(2((\\.[AEVID](z)([1-9a-km-zA-HJ-NP-Z]{46,47}))+(\\.(S)[0-9a-zA-Z=]*)?)))$".r
+    "^did:peer:(([01](z)([1-9a-km-zA-HJ-NP-Z]{46,47}))|(2((\\.[AEVID](z)([1-9a-km-zA-HJ-NP-Z]{46,47}))+(\\.(S)[0-9a-zA-Z=]*)*)))$".r
   def regexPeer0 = "^did:peer:(0(z)([1-9a-km-zA-HJ-NP-Z]{46,47}))$".r
   def regexPeer1 = "^did:peer:(1(z)([1-9a-km-zA-HJ-NP-Z]{46,47}))$".r
-  // #regexPeer2 = "^did:peer:(2((\\.[AEVID](z)([1-9a-km-zA-HJ-NP-Z]{46,47}))+(\\.(S)[0-9a-zA-Z=]*)?))$".r
-  def regexPeer2 = "^did:peer:2((\\.([AEVID])z([1-9a-km-zA-HJ-NP-Z]{46,47}))+(\\.(S)([0-9a-zA-Z=]*))?)$".r
+  // #regexPeer2 = "^did:peer:(2((\\.[AEVID](z)([1-9a-km-zA-HJ-NP-Z]{46,47}))+(\\.(S)[0-9a-zA-Z=]*)*))$".r
+  def regexPeer2 = "^did:peer:2((\\.([AEVID])z([1-9a-km-zA-HJ-NP-Z]{46,47}))+(\\.(S)([0-9a-zA-Z=]*))*)$".r
 
   def apply(didSubject: DIDSubject): DIDPeer = fromDID(didSubject.toDID).toOption.get // FIXME!
 

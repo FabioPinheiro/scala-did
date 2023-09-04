@@ -40,19 +40,19 @@ case class DIDPeerServiceEncoded(
     t: String = "dm",
     s: String,
     r: Option[Seq[String]] = Some(Seq.empty),
-    a: Seq[String] = Seq("didcomm/v2")
+    a: Option[Seq[String]] = Some(Seq("didcomm/v2"))
 ) {
   def `type` = t
   def serviceEndpoint = s
   def routingKeys = r
   def accept = a
 
-  def getDIDService(id: DIDSubject): DIDService = DIDServiceGeneric(
-    id = id.string + "#didcommmessaging-0",
+  def getDIDService(id: DIDSubject, index: Int): DIDService = DIDServiceGeneric(
+    id = id.string + "#" + { if (this.t == "dm") "didcommmessaging" else this.t.toLowerCase() } + "-" + index,
     `type` = if (this.t == "dm") "DIDCommMessaging" else this.t,
     serviceEndpoint = Json.Str(this.s),
     routingKeys = Some(this.r.toSet.flatten).filterNot(_.isEmpty),
-    accept = Some(this.a.toSet).filterNot(_.isEmpty),
+    accept = Some(this.a.toSet.flatten).filterNot(_.isEmpty),
   )
 }
 

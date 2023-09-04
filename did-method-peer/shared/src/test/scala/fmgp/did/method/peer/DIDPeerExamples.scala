@@ -2,6 +2,22 @@ package fmgp.did.method.peer
 
 object DIDPeerExamples {
 
+  val aliceWithMultiService =
+    """did:peer:2
+        |.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y
+        |.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd
+        |.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ
+        |.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ
+        |.SeyJ0IjoiRElEQ29tbU1lc3NhZ2luZyIsInMiOiJodHRwczovLzMuc2VydmVyLmVuZHBvaW50IiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ
+        |.SeyJ0IjoiU2VyaXZlVHlwZTEyMyIsInMiOiJodHRwczovL25ldy5zZXJ2ZXIudHlwZSJ9
+        |""".stripMargin.replaceAll("\n", "")
+
+  // Services:
+  // {"t":"dm","s":"https://alice.did.fmgp.app/","r":[],"a":["didcomm/v2"]}
+  // {"t":"dm","s":"https://alice.did.fmgp.app/","r":[],"a":["didcomm/v2"]}
+  // {"t":"DIDCommMessaging","s":"https://3.server.endpoint","r":[],"a":["didcomm/v2"]}
+  // {"t":"SeriveType123","s":"https://new.server.type"}
+
   /** see https://identity.foundation/peer-did-method-spec/#multi-key-creation
     *
     * Ez6LSbysY2xFMRpGMhb7tFTLMpeuPRaqaWM1yECx2AtzE3KCc
