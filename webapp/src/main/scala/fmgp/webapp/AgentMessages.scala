@@ -18,13 +18,6 @@ import fmgp.did.agent._
 
 object AgentMessageStorage {
 
-  val messageStorageVar = Var[MessageStorage](initial = MessageStorage.example)
-
-  def messageSend(msg: SignedMessage | EncryptedMessage, from: FROM, plaintext: PlaintextMessage) =
-    messageStorageVar.update(_.messageSend(msg, from, plaintext))
-  def messageRecive(msg: SignedMessage | EncryptedMessage, plaintext: PlaintextMessage) =
-    messageStorageVar.update(_.messageRecive(msg, plaintext))
-
   val rootElement = div(
     onMountCallback { ctx =>
       // job(ctx.owner)
@@ -40,7 +33,7 @@ object AgentMessageStorage {
       //   Some(FROM("did:peer:123456789qwertyuiopasdfghjklzxcvbnm")),
       //   "TODO WIP",
       // ),
-      children <-- Global.agentVar.signal.combineWith(messageStorageVar.signal).map {
+      children <-- Global.agentVar.signal.combineWith(Global.messageStorageVar.signal).map {
         case (None, messageStorage) => Seq()
         case (Some(agent), messageStorage) =>
           messageStorage.storageItems.reverse.map {

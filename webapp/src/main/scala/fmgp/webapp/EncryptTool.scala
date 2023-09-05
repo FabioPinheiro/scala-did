@@ -23,12 +23,20 @@ object EncryptTool {
 
   val encryptedMessageVar: Var[Option[Either[DidFail, (PlaintextMessage, EncryptedMessage)]]] = Var(initial = None)
   val signMessageVar: Var[Option[Either[DidFail, (PlaintextMessage, SignedMessage)]]] = Var(initial = None)
-  val dataTextVar = Var(initial = MessageTemplate.exPlaintextMessage.toJsonPretty)
+  val dataTextVar: Var[String] = Var(initial = MessageTemplate.exPlaintextMessage.toJsonPretty)
   val curlCommandVar: Var[Option[String]] = Var(initial = None)
   val outputFromCallVar = Var[Option[EncryptedMessage]](initial = None)
   val forwardMessageVar = Var[Option[ForwardMessage]](initial = None)
 
   def plaintextMessage = dataTextVar.signal.map(_.fromJson[PlaintextMessage])
+
+  def cleanupVars = {
+    encryptedMessageVar.set(None)
+    signMessageVar.set(None)
+    curlCommandVar.set(None)
+    outputFromCallVar.set(None)
+    forwardMessageVar.set(None)
+  }
 
   def jobNextForward(owner: Owner) = {
     def program(pMsg: PlaintextMessage, eMsg: EncryptedMessage): ZIO[Any, DidFail, Option[ForwardMessage]] = {
@@ -73,8 +81,9 @@ object EncryptTool {
       plaintextMessage
     )
     .map {
-      case (_, Left(_))                                              => encryptedMessageVar.set(None)
-      case (_, Right(pMsg)) if pMsg.to.flatMap(_.headOption).isEmpty => encryptedMessageVar.set(None)
+      case (_, Left(_))                                              => cleanupVars
+      case (_, Right(pMsg)) if pMsg.to.flatMap(_.headOption).isEmpty => cleanupVars
+      case (None, Right(pMsg)) if pMsg.from.isDefined                => cleanupVars
       case (None, Right(pMsg)) =>
         val program = OperationsClientRPC
           // .encrypt(pMsg) // always use the message data (FROM/TO) to Encrypt
@@ -87,6 +96,8 @@ object EncryptTool {
             program.provideSomeLayer(ResolverTool.resolverLayer)
           )
         }
+      case (Some(agent), Right(pMsg)) if pMsg.from.isDefined && !pMsg.from.contains(agent.id.asFROM) =>
+        cleanupVars
       case (Some(agent), Right(pMsg)) =>
         val program = OperationsClientRPC
           .encrypt(pMsg) // .authEncrypt(pMsg)
@@ -170,11 +181,7 @@ object EncryptTool {
               case Right(value) => outputFromCallVar.set(Some(value))
             }
     } yield (call)
-    Unsafe.unsafe { implicit unsafe => // Run side efect
-      Runtime.default.unsafe.fork(
-        program.provide(ResolverTool.resolverLayer)
-      )
-    }
+    program.provide(ResolverTool.resolverLayer)
   }
 
   val rootElement = div(
@@ -194,7 +201,7 @@ object EncryptTool {
     ),
     p(
       overflowWrap.:=("anywhere"),
-      "Send TO (used by Templates): ",
+      "Send TO (used by Templates only. Does not influence the encryption): ",
       Global.makeSelectElementTO(Global.recipientVar),
       " ",
       code(child.text <-- Global.recipientVar.signal.map(_.map(_.toDID.string).getOrElse(Global.noneOption))),
@@ -410,12 +417,17 @@ object EncryptTool {
             pre(code(eMsg.toJsonPretty)),
             button(
               "Copy Encrypted Message to clipboard",
-              onClick --> {
-                AgentMessageStorage.messageSend(
-                  eMsg,
-                  Global.agentVar.now().map(_.id.asFROM).getOrElse(???),
-                  plaintext
-                ) // side efect
+              onClick --> { _ =>
+                Global.agentVar
+                  .now()
+                  .map(_.id.asFROM)
+                  .map(from =>
+                    Global.messageSend(
+                      eMsg,
+                      from,
+                      plaintext
+                    ) // side efect
+                  )
                 Global.clipboardSideEffect(eMsg.toJson)
               }
             )
@@ -433,12 +445,17 @@ object EncryptTool {
             pre(code(sMsg.toJsonPretty)),
             button(
               "Copy Sign Message to clipboard",
-              onClick --> {
-                AgentMessageStorage.messageSend(
-                  sMsg,
-                  Global.agentVar.now().map(_.id.asFROM).getOrElse(???),
-                  plaintext
-                ) // side efect
+              onClick --> { _ =>
+                Global.agentVar
+                  .now()
+                  .map(_.id.asFROM)
+                  .foreach(from =>
+                    Global.messageSend(
+                      sMsg,
+                      from,
+                      plaintext
+                    ) // side efect
+                  )
                 Global.clipboardSideEffect(sMsg.toJson)
               }
             )
@@ -468,12 +485,12 @@ object EncryptTool {
                 onClick --> Sink.jsCallbackToSink(_ =>
                   encryptedMessageVar.now() match {
                     case Some(Right((plaintext, eMsg))) =>
-                      AgentMessageStorage.messageSend(
+                      Global.messageSend(
                         eMsg,
                         Global.agentVar.now().map(_.id.asFROM).getOrElse(???),
                         plaintext
                       ) // side efect
-                      curlProgram(eMsg)
+                      Global.runProgram(curlProgram(eMsg)) // side efect
                     case _ => // None
                   }
                 )

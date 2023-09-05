@@ -10,7 +10,7 @@ import com.raquo.laminar.api.L._
 import MyRouter._
 
 @JSExportTopLevel("AppUtils")
-object AppUtils {
+object AppUtils { // TODO RENAME TO UIUtils
 
   def onEnterPress = onKeyPress.filter(_.keyCode == dom.ext.KeyCode.Enter)
 

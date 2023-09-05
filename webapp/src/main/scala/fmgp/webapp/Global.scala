@@ -4,12 +4,24 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
 import org.scalajs.dom
 import com.raquo.laminar.api.L._
+import zio._
 
 import fmgp.did._
+import fmgp.did.comm._
 import fmgp.did.method.peer.DIDPeer
-import fmgp.did.comm.TO
+import fmgp.did.agent.MessageStorage
+import fmgp.crypto.error.DidFail
+import scala.util.Try
+import scala.util.Failure
+import scala.util.Success
 
 object Global {
+
+  def runProgram(program: ZIO[Any, DidFail, Unit]) = Unsafe.unsafe { implicit unsafe => // Run side efect
+    Runtime.default.unsafe.fork(
+      program
+    )
+  }
 
   val agentProvider = Var(initial = AgentProvider.provider)
   def providerNow = agentProvider.now()
@@ -71,4 +83,26 @@ object Global {
     val config = typings.mermaid.configTypeMod.MermaidConfig()
     typings.mermaid.mod.default.init(config, htmlPath)
   }
+
+  val messageStorageVar = Var[MessageStorage](initial = MessageStorage.example)
+
+  def messageSend(msg: SignedMessage | EncryptedMessage, from: FROM, plaintext: PlaintextMessage) =
+    messageStorageVar.tryUpdate {
+      case Success(messageStorage) =>
+        println(s"DEBUG: Store messageSend id: ${plaintext.id}")
+        Success(messageStorage.messageSend(msg, from, plaintext))
+      case Failure(exception) =>
+        println(s"DEBUG: Store messageSend id: ${plaintext.id} FAIL: ${exception}")
+        Failure(exception)
+    }
+  def messageRecive(msg: SignedMessage | EncryptedMessage, plaintext: PlaintextMessage) =
+    messageStorageVar.tryUpdate {
+      case Success(messageStorage) =>
+        println(s"DEBUG: Store messageRecive id: ${plaintext.id}")
+        Success(messageStorage.messageRecive(msg, plaintext))
+      case Failure(exception) =>
+        println(s"DEBUG: Store messageRecive id: ${plaintext.id} FAIL: ${exception}")
+        Failure(exception)
+    }
+
 }

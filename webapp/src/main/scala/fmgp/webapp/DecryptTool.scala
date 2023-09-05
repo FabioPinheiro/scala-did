@@ -65,12 +65,12 @@ object DecryptTool {
               decryptMessageVar.set(Some(Right(msg._2))) // side effect!
               msg match
                 case (eMsg, plaintext: PlaintextMessage) =>
-                  AgentMessageStorage.messageRecive(eMsg, plaintext) // side effect!
+                  Global.messageRecive(eMsg, plaintext) // side effect!
                 case (eMsg, sMsg: SignedMessage) =>
                   sMsg.payload.content.fromJson[Message] match
                     case Left(value) => println("ERROR: " + value)
                     case Right(plaintext: PlaintextMessage) =>
-                      AgentMessageStorage.messageRecive(eMsg, plaintext) // side effect!
+                      Global.messageRecive(eMsg, plaintext) // side effect!
                     case Right(value: SignedMessage)    => println("ERROR: Double Sign: " + value)
                     case Right(value: EncryptedMessage) => println("ERROR: Sign and Encrypted: " + value)
 

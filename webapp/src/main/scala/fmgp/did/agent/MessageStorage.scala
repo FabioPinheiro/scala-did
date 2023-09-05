@@ -19,7 +19,10 @@ case class MessageStorage(storageItems: Seq[StorageItem] = Seq.empty) {
   def messageSend(msg: SignedMessage | EncryptedMessage, from: FROM, plaintext: PlaintextMessage) =
     if (storageItems.exists(_.plaintext.id == plaintext.id)) this
     else {
-      assert(plaintext.from.isEmpty || plaintext.from.contains(from))
+      assert(
+        plaintext.from.isEmpty || plaintext.from.contains(from),
+        "When sening a message the MUST be empty or the field 'from' MUST be the same as in the PlaintextMessage"
+      )
       MessageStorage(
         storageItems = storageItems :+ StorageItem(
           original = Some(msg),
