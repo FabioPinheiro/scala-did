@@ -16,13 +16,13 @@ import typings.std.stdBooleans.`false`
 object DAppStore {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  @JSExport
-  def xxx = {
-    IpfsClient.dagGet().map {
-      case Left(l)  => "aaa"
-      case Right(r) => onStatementUpdate(r)
-    }
-  }
+  // @JSExport
+  // def xxx = {
+  //   IpfsClient.dagGet().map {
+  //     case Left(l)  => "aaa"
+  //     case Right(r) => onStatementUpdate(r)
+  //   }
+  // }
 
   val statementVar = Var[Option[Statement]](initial = None)
   def onStatementUpdate(statement: Statement): Unit = statementVar.set(Some(statement))
@@ -63,5 +63,4 @@ object DAppStore {
     println(aux)
     aux
   }
-
 }

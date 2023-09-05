@@ -169,7 +169,8 @@ lazy val NPM = new {
 
   val materialDesign = Seq("material-components-web" -> V.materialComponents)
 
-  val ipfsClient = Seq("multiformats" -> "9.6.4")
+  // val ipfsClient = Seq("multiformats" -> "9.6.4")
+  val helia = Seq("helia" -> "2.0.1") // FIXME -> https://github.com/ipfs/helia/issues/254
 
   // val nodeJose = Seq("node-jose" -> "2.1.1", "@types/node-jose" -> "1.1.10")
   // val elliptic = Seq("elliptic" -> "6.5.4", "@types/elliptic" -> "6.4.14")
@@ -484,9 +485,11 @@ lazy val webapp = project
   .settings(
     libraryDependencies ++= Seq(D.laminar.value, D.waypoint.value, D.upickle.value),
     libraryDependencies ++= Seq(D.zio.value, D.zioJson.value),
-    Compile / npmDependencies ++= NPM.mermaid ++ NPM.qrcode ++ NPM.qrcodeScanner ++ NPM.materialDesign ++ NPM.ipfsClient,
-    // ++ List("ms" -> "2.1.1"),
-    // stIgnore ++= List("ms") // https://scalablytyped.org/docs/conversion-options
+    Compile / npmDependencies ++= NPM.mermaid ++ NPM.qrcode ++ NPM.qrcodeScanner ++ NPM.materialDesign ++ NPM.helia,
+    // Compile / npmDependencies ++=  NPM.ipfsClient ++ List("ms" -> "2.1.1"),
+    // https://scalablytyped.org/docs/conversion-options
+    // stIgnore ++= List("ms")
+    stIgnore += "@noble/curves", // Because of https://github.com/ScalablyTyped/Converter/issues/558
   )
   .settings( // for doc
     libraryDependencies += D.laika.value,

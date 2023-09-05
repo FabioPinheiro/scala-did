@@ -7,31 +7,31 @@ import zio.json.ast.Json
 import scala.scalajs.js
 import org.scalajs.dom
 
-@js.annotation.JSExportTopLevel("IpfsClient")
-object IpfsClient {
-  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+// @js.annotation.JSExportTopLevel("IpfsClient")
+// object IpfsClient {
+//   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  // val url = "http://localhost:5001"
-  val url = "http://192.168.1.78:9081"
+//   // val url = "http://localhost:5001"
+//   val url = "http://192.168.1.78:9081"
 
-  @js.annotation.JSExport
-  def dagGet(cid: String = "bafyreihn56com4a5yt2yjt6renhfdakx7ntkyg7huethm46inaxkd2acwi") = {
+//   @js.annotation.JSExport
+//   def dagGet(cid: String = "bafyreihn56com4a5yt2yjt6renhfdakx7ntkyg7huethm46inaxkd2acwi") = {
 
-    val requestInit =
-      js.Dynamic
-        .literal(method = dom.HttpMethod.POST)
-        .asInstanceOf[dom.RequestInit]
+//     val requestInit =
+//       js.Dynamic
+//         .literal(method = dom.HttpMethod.POST)
+//         .asInstanceOf[dom.RequestInit]
 
-    dom.Fetch
-      .fetch(s"$url/api/v0/dag/get?arg=$cid", requestInit)
-      .toFuture
-      .flatMap(_.text().toFuture)
-      .map(_.fromJson[Statement])
-    // .map(e => println(e))
+//     dom.Fetch
+//       .fetch(s"$url/api/v0/dag/get?arg=$cid", requestInit)
+//       .toFuture
+//       .flatMap(_.text().toFuture)
+//       .map(_.fromJson[Statement])
+//     // .map(e => println(e))
 
-    // {"<second-part-of-the-signedCredential>":"MEYCIQDmJrnwAbieaH9f28FDae1oMyyS-DjpNNO9NUipZd592QIhAL2tVnQbx8P-44IM1NSmvnJM49boW2Vy-_jR-pbwn1vq","credential":{"credentialSubject":{"CID":{"/":"QmX6CvErxHkuybopMsRYC3oHZvsrkbLQpYkfzCvP8nNFfi"},"category":"UPTODATE","id":"did:prism:e6dfb26d195076c6408ae479eae6a128ab6f859f0d1c296f602b3dba6a3e714b"},"id":"did:prism:e6dfb26d195076c6408ae479eae6a128ab6f859f0d1c296f602b3dba6a3e714b","keyId":"issuing0"},"proof":{"hash":"6a1c8db293ff793f086dd0544a76a09fe0ebf5ca15fee5431dab60321cec0e60","index":0,"siblings":[]}}
-  }
-}
+//     // {"<second-part-of-the-signedCredential>":"MEYCIQDmJrnwAbieaH9f28FDae1oMyyS-DjpNNO9NUipZd592QIhAL2tVnQbx8P-44IM1NSmvnJM49boW2Vy-_jR-pbwn1vq","credential":{"credentialSubject":{"CID":{"/":"QmX6CvErxHkuybopMsRYC3oHZvsrkbLQpYkfzCvP8nNFfi"},"category":"UPTODATE","id":"did:prism:e6dfb26d195076c6408ae479eae6a128ab6f859f0d1c296f602b3dba6a3e714b"},"id":"did:prism:e6dfb26d195076c6408ae479eae6a128ab6f859f0d1c296f602b3dba6a3e714b","keyId":"issuing0"},"proof":{"hash":"6a1c8db293ff793f086dd0544a76a09fe0ebf5ca15fee5431dab60321cec0e60","index":0,"siblings":[]}}
+//   }
+// }
 
 sealed trait Statements
 object Statements {
