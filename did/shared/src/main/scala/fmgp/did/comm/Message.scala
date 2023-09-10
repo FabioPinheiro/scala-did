@@ -157,7 +157,8 @@ case class SignedMessage(
   def base64noSignature = signatures.head.`protected`.base64url + "." + payload.base64url
   def base64 = base64noSignature + "." + signatures.head.signature.value
 
-  def sha1 = SHA1.digestToHex(this.toJson)
+  def sha1 = sha256 // FIXME SHA1.digestToHex(this.toJson)
+  def sha256 = SHA256.digestToHex(this.toJson)
 }
 
 object SignedMessage {
@@ -229,7 +230,8 @@ trait EncryptedMessage extends Message {
   // extra
   def recipientsSubject = recipients.map(_.recipientSubject).toSet
   def recipientsKid = recipients.map(_.recipientKid).toSet
-  def sha1 = SHA1.digestToHex(this.toJson)
+  def sha1 = sha256 // FIXME
+  def sha256 = SHA256.digestToHex(this.toJson)
 }
 
 // trait AnonEncryptedMessage //TODO and make EncryptedMessage a sealed trait

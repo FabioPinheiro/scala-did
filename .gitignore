@@ -6,6 +6,7 @@ project/metals.sbt
 project/project/
 target/
 node_modules/
+dist/
 
 **/yarn.lock
 

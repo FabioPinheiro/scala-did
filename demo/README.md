@@ -53,3 +53,7 @@ docker push registry.fly.io/scala-did-demo # +- 52MB
 flyctl image update -a scala-did-demo
 # FIXME: Error image is not eligible for automated image updates
 ```
+
+## Others
+
+jar tvf demo/jvm/target/scala-3.3.0/scala-did-demo-server.jar | sort -k1nr | less

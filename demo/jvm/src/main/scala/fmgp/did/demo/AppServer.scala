@@ -23,6 +23,7 @@ import fmgp.did.method.peer.DidPeerResolver
 import fmgp.crypto.Curve
 import fmgp.crypto.KeyGenerator
 import fmgp.util.MiddlewareUtils
+import zio.http.endpoint.RoutesMiddleware
 
 /** demoJVM/runMain fmgp.did.demo.AppServer
   *
@@ -143,7 +144,8 @@ object AppServer extends ZIOAppDefault {
           case Left(error)  => ZIO.succeed(Response.text(error.error).copy(status = Status.BadRequest)).debug
           case Right(value) => ZIO.succeed(Response.text("DID:" + value)).debug
       case req @ Method.GET -> Root => { // html.Html.fromDomElement()
-        val data = Source.fromResource(s"public/index.html").mkString("")
+        // val data = Source.fromResource(s"public/index.html").mkString("")
+        val data = Source.fromResource(s"index.html").mkString("")
         ZIO.log("index.html") *> ZIO.succeed(Response.html(data))
       }
     } ++ Http.fromResource(s"public/favicon.ico").when {
@@ -157,11 +159,11 @@ object AppServer extends ZIOAppDefault {
     case _                            => false
   } ++ {
     Http
-      .fromResource(s"public/fmgp-webapp-fastopt-bundle.js.gz") // ".gz" becuase of 0
-      .map(_.setHeaders(Headers(Header.ContentType(MediaType.application.javascript), Header.ContentEncoding.GZip)))
+      .fromResource(s"webapp.js") // ".gz" becuase of 0
+      .map(_.setHeaders(Headers(Header.ContentType(MediaType.application.javascript)))) // Header.ContentEncoding.GZip
       .when {
-        case Method.GET -> Root / "public" / "fmgp-webapp-fastopt-bundle.js" => true
-        case _                                                               => false
+        case Method.GET -> Root / "webapp.js" => true
+        case _                                => false
       }
   } ++ {
     Http
@@ -172,7 +174,45 @@ object AppServer extends ZIOAppDefault {
           true
         case _ => false
       }
-  }
+  } ++ Http
+    .collectHandler[Request] { case Method.GET -> "" /: "assets" /: path =>
+      RoutesMiddleware
+      // TODO https://zio.dev/reference/stream/zpipeline/#:~:text=ZPipeline.gzip%20%E2%80%94%20The%20gzip%20pipeline%20compresses%20a%20stream%20of%20bytes%20as%20using%20gzip%20method%3A
+      import zio.http.html._
+      for {
+        file <- Handler.getResourceAsFile("assets/" + path.encode)
+        http <-
+          // Rendering a custom UI to list all the files in the directory
+          if (file.isDirectory) {
+            // Accessing the files in the directory
+            val files = file.listFiles.toList.sortBy(_.getName)
+            val base = "/assets"
+            val rest = path.dropLast(1)
+
+            // Custom UI to list all the files in the directory
+            Handler.template(s"File Explorer ~$base/${path}") {
+              ul(
+                li(a(href := s"$base/$rest", "..")),
+                files.map { file =>
+                  li(
+                    a(
+                      href := s"$base/${path.encode}${if (path.isRoot) file.getName else "/" + file.getName}",
+                      file.getName,
+                    ),
+                  )
+                },
+              )
+            }
+          }
+
+          // Return the file if it's a static resource
+          else if (file.isFile)
+            Http.fromFile(file).toHandler(Handler.notFound)
+
+          // Return a 404 if the file doesn't exist
+          else Handler.notFound
+      } yield http
+    }
 
   override val run = for {
     _ <- Console.printLine(
@@ -208,6 +248,7 @@ object AppServer extends ZIOAppDefault {
     myServer <- Server
       .serve(
         ((app ++ mdocMarkdown ++ mdocHTML ++ DidPeerUniresolverDriver.resolverPeer) @@ MiddlewareUtils.all)
+          // TODO Test this .withDefaultErrorResponse
           .tapUnhandledZIO(ZIO.logWarning("Unhandled Endpoint"))
           .tapErrorCauseZIO(cause => ZIO.logErrorCause(cause)) // THIS is to log all the erros
           .mapError(err =>
@@ -224,6 +265,16 @@ object AppServer extends ZIOAppDefault {
       .provideSomeLayer(client >>> MessageDispatcherJVM.layer)
       .provideSomeEnvironment { (env: ZEnvironment[Server]) => env.add(myHub) }
       .provide(Server.defaultWithPort(port))
+      // .provide(
+      //   Server.defaultWith(
+      //     _.port(port)
+      //       .responseCompression(
+      //         Server.Config.ResponseCompressionConfig.default
+      //           // Server.Config.ResponseCompressionConfig.config
+      //           // Server.Config.ResponseCompressionConfig(0, IndexedSeq(Server.Config.CompressionOptions.gzip()))
+      //       )
+      //   )
+      // )
       .debug
       .fork
     _ <- ZIO.log(s"Server Started")
