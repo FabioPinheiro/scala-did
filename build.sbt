@@ -266,6 +266,7 @@ addCommandAlias("fullPackAll", "docs/mdoc;doc;compile;serviceworker/fullLinkJS;w
 addCommandAlias("cleanAll", "clean;docs/clean")
 addCommandAlias("assemblyAll", "fullPackAll;buildFrontend;demoJVM/assembly")
 addCommandAlias("live", "fastPackAll;~demoJVM/reStart")
+addCommandAlias("ciJob", "docs/mdoc;compile;testAll")
 
 lazy val buildFrontend = taskKey[Unit]("Execute frontend scripts")
 buildFrontend := {
@@ -541,18 +542,30 @@ ThisBuild / assemblyMergeStrategy := {
 }
 
 /** Copy the Documentation and Generate an Scala object to Store */
-def makeDocSources = Def.task {
-  val resourceFile = rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "mdoc" / "readme.md"
-  val sourceDir = (Compile / sourceManaged).value
-  val sourceFile = sourceDir / "DocSource.scala"
-  if (!sourceFile.exists() || sourceFile.lastModified() < resourceFile.lastModified()) {
-    val contentREAMDE = IO.read(resourceFile).replaceAllLiterally("$", "$$").replaceAllLiterally("\"\"\"", "\"\"$\"")
-    val scalaCode = s"""
+def makeDocSources = Def
+  .task {
+    val resourceFile = rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "mdoc" / "readme.md"
+    val originalFile = rootPaths.value.apply("BASE").toFile() / "docs" / "readme.md"
+    val sourceDir = (Compile / sourceManaged).value
+    val sourceFile = sourceDir / "DocSource.scala"
+    val log = streams.value.log
+    if (!sourceFile.exists() || sourceFile.lastModified() < resourceFile.lastModified()) {
+      val file =
+        if (resourceFile.exists()) resourceFile
+        else {
+          log.warn("makeDocSources: the resourceFile does not exists. Using the originalFile")
+          originalFile
+        }
+      val contentREAMDE = IO
+        .read(file)
+        .replaceAllLiterally("$", "$$")
+        .replaceAllLiterally("\"\"\"", "\"\"$\"")
+      val scalaCode = s"""
       |package fmgp.did
       |object DocSource {
       |  final val readme = raw\"\"\"$contentREAMDE\"\"\"
       |}""".stripMargin
-    IO.write(sourceFile, scalaCode)
+      IO.write(sourceFile, scalaCode)
+    }
+    Seq(sourceFile)
   }
-  Seq(sourceFile)
-}
