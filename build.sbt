@@ -264,9 +264,9 @@ addCommandAlias("testAll", ";testJVM;testJS")
 addCommandAlias("fastPackAll", "docs/mdoc;doc;compile;serviceworker/fastLinkJS;webapp/fastLinkJS")
 addCommandAlias("fullPackAll", "docs/mdoc;doc;compile;serviceworker/fullLinkJS;webapp/fullLinkJS")
 addCommandAlias("cleanAll", "clean;docs/clean")
-addCommandAlias("assemblyAll", "fullPackAll;buildFrontend;demoJVM/assembly")
+addCommandAlias("assemblyAll", "buildFrontend;fullPackAll;demoJVM/assembly")
 addCommandAlias("live", "fastPackAll;~demoJVM/reStart")
-addCommandAlias("ciJob", "docs/mdoc;compile;testAll")
+addCommandAlias("ciJob", "buildFrontend;docs/mdoc;compile;testAll")
 
 lazy val buildFrontend = taskKey[Unit]("Execute frontend scripts")
 buildFrontend := {
