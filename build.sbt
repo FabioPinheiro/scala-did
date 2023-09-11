@@ -264,17 +264,24 @@ addCommandAlias("testAll", ";testJVM;testJS")
 addCommandAlias("fastPackAll", "docs/mdoc;doc;compile;serviceworker/fastLinkJS;webapp/fastLinkJS")
 addCommandAlias("fullPackAll", "docs/mdoc;doc;compile;serviceworker/fullLinkJS;webapp/fullLinkJS")
 addCommandAlias("cleanAll", "clean;docs/clean")
-addCommandAlias("assemblyAll", "buildFrontend;fullPackAll;demoJVM/assembly")
+addCommandAlias("assemblyAll", "installFrontend;fullPackAll;buildFrontend;demoJVM/assembly")
 addCommandAlias("live", "fastPackAll;~demoJVM/reStart")
-addCommandAlias("ciJob", "buildFrontend;docs/mdoc;compile;testAll")
+addCommandAlias("ciJob", "installFrontend;fullPackAll;buildFrontend;testAll")
+
+lazy val installFrontend = taskKey[Unit]("Install all NPM package")
+installFrontend := {
+  val npmInstall = Process("npm" :: "install" :: Nil)
+  val log = streams.value.log
+  if ((npmInstall !) == 0) { log.success("NPM package install successful!") }
+  else { throw new IllegalStateException("NPM package install failed!") }
+}
 
 lazy val buildFrontend = taskKey[Unit]("Execute frontend scripts")
 buildFrontend := {
-  val npmInstall = Process("npm" :: "install" :: Nil)
+  // val npmInstall = Process("npm" :: "install" :: Nil)
   val npmBuild = Process("npm" :: "run" :: "build" :: Nil)
   val log = streams.value.log
-
-  if ((npmInstall #&& npmBuild !) == 0) { log.success("frontend build successful!") }
+  if (( /*npmInstall #&&*/ npmBuild !) == 0) { log.success("frontend build successful!") }
   else { throw new IllegalStateException("frontend build failed!") }
 }
 
