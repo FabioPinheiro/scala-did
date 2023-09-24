@@ -4,11 +4,6 @@ resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 import org.scalajs.linker.interface.ModuleSplitStyle
 import scala.sys.process._
 
-// lazy val baseRootPath = rootPaths.map(_.apply("BASE").toFile())
-// def baseRootPath = rootPaths.value.apply("BASE").toFile()
-
-// baseRootPath := rootPaths.apply("BASE").toFile()
-
 inThisBuild(
   Seq(
     scalaVersion := "3.3.0", // Also update docs/publishWebsite.sh and any ref to scala-3.3.0
@@ -510,29 +505,12 @@ lazy val demo = crossProject(JSPlatform, JVMPlatform)
     assembly / mainClass := Some("fmgp.did.demo.AppServer"),
     assembly / assemblyJarName := "scala-did-demo-server.jar",
     libraryDependencies += D.ziohttp.value,
-
-    // WebScalaJSBundlerPlugin
-    // scalaJSProjects := Seq(webapp),
-    // Compile / compile := ((Compile / compile) dependsOn scalaJSPipeline).value,
-    /** scalaJSPipeline task runs scalaJSDev when isDevMode is true, runs scalaJSProd otherwise. scalaJSProd task runs
-      * all tasks for production, including Scala.js fullOptJS task and source maps scalaJSDev task runs all tasks for
-      * development, including Scala.js fastOptJS task and source maps.
-      */
-    // Assets / pipelineStages := Seq(gzip), // Assets / pipelineStages := Seq(scalaJSPipeline, gzip),
-    // pipelineStages ++= Seq(digest, gzip), //Compression - If you serve your Scala.js application from a web server, you should additionally gzip the resulting .js files.
-
     Compile / unmanagedResourceDirectories += baseDirectory.value / "src" / "main" / "extra-resources",
     Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "api",
     Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "mdoc",
-    // Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "serviceworker" / "target" / "scala-3.3.0" / "fmgp-serviceworker-fastopt",
-    // Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "webapp" / "target" / "scala-3.3.0" / "fmgp-webapp-fastopt",
     Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "vite" / "dist",
-    // Frontend dependency configuration
-    Assets / WebKeys.packagePrefix := "public/",
-    Runtime / managedClasspath += (Assets / packageBin).value,
   )
   .dependsOn(did, didImp, didExtra, didResolverPeer, didResolverWeb, didUniresolver, didExample)
-  .enablePlugins(WebScalaJSBundlerPlugin)
 
 val webjarsPattern = "(META-INF/resources/webjars/.*)".r
 ThisBuild / assemblyMergeStrategy := {

@@ -44,7 +44,7 @@ object QRcodeScannerTool {
 
   val videoContainer = videoTag()
 
-  // When sarting will download the file: ./public/vendors-node_modules_qr-scanner_qr-scanner-worker_min_js-library.js
+  // When sarting will download the file: ./vendors-node_modules_qr-scanner_qr-scanner-worker_min_js-library.js
   var qrScanner: Option[QrScanner] = None
 
   @js.annotation.JSExport

@@ -148,7 +148,6 @@ object AppServer extends ZIOAppDefault {
           case Left(error)  => ZIO.succeed(Response.text(error.error).copy(status = Status.BadRequest)).debug
           case Right(value) => ZIO.succeed(Response.text("DID:" + value)).debug
       case req @ Method.GET -> Root => { // html.Html.fromDomElement()
-        // val data = Source.fromResource(s"public/index.html").mkString("")
         val data = Source.fromResource(s"index.html").mkString("")
         ZIO.log("index.html") *> ZIO.succeed(Response.html(data))
       }
@@ -168,15 +167,6 @@ object AppServer extends ZIOAppDefault {
       .when {
         case Method.GET -> Root / "webapp.js" => true
         case _                                => false
-      }
-  } ++ {
-    Http
-      .fromResource(s"public/vendors-node_modules_qr-scanner_qr-scanner-worker_min_js-library.js.gz")
-      .map(_.setHeaders(Headers(Header.ContentType(MediaType.application.javascript), Header.ContentEncoding.GZip)))
-      .when {
-        case Method.GET -> Root / "public" / "vendors-node_modules_qr-scanner_qr-scanner-worker_min_js-library.js" =>
-          true
-        case _ => false
       }
   } ++ Http
     .collectHandler[Request] { case Method.GET -> "" /: "assets" /: path =>
