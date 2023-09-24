@@ -24,6 +24,10 @@ import fmgp.crypto.Curve
 import fmgp.crypto.KeyGenerator
 import fmgp.util.MiddlewareUtils
 import zio.http.endpoint.RoutesMiddleware
+import java.io.File
+import java.io.FileNotFoundException
+import zio.http.Header.ContentType
+import zio.http.MediaTypes
 
 /** demoJVM/runMain fmgp.did.demo.AppServer
   *
@@ -148,12 +152,12 @@ object AppServer extends ZIOAppDefault {
         val data = Source.fromResource(s"index.html").mkString("")
         ZIO.log("index.html") *> ZIO.succeed(Response.html(data))
       }
-    } ++ Http.fromResource(s"public/favicon.ico").when {
+    } ++ Http.fromResource(s"favicon.ico").when {
     case Method.GET -> Root / "favicon.ico" => true
     case _                                  => false
-  } ++ Http.fromResource(s"public/manifest.json").when {
-    case Method.GET -> Root / "manifest.json" => true
-    case _                                    => false
+  } ++ Http.fromResource(s"manifest.webmanifest").when {
+    case Method.GET -> Root / "manifest.webmanifest" => true
+    case _                                           => false
   } ++ Http.fromResource(s"sw.js").when {
     case Method.GET -> Root / "sw.js" => true
     case _                            => false
@@ -179,39 +183,37 @@ object AppServer extends ZIOAppDefault {
       RoutesMiddleware
       // TODO https://zio.dev/reference/stream/zpipeline/#:~:text=ZPipeline.gzip%20%E2%80%94%20The%20gzip%20pipeline%20compresses%20a%20stream%20of%20bytes%20as%20using%20gzip%20method%3A
       import zio.http.html._
-      for {
-        file <- Handler.getResourceAsFile("assets/" + path.encode)
-        http <-
-          // Rendering a custom UI to list all the files in the directory
-          if (file.isDirectory) {
-            // Accessing the files in the directory
-            val files = file.listFiles.toList.sortBy(_.getName)
-            val base = "/assets"
-            val rest = path.dropLast(1)
-
-            // Custom UI to list all the files in the directory
-            Handler.template(s"File Explorer ~$base/${path}") {
-              ul(
-                li(a(href := s"$base/$rest", "..")),
-                files.map { file =>
-                  li(
-                    a(
-                      href := s"$base/${path.encode}${if (path.isRoot) file.getName else "/" + file.getName}",
-                      file.getName,
-                    ),
-                  )
-                },
+      path.encode match {
+        case "" | "/" =>
+          Response
+            .html(
+              ul( // Custom UI to list all the files in the directory
+                (li(a(href := "..", "..")) +: Source
+                  .fromResource("assets")
+                  .getLines()
+                  .map { file => li(a(href := file, file)): Html }
+                  .toSeq): _*
               )
-            }
+            )
+            .toHandler
+        case other =>
+          val fullPath = s"assets/$other"
+          val classLoader = Thread.currentThread().getContextClassLoader()
+          Option(classLoader.getResourceAsStream(fullPath)) match {
+            case None => Handler.notFound
+            case Some(_) =>
+              import zio.http.{MediaType => Ztype}
+              val headerContentType = fullPath match
+                case s if s.endsWith(".html") => Header.ContentType(Ztype.text.html)
+                case s if s.endsWith(".js")   => Header.ContentType(Ztype.text.javascript)
+                case s if s.endsWith(".css")  => Header.ContentType(Ztype.text.css)
+                case s                        => Header.ContentType(Ztype.text.plain)
+              // TODO headerContentEncoding:
+              Handler
+                .fromStream(ZStream.fromResource(fullPath))
+                .map(r => r.withHeader(headerContentType))
           }
-
-          // Return the file if it's a static resource
-          else if (file.isFile)
-            Http.fromFile(file).toHandler(Handler.notFound)
-
-          // Return a 404 if the file doesn't exist
-          else Handler.notFound
-      } yield http
+      }
     }
 
   override val run = for {

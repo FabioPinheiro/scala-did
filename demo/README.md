@@ -41,19 +41,33 @@ NODE_OPTIONS=--openssl-legacy-provider sbt assemblyAll
 flyctl deploy ./demo/
 ```
 
-**[WIP] deploy by pushing docker image**
+**deploy by pushing docker image**
 
 ```shell
 NODE_OPTIONS=--openssl-legacy-provider sbt assemblyAll
 docker build --tag scala_did_demo ./demo/
 docker tag scala_did_demo registry.fly.io/scala-did-demo
 # flyctl auth docker
-docker push registry.fly.io/scala-did-demo # +- 52MB
+docker push registry.fly.io/scala-did-demo # +- 115.1MB (before was +- 52MB)
 
 flyctl image update -a scala-did-demo
-# FIXME: Error image is not eligible for automated image updates
+```
+
+## Test inside a docket
+
+```shell
+NODE_OPTIONS=--openssl-legacy-provider sbt assemblyAll
+docker build --tag scala_did_demo ./demo/
+docker run -it --rm -p 8080:8080 scala_did_demo:latest
 ```
 
 ## Others
 
-jar tvf demo/jvm/target/scala-3.3.0/scala-did-demo-server.jar | sort -k1nr | less
+Sort by file size
+`jar tvf demo/jvm/target/scala-3.3.0/scala-did-demo-server.jar | sort -k1nr | less`
+
+Show assets
+`jar tvf demo/jvm/target/scala-3.3.0/scala-did-demo-server.jar | sort -k1nr | grep "assets/"`
+
+Show jar size
+`du -h demo/jvm/target/scala-3.3.0/scala-did-demo-server.jar`
