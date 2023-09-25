@@ -38,7 +38,7 @@ package error {
 
   case class FailToGenerateKey(origin: DidFail) extends CryptoFailed
 
-  case object CryptoNotImplementedError extends CryptoFailed
+  case object CryptoNotImplementedError extends CryptoFailed // TODO
   case object UnknownError extends CryptoFailed
   case class SomeThrowable(error: String) extends CryptoFailed
   object SomeThrowable {
@@ -76,7 +76,9 @@ package error {
   case object WrongKeysTypeCombination extends CurveError
 
   case object EncryptionFailed extends CryptoFailed
-  case object DecryptionFailed extends CryptoFailed
+  case class DecryptionFailed(reason: String) extends CryptoFailed
+  case object AnonDecryptAuthMsgFailed extends CryptoFailed
+  case object AuthDecryptAnonMsgFailed extends CryptoFailed
   case object ValidationFailed extends CryptoFailed
 
   case object NoKeys extends CryptoFailed

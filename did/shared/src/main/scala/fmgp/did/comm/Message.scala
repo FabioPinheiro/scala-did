@@ -230,6 +230,10 @@ trait EncryptedMessage extends Message {
   def recipientsSubject = recipients.map(_.recipientSubject).toSet
   def recipientsKid = recipients.map(_.recipientKid).toSet
   def sha1 = SHA1.digestToHex(this.toJson)
+  def isAnon = `protected`.obj match
+    case AnonProtectedHeader(epk, apv, typ, enc, alg)            => true
+    case AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) => false
+  def isAuth = !isAnon
 }
 
 // trait AnonEncryptedMessage //TODO and make EncryptedMessage a sealed trait
