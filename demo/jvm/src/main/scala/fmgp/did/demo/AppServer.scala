@@ -151,6 +151,7 @@ object AppServer extends ZIOAppDefault {
         val data = Source.fromResource(s"index.html").mkString("")
         ZIO.log("index.html") *> ZIO.succeed(Response.html(data))
       }
+      case req @ Method.GET -> Root / "index.html" => ZIO.succeed(Response.redirect(URL.root))
     } ++ Http.fromResource(s"favicon.ico").when {
     case Method.GET -> Root / "favicon.ico" => true
     case _                                  => false

@@ -1,7 +1,7 @@
 resolvers ++= Resolver.sonatypeOssRepos("public")
 resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 
-import org.scalajs.linker.interface.ModuleSplitStyle
+import org.scalajs.linker.interface.{ModuleInitializer, ModuleSplitStyle}
 import scala.sys.process._
 
 inThisBuild(
@@ -432,7 +432,6 @@ lazy val didUniresolver = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(did)
   .configure(docConfigure)
 
-import org.scalajs.linker.interface
 lazy val serviceworker = project
   .in(file("serviceworker"))
   .settings(publish / skip := true)
@@ -445,7 +444,7 @@ lazy val serviceworker = project
         .withJSHeader(jsHeader)
     },
     scalaJSModuleInitializers := Seq( // scalaJSUseMainModuleInitializer := true,
-      interface.ModuleInitializer.mainMethod("fmgp.serviceworker.SW", "main").withModuleID("sw")
+      ModuleInitializer.mainMethod("fmgp.serviceworker.SW", "main").withModuleID("sw")
     ),
     libraryDependencies += D.dom.value,
     libraryDependencies ++= Seq(D.zio.value, D.zioJson.value),
@@ -458,10 +457,10 @@ lazy val webapp = project
   .configure(scalaJSViteConfigure)
   .settings(
     scalaJSLinkerConfig ~= {
-      _.withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("fmgp")))
+      _.withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("fmgp.webapp")))
     },
     Compile / scalaJSModuleInitializers += {
-      org.scalajs.linker.interface.ModuleInitializer.mainMethod("fmgp.webapp.App", "main").withModuleID("webapp")
+      ModuleInitializer.mainMethod("fmgp.webapp.App", "main").withModuleID("webapp")
     },
   )
   .configure(buildInfoConfigure)

@@ -2,20 +2,31 @@
 
 ## run
 
+**Run Server:**
+
 ```sbt
+NODE_OPTIONS=--openssl-legacy-provider sbt
+serviceworker / fastLinkJS
 ~ demoJVM/reStart
 ```
 
-### test
+**Run Frontend:**
 
 ```shell
-curl localhost:8080/demo
+npm run build
+npm run preview
+
+# OR with live reload
+
+NODE_OPTIONS=--openssl-legacy-provider sbt '~webapp/fastLinkJS' # run on another console
+npm run dev
 ```
 
 ## docker
+
 ```shell
 NODE_OPTIONS=--openssl-legacy-provider sbt assemblyAll
-java -jar jvm/target/scala-3.3.0/scala-did-demo-server.jar
+# java -jar jvm/target/scala-3.3.0/scala-did-demo-server.jar
 docker build --tag scala_did_demo .
 docker run --rm -p 8080:8080 --memory="100m" --cpus="1.0" scala_did_demo
 ```
@@ -51,14 +62,6 @@ docker tag scala_did_demo registry.fly.io/scala-did-demo
 docker push registry.fly.io/scala-did-demo # +- 115.1MB (before was +- 52MB)
 
 flyctl image update -a scala-did-demo
-```
-
-## Test inside a docket
-
-```shell
-NODE_OPTIONS=--openssl-legacy-provider sbt assemblyAll
-docker build --tag scala_did_demo ./demo/
-docker run -it --rm -p 8080:8080 scala_did_demo:latest
 ```
 
 ## Others

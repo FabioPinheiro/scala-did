@@ -36,6 +36,9 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
         uriPrefix: 'scalajs', // URI prefix of imports that this plugin catches
       }),
       VitePWA({
+        devOptions: {
+          enabled: true
+        },
         srcDir: serviceworkerSrc,
         filename: "sw.js",
         strategies: "injectManifest",
