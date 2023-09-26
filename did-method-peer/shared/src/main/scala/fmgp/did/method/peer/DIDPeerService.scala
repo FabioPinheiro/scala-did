@@ -39,7 +39,9 @@ import scala.util.chaining._
 case class DIDPeerServiceEncoded(
     t: String = "dm",
     s: String,
-    r: Option[Seq[String]] = Some(Seq.empty),
+    r: Option[Seq[String]] = Some( // TODO use None. This was the support some integration problem on other libraries
+      Seq.empty
+    ),
     a: Option[Seq[String]] = Some(Seq("didcomm/v2"))
 ) {
   def `type` = t
@@ -47,13 +49,22 @@ case class DIDPeerServiceEncoded(
   def routingKeys = r
   def accept = a
 
-  def getDIDService(id: DIDSubject, index: Int): DIDService = DIDServiceGeneric(
-    id = id.string + "#" + { if (this.t == "dm") "didcommmessaging" else this.t.toLowerCase() } + "-" + index,
-    `type` = if (this.t == "dm") "DIDCommMessaging" else this.t,
-    serviceEndpoint = Json.Str(this.s),
-    routingKeys = Some(this.r.toSet.flatten).filterNot(_.isEmpty),
-    accept = Some(this.a.toSet.flatten).filterNot(_.isEmpty),
-  )
+  def getDIDService(id: DIDSubject, index: Int): DIDService =
+    if (this.t == "dm" || this.t == DIDService.TYPE_DIDCommMessaging)
+      DIDServiceDIDCommMessaging(
+        id = s"${id.string}#didcommmessaging-$index",
+        DIDCommMessagingServiceEndpoint(
+          uri = this.s,
+          routingKeys = Some(this.r.toSet.flatten).filterNot(_.isEmpty),
+          accept = Some(this.a.toSet.flatten).filterNot(_.isEmpty),
+        )
+      )
+    else
+      DIDServiceGeneric(
+        id = id.string + "#" + this.t.toLowerCase() + "-" + index,
+        `type` = this.t,
+        serviceEndpoint = Json.Str(this.s),
+      )
 }
 
 object DIDPeerServiceEncoded {
