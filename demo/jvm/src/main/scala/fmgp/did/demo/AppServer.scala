@@ -244,13 +244,7 @@ object AppServer extends ZIOAppDefault {
           // TODO Test this .withDefaultErrorResponse
           .tapUnhandledZIO(ZIO.logWarning("Unhandled Endpoint"))
           .tapErrorCauseZIO(cause => ZIO.logErrorCause(cause)) // THIS is to log all the erros
-          .mapError(err =>
-            Response(
-              status = Status.BadRequest,
-              headers = Headers.empty,
-              body = Body.fromString(err.getMessage()),
-            )
-          )
+          .withDefaultErrorResponse
       )
       .provideSomeLayer(DidPeerResolver.layerDidPeerResolver)
       .provideSomeLayer(AgentByHost.layer)

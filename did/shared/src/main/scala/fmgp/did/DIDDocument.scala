@@ -54,10 +54,11 @@ trait DIDDocument extends DID {
   private inline def getServices = service.toSeq.flatten
   def getDIDServiceDIDCommMessaging = getServices
     .collect { case e: DIDServiceDIDCommMessaging => e }
-  def getDIDServiceDIDLinkedDomains = getServices
-    .collect { case e: DIDServiceDIDLinkedDomains => e }
-  def getDIDServiceDecentralizedWebNode = getServices
-    .collect { case e: DIDServiceDecentralizedWebNode => e }
+  // FIXME
+  // def getDIDServiceDIDLinkedDomains = getServices
+  //   .collect { case e: DIDServiceDIDLinkedDomains => e }
+  // def getDIDServiceDecentralizedWebNode = getServices
+  //   .collect { case e: DIDServiceDecentralizedWebNode => e }
 }
 
 object DIDDocument {

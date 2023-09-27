@@ -68,42 +68,87 @@ trait CryptoOperations {
 
   def decrypt(
       recipientKidsKeys: Seq[(VerificationMethodReferenced, PrivateKey)],
-      msg: EncryptedMessage
+      msg: EncryptedMessage // TODO make more type safe
   ): IO[DidFail, Array[Byte]] = anonDecrypt(recipientKidsKeys, msg)
 
   def decrypt(
       senderKey: PublicKey,
       recipientKidsKeys: Seq[(VerificationMethodReferenced, PrivateKey)],
-      msg: EncryptedMessage
+      msg: EncryptedMessage // TODO make more type safe
   ): IO[DidFail, Array[Byte]] = authDecrypt(senderKey, recipientKidsKeys, msg)
 
   def anonDecryptMessage(
       recipientKidsKeys: Seq[(VerificationMethodReferenced, PrivateKey)],
       msg: EncryptedMessage
-  ): IO[DidFail, Message] = anonDecrypt(recipientKidsKeys, msg)
-    .flatMap(data =>
-      ZIO.fromEither {
-        String(data)
-          .fromJson[Message]
-          .left
-          .map(info => FailToParse(s"Decoding into a Message: $info"))
-      }
-    )
+  ): IO[DidFail, Message] =
+    msg.`protected`.obj.match
+      case AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) =>
+        ZIO.fail(AnonDecryptAuthMsgFailed)
+      case AnonProtectedHeader(epk, apv, typ, enc, alg) =>
+        anonDecrypt(recipientKidsKeys, msg)
+          .flatMap(data =>
+            ZIO.fromEither {
+              String(data)
+                .fromJson[Message]
+                .left
+                .map(info => FailToParse(s"Decoding into a Message: $info"))
+            }
+          )
+          .reject {
+            // FIXME case out: SignedMessage    => CryptoNotImplementedError // TODO
+            // FIXME case out: EncryptedMessage => CryptoNotImplementedError // TODO
+            // this is tested by "decrypt encryptedMessage_EdDSA_ECDH1PU_X25519_A256CBCHS512__ECDHES_X25519_XC20P"
+            case out: PlaintextMessage if {
+                  val recipientsKID = msg.recipients.map(_.recipientKid.value)
+                  val keysKID = recipientKidsKeys.map(_._1.value)
+                  !(keysKID.forall(s => recipientsKID.contains(s))) // Only use keys that makes sense
+                } =>
+              DecryptionFailed("Only use keys that is expeted by the Message")
+            case out: PlaintextMessage if {
+                  val recipientDIDs = msg.recipients.map(_.recipientKid.did.did).toSet
+                  val outToDIDs = out.to.getOrElse(Set.empty).map(_.toDID.did)
+                  !(recipientDIDs == outToDIDs) // Outer and inner message MUST have the same recipients
+                } =>
+              DecryptionFailed("Outer and inner message MUST have the same recipients")
+          }
 
   def authDecryptMessage(
       senderKey: PublicKey,
       recipientKidsKeys: Seq[(VerificationMethodReferenced, PrivateKey)],
       msg: EncryptedMessage
   ): IO[DidFail, Message] =
-    authDecrypt(senderKey, recipientKidsKeys, msg)
-      .flatMap(data =>
-        ZIO.fromEither {
-          String(data)
-            .fromJson[Message]
-            .left
-            .map(info => FailToParse(s"Decoding into a Message: $info"))
-        }
-      )
+    msg.`protected`.obj.match
+      case AnonProtectedHeader(epk, apv, typ, enc, alg) =>
+        ZIO.fail(AuthDecryptAnonMsgFailed)
+      case AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) =>
+        authDecrypt(senderKey, recipientKidsKeys, msg)
+          .flatMap(data =>
+            ZIO.fromEither {
+              String(data)
+                .fromJson[Message]
+                .left
+                .map(info => FailToParse(s"Decoding into a Message: $info"))
+            }
+          )
+          .reject {
+            // FIXME case out: SignedMessage => CryptoNotImplementedError // TODO
+            // this is tested by "decrypt encryptedMessage_EdDSA_ECDH1PU_P521_A256CBCHS512"
+            // FIXME case out: EncryptedMessage => CryptoNotImplementedError // TODO
+            case out: PlaintextMessage if {
+                  val recipientsKID = msg.recipients.map(_.recipientKid.value)
+                  val keysKID = recipientKidsKeys.map(_._1.value)
+                  !(keysKID.forall(s => recipientsKID.contains(s))) // Only use keys that makes sense
+                } =>
+              DecryptionFailed("Only use keys that is expeted by the Message")
+            case out: PlaintextMessage if {
+                  val recipientDIDs = msg.recipients.map(_.recipientKid.did.did).toSet
+                  val outToDIDs = out.to.getOrElse(Set.empty).map(_.toDID.did)
+                  !(recipientDIDs == outToDIDs) // Outer and inner message MUST have the same recipients
+                } =>
+              DecryptionFailed("Outer and inner message MUST have the same recipients")
+            case out: PlaintextMessage if !(out.from.exists(_.toDID.string == skid.did.string)) =>
+              DecryptionFailed("Outer Message skid Inner MUST correspond to the inner message FROM")
+          }
 
   // ## Decrypt - RAW ##
 

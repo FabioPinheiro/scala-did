@@ -15,7 +15,8 @@ type NotRequired[A] = Option[A]
 type SetU[A] = A | Seq[A]
 // type SetMapU[A] = A | Seq[A] | Map[String, A]
 // type ServiceEndpoint = URI | Map[String, URI] | Seq[URI] | Seq[Map[String, URI]] //SetU[URI]
-type ServiceEndpoint = Json.Str | Json.Arr | Json.Obj
+type ServiceEndpoint = Json.Str | Json.Obj | Json.Arr
+type ServiceEndpointNoStr = Json.Obj | Json.Arr
 type Authentication = Option[Set[VerificationMethod]]
 
 object SetU {
@@ -24,13 +25,25 @@ object SetU {
       .map(e => e: U | Seq[U])
       .orElse(JsonDecoder.seq[U].map(e => e: U | Seq[U]))
 
-  inline given encoder[U](using jsonEncoder: JsonEncoder[U]): JsonEncoder[U | Seq[U]] =
-    JsonEncoder.seq[U].contramap { (uuu: (U | Seq[U])) =>
-      uuu match {
-        case one: U                 => Seq(one)
-        case seq: Seq[U] @unchecked => seq
-      }
+  // opinionated will always and go to a sequence
+  // inline given encoder[U](using jsonEncoder: JsonEncoder[U]): JsonEncoder[U | Seq[U]] =
+  //   JsonEncoder.seq[U].contramap { (uuu: (U | Seq[U])) =>
+  //     uuu match {
+  //       case one: U                 => Seq(one)
+  //       case seq: Seq[U] @unchecked => seq
+  //     }
+  //   }
+
+  // TODO we must prove that [U] is not the sequence itself... this will not work in that case
+  given encoder[U](using jsonEncoder: JsonEncoder[U]): JsonEncoder[U | Seq[U]] =
+    new JsonEncoder[U | Seq[U]] {
+      override def unsafeEncode(b: U | Seq[U], indent: Option[Int], out: zio.json.internal.Write): Unit =
+        if (b.isInstanceOf[Seq[_]])
+          JsonEncoder.seq[U].unsafeEncode(b.asInstanceOf[Seq[U]], indent, out)
+        else jsonEncoder.unsafeEncode(b.asInstanceOf[U], indent, out)
+
     }
+
 }
 
 object ServiceEndpoint {

@@ -204,9 +204,13 @@ object DIDExamples {
   }]
 }
 """.stripMargin
-  val EX20_DIDService = DIDServiceGeneric(
+  val EX20_DIDServiceGeneric = DIDServiceGeneric(
     id = "did:example:123#linked-domain",
     `type` = "LinkedDomains",
+    serviceEndpoint = Json.Str("https://bar.example.com")
+  )
+  val EX20_DIDService = DIDServiceLinkedDomains(
+    id = "did:example:123#linked-domain",
     serviceEndpoint = Json.Str("https://bar.example.com")
   )
 
