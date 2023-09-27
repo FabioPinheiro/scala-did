@@ -75,6 +75,15 @@ final case class DIDServiceDIDCommMessaging(
     if (restEndpoints.isEmpty)
       firstEndpoint.toJsonAST.flatMap(_.as[Json.Obj]).getOrElse(Json.Obj())
     else endpoints.toJsonAST.flatMap(_.as[Json.Arr]).getOrElse(Json.Arr())
+
+  // util used by webapp
+  def getServiceEndpointNextForward = endpoints.map(e => e.uri).flatMap {
+    case uri @ s"did:$rest" =>
+      fmgp.did.comm.FROMTO.either(uri) match
+        case Left(_)       => None // uri
+        case Right(fromto) => Some(fromto)
+    case other => None // other
+  }
 }
 
 object DIDServiceDIDCommMessaging {

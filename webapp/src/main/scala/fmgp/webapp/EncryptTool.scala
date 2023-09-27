@@ -146,8 +146,8 @@ object EncryptTool {
       val program = for {
         resolver <- ZIO.service[Resolver]
         doc <- resolver.didDocument(TO(eMsg.recipientsSubject.head.string))
-        mDIDServiceDIDCommMessaging = doc.getDIDServiceDIDCommMessaging.headOption
-        mURI = mDIDServiceDIDCommMessaging.flatMap(_.getServiceEndpointAsURIs.headOption)
+        didCommMessagingSrevices = doc.getDIDServiceDIDCommMessaging
+        mURI = didCommMessagingSrevices.flatMap(_.endpoints.map(e => e.uri)).headOption
         ret = mURI match
           case None => curlCommandVar.set(None)
           case Some(uri) =>
@@ -168,8 +168,8 @@ object EncryptTool {
     val program = for {
       resolver <- ZIO.service[Resolver]
       doc <- resolver.didDocument(TO(msg.recipientsSubject.head.string))
-      mDIDServiceDIDCommMessaging = doc.getDIDServiceDIDCommMessaging.headOption
-      mURI = mDIDServiceDIDCommMessaging.flatMap(_.getServiceEndpointAsURIs.headOption)
+      didCommMessagingSrevices = doc.getDIDServiceDIDCommMessaging
+      mURI = didCommMessagingSrevices.flatMap(_.endpoints.map(e => e.uri)).headOption
       call <- mURI match
         case None => ZIO.unit
         case Some(uri) =>
