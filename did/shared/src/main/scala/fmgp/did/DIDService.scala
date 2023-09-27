@@ -94,7 +94,7 @@ object DIDServiceDIDCommMessaging {
         case `DIDCommMessaging` =>
           g.serviceEndpoint match {
             case s: Json.Str =>
-              Left(s"$DIDCommMessaging the field 'serviceEndpoint' MUST the a json objects or a json array")
+              Left(s"$DIDCommMessaging the field 'serviceEndpoint' MUST be a json objects or a json array")
             case obj: Json.Obj =>
               DIDCommMessagingServiceEndpoint.decoder
                 .fromJsonAST(obj)

@@ -77,7 +77,7 @@ val sender = DIDPeer2.makeAgent(
       kid = None
     )
   ),
-  Seq(DIDPeerServiceEncoded(s = "https://alice.did.fmgp.app/"))
+  Seq(DIDPeerServiceEncoded("https://alice.did.fmgp.app/"))
 )
 ```
 

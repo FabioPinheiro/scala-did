@@ -72,16 +72,10 @@ case class DIDPeer2(elements: Seq[DIDPeer2.Element]) extends DIDPeer {
     service = Some(
       elements
         .collect { case e: DIDPeer2.ElementService => e }
-        .zipWithIndex
-        .map { (e: DIDPeer2.ElementService, index) =>
-          val data = String(Base64.basicDecoder.decode(e.base64))
-          data
-            .fromJson[DIDPeerServiceEncoded]
-            .toOption // TODO deal with errors
-            .map { x => x.getDIDService(DIDSubject(this.string), index) }
-        }
-        .flatten
-        .toSet
+        .foldLeft(Set.empty[DIDService])((acc, ele) =>
+          acc ++ DIDPeerServiceEncodedNew(Base64(ele.base64))
+            .getDIDService(DIDSubject(this.string), previouslyNumberOfService = acc.size)
+        )
     ).filterNot(_.isEmpty)
   )
 }
@@ -113,7 +107,7 @@ object DIDPeer2 {
     *     fmgp.crypto.KeyGenerator.unsafeX25519,
     *     fmgp.crypto.KeyGenerator.unsafeEd25519
     *   ),
-    *   Seq(DIDPeerServiceEncoded(s = "http://localhost:8080"))
+    *   Seq(DIDPeerServiceEncoded("http://localhost:8080"))
     * ).did
     * }}}
     */

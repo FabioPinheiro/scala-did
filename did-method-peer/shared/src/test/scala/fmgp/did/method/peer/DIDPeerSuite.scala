@@ -11,6 +11,7 @@ import fmgp.multibase._
 import DIDPeerExamples._
 import fmgp.did.method.peer.DidPeerResolver
 import zio.json.ast.Json
+import fmgp.util.Base64
 
 /** didResolverPeerJVM/testOnly fmgp.did.method.peer.DIDPeerSuite */
 class DIDPeerSuite extends ZSuite {
@@ -122,7 +123,7 @@ class DIDPeerSuite extends ZSuite {
       kid = None // : Option[String]
     )
     val obj =
-      DIDPeer2(Seq(keyAgreement, keyAuthentication), Seq(DIDPeerServiceEncoded("http://localhost:8080")))
+      DIDPeer2(Seq(keyAgreement, keyAuthentication), Seq(DIDPeerServiceEncodedOld("http://localhost:8080")))
 
     assertEquals(
       obj,
@@ -172,4 +173,98 @@ class DIDPeerSuite extends ZSuite {
           case Some(services) => fail(s"Must have only two servies instated of ${services.size}")
   }
 
+  // ##############################################################################################
+  // New DIDPeerServiceEncoded -> because of  https://github.com/Indicio-tech/didcomm-demo/issues/2
+
+  val ex1Str =
+    """[{"t":"dm","s":"https://did.fmgp.app","r":[],"a":["didcomm/v2"]},{"t":"dm","s":"ws://did.fmgp.app","r":[],"a":["didcomm/v2"]}]"""
+  val ex1AfterRemoveAbbreviation =
+    """[
+      |  {
+      |    "type" : "DIDCommMessaging",
+      |    "serviceEndpoint" : "https://did.fmgp.app",
+      |    "routingKeys" : [],
+      |    "accept" : ["didcomm/v2"]
+      |  },
+      |  {
+      |    "type" : "DIDCommMessaging",
+      |    "serviceEndpoint" : "ws://did.fmgp.app",
+      |    "routingKeys" : [],
+      |    "accept" : ["didcomm/v2"]
+      |  }
+      |]""".stripMargin.replaceAll("\n", "").replaceAll(" ", "")
+
+  val ex1Services =
+    """[
+      |  {
+      |    "id" : "did:test:s1#didcommmessaging-0",
+      |    "type" : "DIDCommMessaging",
+      |    "serviceEndpoint" : {
+      |      "uri" : "https://did.fmgp.app",
+      |      "accept" : ["didcomm/v2"],
+      |      "routingKeys" : []
+      |    }
+      |  },
+      |  {
+      |    "id" : "did:test:s1#didcommmessaging-1",
+      |    "type" : "DIDCommMessaging",
+      |    "serviceEndpoint" : {
+      |      "uri" : "ws://did.fmgp.app",
+      |      "accept" : [ "didcomm/v2"],
+      |      "routingKeys" : []
+      |    }
+      |  }
+      |]""".stripMargin.replaceAll("\n", "").replaceAll(" ", "")
+
+  val ex2Str =
+    """{"t":"dm","s":{"uri":"did:peer:2.SW3sidCI6ImRtIiwicyI6Imh0dHBzOi8vZGlkLmZtZ3AuYXBwIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfSx7InQiOiJkbSIsInMiOiJ3czovL2RpZC5mbWdwLmFwcCIsInIiOltdLCJhIjpbImRpZGNvbW0vdjIiXX1d","accept":["didcomm/v2"]}}"""
+  val ex2AfterRemoveAbbreviation =
+    """{
+      |  "type" : "DIDCommMessaging",
+      |  "serviceEndpoint" : {
+      |    "uri" : "did:peer:2.SW3sidCI6ImRtIiwicyI6Imh0dHBzOi8vZGlkLmZtZ3AuYXBwIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfSx7InQiOiJkbSIsInMiOiJ3czovL2RpZC5mbWdwLmFwcCIsInIiOltdLCJhIjpbImRpZGNvbW0vdjIiXX1d",
+      |    "accept" : ["didcomm/v2"]
+      |  }
+      |}""".stripMargin.replaceAll("\n", "").replaceAll(" ", "")
+  val ex2Services =
+    """[
+      |  {
+      |    "id" : "did:test:s2#didcommmessaging-0",
+      |    "type" : "DIDCommMessaging",
+      |    "serviceEndpoint" : {
+      |      "uri" : "did:peer:2.SW3sidCI6ImRtIiwicyI6Imh0dHBzOi8vZGlkLmZtZ3AuYXBwIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfSx7InQiOiJkbSIsInMiOiJ3czovL2RpZC5mbWdwLmFwcCIsInIiOltdLCJhIjpbImRpZGNvbW0vdjIiXX1d",
+      |      "accept" : ["didcomm/v2"]
+      |    }
+      |  }
+      |]""".stripMargin.replaceAll("\n", "").replaceAll(" ", "")
+
+  test("test DIDPeerServiceEncoded abbreviation ex1") {
+    val ret = DIDPeerServiceEncoded.abbreviation(ex1Str.fromJson[Json].getOrElse(???))
+    assertEquals(
+      ret.toJson,
+      ex1AfterRemoveAbbreviation // .fromJson[Json].getOrElse(???).toJson
+    )
+  }
+
+  test("test DIDPeerServiceEncoded abbreviation ex2") {
+    val ret = DIDPeerServiceEncoded.abbreviation(ex2Str.fromJson[Json].getOrElse(???))
+    assertEquals(
+      ret.toJson,
+      ex2AfterRemoveAbbreviation.fromJson[Json].getOrElse(???).toJson
+    )
+  }
+
+  test("test DIDPeerServiceEncoded get services ex1") {
+    val service = DIDPeerServiceEncodedNew(Base64.encode(ex1Str))
+      .getDIDService(didSubject = DIDSubject("did:test:s1"), previouslyNumberOfService = 0)
+    assertEquals(service.size, 2)
+    assertEquals(service.toJson, ex1Services)
+  }
+
+  test("test DIDPeerServiceEncoded get services ex2") {
+    val service = DIDPeerServiceEncodedNew(Base64.encode(ex2Str))
+      .getDIDService(didSubject = DIDSubject("did:test:s2"), previouslyNumberOfService = 0)
+    assertEquals(service.size, 1)
+    assertEquals(service.toJson, ex2Services)
+  }
 }

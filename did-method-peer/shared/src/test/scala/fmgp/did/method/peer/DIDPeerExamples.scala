@@ -111,7 +111,8 @@ object DIDPeerExamples {
       "type": "DIDCommMessaging",
       "serviceEndpoint": {
         "uri": "http://localhost:8080/test",
-        "accept": ["didcomm/v2"]
+        "accept": ["didcomm/v2"],
+        "routingKeys": []
       }
     }
   ]
