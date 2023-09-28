@@ -6,7 +6,7 @@ import scala.sys.process._
 
 inThisBuild(
   Seq(
-    scalaVersion := "3.3.0", // Also update docs/publishWebsite.sh and any ref to scala-3.3.0
+    scalaVersion := "3.3.1", // Also update docs/publishWebsite.sh and any ref to scala-3.3.0
   )
 )
 // publish config
@@ -424,7 +424,7 @@ lazy val didUniresolver = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.zioMunitTest.value,
   )
   .jvmSettings(libraryDependencies += D.ziohttp.value)
-  // .enablePlugins(ScalaJSBundlerPlugin).jsSettings(Test / npmDependencies += "node-fetch" -> "3.3.0")
+  // .enablePlugins(ScalaJSBundlerPlugin).jsSettings(Test / npmDependencies += "node-fetch" -> "3.3.1")
   .jsSettings( // TODO https://scalacenter.github.io/scalajs-bundler/reference.html#jsdom
     libraryDependencies += D.dom.value,
     // jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
