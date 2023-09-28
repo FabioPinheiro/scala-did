@@ -346,8 +346,8 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
   .settings(name := "did-imp")
   .settings(libraryDependencies += D.zioMunitTest.value)
   .jvmSettings( // Add JVM-specific settings here
-    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.75", // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
-    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.75", // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
+    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.76", // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
+    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.76", // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
     libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.31", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt/9.23
 
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
@@ -391,8 +391,8 @@ lazy val didResolverPeer = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings( // See dependencyTree ->  didResolverPeerJVM/Test/dependencyTree
     libraryDependencies += "org.didcommx" % "didcomm" % "0.3.2" % Test,
     libraryDependencies += "org.didcommx" % "peerdid" % "0.3.0" % Test,
-    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.75" % Test,
-    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.75" % Test,
+    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.76" % Test,
+    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.76" % Test,
     libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.16-preview.1" % Test,
   )
   .jsConfigure(scalaJSViteConfigure)
