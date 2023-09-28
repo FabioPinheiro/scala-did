@@ -99,7 +99,7 @@ lazy val V = new {
   val zioJson = "0.6.2"
   val zioMunitTest = "0.1.1"
   val zioHttp = "3.0.0-RC2"
-  val zioPrelude = "1.0.0-RC19"
+  val zioPrelude = "1.0.0-RC21"
 
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time
   val scalaJavaTime = "2.3.0"
