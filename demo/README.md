@@ -62,6 +62,7 @@ docker tag scala_did_demo registry.fly.io/scala-did-demo
 docker push registry.fly.io/scala-did-demo # +- 115.1MB (before was +- 52MB)
 
 flyctl image update -a scala-did-demo
+flyctl deploy -i registry.fly.io/scala-did-demo -a scala-did-demo
 ```
 
 ## Others

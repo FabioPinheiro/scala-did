@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build_for_sourcemap": "NODE_OPTIONS='--max-old-space-size=4096' vite build",
+    "build_serviceworker_full": "NODE_OPTIONS='--max-old-space-size=4096' sbt serviceworker/fullLinkJS",
     "build": "vite build",
     "preview": "vite preview"
   },
