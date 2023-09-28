@@ -1,6 +1,9 @@
 resolvers ++= Resolver.sonatypeOssRepos("public")
 resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 
+import org.scalajs.linker.interface.{ModuleInitializer, ModuleSplitStyle}
+import scala.sys.process._
+
 inThisBuild(
   Seq(
     scalaVersion := "3.3.0", // Also update docs/publishWebsite.sh and any ref to scala-3.3.0
@@ -63,7 +66,7 @@ lazy val docs = project // new documentation project
   .in(file("docs-build")) // important: it must not be docs/
   .settings(skip / publish := true)
   .settings(
-    cleanFiles += baseDirectory.value / "docs-build",
+    cleanFiles += rootPaths.value.apply("BASE").toFile() / "docs-build",
     //   mdocJS := Some(webapp),
     //   // https://scalameta.org/mdoc/docs/js.html#using-scalajs-bundler
     //   mdocJSLibraries := ((webapp / Compile / fullOptJS) / webpack).value,
@@ -109,8 +112,6 @@ lazy val V = new {
   val laminar = "16.0.0"
   val waypoint = "7.0.0"
   val upickle = "3.1.2"
-  // https://www.npmjs.com/package/material-components-web
-  val materialComponents = "12.0.0"
 }
 
 /** Dependencies */
@@ -125,6 +126,7 @@ lazy val D = new {
       .cross(CrossVersion.for3Use2_13)
   )
 
+  /* Depend on the scalajs-dom library. It provides static types for the browser DOM APIs. */
   val dom = Def.setting("org.scala-js" %%% "scalajs-dom" % V.scalajsDom)
 
   val zio = Def.setting("dev.zio" %%% "zio" % V.zio)
@@ -153,30 +155,6 @@ lazy val D = new {
   val laminar = Def.setting("com.raquo" %%% "laminar" % V.laminar)
   val waypoint = Def.setting("com.raquo" %%% "waypoint" % V.waypoint)
   val upickle = Def.setting("com.lihaoyi" %%% "upickle" % V.upickle)
-}
-
-/** NPM Dependencies */
-lazy val NPM = new {
-  // https://www.npmjs.com/package/@types/d3
-  // val d3NpmDependencies = Seq("d3", "@types/d3").map(_ -> "7.1.0")
-
-  val mermaid = Seq("mermaid" -> "9.3.0") // "@types/mermaid" -> "9.2.0"
-
-  // https://www.npmjs.com/package/qrcode-generator
-  val qrcode = Seq("qrcode-generator" -> "1.4.4")
-  val qrcodeScanner = Seq("qr-scanner" -> "1.4.2") // 524 kB // https://www.npmjs.com/package/qr-scanner
-  // val qrcode = Seq("html5-qrcode" -> "2.3.8") // 2.63 MB // https://www.npmjs.com/package/html5-qrcode
-
-  val materialDesign = Seq("material-components-web" -> V.materialComponents)
-
-  val ipfsClient = Seq("multiformats" -> "9.6.4")
-
-  // val nodeJose = Seq("node-jose" -> "2.1.1", "@types/node-jose" -> "1.1.10")
-  // val elliptic = Seq("elliptic" -> "6.5.4", "@types/elliptic" -> "6.4.14")
-  val jose = Seq("jose" -> "4.8.3")
-
-  val sha1 = Seq("js-sha1" -> "0.6.0", "@types/js-sha1" -> "0.6.0")
-  val sha256 = Seq("js-sha256" -> "0.9.0")
 }
 
 inThisBuild(
@@ -212,34 +190,31 @@ inThisBuild(
 lazy val setupTestConfig: Seq[sbt.Def.SettingsDefinition] = Seq(
   libraryDependencies += D.munit.value,
 )
-
-lazy val scalaJSBundlerConfigure: Project => Project =
+lazy val jsHeader =
+  """/* FMGP scala-did examples and tool
+    | * https://github.com/FabioPinheiro/scala-did
+    | * Copyright: Fabio Pinheiro - fabiomgpinheiro@gmail.com
+    | */""".stripMargin.trim() + "\n"
+lazy val scalaJSViteConfigure: Project => Project =
   _.enablePlugins(ScalaJSPlugin)
-    .enablePlugins(ScalaJSBundlerPlugin)
+    .enablePlugins(ScalablyTypedConverterExternalNpmPlugin)
     .settings(
-      scalaJSLinkerConfig ~= {
-        _.withSourceMap(false) // disabled because it somehow triggers warnings and errors
-          .withModuleKind(ModuleKind.CommonJSModule) // ModuleKind.ESModule
-          // must be set to ModuleKind.CommonJSModule in projects where ScalaJSBundler plugin is enabled
-          .withJSHeader(
-            """/* FMGP scala-did examples and tool
-            | * https://github.com/FabioPinheiro/scala-did
-            | * Copyright: Fabio Pinheiro - fabiomgpinheiro@gmail.com
-            | */""".stripMargin.trim() + "\n"
-          )
-      }
-    )
-    // .settings( //TODO https://scalacenter.github.io/scalajs-bundler/reference.html#jsdom
-    //   //jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
-    //   //Test / requireJsDomEnv := true)
-    // )
-    .enablePlugins(ScalablyTypedConverterPlugin)
-    .settings(
-      // Compile / fastOptJS / webpackExtraArgs += "--mode=development",
-      // Compile / fullOptJS / webpackExtraArgs += "--mode=production",
-      Compile / fastOptJS / webpackDevServerExtraArgs += "--mode=development",
-      Compile / fullOptJS / webpackDevServerExtraArgs += "--mode=production",
-      useYarn := true
+      /* Configure Scala.js to emit modules in the optimal way to
+       * connect to Vite's incremental reload.
+       * - emit ECMAScript modules
+       * - emit as many small modules as possible for classes in the "livechart" package
+       * - emit as few (large) modules as possible for all other classes
+       *   (in particular, for the standard library)
+       */
+      scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withJSHeader(jsHeader) },
+      // .withSourceMap(false) // disabled because it somehow triggers warnings and errors
+
+      // Tell ScalablyTyped that we manage `npm install` ourselves
+      externalNpm := rootPaths.value.apply("BASE").toFile(),
+      // ShortModuleNames
+      stShortModuleNames := true,
+      // TODO REMOVE webpackBundlingMode := BundlingMode.LibraryAndApplication(), // BundlingMode.Application,
+      // TODO useYarn := true
     )
 
 lazy val buildInfoConfigure: Project => Project = _.enablePlugins(BuildInfoPlugin)
@@ -251,7 +226,7 @@ lazy val buildInfoConfigure: Project => Project = _.enablePlugins(BuildInfoPlugi
       version,
       scalaVersion,
       sbtVersion,
-      BuildInfoKey.action("buildTime") { System.currentTimeMillis }, // re-computed each time at compile
+      // BuildInfoKey.action("buildTime") { System.currentTimeMillis }, // re-computed each time at compile
     ),
   )
 
@@ -260,12 +235,10 @@ lazy val docConfigure: Project => Project =
   _.settings(
     autoAPIMappings := true,
     Compile / doc / target := {
-      val path =
-        baseDirectory.value.toPath.getParent.getParent /
-          "docs-build" / "target" / "api" /
-          name.value / baseDirectory.value.getName
-      // println(path)
-      path.toFile
+      val path = rootPaths.value.apply("BASE").toFile() /
+        "docs-build" / "target" / "api" / name.value / baseDirectory.value.getName
+      println(path.getAbsolutePath())
+      path
     },
     apiURL := Some(url(s"https://did.fmgp.app/apis/${name.value}/${baseDirectory.value.getName}")),
   )
@@ -283,10 +256,29 @@ addCommandAlias(
     "multiformatsJS/test"
 )
 addCommandAlias("testAll", ";testJVM;testJS")
-addCommandAlias("compileAll", "docs/mdoc;serviceworker/fastLinkJS;compile")
-addCommandAlias("assemblyAll", "docs/mdoc;serviceworker/fastLinkJS;compile;demoJVM/assembly")
+addCommandAlias("fastPackAll", "docs/mdoc;doc;compile;serviceworker/fastLinkJS;webapp/fastLinkJS")
+addCommandAlias("fullPackAll", "docs/mdoc;doc;compile;serviceworker/fullLinkJS;webapp/fullLinkJS")
 addCommandAlias("cleanAll", "clean;docs/clean")
-addCommandAlias("live", "compileAll;~demoJVM/reStart")
+addCommandAlias("assemblyAll", "installFrontend;fullPackAll;buildFrontend;demoJVM/assembly")
+addCommandAlias("live", "fastPackAll;~demoJVM/reStart")
+addCommandAlias("ciJob", "installFrontend;fullPackAll;buildFrontend;testAll")
+
+lazy val installFrontend = taskKey[Unit]("Install all NPM package")
+installFrontend := {
+  val npmInstall = Process("npm" :: "install" :: Nil)
+  val log = streams.value.log
+  if ((npmInstall !) == 0) { log.success("NPM package install successful!") }
+  else { throw new IllegalStateException("NPM package install failed!") }
+}
+
+lazy val buildFrontend = taskKey[Unit]("Execute frontend scripts")
+buildFrontend := {
+  // val npmInstall = Process("npm" :: "install" :: Nil)
+  val npmBuild = Process("npm" :: "run" :: "build" :: Nil)
+  val log = streams.value.log
+  if (( /*npmInstall #&&*/ npmBuild !) == 0) { log.success("frontend build successful!") }
+  else { throw new IllegalStateException("frontend build failed!") }
+}
 
 lazy val root = project
   .in(file("."))
@@ -315,11 +307,7 @@ lazy val did = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.zioMunitTest.value,
   )
   .jsSettings(libraryDependencies += D.scalajsJavaSecureRandom.value.cross(CrossVersion.for3Use2_13))
-  .jsConfigure(scalaJSBundlerConfigure)
-  .jsSettings( // Add JS-specific settings here
-    stShortModuleNames := true,
-    Compile / npmDependencies ++= NPM.sha1 ++ NPM.sha256,
-  )
+  .jsConfigure(scalaJSViteConfigure)
   .configure(docConfigure)
 
 lazy val didExperiments = crossProject(JSPlatform, JVMPlatform)
@@ -332,7 +320,7 @@ lazy val didExperiments = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.zioMunitTest.value,
   )
   .dependsOn(did % "compile;test->test")
-  .jsConfigure(scalaJSBundlerConfigure) // Because of didJS now uses NPM libs
+  .jsConfigure(scalaJSViteConfigure) // Because of didJS now uses NPM libs
   .configure(docConfigure)
 
 lazy val didExtra = crossProject(JSPlatform, JVMPlatform)
@@ -346,7 +334,7 @@ lazy val didExtra = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     libraryDependencies += D.ziohttp.value,
   )
-  .jsConfigure(scalaJSBundlerConfigure) // Because of didJS now uses NPM libs
+  .jsConfigure(scalaJSViteConfigure) // Because of didJS now uses NPM libs
   .configure(docConfigure)
 
 lazy val didImp = crossProject(JSPlatform, JVMPlatform)
@@ -366,10 +354,8 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
     libraryDependencies += "com.google.protobuf" % "protobuf-java" % "3.23.3",
   )
-  .jsConfigure(scalaJSBundlerConfigure)
+  .jsConfigure(scalaJSViteConfigure)
   .jsSettings( // Add JS-specific settings here
-    stShortModuleNames := true,
-    Compile / npmDependencies ++= NPM.jose, // NPM.elliptic, // NPM.nodeJose
     // Test / scalaJSUseMainModuleInitializer := true, Test / scalaJSUseTestModuleInitializer := false, Test / mainClass := Some("fmgp.crypto.MainTestJS")
     Test / parallelExecution := false,
     Test / testOptions += Tests.Argument("--exclude-tags=JsUnsupported"),
@@ -408,7 +394,7 @@ lazy val didResolverPeer = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.75" % Test,
     libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.16-preview.1" % Test,
   )
-  .jsConfigure(scalaJSBundlerConfigure)
+  .jsConfigure(scalaJSViteConfigure)
   .dependsOn(did, multiformats)
   .dependsOn(didImp % "test->test") // To generate keys for tests
   .configure(docConfigure)
@@ -446,29 +432,20 @@ lazy val didUniresolver = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(did)
   .configure(docConfigure)
 
-import org.scalajs.linker.interface
 lazy val serviceworker = project
   .in(file("serviceworker"))
   .settings(publish / skip := true)
   .settings(name := "fmgp-serviceworker")
   .enablePlugins(ScalaJSPlugin) // Enable the Scala.js plugin in this project
   .settings(
-    // Tell Scala.js that this is an application with a main method
-    // scalaJSUseMainModuleInitializer := true,
-    scalaJSModuleInitializers := Seq(
-      interface.ModuleInitializer.mainMethod("fmgp.serviceworker.SW", "main").withModuleID("sw")
-    ),
-    /* Configure Scala.js to emit modules in the optimal way to
-     * connect to Vite's incremental reload.
-     * - emit ECMAScript modules
-     * - emit as many small modules as possible for classes in the "serviceworker" package
-     * - emit as few (large) modules as possible for all other classes (in particular, for the standard library)
-     */
     scalaJSLinkerConfig ~= {
       _.withModuleKind(ModuleKind.ESModule)
-      // .withModuleSplitStyle(org.scalajs.linker.interface.ModuleSplitStyle.SmallModulesFor(List("serviceworker")))
+        .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("fmgp.serviceworker")))
+        .withJSHeader(jsHeader)
     },
-    /* Depend on the scalajs-dom library. It provides static types for the browser DOM APIs. */
+    scalaJSModuleInitializers := Seq( // scalaJSUseMainModuleInitializer := true,
+      ModuleInitializer.mainMethod("fmgp.serviceworker.SW", "main").withModuleID("sw")
+    ),
     libraryDependencies += D.dom.value,
     libraryDependencies ++= Seq(D.zio.value, D.zioJson.value),
   )
@@ -477,28 +454,26 @@ lazy val webapp = project
   .in(file("webapp"))
   .settings(publish / skip := true)
   .settings(name := "fmgp-webapp")
-  .configure(scalaJSBundlerConfigure)
+  .configure(scalaJSViteConfigure)
+  .settings(
+    scalaJSLinkerConfig ~= {
+      _.withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("fmgp.webapp")))
+    },
+    Compile / scalaJSModuleInitializers += {
+      ModuleInitializer.mainMethod("fmgp.webapp.App", "main").withModuleID("webapp")
+    },
+  )
   .configure(buildInfoConfigure)
-  .dependsOn(did.js, didExample.js)
-  .dependsOn(serviceworker)
   .settings(
     libraryDependencies ++= Seq(D.laminar.value, D.waypoint.value, D.upickle.value),
     libraryDependencies ++= Seq(D.zio.value, D.zioJson.value),
-    Compile / npmDependencies ++= NPM.mermaid ++ NPM.qrcode ++ NPM.qrcodeScanner ++ NPM.materialDesign ++ NPM.ipfsClient,
-    // ++ List("ms" -> "2.1.1"),
-    // stIgnore ++= List("ms") // https://scalablytyped.org/docs/conversion-options
   )
   .settings( // for doc
     libraryDependencies += D.laika.value,
     Compile / sourceGenerators += makeDocSources.taskValue,
   )
-  .settings(
-    stShortModuleNames := true,
-    webpackBundlingMode := BundlingMode.LibraryAndApplication(), // BundlingMode.Application,
-    Compile / scalaJSModuleInitializers += {
-      org.scalajs.linker.interface.ModuleInitializer.mainMethod("fmgp.webapp.App", "main")
-    },
-  )
+  .dependsOn(did.js, didExample.js)
+  .dependsOn(serviceworker)
 
 lazy val didExample = crossProject(JSPlatform, JVMPlatform)
   .in(file("did-example"))
@@ -529,26 +504,12 @@ lazy val demo = crossProject(JSPlatform, JVMPlatform)
     assembly / mainClass := Some("fmgp.did.demo.AppServer"),
     assembly / assemblyJarName := "scala-did-demo-server.jar",
     libraryDependencies += D.ziohttp.value,
-
-    // WebScalaJSBundlerPlugin
-    scalaJSProjects := Seq(webapp),
-    /** scalaJSPipeline task runs scalaJSDev when isDevMode is true, runs scalaJSProd otherwise. scalaJSProd task runs
-      * all tasks for production, including Scala.js fullOptJS task and source maps scalaJSDev task runs all tasks for
-      * development, including Scala.js fastOptJS task and source maps.
-      */
-    Assets / pipelineStages := Seq(scalaJSPipeline, gzip),
-    // pipelineStages ++= Seq(digest, gzip), //Compression - If you serve your Scala.js application from a web server, you should additionally gzip the resulting .js files.
     Compile / unmanagedResourceDirectories += baseDirectory.value / "src" / "main" / "extra-resources",
-    // Compile / unmanagedResourceDirectories += (baseDirectory.value.toPath.getParent.getParent / "docs-build" / "target" / "api").toFile,
-    Compile / unmanagedResourceDirectories += (baseDirectory.value.toPath.getParent.getParent / "docs-build" / "target" / "mdoc").toFile,
-    Compile / unmanagedResourceDirectories += (baseDirectory.value.toPath.getParent.getParent / "serviceworker" / "target" / "scala-3.3.0" / "fmgp-serviceworker-fastopt").toFile,
-    Compile / compile := ((Compile / compile) dependsOn scalaJSPipeline).value,
-    // Frontend dependency configuration
-    Assets / WebKeys.packagePrefix := "public/",
-    Runtime / managedClasspath += (Assets / packageBin).value,
+    Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "api",
+    Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "mdoc",
+    Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "vite" / "dist",
   )
   .dependsOn(did, didImp, didExtra, didResolverPeer, didResolverWeb, didUniresolver, didExample)
-  .enablePlugins(WebScalaJSBundlerPlugin)
 
 val webjarsPattern = "(META-INF/resources/webjars/.*)".r
 ThisBuild / assemblyMergeStrategy := {
@@ -565,19 +526,30 @@ ThisBuild / assemblyMergeStrategy := {
 }
 
 /** Copy the Documentation and Generate an Scala object to Store */
-def makeDocSources = Def.task {
-  val baseDir = baseDirectory.value.toPath.getParent / "docs-build" / "target" / "mdoc"
-  val resourceFile = (baseDir / "readme.md").toFile
-  val sourceDir = (Compile / sourceManaged).value
-  val sourceFile = sourceDir / "DocSource.scala"
-  if (!sourceFile.exists() || sourceFile.lastModified() < resourceFile.lastModified()) {
-    val contentREAMDE = IO.read(resourceFile).replaceAllLiterally("$", "$$").replaceAllLiterally("\"\"\"", "\"\"$\"")
-    val scalaCode = s"""
+def makeDocSources = Def
+  .task {
+    val resourceFile = rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "mdoc" / "readme.md"
+    val originalFile = rootPaths.value.apply("BASE").toFile() / "docs" / "readme.md"
+    val sourceDir = (Compile / sourceManaged).value
+    val sourceFile = sourceDir / "DocSource.scala"
+    val log = streams.value.log
+    if (!sourceFile.exists() || sourceFile.lastModified() < resourceFile.lastModified()) {
+      val file =
+        if (resourceFile.exists()) resourceFile
+        else {
+          log.warn("makeDocSources: the resourceFile does not exists. Using the originalFile")
+          originalFile
+        }
+      val contentREAMDE = IO
+        .read(file)
+        .replaceAllLiterally("$", "$$")
+        .replaceAllLiterally("\"\"\"", "\"\"$\"")
+      val scalaCode = s"""
       |package fmgp.did
       |object DocSource {
       |  final val readme = raw\"\"\"$contentREAMDE\"\"\"
       |}""".stripMargin
-    IO.write(sourceFile, scalaCode)
+      IO.write(sourceFile, scalaCode)
+    }
+    Seq(sourceFile)
   }
-  Seq(sourceFile)
-}

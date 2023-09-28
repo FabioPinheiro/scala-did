@@ -2,6 +2,7 @@ package fmgp.serviceworker
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.*
+import scala.scalajs.js.JSON
 
 import scalajs._
 import org.scalajs.dom._
@@ -13,12 +14,31 @@ import scala.concurrent.Promise
 // @js.native @JSImport("/javascript.svg", JSImport.Default)
 // val javascriptLogo: String = js.native
 
+@js.native
+trait ManifestEntry extends js.Object {
+  def revision: js.UndefOr[String] = js.native
+  def url: String = js.native
+}
+
 object SW {
+  // this is extremely hack thing to do to have "self.__WB_MANIFEST" on the generated code
+  def self__WB_MANIFEST = {
+    js.Dynamic.global
+      .selectDynamic("self")
+      .__WB_MANIFEST
+      .asInstanceOf[js.Array[ManifestEntry]]
+    // Uncaught org.scalajs.linker.runtime.UndefinedBehaviorError: java.lang.ClassCastException: undefined cannot be cast to java.lang.String
+  }.map(e => e.url: RequestInfo)
+
   // def main(args: Array[String]): Unit = println("main")
   val version = 16
 
   def main() = {
     println(s"--- SW version $version ---")
+
+    println(s"--- SW self__WB_MANIFEST ---")
+    println(JSON.stringify(self__WB_MANIFEST, null, 1))
+
     ServiceWorkerGlobalScope.self.oninstall = (event: ExtendableEvent) => oninstall(event)
     ServiceWorkerGlobalScope.self.onactivate = (event: ExtendableEvent) => onactivate(event)
     ServiceWorkerGlobalScope.self.onmessage = (event: MessageEvent) => println("onmessage")
@@ -38,14 +58,14 @@ object SW {
             .`open`("v1")
             .`then`((cache) =>
               cache.addAll(
-                js.Array(
-                  "/",
-                  "/public/fmgp-webapp-fastopt-bundle.js",
-                  // "/public/fmgp-webapp-fastopt-library.js",
-                  "https://fonts.googleapis.com/css?family=Roboto:300,400,500",
-                  "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css",
-                  "https://fonts.googleapis.com/icon?family=Material+Icons",
-                )
+                self__WB_MANIFEST
+                // js.Array(
+                //   "/",
+                //   "/webapp.js", // "/public/fmgp-webapp-fastopt-library.js",
+                //   "https://fonts.googleapis.com/css?family=Roboto:300,400,500",
+                //   "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css",
+                //   "https://fonts.googleapis.com/icon?family=Material+Icons",
+                // )
               )
             )
             .`then`(_ => ServiceWorkerGlobalScope.self.skipWaiting())

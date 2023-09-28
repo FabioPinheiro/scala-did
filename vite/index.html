@@ -4,28 +4,35 @@
   <meta charset="UTF-8">
   <title>ScalaDID [FAST]</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json">
+  <!-- <link rel="manifest" href="manifest.json"> -->
   <meta name="theme-color" content="#6200ee" />
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
   <!-- <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet"> -->
 
 
   <!-- https://material.io/develop/web/getting-started -->
-  <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
-  <!-- <link
-    href="./target/scala-3.3.0/scalajs-bundler/main/node_modules/material-components-web/dist/material-components-web.min.css"
-    rel="stylesheet"> -->
+  <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
+  <!-- onerror="this.onerror=null;this.href='local.css';" -->
+
   <!-- <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script> -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <!-- <script src="https://cdn.jsdelivr.net/npm/ipfs-http-client/dist/index.min.js"></script> -->
-
   <script>
     var callback = function () {
       alert('A callback was triggered');
     }
   </script>
+
   <!-- My APP -->
-  <script type="text/javascript" src="public/fmgp-webapp-fastopt-bundle.js"></script>
+  <script type="module" src="main.js"></script>
+  <link rel="manifest" href="manifest.webmanifest">
+  <script id="vite-plugin-pwa:inline-sw">
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      })
+    }
+  </script>
+
 </head>
 
 <body style="margin:0;">

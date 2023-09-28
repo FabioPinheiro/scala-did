@@ -23,6 +23,11 @@ import fmgp.did.method.peer.DidPeerResolver
 import fmgp.crypto.Curve
 import fmgp.crypto.KeyGenerator
 import fmgp.util.MiddlewareUtils
+import zio.http.endpoint.RoutesMiddleware
+import java.io.File
+import java.io.FileNotFoundException
+import zio.http.Header.ContentType
+import zio.http.MediaTypes
 
 /** demoJVM/runMain fmgp.did.demo.AppServer
   *
@@ -143,36 +148,64 @@ object AppServer extends ZIOAppDefault {
           case Left(error)  => ZIO.succeed(Response.text(error.error).copy(status = Status.BadRequest)).debug
           case Right(value) => ZIO.succeed(Response.text("DID:" + value)).debug
       case req @ Method.GET -> Root => { // html.Html.fromDomElement()
-        val data = Source.fromResource(s"public/index.html").mkString("")
+        val data = Source.fromResource(s"index.html").mkString("")
         ZIO.log("index.html") *> ZIO.succeed(Response.html(data))
       }
-    } ++ Http.fromResource(s"public/favicon.ico").when {
+      case req @ Method.GET -> Root / "index.html" => ZIO.succeed(Response.redirect(URL.root))
+    } ++ Http.fromResource(s"favicon.ico").when {
     case Method.GET -> Root / "favicon.ico" => true
     case _                                  => false
-  } ++ Http.fromResource(s"public/manifest.json").when {
-    case Method.GET -> Root / "manifest.json" => true
-    case _                                    => false
+  } ++ Http.fromResource(s"manifest.webmanifest").when {
+    case Method.GET -> Root / "manifest.webmanifest" => true
+    case _                                           => false
   } ++ Http.fromResource(s"sw.js").when {
     case Method.GET -> Root / "sw.js" => true
     case _                            => false
   } ++ {
     Http
-      .fromResource(s"public/fmgp-webapp-fastopt-bundle.js.gz") // ".gz" becuase of 0
-      .map(_.setHeaders(Headers(Header.ContentType(MediaType.application.javascript), Header.ContentEncoding.GZip)))
+      .fromResource(s"webapp.js") // ".gz" becuase of 0
+      .map(_.setHeaders(Headers(Header.ContentType(MediaType.application.javascript)))) // Header.ContentEncoding.GZip
       .when {
-        case Method.GET -> Root / "public" / "fmgp-webapp-fastopt-bundle.js" => true
-        case _                                                               => false
+        case Method.GET -> Root / "webapp.js" => true
+        case _                                => false
       }
-  } ++ {
-    Http
-      .fromResource(s"public/vendors-node_modules_qr-scanner_qr-scanner-worker_min_js-library.js.gz")
-      .map(_.setHeaders(Headers(Header.ContentType(MediaType.application.javascript), Header.ContentEncoding.GZip)))
-      .when {
-        case Method.GET -> Root / "public" / "vendors-node_modules_qr-scanner_qr-scanner-worker_min_js-library.js" =>
-          true
-        case _ => false
+  } ++ Http
+    .collectHandler[Request] { case Method.GET -> "" /: "assets" /: path =>
+      RoutesMiddleware
+      // TODO https://zio.dev/reference/stream/zpipeline/#:~:text=ZPipeline.gzip%20%E2%80%94%20The%20gzip%20pipeline%20compresses%20a%20stream%20of%20bytes%20as%20using%20gzip%20method%3A
+      import zio.http.html._
+      path.encode match {
+        case "" | "/" =>
+          Response
+            .html(
+              ul( // Custom UI to list all the files in the directory
+                (li(a(href := "..", "..")) +: Source
+                  .fromResource("assets")
+                  .getLines()
+                  .map { file => li(a(href := file, file)): Html }
+                  .toSeq): _*
+              )
+            )
+            .toHandler
+        case other =>
+          val fullPath = s"assets/$other"
+          val classLoader = Thread.currentThread().getContextClassLoader()
+          Option(classLoader.getResourceAsStream(fullPath)) match {
+            case None => Handler.notFound
+            case Some(_) =>
+              import zio.http.{MediaType => Ztype}
+              val headerContentType = fullPath match
+                case s if s.endsWith(".html") => Header.ContentType(Ztype.text.html)
+                case s if s.endsWith(".js")   => Header.ContentType(Ztype.text.javascript)
+                case s if s.endsWith(".css")  => Header.ContentType(Ztype.text.css)
+                case s                        => Header.ContentType(Ztype.text.plain)
+              // TODO headerContentEncoding:
+              Handler
+                .fromStream(ZStream.fromResource(fullPath))
+                .map(r => r.withHeader(headerContentType))
+          }
       }
-  }
+    }
 
   override val run = for {
     _ <- Console.printLine(
@@ -208,6 +241,7 @@ object AppServer extends ZIOAppDefault {
     myServer <- Server
       .serve(
         ((app ++ mdocMarkdown ++ mdocHTML ++ DidPeerUniresolverDriver.resolverPeer) @@ MiddlewareUtils.all)
+          // TODO Test this .withDefaultErrorResponse
           .tapUnhandledZIO(ZIO.logWarning("Unhandled Endpoint"))
           .tapErrorCauseZIO(cause => ZIO.logErrorCause(cause)) // THIS is to log all the erros
           .withDefaultErrorResponse
@@ -218,6 +252,16 @@ object AppServer extends ZIOAppDefault {
       .provideSomeLayer(client >>> MessageDispatcherJVM.layer)
       .provideSomeEnvironment { (env: ZEnvironment[Server]) => env.add(myHub) }
       .provide(Server.defaultWithPort(port))
+      // .provide(
+      //   Server.defaultWith(
+      //     _.port(port)
+      //       .responseCompression(
+      //         Server.Config.ResponseCompressionConfig.default
+      //           // Server.Config.ResponseCompressionConfig.config
+      //           // Server.Config.ResponseCompressionConfig(0, IndexedSeq(Server.Config.CompressionOptions.gzip()))
+      //       )
+      //   )
+      // )
       .debug
       .fork
     _ <- ZIO.log(s"Server Started")
