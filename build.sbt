@@ -111,7 +111,7 @@ lazy val V = new {
 
   val laminar = "16.0.0"
   val waypoint = "7.0.0"
-  val upickle = "3.1.2"
+  val upickle = "3.1.3"
 }
 
 /** Dependencies */
