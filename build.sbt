@@ -353,7 +353,7 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
     libraryDependencies += "com.google.crypto.tink" % "tink" % "1.11.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
-    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "3.23.3",
+    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "3.23.4",
   )
   .jsConfigure(scalaJSViteConfigure)
   .jsSettings( // Add JS-specific settings here
