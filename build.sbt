@@ -107,7 +107,7 @@ lazy val V = new {
   val logbackClassic = "1.2.10"
   val scalaLogging = "3.9.4"
 
-  val laika = "0.19.2"
+  val laika = "0.19.5"
 
   val laminar = "16.0.0"
   val waypoint = "7.0.0"
