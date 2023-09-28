@@ -96,7 +96,7 @@ lazy val V = new {
 
   // https://mvnrepository.com/artifact/dev.zio/zio
   val zio = "2.0.15"
-  val zioJson = "0.4.2" // FIXME UPDATE
+  val zioJson = "0.6.2"
   val zioMunitTest = "0.1.1"
   val zioHttp = "3.0.0-RC2"
   val zioPrelude = "1.0.0-RC19"
@@ -159,31 +159,32 @@ lazy val D = new {
 
 inThisBuild(
   Seq(
-    scalacOptions ++= Seq(
-      // ### https://docs.scala-lang.org/scala3/guides/migration/options-new.html
-      // ### https://docs.scala-lang.org/scala3/guides/migration/options-lookup.html
-      //
-      "-encoding", // if an option takes an arg, supply it on the same line
-      "UTF-8", // source files are in UTF-8
-      "-deprecation", // warn about use of deprecated APIs
-      "-unchecked", // warn about unchecked type parameters
-      "-feature", // warn about misused language features (Note we are using 'language:implicitConversions')
-      "-Xfatal-warnings",
-      // TODO "-Yexplicit-nulls",
-      // "-Ysafe-init", // https://dotty.epfl.ch/docs/reference/other-new-features/safe-initialization.html
-      "-language:implicitConversions", // we can use with the flag '-feature'
-      // NO NEED ATM "-language:reflectiveCalls",
-      // "-Xprint-diff",
-      // "-Xprint-diff-del",
-      // "-Xprint-inline",
-      // NO NEED ATM "-Xsemanticdb"
-      // NO NEED ATM "-Ykind-projector"
-    ),
+    // ### https://docs.scala-lang.org/scala3/guides/migration/options-new.html
+    // ### https://docs.scala-lang.org/scala3/guides/migration/options-lookup.html
+    scalacOptions ++=
+      Seq("-encoding", "UTF-8") ++ // source files are in UTF-8
+        Seq(
+          "-deprecation", // warn about use of deprecated APIs
+          "-unchecked", // warn about unchecked type parameters
+          "-feature", // warn about misused language features (Note we are using 'language:implicitConversions')
+          "-Xfatal-warnings",
+          // TODO "-Yexplicit-nulls",
+          // "-Ysafe-init", // https://dotty.epfl.ch/docs/reference/other-new-features/safe-initialization.html
+          "-language:implicitConversions", // we can use with the flag '-feature'
+          // NO NEED ATM "-language:reflectiveCalls",
+          // "-Xprint-diff",
+          // "-Xprint-diff-del",
+          // "-Xprint-inline",
+          // NO NEED ATM "-Xsemanticdb"
+          // NO NEED ATM "-Ykind-projector"
+        ) ++
+        // Because DeriveJson(Decoder/Encoder).gen[DidFail] exceeded maximal number of successive inlines (default is 32)
+        Seq("-Xmax-inlines", "38")
 
-    // ### commonSettings ###
-    // Compile / doc / sources := Nil,
-    // ### setupTestConfig ### //lazy val settingsFlags: Seq[sbt.Def.SettingsDefinition] = ???
-    // libraryDependencies += D.munit.value, // BUG? "JS's Tests does not stop"
+      // ### commonSettings ###
+      // Compile / doc / sources := Nil,
+      // ### setupTestConfig ### //lazy val settingsFlags: Seq[sbt.Def.SettingsDefinition] = ???
+      // libraryDependencies += D.munit.value, // BUG? "JS's Tests does not stop"
   )
 )
 

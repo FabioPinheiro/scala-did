@@ -44,7 +44,7 @@ package error {
   object SomeThrowable {
     def apply(throwable: Throwable) = new SomeThrowable(throwable.getClass.getName() + ":" + throwable.getMessage)
   }
-  case class CryptoErrorCollection[E <: CryptoFailed](errors: Seq[E]) extends CryptoFailed
+  case class CryptoErrorCollection[+E <: CryptoFailed](errors: Seq[E]) extends CryptoFailed
   object CryptoErrorCollection {
     def unfold[E <: CryptoFailed, A](x: Seq[Either[E, A]]): Either[CryptoFailed, Seq[A]] =
       x.partition(_.isLeft).asInstanceOf[(Seq[Left[E, A]], Seq[Right[E, A]])] match {
