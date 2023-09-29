@@ -143,7 +143,8 @@ object MessageTemplate {
       recipient_did = Some(FROMTO("did:recipient_did:123")),
       attachments = Map("321" -> obj_encryptedMessage_ECDHES_X25519_XC20P)
     )
-    def exMessagesReceived = MessagesReceived(from = from, to = to, thid = Some(thidMaybe), message_id_list = Seq("321"))
+    def exMessagesReceived =
+      MessagesReceived(from = from, to = to, thid = Some(thidMaybe), message_id_list = Seq("321"))
     def exLiveModeChange = LiveModeChange(from = from, to = to, live_delivery = true)
   }
 
