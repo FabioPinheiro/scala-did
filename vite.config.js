@@ -4,8 +4,8 @@ import { VitePWA } from 'vite-plugin-pwa'
 import viteCompression from 'vite-plugin-compression';
 
 export default defineConfig(({ command, mode, ssrBuild }) => {
-  const serviceworkerSrc = '../serviceworker/target/scala-3.3.0/fmgp-serviceworker-' + ((command === 'serve') ? 'fastopt' : 'opt')
-  //resolve(__dirname, 'serviceworker/target/scala-3.3.0/fmgp-serviceworker-fastopt'),
+  const serviceworkerSrc = '../serviceworker/target/scala-3.3.1/fmgp-serviceworker-' + ((command === 'serve') ? 'fastopt' : 'opt')
+  //resolve(__dirname, 'serviceworker/target/scala-3.3.1/fmgp-serviceworker-fastopt'),
 
   return {
     root: './vite',
