@@ -91,7 +91,7 @@ lazy val V = new {
   val munit = "1.0.0-M8" // "0.7.29"
 
   // https://mvnrepository.com/artifact/org.scala-js/scalajs-dom
-  val scalajsDom = "2.6.0"
+  val scalajsDom = "2.8.0"
   // val scalajsLogging = "1.1.2-SNAPSHOT" //"1.1.2"
 
   // https://mvnrepository.com/artifact/dev.zio/zio

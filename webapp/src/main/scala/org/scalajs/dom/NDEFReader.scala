@@ -6,6 +6,9 @@ import scala.scalajs.js.annotation.JSGlobal
 /** The [[NDEFReader]] interface of the Web NFC API (https://developer.mozilla.org/en-US/docs/Web/API/Web_NFC_API) is
   * used to read from and write data to compatible NFC devices, e.g. NFC tags supporting NDEF, when these devices are
   * within the reader's magnetic induction field.
+  *
+  * @see
+  *   https://w3c.github.io/web-nfc/#the-ndefreader-object
   */
 @JSGlobal("NDEFReader")
 @js.native
@@ -36,7 +39,9 @@ class NDEFReader() extends EventTarget {
     */
   def write(message: String, options: NDEFWriteOptions): js.Promise[Unit] = js.native
   def write(message: js.typedarray.ArrayBuffer, options: NDEFWriteOptions): js.Promise[Unit] = js.native
-  // def write(message:js.typedarray.TypedArray[NDEFRecord, ???] , options: NDEFWriteOptions = js.native): js.Promise[Unit] = js.native
+
+  def write(message: js.typedarray.TypedArray[_, _],
+      options: NDEFWriteOptions = js.native): js.Promise[Unit] = js.native
   def write(message: js.typedarray.DataView, options: NDEFWriteOptions): js.Promise[Unit] = js.native
   def write(message: js.Array[NDEFRecord], options: NDEFWriteOptions): js.Promise[Unit] = js.native
 

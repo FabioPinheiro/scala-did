@@ -15,7 +15,7 @@ object SandboxSettings {
         button(
           "Register URL protocol handler: web",
           onClick --> { _ =>
-            val n = dom.window.navigator.asInstanceOf[dom.NavigatorProtocolHandler]
+            val n = dom.window.navigator
             n.registerProtocolHandler("did", "#/resolver/%s")
             println("""registerProtocolHandler("did", "#/resolver/%s")""")
           },
@@ -23,7 +23,7 @@ object SandboxSettings {
         button(
           "Unregister URL protocol handler: web",
           onClick --> { _ =>
-            val n = dom.window.navigator.asInstanceOf[dom.NavigatorProtocolHandler]
+            val n = dom.window.navigator
             n.unregisterProtocolHandler("did", "#/resolver/%s")
             println("""unregisterProtocolHandler("did", "#/resolver/%s")""")
           },
@@ -41,7 +41,7 @@ object SandboxSettings {
         button(
           "Register URL protocol handler: web+did",
           onClick --> { _ =>
-            val n = dom.window.navigator.asInstanceOf[dom.NavigatorProtocolHandler]
+            val n = dom.window.navigator
             n.registerProtocolHandler("web+did", "#/resolver/%s")
             println("""registerProtocolHandler("web+did", "#/resolver/%s")""")
           },
@@ -49,7 +49,7 @@ object SandboxSettings {
         button(
           "Unregister URL protocol handler: web+did",
           onClick --> { _ =>
-            val n = dom.window.navigator.asInstanceOf[dom.NavigatorProtocolHandler]
+            val n = dom.window.navigator
             n.unregisterProtocolHandler("web+did", "#/resolver/%s")
             println("""unregisterProtocolHandler("web+did", "#/resolver/%s")""")
           },
