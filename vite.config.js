@@ -23,6 +23,8 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
       cors: true,
       proxy: {
         '/ops': 'http://localhost:8080',
+        '/makeKey/X25519': 'http://localhost:8080',
+        '/makeKey/Ed25519': 'http://localhost:8080',
         '^/tap/.*': {
           target: 'ws://localhost:8080',
           ws: true,
