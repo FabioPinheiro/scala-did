@@ -28,6 +28,7 @@ object AgentManagement {
   }
   def childrenSignal: Signal[Seq[Node]] = keyStoreVar.map(_.keys.toSeq.map(_.toJson).map(code(_)))
 
+  val mediatorDIDVar: Var[Option[DID]] = Var(initial = None)
   val keyStore2Var: Var[KeyStore] = Var(initial = KeyStore(Set.empty))
 
   private val commandObserver = Observer[String] { case str =>
@@ -43,7 +44,7 @@ object AgentManagement {
     value := "https://sit-prism-mediator.atalaprism.io",
   )
 
-  def newPeerDID = {
+  def newPeerDID(service: Option[DIDPeerServiceEncoded]) = {
     val programe = ZIO
       .collectAllPar(
         Seq(
@@ -52,7 +53,7 @@ object AgentManagement {
         )
       )
       .map { case Seq(x25519, ed255199) =>
-        val newAgent = DIDPeer2.makeAgent(Seq(x25519, ed255199), Seq(DIDPeerServiceEncoded(s = urlEndpoint.ref.value)))
+        val newAgent = DIDPeer2.makeAgent(Seq(x25519, ed255199), service.toSeq)
         Global.agentProvider.update(e => e.withAgent(AgentWithShortName("Agent" + e.agents.size, newAgent)))
       }
     // .tap(_ => ZIO.succeed(urlEndpoint.ref.value = "")) // clean up
@@ -77,28 +78,55 @@ object AgentManagement {
         provider.agentsAndIdentities.map {
           case element: AgentProvider.AgentWithShortName =>
             tr(
-              td(code(element.name)),
+              td(
+                button(
+                  code(element.name),
+                  onClick --> { (ev) => Global.selectAgentByName(element.name) }
+                )
+              ),
               td(code(element.value.keys.size)),
-              td(code(element.value.id.string)),
+              td(a(element.value.id.did, MyRouter.navigateTo(MyRouter.ResolverPage(element.value.id.did)))),
             )
           case element: AgentProvider.DIDWithShortName =>
             tr(
-              td(code(element.name)),
+              td(
+                button(
+                  code(element.name),
+                  onClick --> { (ev) => Global.selectAgentByName(element.name) }
+                )
+              ),
               td(code("N/A")),
-              td(code(element.value.string)),
+              td(a(element.value.did, MyRouter.navigateTo(MyRouter.ResolverPage(element.value.did)))),
             )
         }
       ),
     ),
-    h2("New Agent"),
+    hr(),
+    p(
+      overflowWrap.:=("anywhere"),
+      b("Selected Mediator: "),
+      Global.makeSelectElementDID(mediatorDIDVar),
+      " ",
+      code(child.text <-- mediatorDIDVar.signal.map(_.map(_.string).getOrElse("custom")))
+    ),
     div(
-      urlEndpoint,
+      b("Create Agent: "),
       button(
         "New DID Peer",
-        onClick --> { (_) => newPeerDID }
-      )
+        onClick --> { (_) =>
+          val services =
+            Some(urlEndpoint.ref.value.trim).filterNot(_.isEmpty).map(endpoint => DIDPeerServiceEncoded(s = endpoint))
+          newPeerDID(services)
+        }
+      ),
+      " with the follow endpoint ",
+      child <-- mediatorDIDVar.signal.map {
+        case None              => urlEndpoint
+        case Some(mediatorDID) => code(mediatorDID.did)
+      }
     ),
-    h2("Select Agent"),
+    hr(),
+    h2("Selected Agent: "),
     div(
       child <-- Global.agentVar.signal.map {
         case None        => "none"
@@ -109,6 +137,7 @@ object AgentManagement {
       div(child.text <-- keyStoreVar.map(_.keys.size).map(c => s"KeyStore (with $c keys):")),
       div(children <-- childrenSignal)
     ),
+    /*
     table(
       tr(th("type"), th("isPointOnCurve"), th("Keys Id")),
       children <-- keyStoreVar.map(
@@ -127,10 +156,10 @@ object AgentManagement {
                   td(code(k.isPointOnCurve)),
                   td(code(kid.getOrElse("missing"))),
                 )
-
           }
       ),
     ),
+     */
     div(
       h2("KeyStore:"),
       child <-- keyStoreVar.map(keyStore => pre(code(keyStore.keys.toJsonPretty)))

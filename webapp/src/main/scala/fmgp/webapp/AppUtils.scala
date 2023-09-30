@@ -46,9 +46,7 @@ object AppUtils { // TODO RENAME TO UIUtils
         //   i(aria.label("Atomium"), atomiumSVG)
         // ),
         span(className("mdc-list-item__text"), didName),
-        onClick --> Observer[org.scalajs.dom.MouseEvent](onNext =
-          ev => Global.agentVar.update(e => Global.providerNow.getAgentByName(didName)),
-        )
+        onClick --> Observer[org.scalajs.dom.MouseEvent](onNext = ev => Global.selectAgentByName(didName))
       )
 
     val options = {
@@ -106,7 +104,7 @@ object AppUtils { // TODO RENAME TO UIUtils
           //   "search"
           // ),
           select(
-            value <-- Global.selectAgent,
+            value <-- Global.selectAgented,
             onChange.mapToValue.map(e => Global.providerNow.getAgentByName(e)) --> Global.agentVar,
             children <-- Global.dids.map {
               _.map { step => option(value := step, step) } :+

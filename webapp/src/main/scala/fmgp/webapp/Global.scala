@@ -47,7 +47,9 @@ object Global {
       )
   }
 
-  def selectAgent: Signal[String] = Global.agentVar.signal.combineWith(agentProvider.signal).map {
+  def selectAgentByName(didName: String) = Global.agentVar.update(e => Global.providerNow.getAgentByName(didName))
+
+  def selectAgented: Signal[String] = Global.agentVar.signal.combineWith(agentProvider.signal).map {
     case (Some(agent), agentProvider) => agentProvider.nameOfAgent(agent.id).getOrElse(noneOption)
     case (None, agentProvider)        => noneOption
   }
