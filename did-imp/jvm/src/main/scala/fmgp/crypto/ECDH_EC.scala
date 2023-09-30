@@ -28,6 +28,7 @@ import zio.json._
 import fmgp.crypto.error._
 import com.nimbusds.jose.jca.JWEJCAContext
 import com.nimbusds.jose.JWEHeader
+import com.nimbusds.jose.util.Base64URL
 
 trait ECDH_UtilsEC {
   protected def getCurve(
@@ -116,17 +117,16 @@ object ECDH_AnonEC extends ECDH_UtilsEC {
           }
       }
     }
-
-    aad = AAD.compute(UtilsJVM.unsafe.given_Conversion_ProtectedHeader_JWEHeader(header.obj))
-
-    cek: SecretKey = { // REMOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      import UtilsJVM.unsafe.given
-      val jcaContext: JWEJCAContext = new JWEJCAContext()
-      ContentCryptoProvider.generateCEK(header.obj.enc /*getEncryptionMethod*/, jcaContext.getSecureRandom)
-    }
-    myProvider = new ECDH_AnonCryptoProvider(curve, cek)
-
-    ret <- myProvider.decryptAUX(header, sharedSecrets, recipients, iv, cipherText, authTag, aad)
+    ret <- new ECDH_AnonCryptoProvider(curve, cek = null) // refactoring to remove the null
+      .decryptAUX(
+        header,
+        sharedSecrets,
+        recipients,
+        iv,
+        cipherText,
+        authTag,
+        aad = AAD.compute(Base64URL(header.base64url))
+      )
   } yield (ret)
 }
 
@@ -212,15 +212,15 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
           }
       }
     }
-
-    aad = AAD.compute(UtilsJVM.unsafe.given_Conversion_ProtectedHeader_JWEHeader(header.obj))
-
-    cek: SecretKey = { // REMOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      import UtilsJVM.unsafe.given
-      val jcaContext: JWEJCAContext = new JWEJCAContext()
-      ContentCryptoProvider.generateCEK(header.obj.enc /*getEncryptionMethod*/, jcaContext.getSecureRandom)
-    }
-    myProvider = new ECDH_AuthCryptoProvider(curve, cek)
-    ret <- myProvider.decryptAUX(header, sharedSecrets, recipients, iv, cipherText, authTag, aad)
+    ret <- new ECDH_AuthCryptoProvider(curve, cek = null) // refactoring to remove the null
+      .decryptAUX(
+        header,
+        sharedSecrets,
+        recipients,
+        iv,
+        cipherText,
+        authTag,
+        aad = AAD.compute(Base64URL(header.base64url))
+      )
   } yield (ret)
 }
