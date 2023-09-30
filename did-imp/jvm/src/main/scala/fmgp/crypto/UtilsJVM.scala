@@ -71,6 +71,14 @@ object UtilsJVM {
 
   object unsafe {
 
+    given Conversion[ENCAlgorithm, EncryptionMethod] with
+      def apply(x: ENCAlgorithm) = {
+        x match
+          case ENCAlgorithm.XC20P           => EncryptionMethod.XC20P
+          case ENCAlgorithm.A256GCM         => EncryptionMethod.A256GCM
+          case ENCAlgorithm.`A256CBC-HS512` => EncryptionMethod.A256CBC_HS512
+      }
+
     /** Don't import this by default */
     given Conversion[ProtectedHeader, JWEHeader] with
       def apply(x: ProtectedHeader) = {

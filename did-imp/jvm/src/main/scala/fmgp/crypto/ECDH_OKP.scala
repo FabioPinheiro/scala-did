@@ -22,6 +22,10 @@ import fmgp.util.Base64
 import zio.json._
 
 import fmgp.crypto.error._
+import com.nimbusds.jose.jca.JWEJCAContext
+import com.nimbusds.jose.crypto.impl.ContentCryptoProvider
+import com.nimbusds.jose.crypto.impl.AAD
+import com.nimbusds.jose.util.Base64URL
 
 trait ECDH_UtilsOKP {
   protected def getCurve(
@@ -47,7 +51,6 @@ object ECDH_AnonOKP extends ECDH_UtilsOKP {
       clearText: Array[Byte],
   ): Either[CryptoFailed, EncryptedMessageGeneric] = for {
     curve <- getCurve(okpRecipientsKeys).map(_.toJWKCurve)
-    myProvider = ECDH_AnonCryptoProvider(curve)
 
     // Generate ephemeral X25519 key pair
     ephemeralPrivateKeyBytes: Array[Byte] =
@@ -64,15 +67,22 @@ object ECDH_AnonOKP extends ECDH_UtilsOKP {
         .d(Base64.encode(ephemeralPrivateKeyBytes))
         .build()
     ephemeralPublicKey: OctetKeyPair = ephemeralPrivateKey.toPublicJWK()
-    ecKeyEphemeral <- ephemeralPublicKey.toJSONString().fromJson[OKPPublicKey].left.map(CryptoFailToParse(_))
+    opkKeyEphemeral <- ephemeralPublicKey.toJSONString().fromJson[OKPPublicKey].left.map(CryptoFailToParse(_))
 
-    updatedHeader = header.buildWithKey(epk = ecKeyEphemeral)
+    updatedHeader = header.buildWithKey(epk = opkKeyEphemeral) // Add the ephemeral public opk key to the header
+    updatedAAD = AAD.compute(UtilsJVM.unsafe.given_Conversion_ProtectedHeader_JWEHeader(updatedHeader))
 
     sharedSecrets = okpRecipientsKeys.map { case (vmr, key) =>
       (vmr, ECDH.deriveSharedSecret(key.toJWK, ephemeralPrivateKey))
     }
 
-    ret = myProvider.encryptAUX(updatedHeader, sharedSecrets, clearText)
+    cek: SecretKey = {
+      import UtilsJVM.unsafe.given
+      val jcaContext: JWEJCAContext = new JWEJCAContext()
+      ContentCryptoProvider.generateCEK(updatedHeader.enc /*getEncryptionMethod*/, jcaContext.getSecureRandom)
+    }
+    myProvider = new ECDH_AnonCryptoProvider(curve, cek)
+    ret = myProvider.encryptAUX(updatedHeader, sharedSecrets, clearText, updatedAAD)
   } yield (ret)
 
   def decrypt(
@@ -84,7 +94,6 @@ object ECDH_AnonOKP extends ECDH_UtilsOKP {
       authTag: TAG
   ): Either[CryptoFailed, Array[Byte]] = for {
     curve <- getCurve(okpRecipientsKeys).map(_.toJWKCurve)
-    myProvider = ECDH_AnonCryptoProvider(curve)
     critPolicy: CriticalHeaderParamsDeferral = {
       val aux = new CriticalHeaderParamsDeferral()
       aux.ensureHeaderPasses(header)
@@ -117,14 +126,16 @@ object ECDH_AnonOKP extends ECDH_UtilsOKP {
       }
     }
 
-    ret <- myProvider.decryptAUX(
-      header,
-      sharedSecrets,
-      recipients,
-      iv,
-      cipherText,
-      authTag,
-    )
+    ret <- ECDH_AnonCryptoProvider(curve, cek = null) // refactoring to remove the null
+      .decryptAUX(
+        header,
+        sharedSecrets,
+        recipients,
+        iv,
+        cipherText,
+        authTag,
+        aad = AAD.compute(Base64URL(header.base64url)),
+      )
   } yield (ret)
 }
 
@@ -137,7 +148,6 @@ object ECDH_AuthOKP extends ECDH_UtilsOKP {
       clearText: Array[Byte],
   ): Either[CryptoFailed, EncryptedMessageGeneric] = for {
     curve <- getCurve(okpRecipientsKeys).map(_.toJWKCurve)
-    myProvider = ECDH_AuthCryptoProvider(curve)
 
     // Generate ephemeral X25519 key pair
     ephemeralPrivateKeyBytes: Array[Byte] =
@@ -156,7 +166,8 @@ object ECDH_AuthOKP extends ECDH_UtilsOKP {
     ephemeralPublicKey: OctetKeyPair = ephemeralPrivateKey.toPublicJWK()
     okpKeyEphemeral <- ephemeralPublicKey.toJSONString().fromJson[OKPPublicKey].left.map(CryptoFailToParse(_))
 
-    updatedHeader = header.buildWithKey(okpKeyEphemeral)
+    updatedHeader = header.buildWithKey(epk = okpKeyEphemeral) // Add the ephemeral public OPK key to the header
+    updatedAAD = AAD.compute(UtilsJVM.unsafe.given_Conversion_ProtectedHeader_JWEHeader(updatedHeader))
 
     sharedSecrets = okpRecipientsKeys.map { case (vmr, key) =>
       (
@@ -169,7 +180,14 @@ object ECDH_AuthOKP extends ECDH_UtilsOKP {
       )
     }
 
-    ret = myProvider.encryptAUX(updatedHeader, sharedSecrets, clearText)
+    cek: SecretKey = {
+      import UtilsJVM.unsafe.given
+      val jcaContext: JWEJCAContext = new JWEJCAContext()
+      ContentCryptoProvider.generateCEK(updatedHeader.enc /*getEncryptionMethod*/, jcaContext.getSecureRandom)
+    }
+    myProvider = new ECDH_AuthCryptoProvider(curve, cek)
+
+    ret = myProvider.encryptAUX(updatedHeader, sharedSecrets, clearText, updatedAAD)
   } yield (ret)
 
   def decrypt(
@@ -182,7 +200,6 @@ object ECDH_AuthOKP extends ECDH_UtilsOKP {
       authTag: TAG
   ): Either[CryptoFailed, Array[Byte]] = for {
     curve <- getCurve(okpRecipientsKeys).map(_.toJWKCurve)
-    myProvider = ECDH_AuthCryptoProvider(curve)
     critPolicy: CriticalHeaderParamsDeferral = {
       val aux = new CriticalHeaderParamsDeferral()
       aux.ensureHeaderPasses(header);
@@ -212,7 +229,16 @@ object ECDH_AuthOKP extends ECDH_UtilsOKP {
       }
     }
 
-    ret <- myProvider.decryptAUX(header, sharedSecrets, recipients, iv, cipherText, authTag)
+    ret <- ECDH_AuthCryptoProvider(curve, cek = null) // refactoring to remove the null
+      .decryptAUX(
+        header,
+        sharedSecrets,
+        recipients,
+        iv,
+        cipherText,
+        authTag,
+        aad = AAD.compute(Base64URL(header.base64url))
+      )
 
   } yield (ret)
 }

@@ -348,7 +348,8 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings( // Add JVM-specific settings here
     libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.76", // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
     libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.76", // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
-    libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.31", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt/9.23
+    libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.35", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt
+    // https://bitbucket.org/connect2id/nimbus-jose-jwt/branches/compare/release-9.35%0Drelease-9.32
 
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
     libraryDependencies += "com.google.crypto.tink" % "tink" % "1.11.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
