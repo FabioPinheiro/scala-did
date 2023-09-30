@@ -7,6 +7,7 @@ import scala.util.Try
 import com.nimbusds.jose.JWEHeader
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.crypto.ECDHDecrypter
+import com.nimbusds.jose.crypto.impl.AAD
 import com.nimbusds.jose.crypto.impl.AESKW
 import com.nimbusds.jose.crypto.impl.ECDH
 import com.nimbusds.jose.crypto.impl.ECDHCryptoProvider
@@ -26,30 +27,28 @@ import fmgp.did.comm._
 import fmgp.util._
 import fmgp.crypto.JWERecipient
 import fmgp.crypto.error._
+import com.nimbusds.jose.crypto.impl.JWEHeaderValidation
 
 /** Elliptic-curve Diffie–Hellman */
-case class ECDH_AnonCryptoProvider(val curve: JWKCurve) extends ECDHCryptoProvider(curve) {
+case class ECDH_AnonCryptoProvider(val curve: JWKCurve, val cek: SecretKey) extends ECDHCryptoProvider(curve, cek) {
 
   override def supportedEllipticCurves(): java.util.Set[JWKCurve] = Set(curve).asJava
 
   def encryptAUX(
       header: ProtectedHeader,
       sharedSecrets: Seq[(VerificationMethodReferenced, javax.crypto.SecretKey)],
-      clearText: Array[Byte]
+      clearText: Array[Byte],
+      aad: Array[Byte],
   ): EncryptedMessageGeneric = { // FIXME ERRORs
     import UtilsJVM.unsafe.given
 
-    val algMode: ECDH.AlgorithmMode = ECDH.resolveAlgorithmMode(header.getAlgorithm);
+    val alg = JWEHeaderValidation.getAlgorithmAndEnsureNotNull(header)
+    val algMode: ECDH.AlgorithmMode = ECDH.resolveAlgorithmMode(alg)
     assert(algMode == ECDH.AlgorithmMode.KW)
-
-    val cek: SecretKey = ContentCryptoProvider.generateCEK(
-      header.getEncryptionMethod,
-      getJCAContext.getSecureRandom
-    )
 
     sharedSecrets match {
       case head :: tail =>
-        val headParts: JWECryptoParts = encryptWithZ(header, head._2, clearText, cek)
+        val headParts: JWECryptoParts = encryptWithZ(header, head._2, clearText, aad)
 
         val recipients = tail.map { rs =>
           val sharedKey: SecretKey = ECDH.deriveSharedKey(header, rs._2, getConcatKDF)
@@ -81,6 +80,7 @@ case class ECDH_AnonCryptoProvider(val curve: JWKCurve) extends ECDHCryptoProvid
       iv: IV,
       cipherText: CipherText,
       authTag: TAG,
+      aad: Array[Byte],
   ): Either[CryptoFailed, Array[Byte]] = {
 
     val tmp = sharedSecrets.map { case (vmr, secretKey) =>
@@ -89,7 +89,7 @@ case class ECDH_AnonCryptoProvider(val curve: JWKCurve) extends ECDHCryptoProvid
         .map(_.encryptedKey)
         .map(encryptedKey =>
           Try(
-            decryptWithZ(header, secretKey, encryptedKey, iv.base64, cipherText.base64, authTag.base64)
+            decryptWithZ(header, aad, secretKey, encryptedKey, iv.base64, cipherText.base64, authTag.base64)
           ).toEither.left
             .map {
               case ex: com.nimbusds.jose.JOSEException if ex.getMessage == "MAC check failed" => MACCheckFailed
@@ -109,28 +109,25 @@ case class ECDH_AnonCryptoProvider(val curve: JWKCurve) extends ECDHCryptoProvid
 }
 
 /** Elliptic-curve Diffie–Hellman */
-case class ECDH_AuthCryptoProvider(val curve: JWKCurve) extends ECDH1PUCryptoProvider(curve) {
+case class ECDH_AuthCryptoProvider(val curve: JWKCurve, val cek: SecretKey) extends ECDH1PUCryptoProvider(curve, cek) {
 
   override def supportedEllipticCurves(): java.util.Set[JWKCurve] = Set(curve).asJava
 
   def encryptAUX(
       header: ProtectedHeader,
       sharedSecrets: Seq[(VerificationMethodReferenced, javax.crypto.SecretKey)],
-      clearText: Array[Byte]
+      clearText: Array[Byte],
+      aad: Array[Byte],
   ): EncryptedMessageGeneric = { // FIXME ERRORs
     import UtilsJVM.unsafe.given
 
-    val algMode: ECDH.AlgorithmMode = ECDH1PU.resolveAlgorithmMode(header.getAlgorithm())
+    val alg = JWEHeaderValidation.getAlgorithmAndEnsureNotNull(header)
+    val algMode: ECDH.AlgorithmMode = ECDH1PU.resolveAlgorithmMode(alg)
     assert(algMode == ECDH.AlgorithmMode.KW)
-
-    val cek: SecretKey = ContentCryptoProvider.generateCEK(
-      header.getEncryptionMethod,
-      getJCAContext.getSecureRandom
-    )
 
     sharedSecrets match {
       case head :: tail =>
-        val headParts: JWECryptoParts = encryptWithZ(header, head._2, clearText, cek)
+        val headParts: JWECryptoParts = encryptWithZ(header, head._2, clearText, aad)
 
         val recipients = tail.map { rs =>
           val sharedKey: SecretKey =
@@ -161,7 +158,8 @@ case class ECDH_AuthCryptoProvider(val curve: JWKCurve) extends ECDH1PUCryptoPro
       recipients: Seq[JWERecipient],
       iv: IV,
       cipherText: CipherText,
-      authTag: TAG
+      authTag: TAG,
+      aad: Array[Byte],
   ): Either[CryptoFailed, Array[Byte]] = {
 
     val tmp = sharedSecrets.map { case (vmr, secretKey) =>
@@ -170,7 +168,7 @@ case class ECDH_AuthCryptoProvider(val curve: JWKCurve) extends ECDH1PUCryptoPro
         .map(_.encryptedKey)
         .map(encryptedKey =>
           Try(
-            decryptWithZ(header, secretKey, encryptedKey, iv.base64, cipherText.base64, authTag.base64)
+            decryptWithZ(header, aad, secretKey, encryptedKey, iv.base64, cipherText.base64, authTag.base64)
           ).toEither.left
             .map {
               case ex: com.nimbusds.jose.JOSEException if ex.getMessage == "MAC check failed" => MACCheckFailed

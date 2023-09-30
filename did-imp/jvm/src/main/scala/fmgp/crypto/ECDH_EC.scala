@@ -5,9 +5,11 @@ import scala.util.chaining._
 import scala.collection.convert._
 import scala.jdk.CollectionConverters._
 
+import com.nimbusds.jose.crypto.impl.AAD
 import com.nimbusds.jose.crypto.impl.ECDH
 import com.nimbusds.jose.crypto.impl.ECDH1PU
 import com.nimbusds.jose.crypto.impl.ECDH1PUCryptoProvider
+import com.nimbusds.jose.crypto.impl.ContentCryptoProvider
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral
 import com.nimbusds.jose.crypto.utils.ECChecks
 import com.nimbusds.jose.jwk.{Curve => JWKCurve}
@@ -24,6 +26,8 @@ import fmgp.util.Base64
 import java.util.Collections
 import zio.json._
 import fmgp.crypto.error._
+import com.nimbusds.jose.jca.JWEJCAContext
+import com.nimbusds.jose.JWEHeader
 
 trait ECDH_UtilsEC {
   protected def getCurve(
@@ -48,7 +52,6 @@ object ECDH_AnonEC extends ECDH_UtilsEC {
       clearText: Array[Byte],
   ): Either[CryptoFailed, EncryptedMessageGeneric] = for {
     curve <- getCurve(ecRecipientsKeys).map(_.toJWKCurve)
-    myProvider = new ECDH_AnonCryptoProvider(curve)
 
     // Generate ephemeral EC key pair
     ephemeralKeyPair: JWKECKey = new ECKeyGenerator(curve).generate()
@@ -56,14 +59,22 @@ object ECDH_AnonEC extends ECDH_UtilsEC {
     ephemeralPrivateKey = ephemeralKeyPair.toECPrivateKey()
     ecKeyEphemeral <- ephemeralKeyPair.toJSONString().fromJson[ECPublicKey].left.map(CryptoFailToParse(_))
 
-    updatedHeader = header.buildWithKey(epk = ecKeyEphemeral)
+    updatedHeader = header.buildWithKey(epk = ecKeyEphemeral) // Add the ephemeral public EC key to the header
+    updatedAAD = AAD.compute(UtilsJVM.unsafe.given_Conversion_ProtectedHeader_JWEHeader(updatedHeader))
 
     sharedSecrets = ecRecipientsKeys.map { case (vmr, key) =>
       val use_the_defualt_JCA_Provider = null
       (vmr, ECDH.deriveSharedSecret(key.toJWK.toECPublicKey(), ephemeralPrivateKey, use_the_defualt_JCA_Provider))
     }
 
-    ret = myProvider.encryptAUX(updatedHeader, sharedSecrets, clearText)
+    cek: SecretKey = {
+      import UtilsJVM.unsafe.given
+      val jcaContext: JWEJCAContext = new JWEJCAContext()
+      ContentCryptoProvider.generateCEK(updatedHeader.enc /*getEncryptionMethod*/, jcaContext.getSecureRandom)
+    }
+    myProvider = new ECDH_AnonCryptoProvider(curve, cek)
+
+    ret = myProvider.encryptAUX(updatedHeader, sharedSecrets, clearText, updatedAAD)
   } yield (ret)
 
   def decrypt(
@@ -75,7 +86,6 @@ object ECDH_AnonEC extends ECDH_UtilsEC {
       authTag: TAG
   ): Either[CryptoFailed, Array[Byte]] = for {
     curve <- getCurve(ecRecipientsKeys).map(_.toJWKCurve)
-    myProvider = new ECDH_AnonCryptoProvider(curve)
     critPolicy: CriticalHeaderParamsDeferral = {
       val aux = new CriticalHeaderParamsDeferral()
       aux.ensureHeaderPasses(header)
@@ -107,7 +117,16 @@ object ECDH_AnonEC extends ECDH_UtilsEC {
       }
     }
 
-    ret <- myProvider.decryptAUX(header, sharedSecrets, recipients, iv, cipherText, authTag)
+    aad = AAD.compute(UtilsJVM.unsafe.given_Conversion_ProtectedHeader_JWEHeader(header.obj))
+
+    cek: SecretKey = { // REMOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      import UtilsJVM.unsafe.given
+      val jcaContext: JWEJCAContext = new JWEJCAContext()
+      ContentCryptoProvider.generateCEK(header.obj.enc /*getEncryptionMethod*/, jcaContext.getSecureRandom)
+    }
+    myProvider = new ECDH_AnonCryptoProvider(curve, cek)
+
+    ret <- myProvider.decryptAUX(header, sharedSecrets, recipients, iv, cipherText, authTag, aad)
   } yield (ret)
 }
 
@@ -120,7 +139,6 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
       clearText: Array[Byte],
   ): Either[CryptoFailed, EncryptedMessageGeneric] = for {
     curve <- getCurve(ecRecipientsKeys).map(_.toJWKCurve)
-    myProvider = new ECDH_AuthCryptoProvider(curve)
 
     // Generate ephemeral EC key pair on the same curve as the consumer's public key
     ephemeralKeyPair: JWKECKey = new ECKeyGenerator(curve).generate()
@@ -128,8 +146,15 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
     ephemeralPrivateKey = ephemeralKeyPair.toECPrivateKey()
     ecKeyEphemeral <- ephemeralKeyPair.toJSONString().fromJson[ECPublicKey].left.map(CryptoFailToParse(_))
 
-    // Add the ephemeral public EC key to the header
-    updatedHeader = header.buildWithKey(ecKeyEphemeral)
+    updatedHeader = header.buildWithKey(epk = ecKeyEphemeral) // Add the ephemeral public EC key to the header
+    updatedAAD = AAD.compute(UtilsJVM.unsafe.given_Conversion_ProtectedHeader_JWEHeader(updatedHeader))
+
+    jcaContext: JWEJCAContext = new JWEJCAContext()
+    cek: SecretKey = {
+      import UtilsJVM.unsafe.given
+      ContentCryptoProvider.generateCEK(updatedHeader.enc /*getEncryptionMethod*/, jcaContext.getSecureRandom)
+    }
+    myProvider = new ECDH_AuthCryptoProvider(curve, cek)
 
     sharedSecrets = ecRecipientsKeys.map { case (vmr, key) =>
       val use_the_defualt_JCA_Provider = null
@@ -139,12 +164,12 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
           sender.toJWK.toECPrivateKey(),
           key.toJWK.toECPublicKey(),
           ephemeralPrivateKey,
-          myProvider.getJCAContext().getKeyEncryptionProvider()
+          jcaContext.getKeyEncryptionProvider() // myProvider.getJCAContext().getKeyEncryptionProvider()
         )
       )
     }
 
-    ret = myProvider.encryptAUX(updatedHeader, sharedSecrets, clearText)
+    ret = myProvider.encryptAUX(updatedHeader, sharedSecrets, clearText, updatedAAD)
   } yield (ret)
 
   def decrypt(
@@ -157,7 +182,6 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
       authTag: TAG
   ): Either[CryptoFailed, Array[Byte]] = for {
     curve <- getCurve(ecRecipientsKeys).map(_.toJWKCurve)
-    myProvider = new ECDH_AuthCryptoProvider(curve)
     critPolicy: CriticalHeaderParamsDeferral = {
       val aux = new CriticalHeaderParamsDeferral()
       aux.ensureHeaderPasses(header)
@@ -189,6 +213,14 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
       }
     }
 
-    ret <- myProvider.decryptAUX(header, sharedSecrets, recipients, iv, cipherText, authTag)
+    aad = AAD.compute(UtilsJVM.unsafe.given_Conversion_ProtectedHeader_JWEHeader(header.obj))
+
+    cek: SecretKey = { // REMOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      import UtilsJVM.unsafe.given
+      val jcaContext: JWEJCAContext = new JWEJCAContext()
+      ContentCryptoProvider.generateCEK(header.obj.enc /*getEncryptionMethod*/, jcaContext.getSecureRandom)
+    }
+    myProvider = new ECDH_AuthCryptoProvider(curve, cek)
+    ret <- myProvider.decryptAUX(header, sharedSecrets, recipients, iv, cipherText, authTag, aad)
   } yield (ret)
 }
