@@ -40,25 +40,10 @@ object DecryptTool {
           decryptMessageVar.set(Some(Left(FailToParse("Fail to parse Encrypted Message: " + error)))) // side effect!
         case (Some(agent), Right(msg)) =>
           val program = {
-            msg.`protected`.obj match
-              case AnonProtectedHeader(epk, apv, typ, enc, alg) =>
-                OperationsClientRPC
-                  .anonDecryptRaw(msg)
-                  .flatMap { data =>
-                    decryptDataVar.set(Some(data)) // side effect!
-                    Operations
-                      .parseMessage(data)
-                      .map((msg, _))
-                  }
-              case AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) =>
-                OperationsClientRPC
-                  .authDecryptRaw(msg)
-                  .flatMap { data =>
-                    decryptDataVar.set(Some(data)) // side effect!
-                    Operations
-                      .parseMessage(data)
-                      .map((msg, _))
-                  }
+            OperationsClientRPC.decryptRaw(msg).flatMap { data =>
+              decryptDataVar.set(Some(data)) // side effect!
+              Operations.parseMessage(data).map((msg, _))
+            }
           }.mapBoth(
             error => decryptMessageVar.set(Some(Left(error))), // side effect!
             msg =>

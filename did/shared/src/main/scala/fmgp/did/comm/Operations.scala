@@ -23,6 +23,14 @@ trait Operations {
 
   def authEncrypt(msg: PlaintextMessage): ZIO[Agent & Resolver, DidFail, EncryptedMessage]
 
+  def decrypt(msg: EncryptedMessage): ZIO[Agent & Resolver, DidFail, Message] =
+    decryptRaw(msg).flatMap(Operations.parseMessage(_))
+
+  def decryptRaw(msg: EncryptedMessage): ZIO[Agent & Resolver, DidFail, Array[Byte]] =
+    msg.`protected`.obj match
+      case _: AnonProtectedHeader => anonDecryptRaw(msg)
+      case _: AuthProtectedHeader => authDecryptRaw(msg)
+
   def anonDecryptRaw(msg: EncryptedMessage): ZIO[Agent, DidFail, Array[Byte]]
   def authDecryptRaw(msg: EncryptedMessage): ZIO[Agent & Resolver, DidFail, Array[Byte]]
 
@@ -73,6 +81,12 @@ object Operations {
       msg: PlaintextMessage,
   ): ZIO[Operations & Agent & Resolver, DidFail, EncryptedMessage] =
     ZIO.serviceWithZIO[Operations](_.authEncrypt(msg))
+
+  /** decrypt and verify if needed */
+  def decrypt(
+      msg: EncryptedMessage
+  ): ZIO[Operations & Agent & Resolver, DidFail, Message] =
+    ZIO.serviceWithZIO[Operations](_.decrypt(msg))
 
   /** decrypt */
   def anonDecrypt(
