@@ -17,11 +17,13 @@ import scala.util.Success
 
 object Global {
 
-  def runProgram(program: ZIO[Any, DidFail, Unit]) = Unsafe.unsafe { implicit unsafe => // Run side efect
-    Runtime.default.unsafe.fork(
-      program
+  val resolverLayer = ZLayer.succeed(
+    MultiResolver(
+      fmgp.did.method.hardcode.HardcodeResolver.default,
+      // Uniresolver.default, //FIX -> has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource
+      fmgp.did.method.peer.DidPeerResolver.default,
     )
-  }
+  )
 
   val agentProvider = Var(initial = AgentProvider.provider)
   def providerNow = agentProvider.now()
@@ -48,8 +50,9 @@ object Global {
   }
 
   def selectAgentByName(didName: String) = Global.agentVar.update(e => Global.providerNow.getAgentByName(didName))
+  def selectAgentDID(subject: DIDSubject) = Global.agentVar.update(e => Global.providerNow.getAgentByDID(subject))
 
-  def selectAgented: Signal[String] = Global.agentVar.signal.combineWith(agentProvider.signal).map {
+  def selectAgent: Signal[String] = Global.agentVar.signal.combineWith(agentProvider.signal).map {
     case (Some(agent), agentProvider) => agentProvider.nameOfAgent(agent.id).getOrElse(noneOption)
     case (None, agentProvider)        => noneOption
   }
@@ -88,6 +91,7 @@ object Global {
 
   val messageStorageVar = Var[MessageStorage](initial = MessageStorage.example)
 
+  /** Store in BD */
   def messageSend(msg: SignedMessage | EncryptedMessage, from: FROM, plaintext: PlaintextMessage) =
     messageStorageVar.tryUpdate {
       case Success(messageStorage) =>
@@ -97,6 +101,8 @@ object Global {
         println(s"DEBUG: Store messageSend id: ${plaintext.id} FAIL: ${exception}")
         Failure(exception)
     }
+
+  /** Store in BD */
   def messageRecive(msg: SignedMessage | EncryptedMessage, plaintext: PlaintextMessage) =
     messageStorageVar.tryUpdate {
       case Success(messageStorage) =>

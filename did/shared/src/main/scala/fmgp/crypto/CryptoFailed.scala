@@ -2,8 +2,8 @@ package fmgp.crypto
 
 import zio.json._
 
-import fmgp.did.comm.PIURI
 import fmgp.did.DIDSubject
+import fmgp.did.comm._
 
 package error {
 
@@ -77,6 +77,9 @@ package error {
 
   case object EncryptionFailed extends CryptoFailed
   case class DecryptionFailed(reason: String) extends CryptoFailed
+  case class FailDecryptDoubleSign(outsideMsg: SignedMessage, insideMsg: SignedMessage) extends CurveError
+  case class FailDecryptSignThenEncrypted(outsideMsg: SignedMessage, insideMsg: EncryptedMessage) extends CurveError
+  case class FailDecryptDoubleEncrypted(outsideMsg: EncryptedMessage, insideMsg: EncryptedMessage) extends CurveError
   case object AnonDecryptAuthMsgFailed extends CryptoFailed
   case object AuthDecryptAnonMsgFailed extends CryptoFailed
   case object ValidationFailed extends CryptoFailed

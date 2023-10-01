@@ -12,8 +12,11 @@ import zio.json._
 import fmgp.did._
 import fmgp.crypto._
 import fmgp.crypto.error._
+import fmgp.did.comm._
+import fmgp.did.comm.protocol.mediatorcoordination3._
 import fmgp.did.method.peer._
 import fmgp.did.AgentProvider.AgentWithShortName
+import fmgp.Utils
 
 object AgentManagement {
 
@@ -55,6 +58,7 @@ object AgentManagement {
       .map { case Seq(x25519, ed255199) =>
         val newAgent = DIDPeer2.makeAgent(Seq(x25519, ed255199), service.toSeq)
         Global.agentProvider.update(e => e.withAgent(AgentWithShortName("Agent" + e.agents.size, newAgent)))
+        Global.selectAgentDID(newAgent.id)
       }
     // .tap(_ => ZIO.succeed(urlEndpoint.ref.value = "")) // clean up
 
@@ -111,26 +115,86 @@ object AgentManagement {
     ),
     div(
       b("Create Agent: "),
-      button(
-        "New DID Peer",
-        onClick --> { (_) =>
-          val services =
-            Some(urlEndpoint.ref.value.trim).filterNot(_.isEmpty).map(endpoint => DIDPeerServiceEncoded(s = endpoint))
-          newPeerDID(services)
-        }
-      ),
-      " with the follow endpoint ",
       child <-- mediatorDIDVar.signal.map {
-        case None              => urlEndpoint
-        case Some(mediatorDID) => code(mediatorDID.did)
+        case None =>
+          div(
+            button(
+              "New DID Peer",
+              onClick --> { (_) =>
+                newPeerDID(
+                  Some(urlEndpoint.ref.value.trim)
+                    .filterNot(_.isEmpty)
+                    .map(endpoint => DIDPeerServiceEncoded(s = endpoint))
+                )
+              }
+            ),
+            " with the follow endpoint ",
+            urlEndpoint
+          )
+        case Some(mediatorDID) =>
+          div(
+            button("New DID Peer", onClick --> { (_) => newPeerDID(Some(DIDPeerServiceEncoded(s = mediatorDID.did))) }),
+            " with the follow endpoint ",
+            code(mediatorDID.did)
+          )
       }
     ),
     hr(),
-    h2("Selected Agent: "),
+    h2("Selected Agent"),
     div(
       child <-- Global.agentVar.signal.map {
         case None        => "none"
-        case Some(agent) => code(agent.id.string)
+        case Some(agent) => div(code(agent.id.string))
+      }
+    ),
+    div(
+      child <-- Global.agentVar.signal.combineWith(mediatorDIDVar.signal).map {
+        case (Some(agent), Some(mediatorDID)) =>
+          val mediateRequestProgram = MediateRequest(
+            from = agent.id,
+            to = mediatorDID
+          ).toPlaintextMessage
+
+          div(
+            button(
+              title := mediateRequestProgram.toJsonPretty,
+              "Send Mediate Request",
+              onClick --> { (_) =>
+                val program =
+                  for {
+                    tmp <- Utils.programEncryptMessage(mediateRequestProgram) // encrypt
+                    pMsg = tmp._1
+                    eMsg = tmp._2
+                    responseMsg <- Utils
+                      .curlProgram(eMsg)
+                      .flatMap(_.fromJson[EncryptedMessage] match
+                        case Left(value)        => ZIO.fail(FailToParse(value))
+                        case Right(responseMsg) => ZIO.succeed(responseMsg)
+                      )
+                    response <- OperationsClientRPC.decrypt(responseMsg).flatMap {
+                      case value: EncryptedMessage     => ZIO.fail(FailDecryptDoubleEncrypted(responseMsg, value))
+                      case plaintext: PlaintextMessage => ZIO.succeed(plaintext)
+                      case sMsg @ SignedMessage(payload, signatures) =>
+                        payload.content.fromJson[Message] match
+                          case Left(value)                        => ZIO.fail(FailToParse(value))
+                          case Right(plaintext: PlaintextMessage) => ZIO.succeed(plaintext)
+                          case Right(value: SignedMessage)        => ZIO.fail(FailDecryptDoubleSign(sMsg, value))
+                          case Right(value: EncryptedMessage)     => ZIO.fail(FailDecryptSignThenEncrypted(sMsg, value))
+                    }
+                    mediateGrantOrDeny = response.toMediateGrantOrDeny
+                    _ = mediateGrantOrDeny match
+                      case Left(value)            => println(s"ERROR: $value")
+                      case Right(m: MediateGrant) => println(MediateGrant)
+                      case Right(m: MediateDeny)  => println(MediateDeny)
+                  } yield ()
+
+                Utils.runProgram(program.provideEnvironment(ZEnvironment(agent, DidPeerResolver())))
+              }
+            ),
+            // pre(code())
+          )
+
+        case _ => ""
       }
     ),
     div(

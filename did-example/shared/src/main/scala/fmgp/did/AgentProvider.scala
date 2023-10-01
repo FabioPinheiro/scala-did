@@ -11,6 +11,7 @@ import fmgp.did.method.hardcode.HardcodeResolver
 import fmgp.did.AgentProvider._
 
 case class AgentProvider(agents: Seq[AgentWithShortName], identities: Seq[DIDWithShortName]) {
+  def getAgentByDID(subject: DIDSubject): Option[Agent] = agents.find(_.id.did == subject.did).map(_.value)
   def getAgentByName(name: String): Option[Agent] = agents.find(_.name == name).map(_.value)
   def getDIDByName(name: String): Option[DID] =
     getAgentByName(name)

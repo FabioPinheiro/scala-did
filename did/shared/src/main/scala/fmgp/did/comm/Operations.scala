@@ -111,7 +111,7 @@ object Operations {
     case AnonProtectedHeader(epk, apv, typ, enc, alg)            =>
     case AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) =>
 
-  def parseMessage(data: Array[Byte]) =
+  def parseMessage(data: Array[Byte]): ZIO[Any, FailToParse, Message] =
     ZIO.fromEither {
       String(data)
         .fromJson[Message]

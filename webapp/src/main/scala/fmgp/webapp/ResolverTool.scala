@@ -23,14 +23,6 @@ import fmgp.webapp.MyRouter.ResolverPage
 
 object ResolverTool {
 
-  val resolverLayer = ZLayer.succeed(
-    MultiResolver(
-      HardcodeResolver.default,
-      // Uniresolver.default, //FIX -> has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource
-      DidPeerResolver.default,
-    )
-  )
-
   val didVar: Var[Option[DID]] = Var(initial = None)
   // val customVar: Var[String] = Var(initial = "")
   val didDocumentVar: Var[Either[String, DIDDocument]] = Var(initial = Left(""))
@@ -50,7 +42,7 @@ object ResolverTool {
       ).mapBoth(
         errorInfo => didDocumentVar.update(_ => Left(errorInfo.toString)),
         doc => didDocumentVar.update(_ => Right(doc))
-      ).provide(resolverLayer)
+      ).provide(Global.resolverLayer)
       Unsafe.unsafe { implicit unsafe => Runtime.default.unsafe.fork(program) } // Run side efect
     }
     .observe(owner)

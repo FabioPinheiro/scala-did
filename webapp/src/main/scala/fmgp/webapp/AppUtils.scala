@@ -104,7 +104,7 @@ object AppUtils { // TODO RENAME TO UIUtils
           //   "search"
           // ),
           select(
-            value <-- Global.selectAgented,
+            value <-- Global.selectAgent,
             onChange.mapToValue.map(e => Global.providerNow.getAgentByName(e)) --> Global.agentVar,
             children <-- Global.dids.map {
               _.map { step => option(value := step, step) } :+

@@ -18,6 +18,7 @@ import fmgp.did.uniresolver.Uniresolver
 import fmgp.crypto.error.DidFail
 import com.raquo.airstream.core.Sink
 import fmgp.did.comm.protocol.routing2.ForwardMessage
+import fmgp.Utils
 
 object EncryptTool {
 
@@ -59,7 +60,7 @@ object EncryptTool {
                 .toOption
             )
           } yield forwardMessage
-    }.provide(ResolverTool.resolverLayer)
+    }.provide(Global.resolverLayer)
 
     encryptedMessageVar.signal
       .map {
@@ -93,7 +94,7 @@ object EncryptTool {
           .map(e => encryptedMessageVar.update(_ => Some(e)))
         Unsafe.unsafe { implicit unsafe => // Run side efect
           Runtime.default.unsafe.fork(
-            program.provideSomeLayer(ResolverTool.resolverLayer)
+            program.provideSomeLayer(Global.resolverLayer)
           )
         }
       case (Some(agent), Right(pMsg)) if pMsg.from.isDefined && !pMsg.from.contains(agent.id.asFROM) =>
@@ -108,7 +109,7 @@ object EncryptTool {
         Unsafe.unsafe { implicit unsafe => // Run side efect
           Runtime.default.unsafe.fork(
             program
-              .provideSomeLayer(ResolverTool.resolverLayer)
+              .provideSomeLayer(Global.resolverLayer)
               .provideEnvironment(ZEnvironment(agent))
           )
         }
@@ -132,7 +133,7 @@ object EncryptTool {
         Unsafe.unsafe { implicit unsafe => // Run side efect
           Runtime.default.unsafe.fork(
             programSign
-              .provideSomeLayer(ResolverTool.resolverLayer)
+              .provideSomeLayer(Global.resolverLayer)
               .provideEnvironment(ZEnvironment(agent))
           )
         }
@@ -146,8 +147,8 @@ object EncryptTool {
       val program = for {
         resolver <- ZIO.service[Resolver]
         doc <- resolver.didDocument(TO(eMsg.recipientsSubject.head.string))
-        didCommMessagingSrevices = doc.getDIDServiceDIDCommMessaging
-        mURI = didCommMessagingSrevices.flatMap(_.endpoints.map(e => e.uri)).headOption
+        didCommMessagingServices = doc.getDIDServiceDIDCommMessaging
+        mURI = didCommMessagingServices.flatMap(_.endpoints.map(e => e.uri)).headOption
         ret = mURI match
           case None => curlCommandVar.set(None)
           case Some(uri) =>
@@ -158,31 +159,11 @@ object EncryptTool {
 
       Unsafe.unsafe { implicit unsafe => // Run side efect
         Runtime.default.unsafe.fork(
-          program.provide(ResolverTool.resolverLayer)
+          program.provide(Global.resolverLayer)
         )
       }
     })
     .observe(owner)
-
-  def curlProgram(msg: EncryptedMessage) = {
-    val program = for {
-      resolver <- ZIO.service[Resolver]
-      doc <- resolver.didDocument(TO(msg.recipientsSubject.head.string))
-      didCommMessagingSrevices = doc.getDIDServiceDIDCommMessaging
-      mURI = didCommMessagingSrevices.flatMap(_.endpoints.map(e => e.uri)).headOption
-      call <- mURI match
-        case None => ZIO.unit
-        case Some(uri) =>
-          Client
-            .makeDIDCommPost(msg, uri)
-            .map(_.fromJson[EncryptedMessage])
-            .map {
-              case Left(value)  => outputFromCallVar.set(None)
-              case Right(value) => outputFromCallVar.set(Some(value))
-            }
-    } yield (call)
-    program.provide(ResolverTool.resolverLayer)
-  }
 
   val rootElement = div(
     onMountCallback { ctx =>
@@ -490,7 +471,17 @@ object EncryptTool {
                         Global.agentVar.now().map(_.id.asFROM).getOrElse(???),
                         plaintext
                       ) // side efect
-                      Global.runProgram(curlProgram(eMsg)) // side efect
+                      Utils.runProgram(
+                        Utils
+                          .curlProgram(eMsg)
+                          .map { case output: String =>
+                            output.fromJson[EncryptedMessage] match {
+                              case Left(value)                    => outputFromCallVar.set(None) // side efect
+                              case Right(value: EncryptedMessage) => outputFromCallVar.set(Some(value)) // side efect
+                            }
+                          }
+                          .provide(Global.resolverLayer)
+                      )
                     case _ => // None
                   }
                 )

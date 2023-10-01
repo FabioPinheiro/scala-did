@@ -18,6 +18,7 @@ import fmgp.did.method.peer.DidPeerResolver
 import fmgp.crypto.error._
 
 import fmgp.did.AgentProvider
+import fmgp.Utils
 object DecryptTool {
   val dataVar: Var[String] = Var(initial = "")
   val encryptedMessageVar: Signal[Either[String, EncryptedMessage]] =
@@ -39,33 +40,30 @@ object DecryptTool {
           decryptDataVar.set(None) // side effect!
           decryptMessageVar.set(Some(Left(FailToParse("Fail to parse Encrypted Message: " + error)))) // side effect!
         case (Some(agent), Right(msg)) =>
-          val program = {
-            OperationsClientRPC.decryptRaw(msg).flatMap { data =>
-              decryptDataVar.set(Some(data)) // side effect!
-              Operations.parseMessage(data).map((msg, _))
-            }
-          }.mapBoth(
-            error => decryptMessageVar.set(Some(Left(error))), // side effect!
-            msg =>
-              decryptMessageVar.set(Some(Right(msg._2))) // side effect!
-              msg match
-                case (eMsg, plaintext: PlaintextMessage) =>
-                  Global.messageRecive(eMsg, plaintext) // side effect!
-                case (eMsg, sMsg: SignedMessage) =>
-                  sMsg.payload.content.fromJson[Message] match
-                    case Left(value) => println("ERROR: " + value)
-                    case Right(plaintext: PlaintextMessage) =>
-                      Global.messageRecive(eMsg, plaintext) // side effect!
-                    case Right(value: SignedMessage)    => println("ERROR: Double Sign: " + value)
-                    case Right(value: EncryptedMessage) => println("ERROR: Sign and Encrypted: " + value)
-
-                case (oldEMsg, newEMsg: EncryptedMessage) => println("ERROR: Double Encrypted: " + value)
-          )
-          Unsafe.unsafe { implicit unsafe => // Run side efect
-            Runtime.default.unsafe.fork(
-              program.provideEnvironment(ZEnvironment(agent, DidPeerResolver()))
-            )
-          }
+          val program =
+            OperationsClientRPC
+              .decryptRaw(msg)
+              .flatMap { data =>
+                decryptDataVar.set(Some(data)) // side effect!
+                Operations.parseMessage(data).map((msg, _))
+              }
+              .tapError(error => ZIO.succeed(decryptMessageVar.set(Some(Left(error))))) // side effect!
+              .flatMap(msg =>
+                decryptMessageVar.set(Some(Right(msg._2))) // side effect!
+                msg match
+                  case (eMsg: EncryptedMessage, plaintext: PlaintextMessage) =>
+                    ZIO.succeed(Global.messageRecive(eMsg, plaintext)) // side effect!
+                  case (eMsg: EncryptedMessage, sMsg: SignedMessage) =>
+                    sMsg.payload.content.fromJson[Message] match
+                      case Left(value) => ZIO.fail(FailToParse(value))
+                      case Right(plaintext: PlaintextMessage) =>
+                        ZIO.succeed(Global.messageRecive(eMsg, plaintext)) // side effect!
+                      case Right(value: SignedMessage)    => ZIO.fail(FailDecryptDoubleSign(sMsg, value))
+                      case Right(value: EncryptedMessage) => ZIO.fail(FailDecryptSignThenEncrypted(sMsg, value))
+                  case (outsideMsg: EncryptedMessage, insideMsg: EncryptedMessage) =>
+                    ZIO.fail(FailDecryptDoubleEncrypted(outsideMsg, insideMsg))
+              )
+          Utils.runProgram(program.provideEnvironment(ZEnvironment(agent, DidPeerResolver())))
       }
       .observe(owner)
 
