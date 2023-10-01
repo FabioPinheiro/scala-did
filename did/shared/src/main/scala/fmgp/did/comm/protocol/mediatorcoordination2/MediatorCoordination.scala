@@ -9,6 +9,13 @@ extension (msg: PlaintextMessage)
   def toMediateRequest: Either[String, MediateRequest] = MediateRequest.fromPlaintextMessage(msg)
   def toMediateDeny: Either[String, MediateDeny] = MediateDeny.fromPlaintextMessage(msg)
   def toMediateGrant: Either[String, MediateGrant] = MediateGrant.fromPlaintextMessage(msg)
+  def toMediateGrantOrDeny: Either[String, MediateGrant | MediateDeny] =
+    val TYPE_mediate_grant = MediateGrant.piuri
+    val TYPE_mediate_deny = MediateDeny.piuri
+    msg.`type` match
+      case `TYPE_mediate_grant` => MediateGrant.fromPlaintextMessage(msg)
+      case `TYPE_mediate_deny`  => MediateDeny.fromPlaintextMessage(msg)
+      case typeOther => Left(s"No able to create MediateGrant/MediateDeny from a Message of type '$typeOther'")
 
 /** This message serves as a request from the recipient to the mediator, asking for the permission (and routing
   * information) to publish the endpoint as a mediator.
