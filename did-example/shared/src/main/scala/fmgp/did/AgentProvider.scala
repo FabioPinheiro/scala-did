@@ -125,11 +125,22 @@ object AgentProvider {
           .get
       ),
       DIDWithShortName(
-        "blocktrust",
+        "blocktrust_DEPRECATED",
         DIDPeer
           .fromDID(
             DIDSubject( // https://mediator.blocktrust.dev/
               "did:peer:2.Ez6LSeUYyDHMTbWoMGCKyqntPR95TB3N6ic2A27YLmwZHchxY.Vz6MkgRyq89zDCmXEcg8LmdqKjoaanxK4MUVbbtembDa4fLpK.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLmJsb2NrdHJ1c3QuZGV2LyIsInIiOltdLCJhIjpbImRpZGNvbW0vdjIiXX0"
+            ).toDID
+          )
+          .toOption
+          .get
+      ),
+      DIDWithShortName(
+        "blocktrust",
+        DIDPeer
+          .fromDID(
+            DIDSubject( // https://mediator.blocktrust.dev/
+              "did:peer:2.Ez6LSht3sS5dT1755VmpUykqFHL81b3eFKcxprkTexazY2c9m.Vz6MkrkuJciLrzUUcaCj9JM59VXSLuXyEudLw8YX6VRZStX6z.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLmJsb2NrdHJ1c3QuZGV2LyIsInIiOltdLCJhIjpbImRpZGNvbW0vdjIiXX0"
             ).toDID
           )
           .toOption
