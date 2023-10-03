@@ -1,6 +1,7 @@
 package fmgp
 
 import zio._
+import zio.json._
 import fmgp.did._
 import fmgp.did.comm._
 import fmgp.crypto.error._
@@ -36,4 +37,26 @@ object Utils {
       case Some(uri) => Client.makeDIDCommPost(msg, uri)
   } yield (call)
 
+  def sendAndReceiveProgram(msg: PlaintextMessage) =
+    for {
+      tmp <- Utils.programEncryptMessage(msg) // encrypt
+      pMsg = tmp._1
+      eMsg = tmp._2
+      responseMsg <- Utils
+        .curlProgram(eMsg)
+        .flatMap(_.fromJson[EncryptedMessage] match
+          case Left(value)        => ZIO.fail(FailToParse(value))
+          case Right(responseMsg) => ZIO.succeed(responseMsg)
+        )
+      response <- OperationsClientRPC.decrypt(responseMsg).flatMap {
+        case value: EncryptedMessage     => ZIO.fail(FailDecryptDoubleEncrypted(responseMsg, value))
+        case plaintext: PlaintextMessage => ZIO.succeed(plaintext)
+        case sMsg @ SignedMessage(payload, signatures) =>
+          payload.content.fromJson[Message] match
+            case Left(value)                        => ZIO.fail(FailToParse(value))
+            case Right(plaintext: PlaintextMessage) => ZIO.succeed(plaintext)
+            case Right(value: SignedMessage)        => ZIO.fail(FailDecryptDoubleSign(sMsg, value))
+            case Right(value: EncryptedMessage)     => ZIO.fail(FailDecryptSignThenEncrypted(sMsg, value))
+      }
+    } yield response
 }

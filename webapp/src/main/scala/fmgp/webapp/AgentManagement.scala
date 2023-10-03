@@ -9,14 +9,16 @@ import scala.scalajs.js.JSConverters._
 import zio._
 import zio.json._
 
+import fmgp.Utils
 import fmgp.did._
 import fmgp.crypto._
 import fmgp.crypto.error._
 import fmgp.did.comm._
-import fmgp.did.comm.protocol.mediatorcoordination3._
+import fmgp.did.comm.protocol.mediatorcoordination2
+import fmgp.did.comm.protocol.mediatorcoordination3
+import fmgp.did.comm.protocol.pickup3._
 import fmgp.did.method.peer._
 import fmgp.did.AgentProvider.AgentWithShortName
-import fmgp.Utils
 
 object AgentManagement {
 
@@ -67,6 +69,44 @@ object AgentManagement {
         programe.mapError(DidException(_))
       )
     }
+  }
+
+  object V2 {
+    import mediatorcoordination2._
+    def mediateRequest(msg: MediateRequest) = Utils
+      .sendAndReceiveProgram(msg.toPlaintextMessage)
+      .map { response =>
+        response.toMediateGrantOrDeny match
+          case Left(value)            => println(s"ERROR: $value")
+          case Right(m: MediateGrant) => println(MediateGrant)
+          case Right(m: MediateDeny)  => println(MediateDeny)
+      }
+
+    def recipientUpdate(msg: KeylistUpdate) = Utils
+      .sendAndReceiveProgram(msg.toPlaintextMessage)
+      .map { response =>
+        response.toKeylistResponse match
+          case Left(value)               => println(s"ERROR: $value")
+          case Right(m: KeylistResponse) => println(value)
+      }
+  }
+
+  object V3 {
+    import mediatorcoordination3._
+    def mediateRequest(msg: MediateRequest) = Utils
+      .sendAndReceiveProgram(msg.toPlaintextMessage)
+      .map(_.toMediateGrantOrDeny match {
+        case Left(value)            => println(s"ERROR: $value")
+        case Right(m: MediateGrant) => println(m)
+        case Right(m: MediateDeny)  => println(m)
+      })
+
+    def recipientUpdate(msg: RecipientUpdate) = Utils
+      .sendAndReceiveProgram(msg.toPlaintextMessage)
+      .map(_.toRecipientResponse match {
+        case Left(value)                 => println(s"ERROR: $value")
+        case Right(m: RecipientResponse) => println(value) // TODO
+      })
   }
 
   val rootElement = div(
@@ -150,48 +190,89 @@ object AgentManagement {
     div(
       child <-- Global.agentVar.signal.combineWith(mediatorDIDVar.signal).map {
         case (Some(agent), Some(mediatorDID)) =>
-          val mediateRequestProgram = MediateRequest(
-            from = agent.id,
-            to = mediatorDID
-          ).toPlaintextMessage
+          val env = ZEnvironment(agent, DidPeerResolver())
+          val (mrV2, mrpV2, ruV2, rupV2) = {
+            import mediatorcoordination2._
+            import V2._
+            val mr = MediateRequest(from = agent.id, to = mediatorDID)
+            val mrp = mediateRequest(mr).provideEnvironment(env)
+            val ru = KeylistUpdate(
+              from = agent.id,
+              to = mediatorDID,
+              updates = Seq((mediatorDID.asFROMTO, mediatorcoordination2.KeylistAction.add))
+            )
+            val rup = recipientUpdate(ru).provideEnvironment(env)
+            (mr, mrp, ru, rup)
+          }
+          val (mrV3, mrpV3, ruV3, rupV3) = {
+            import mediatorcoordination3._
+            import V3._
+            val mr = MediateRequest(from = agent.id, to = mediatorDID)
+            val mrp = mediateRequest(mr).provideEnvironment(env)
+            val ru = RecipientUpdate(
+              from = agent.id,
+              to = mediatorDID,
+              updates = Seq((mediatorDID.asFROMTO, RecipientAction.add))
+            )
+            val rup = recipientUpdate(ru).provideEnvironment(env)
+            (mr, mrp, ru, rup)
+          }
+          val pickupMsg = DeliveryRequest(from = agent.id, to = mediatorDID, limit = 100, recipient_did = None)
+          val pickupStatus = StatusRequest(from = agent.id, to = mediatorDID, recipient_did = None)
+
+          def pickupProgram(msg: DeliveryRequest) = Utils
+            .sendAndReceiveProgram(msg.toPlaintextMessage)
+            .map(_.toMessageDelivery match {
+              case Left(value)               => println(s"ERROR: $value")
+              case Right(m: MessageDelivery) => println(value) // TODO
+            })
+            .provideEnvironment(env)
+
+          def pickupStatusProgram(msg: StatusRequest) = Utils
+            .sendAndReceiveProgram(msg.toPlaintextMessage)
+            .map(_.toStatus match {
+              case Left(value)      => println(s"ERROR: $value")
+              case Right(m: Status) => println(value) // TODO
+            })
+            .provideEnvironment(env)
 
           div(
-            button(
-              title := mediateRequestProgram.toJsonPretty,
-              "Send Mediate Request",
-              onClick --> { (_) =>
-                val program =
-                  for {
-                    tmp <- Utils.programEncryptMessage(mediateRequestProgram) // encrypt
-                    pMsg = tmp._1
-                    eMsg = tmp._2
-                    responseMsg <- Utils
-                      .curlProgram(eMsg)
-                      .flatMap(_.fromJson[EncryptedMessage] match
-                        case Left(value)        => ZIO.fail(FailToParse(value))
-                        case Right(responseMsg) => ZIO.succeed(responseMsg)
-                      )
-                    response <- OperationsClientRPC.decrypt(responseMsg).flatMap {
-                      case value: EncryptedMessage     => ZIO.fail(FailDecryptDoubleEncrypted(responseMsg, value))
-                      case plaintext: PlaintextMessage => ZIO.succeed(plaintext)
-                      case sMsg @ SignedMessage(payload, signatures) =>
-                        payload.content.fromJson[Message] match
-                          case Left(value)                        => ZIO.fail(FailToParse(value))
-                          case Right(plaintext: PlaintextMessage) => ZIO.succeed(plaintext)
-                          case Right(value: SignedMessage)        => ZIO.fail(FailDecryptDoubleSign(sMsg, value))
-                          case Right(value: EncryptedMessage)     => ZIO.fail(FailDecryptSignThenEncrypted(sMsg, value))
-                    }
-                    mediateGrantOrDeny = response.toMediateGrantOrDeny
-                    _ = mediateGrantOrDeny match
-                      case Left(value)            => println(s"ERROR: $value")
-                      case Right(m: MediateGrant) => println(MediateGrant)
-                      case Right(m: MediateDeny)  => println(MediateDeny)
-                  } yield ()
-
-                Utils.runProgram(program.provideEnvironment(ZEnvironment(agent, DidPeerResolver())))
-              }
+            div(
+              button(
+                title := mrV2.toPlaintextMessage.toJsonPretty,
+                "Send Mediate Request v2",
+                onClick --> { (_) => Utils.runProgram(mrpV2) }
+              ),
+              button(
+                title := ruV2.toPlaintextMessage.toJsonPretty,
+                "Send Recipient Update v2 (self add as recipient)",
+                onClick --> { (_) => Utils.runProgram(rupV2) }
+              ),
             ),
-            // pre(code())
+            div(
+              button(
+                title := mrV3.toPlaintextMessage.toJsonPretty,
+                "Send Mediate Request v3",
+                onClick --> { (_) => Utils.runProgram(mrpV2) }
+              ),
+              button(
+                title := ruV3.toPlaintextMessage.toJsonPretty,
+                "Send Mediate Request v3 (self add as recipient)",
+                onClick --> { (_) => Utils.runProgram(rupV3) }
+              ),
+            ),
+            div(
+              button(
+                title := pickupMsg.toPlaintextMessage.toJsonPretty,
+                "Delivery Request",
+                onClick --> { (_) => Utils.runProgram(pickupProgram(pickupMsg)) }
+              ),
+              button(
+                title := pickupStatus.toPlaintextMessage.toJsonPretty,
+                "Status Request",
+                onClick --> { (_) => Utils.runProgram(pickupStatusProgram(pickupStatus)) }
+              ),
+            ),
           )
 
         case _ => ""
