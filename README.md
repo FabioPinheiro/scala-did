@@ -8,6 +8,7 @@ Made for developers by developers.
 
 [**Scala-DID Documentation**](./docs/readme.md)
 
+![Maven Central](https://img.shields.io/maven-central/v/app.fmgp/did_3)
 [![CI](https://github.com/FabioPinheiro/scala-did/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioPinheiro/scala-did/actions/workflows/ci.yml)
 [![Scala Steward](https://github.com/FabioPinheiro/scala-did/actions/workflows/scala-steward.yml/badge.svg)](https://github.com/FabioPinheiro/scala-did/actions/workflows/scala-steward.yml)
  - **CI** automate builds and tests all pushes to the master branch also as all PRs created.
