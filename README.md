@@ -38,7 +38,7 @@ Want to see your project here? [Submit a PR]
 
 ## Protocols
 
-- [TODO] `Action Menu 2.0` - https://didcomm.org/action-menu/2.0
+- [DONE] `Action Menu 2.0` - https://didcomm.org/action-menu/2.0
 - [DONE] `BasicMessage 2.0` - https://didcomm.org/basicmessage/2.0
 - [DONE] `DiscoverFeatures 2.0` - https://didcomm.org/discover-features/2.0
 - [TODO] `MediaSharing 1.0` - https://didcomm.org/media-sharing/1.0
