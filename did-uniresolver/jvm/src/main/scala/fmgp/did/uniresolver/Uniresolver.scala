@@ -11,11 +11,17 @@ import fmgp.crypto.error._
 import io.netty.bootstrap.ChannelFactory
 
 object Uniresolver {
-  val default = Uniresolver("https://dev.uniresolver.io/1.0/identifiers/")
-  val layerDefault: ULayer[Resolver] = ZLayer.succeed(default)
+  val defaultEndpoint = "https://dev.uniresolver.io/1.0/identifiers/"
+  val layer: ZLayer[Client & Scope, Throwable, Uniresolver] =
+    ZLayer.fromZIO(
+      for {
+        client <- ZIO.service[Client]
+        scope <- ZIO.service[Scope]
+      } yield Uniresolver("https://dev.uniresolver.io/1.0/identifiers/", client, scope)
+    )
 }
 
-case class Uniresolver(uniresolverServer: String) extends Resolver {
+case class Uniresolver(uniresolverServer: String, client: Client, scope: Scope) extends Resolver {
 
   override protected def didDocumentOf(did: FROMTO): IO[DidFail, DIDDocument] = {
     // if (!methods.contains(did.toDID.namespace)) ZIO.fail(DidMethodNotSupported(did.toDID.namespace))
@@ -23,8 +29,8 @@ case class Uniresolver(uniresolverServer: String) extends Resolver {
 
     val program = for {
       res <- Client
-        .request(uniresolverServer + did)
-        .provide(Client.default)
+        .request(Request.get(path = uniresolverServer + did))
+        .provide(Client.default, Scope.default)
         .mapError { case _: Throwable => SomeThrowable(did.toDID.namespace) }
       data <- res.body.asString
         .mapError { case ex: Throwable => FailToParse(ex.getMessage()) }

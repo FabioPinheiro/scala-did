@@ -13,8 +13,8 @@ import zio.http.MediaTypes
 
 object DidPeerUniresolverDriver {
 
-  val resolverPeer: Http[DidPeerResolver, Nothing, Request, Response] =
-    Http.collectZIO[Request] { case Method.GET -> Root / "resolver" / "peer" / did =>
+  val resolverPeer = Routes(
+    Method.GET / "resolver" / "peer" / string("did") -> handler { (did: String, req: Request) =>
       for {
         resolver <- ZIO.service[DidPeerResolver]
         response <-
@@ -46,4 +46,5 @@ object DidPeerUniresolverDriver {
             )
       } yield (response)
     }
+  ).toHttpApp
 }

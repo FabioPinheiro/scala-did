@@ -63,7 +63,7 @@ object OperationsServerRPC {
             ZLayer.succeed(
               MultiResolver(
                 HardcodeResolver.default,
-                Uniresolver.default,
+                // Uniresolver.default,
                 DidPeerResolver.default,
               )
             )

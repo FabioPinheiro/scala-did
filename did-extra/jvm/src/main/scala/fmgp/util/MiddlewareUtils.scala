@@ -8,47 +8,58 @@ object MiddlewareUtils {
 
   def all = annotateHeaders ++ serverTime
 
-  final def serverTime: RequestHandlerMiddleware[Nothing, Any, Nothing, Any] = HttpAppMiddleware.patchZIO(_ =>
+  final def serverTime: HandlerAspect[Nothing, Any] = Middleware.patchZIO(_ =>
     for {
       currentMilliseconds <- Clock.currentTime(TimeUnit.MILLISECONDS)
       withHeader = Response.Patch.addHeader("X-Time", currentMilliseconds.toString)
     } yield withHeader,
   )
 
-  final def annotateHeaders: RequestHandlerMiddleware[Nothing, Any, Nothing, Any] =
-    new RequestHandlerMiddleware.Simple[Any, Nothing] {
-      override def apply[R1 <: Any, Err1 >: Nothing](
-          handler: Handler[R1, Err1, Request, Response],
-      )(implicit trace: Trace): Handler[R1, Err1, Request, Response] =
-        Handler.fromFunctionZIO { (request: Request) =>
+  final def annotateHeaders: HandlerAspect[Any, Unit] =
+    Middleware.requestLogging(loggedRequestHeaders =
+      Set(
+        Header.Host,
+        Header.Custom("fly-client-ip", "Hack").headerType,
+        Header.Custom("fly-request-id", "Hack").headerType,
+        Header.Custom("x-request-id", "Hack").headerType,
+        Header.Custom("user-agent", "Hack").headerType,
+      )
+    )
 
-          def annotations = request.headers.toSet.flatMap(h =>
-            h.headerName.toLowerCase() match {
-              case "fly-client-ip"  => Some(LogAnnotation("client-ip", h.renderedValue))
-              case "fly-request-id" => Some(LogAnnotation("fly-request-id", h.renderedValue))
-              case "x-request-id"   => Some(LogAnnotation("x-request-id", h.renderedValue))
-              case "user-agent"     => Some(LogAnnotation("user-agent", h.renderedValue))
-              case "host"           => Some(LogAnnotation("host", h.renderedValue))
-              case _                => None
-            }
-          )
+  // final def annotateHeaders: RequestHandlerMiddleware[Nothing, Any, Nothing, Any] =
+  //   new RequestHandlerMiddleware.Simple[Any, Nothing] {
+  //     override def apply[R1 <: Any, Err1 >: Nothing](
+  //         handler: Handler[R1, Err1, Request, Response],
+  //     )(implicit trace: Trace): Handler[R1, Err1, Request, Response] =
+  //       Handler.fromFunctionZIO { (request: Request) =>
 
-          val requestHandler = handler
-            .runZIO(request)
-            .sandbox
-            .exit
-            .timed
-            .tap {
-              case (duration, Exit.Success(response)) =>
-                ZIO.log(s"${response.status.code} ${request.method} ${request.url.encode} ${duration.toMillis}ms")
-              case (duration, Exit.Failure(cause)) =>
-                ZIO.log(s"Failed ${request.method} ${request.url.encode} ${duration.toMillis}ms: " + cause.prettyPrint)
-            }
-            .flatMap(_._2)
-            .unsandbox
+  //         def annotations = request.headers.toSet.flatMap(h =>
+  //           h.headerName.toLowerCase() match {
+  //             case "fly-client-ip"  => Some(LogAnnotation("client-ip", h.renderedValue))
+  //             case "fly-request-id" => Some(LogAnnotation("fly-request-id", h.renderedValue))
+  //             case "x-request-id"   => Some(LogAnnotation("x-request-id", h.renderedValue))
+  //             case "user-agent"     => Some(LogAnnotation("user-agent", h.renderedValue))
+  //             case "host"           => Some(LogAnnotation("host", h.renderedValue))
+  //             case _                => None
+  //           }
+  //         )
 
-          ZIO.logAnnotate(annotations)(requestHandler)
-        }
-    }
+  //         val requestHandler = handler
+  //           .runZIO(request)
+  //           .sandbox
+  //           .exit
+  //           .timed
+  //           .tap {
+  //             case (duration, Exit.Success(response)) =>
+  //               ZIO.log(s"${response.status.code} ${request.method} ${request.url.encode} ${duration.toMillis}ms")
+  //             case (duration, Exit.Failure(cause)) =>
+  //               ZIO.log(s"Failed ${request.method} ${request.url.encode} ${duration.toMillis}ms: " + cause.prettyPrint)
+  //           }
+  //           .flatMap(_._2)
+  //           .unsandbox
+
+  //         ZIO.logAnnotate(annotations)(requestHandler)
+  //       }
+  //   }
 
 }
