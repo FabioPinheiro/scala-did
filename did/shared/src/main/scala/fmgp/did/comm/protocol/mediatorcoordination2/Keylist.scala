@@ -55,7 +55,7 @@ final case class KeylistUpdate(id: MsgID = MsgID(), from: FROM, to: TO, updates:
       return_route = Some(ReturnRoute.all), // Protocol expect recipient to get reply on the same channel
     )
   def makeKeylistResponse(updated: Seq[(FROMTO, KeylistAction, KeylistResult)]) =
-    KeylistResponse(thid = id, to = from.asTO, from = to.asFROM, updated)
+    KeylistResponse(thid = id, to = from.asTO, from = to.asFROM, updated = updated)
 }
 
 /** TODO we don't believe this behavior is correct or secure. But ismimic the behavior of RootsID mediator
