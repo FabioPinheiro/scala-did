@@ -55,7 +55,7 @@ final case class RecipientUpdate(id: MsgID = MsgID(), from: FROM, to: TO, update
       return_route = Some(ReturnRoute.all), // Protocol expect recipient to get reply on the same channel
     )
   def makeRecipientResponse(updated: Seq[(FROMTO, RecipientAction, RecipientResult)]) =
-    RecipientResponse(thid = id, to = from.asTO, from = to.asFROM, updated)
+    RecipientResponse(thid = id, to = from.asTO, from = to.asFROM, updated = updated)
 }
 
 /** TODO we don't believe this behavior is correct or secure. But ismimic the behavior of RootsID mediator
