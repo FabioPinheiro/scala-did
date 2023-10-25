@@ -3,7 +3,6 @@ package fmgp.did.comm.mediator
 import zio._
 import zio.json._
 import zio.http._
-import zio.http.internal.middlewares.Cors.CorsConfig
 import zio.http.Header.{AccessControlAllowOrigin, AccessControlAllowMethods}
 
 import fmgp.did._
@@ -40,7 +39,7 @@ case class MediatorMultiAgent(
     override def keys: Seq[PrivateKey] = _keyStoreAux
   })
 
-  val messageDispatcherLayer: ZLayer[Client, DidFail, MessageDispatcher] =
+  val messageDispatcherLayer: ZLayer[Client & Scope, DidFail, MessageDispatcher] =
     MessageDispatcherJVM.layer.mapError(ex => SomeThrowable(ex))
 
   // TODO move to another place & move validations and build a contex
@@ -215,48 +214,68 @@ object MediatorMultiAgent {
     sm <- DIDSocketManager.make
   } yield MediatorMultiAgent(agent.id, agent.keyStore, sm)
 
-  def didCommApp = {
-    Http.collectZIO[Request] {
-      case req @ Method.GET -> Root
-          if req
-            // FIXME after https://github.com/zio/zio-http/issues/2416
-            // .header(Header.ContentType)
-            // .exists { h =>
-            //   h.mediaType.mainType == MediaTypes.mainType &&
-            //   (h.mediaType.subType == MediaTypes.SIGNED.subType || h.mediaType.subType == MediaTypes.ENCRYPTED.subType)
-            .headers
-            .get("content-type")
-            .exists { h =>
-              h == MediaTypes.SIGNED.typ || h == MediaTypes.ENCRYPTED.typ
-            } =>
-        for {
-          agent <- AgentByHost.getAgentFor(req)
-          annotationMap <- ZIO.logAnnotations.map(_.map(e => LogAnnotation(e._1, e._2)).toSeq)
-          ret <- agent
-            .createSocketApp(annotationMap)
-            .provideSomeEnvironment((env: ZEnvironment[Operations & MessageDispatcher]) => env.add(agent))
-        } yield (ret)
-      case Method.GET -> Root / "tap" / host =>
-        for {
-          agent <- AgentByHost.getAgentFor(Host(host))
-          annotationMap <- ZIO.logAnnotations.map(_.map(e => LogAnnotation(e._1, e._2)).toSeq)
-          ret <- agent
-            .websocketListenerApp(annotationMap)
-            .provideSomeEnvironment((env: ZEnvironment[Operations & MessageDispatcher]) => env.add(agent))
-        } yield (ret)
-      case req @ Method.POST -> Root
-          if req
-            // FIXME after https://github.com/zio/zio-http/issues/2416
-            // .header(Header.ContentType)
-            // .exists { h =>
-            //   h.mediaType.mainType == MediaTypes.mainType &&
-            //   (h.mediaType.subType == MediaTypes.SIGNED.subType || h.mediaType.subType == MediaTypes.ENCRYPTED.subType)
-            .headers
-            .get("content-type")
-            .exists { h =>
-              h == MediaTypes.SIGNED.typ || h == MediaTypes.ENCRYPTED.typ
-            } =>
-        for {
+  // def didCommApp: HttpApp[Hub[String] & AgentByHost & Operations & MessageDispatcher] = Routes(
+  def didCommApp = Routes(
+    Method.GET / "ws" -> handler { (req: Request) =>
+      if (
+        req
+          // FIXME after https://github.com/zio/zio-http/issues/2416
+          // .header(Header.ContentType)
+          // .exists { h =>
+          //   h.mediaType.mainType == MediaTypes.mainType &&
+          //   (h.mediaType.subType == MediaTypes.SIGNED.subType || h.mediaType.subType == MediaTypes.ENCRYPTED.subType)
+          .headers
+          .get("content-type")
+          .exists { h => h == MediaTypes.SIGNED.typ || h == MediaTypes.ENCRYPTED.typ }
+      ) {
+        (for {
+            agent <- AgentByHost.getAgentFor(req)
+            annotationMap <- ZIO.logAnnotations.map(_.map(e => LogAnnotation(e._1, e._2)).toSeq)
+            ret <- agent
+              .createSocketApp(annotationMap)
+              .provideSomeEnvironment((env: ZEnvironment[Operations & MessageDispatcher]) => env.add(agent))
+          } yield (ret)
+            // } else ZIO.succeed(Response(status = Status.NotFound))
+        ).orDie
+      } else {
+        (
+          for {
+            agent <- AgentByHost.getAgentFor(req)
+            data <- req.body.asString
+            ret <- agent
+              .receiveMessage(data, None)
+              .provideSomeEnvironment((env: ZEnvironment[Operations & MessageDispatcher]) => env.add(agent))
+              .mapError(fail => DidException(fail))
+          } yield Response
+            .text(s"The content-type must be ${MediaTypes.SIGNED.typ} or ${MediaTypes.ENCRYPTED.typ}")
+            // .copy(status = Status.BadRequest) but ok for now
+        ).orDie
+      }
+    },
+    Method.GET / "tap" / string("host") -> handler { (host: String, req: Request) =>
+      for {
+        agent <- AgentByHost.getAgentFor(Host(host))
+        annotationMap <- ZIO.logAnnotations.map(_.map(e => LogAnnotation(e._1, e._2)).toSeq)
+        ret <- agent
+          .websocketListenerApp(annotationMap)
+          .provideSomeEnvironment((env: ZEnvironment[Operations & MessageDispatcher]) => env.add(agent))
+      } yield (ret)
+    }.orDie,
+    Method.POST / trailing -> handler { (req: Request) =>
+      if (
+        req
+          // FIXME after https://github.com/zio/zio-http/issues/2416
+          // .header(Header.ContentType)
+          // .exists { h =>
+          //   h.mediaType.mainType == MediaTypes.mainType &&
+          //   (h.mediaType.subType == MediaTypes.SIGNED.subType || h.mediaType.subType == MediaTypes.ENCRYPTED.subType)
+          .headers
+          .get("content-type")
+          .exists { h =>
+            h == MediaTypes.SIGNED.typ || h == MediaTypes.ENCRYPTED.typ
+          }
+      ) {
+        (for {
           agent <- AgentByHost.getAgentFor(req)
           data <- req.body.asString
           maybeSyncReplyMsg <- agent
@@ -266,30 +285,19 @@ object MediatorMultiAgent {
           ret = maybeSyncReplyMsg match
             case None        => Response.ok
             case Some(value) => Response.json(value.toJson)
-        } yield ret
-
-      // TODO [return_route extension](https://github.com/decentralized-identity/didcomm-messaging/blob/main/extensions/return_route/main.md)
-      case req @ Method.POST -> Root =>
-        for {
-          agent <- AgentByHost.getAgentFor(req)
-          data <- req.body.asString
-          ret <- agent
-            .receiveMessage(data, None)
-            .provideSomeEnvironment((env: ZEnvironment[Operations & MessageDispatcher]) => env.add(agent))
-            .mapError(fail => DidException(fail))
-        } yield Response
-          .text(s"The content-type must be ${MediaTypes.SIGNED.typ} or ${MediaTypes.ENCRYPTED.typ}")
-      // .copy(status = Status.BadRequest) but ok for now
-
-    }: Http[Hub[String] & AgentByHost & Operations & MessageDispatcher, Throwable, Request, Response]
-  } @@
-    HttpAppMiddleware.cors(
-      CorsConfig(
-        allowedOrigin = {
-          // case origin @ Origin.Value(_, host, _) if host == "dev" => Some(AccessControlAllowOrigin.Specific(origin))
-          case _ => Some(AccessControlAllowOrigin.All)
-        },
-        allowedMethods = AccessControlAllowMethods(Method.GET, Method.POST, Method.OPTIONS),
-      )
-    )
+        } yield ret).orDie
+      } else
+        (for {
+            agent <- AgentByHost.getAgentFor(req)
+            data <- req.body.asString
+            ret <- agent
+              .receiveMessage(data, None)
+              .provideSomeEnvironment((env: ZEnvironment[Operations & MessageDispatcher]) => env.add(agent))
+              .mapError(fail => DidException(fail))
+          } yield Response
+            .text(s"The content-type must be ${MediaTypes.SIGNED.typ} or ${MediaTypes.ENCRYPTED.typ}")
+            // .copy(status = Status.BadRequest) but ok for now
+        ).orDie
+    },
+  ).toHttpApp
 }

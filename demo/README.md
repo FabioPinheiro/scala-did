@@ -59,9 +59,12 @@ NODE_OPTIONS=--openssl-legacy-provider sbt assemblyAll
 docker build --tag scala_did_demo ./demo/
 docker tag scala_did_demo registry.fly.io/scala-did-demo
 # flyctl auth docker
-docker push registry.fly.io/scala-did-demo # +- 115.1MB (before was +- 52MB)
-
+docker push registry.fly.io/scala-did-demo
+# 2023/10/20 +- 117.3MB
+# 2023/09/24 +- 115.1MB
+# +- 52MB
 flyctl image update -a scala-did-demo
+flyctl deploy ./demo/ -i registry.fly.io/scala-did-demo
 ```
 
 ## Others

@@ -12,15 +12,16 @@ import fmgp.crypto.error._
 import fmgp.util.MyHeaders
 
 object MessageDispatcherJVM {
-  val layer: ZLayer[Client, Throwable, MessageDispatcher] =
+  val layer: ZLayer[Client & Scope, Throwable, MessageDispatcher] =
     ZLayer.fromZIO(
-      ZIO
-        .service[Client]
-        .map(MessageDispatcherJVM(_))
+      for {
+        client <- ZIO.service[Client]
+        scope <- ZIO.service[Scope]
+      } yield MessageDispatcherJVM(client, scope)
     )
 }
 
-class MessageDispatcherJVM(client: Client) extends MessageDispatcher {
+class MessageDispatcherJVM(client: Client, scope: Scope) extends MessageDispatcher {
   def send(
       msg: EncryptedMessage,
       /*context*/
@@ -31,14 +32,12 @@ class MessageDispatcherJVM(client: Client) extends MessageDispatcher {
       .getOrElse(MediaTypes.ENCRYPTED)
       .pipe(e => Header.ContentType(ZMediaType(e.mainType, e.subType)))
     val xForwardedHostHeader = xForwardedHost.map(x => Header.Custom(customName = MyHeaders.xForwardedHost, x))
-
     for {
       res <- Client
         .request(
-          url = destination,
-          method = Method.POST,
-          headers = Headers(Seq(Some(contentTypeHeader), xForwardedHostHeader).flatten),
-          content = Body.fromCharSequence(msg.toJson),
+          Request
+            .post(path = destination, body = Body.fromCharSequence(msg.toJson))
+            .setHeaders(Headers(Seq(Some(contentTypeHeader), xForwardedHostHeader).flatten))
         )
         .tapError(ex => ZIO.logWarning(s"Fail when calling '$destination': ${ex.toString}"))
         .mapError(ex => SomeThrowable(ex))
@@ -49,5 +48,5 @@ class MessageDispatcherJVM(client: Client) extends MessageDispatcher {
         case true  => ZIO.logError(data)
         case false => ZIO.logInfo(data)
     } yield (data)
-  }.provideEnvironment(ZEnvironment(client)) // .host()
+  }.provideEnvironment(ZEnvironment(client, scope))
 }

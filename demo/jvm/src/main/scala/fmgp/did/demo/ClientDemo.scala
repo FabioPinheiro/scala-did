@@ -90,7 +90,7 @@ import fmgp.did.method.peer._
           Operations.layerDefault ++
             ZLayer.succeed(pat) ++
             DidPeerResolver.layer ++
-            (zio.http.Client.default >>> MessageDispatcherJVM.layer)
+            (zio.Scope.default ++ zio.http.Client.default >>> MessageDispatcherJVM.layer)
         )
       )
       .getOrThrowFiberFailure()

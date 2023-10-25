@@ -98,7 +98,7 @@ lazy val V = new {
   val zio = "2.0.18"
   val zioJson = "0.6.2"
   val zioMunitTest = "0.2.0"
-  val zioHttp = "3.0.0-RC2"
+  val zioHttp = "3.0.0-RC3" // "3.0.0-RC2+123-c31778b5-SNAPSHOT"
   val zioPrelude = "1.0.0-RC21"
 
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time
@@ -294,7 +294,7 @@ lazy val root = project
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
   .aggregate(didExample.js, didExample.jvm)
   .aggregate(demo.jvm, demo.js)
-  .aggregate(mediator.jvm, mediator.js)
+  // .aggregate(mediator.jvm, mediator.js) // disabled
   .aggregate(webapp, serviceworker)
 
 lazy val did = crossProject(JSPlatform, JVMPlatform)
@@ -482,14 +482,15 @@ lazy val didExample = crossProject(JSPlatform, JVMPlatform)
   .settings(publish / skip := true)
   .dependsOn(did, didImp, didExtra, didResolverPeer, didResolverWeb, didUniresolver)
 
-lazy val mediator = crossProject(JSPlatform, JVMPlatform)
-  .in(file("did-mediator"))
-  .settings(publish / skip := true)
-  .settings(name := "did-mediator")
-  .jvmSettings(
-    libraryDependencies += D.ziohttp.value,
-  )
-  .dependsOn(did, didImp, didExtra, didResolverPeer)
+// disabled
+// lazy val mediator = crossProject(JSPlatform, JVMPlatform)
+//   .in(file("did-mediator"))
+//   .settings(publish / skip := true)
+//   .settings(name := "did-mediator")
+//   .jvmSettings(
+//     libraryDependencies += D.ziohttp.value,
+//   )
+//   .dependsOn(did, didImp, didExtra, didResolverPeer)
 
 lazy val demo = crossProject(JSPlatform, JVMPlatform)
   .in(file("demo"))
