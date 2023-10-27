@@ -59,4 +59,30 @@ object Utils {
             case Right(value: EncryptedMessage)     => ZIO.fail(FailDecryptSignThenEncrypted(sMsg, value))
       }
     } yield response
+
+  def decryptProgram(eMsg: EncryptedMessage): ZIO[Agent & Resolver, DidFail, (EncryptedMessage, PlaintextMessage)] =
+    OperationsClientRPC
+      .decryptRaw(eMsg)
+      .flatMap { data => Operations.parseMessage(data).map((eMsg, _)) }
+      .flatMap(msg =>
+        msg match
+          case (eMsg: EncryptedMessage, plaintext: PlaintextMessage) =>
+            ZIO.succeed((eMsg, plaintext))
+          case (eMsg: EncryptedMessage, sMsg: SignedMessage) =>
+            verifyProgram(sMsg: SignedMessage).map(e => (eMsg, e._2))
+          // sMsg.payload.content.fromJson[Message] match
+          //   case Left(value) => ZIO.fail(FailToParse(value))
+          //   case Right(plaintext: PlaintextMessage) => // TODO validate
+          //     ZIO.succeed((eMsg, plaintext))
+          //   case Right(value: SignedMessage)    => ZIO.fail(FailDecryptDoubleSign(sMsg, value))
+          //   case Right(value: EncryptedMessage) => ZIO.fail(FailDecryptSignThenEncrypted(sMsg, value))
+          case (outsideMsg: EncryptedMessage, insideMsg: EncryptedMessage) =>
+            ZIO.fail(FailDecryptDoubleEncrypted(outsideMsg, insideMsg))
+      )
+
+  def verifyProgram(sMsg: SignedMessage): ZIO[Resolver, CryptoFailed, (SignedMessage, PlaintextMessage)] =
+    OperationsClientRPC
+      .verify2PlaintextMessage(sMsg)
+      .map { pMsg => (sMsg, pMsg) }
+
 }

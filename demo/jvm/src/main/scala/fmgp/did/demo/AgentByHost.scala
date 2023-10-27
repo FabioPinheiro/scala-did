@@ -17,19 +17,16 @@ object MyHeaders { // extends HeaderNames {
 
 object AgentByHost {
 
-  def getAgentFor(req: Request) = ZIO
-    .serviceWithZIO[AgentByHost](_.agentFromRequest(req))
-    .mapError(ex => DidException(ex))
+  def getAgentFor(req: Request) = ZIO.serviceWithZIO[AgentByHost](_.agentFromRequest(req))
 
   def getAgentFor(host: Host) = ZIO
     .serviceWithZIO[AgentByHost](_.agentFromHost(host))
+    .tapError(ex => ZIO.logError(ex.toString()))
     .mapError(ex => DidException(ex))
 
   def provideAgentFor[R, E <: Exception, A](req: Request, job: ZIO[R & MediatorMultiAgent, E, A]) =
     for {
-      agent <- ZIO
-        .serviceWithZIO[AgentByHost](_.agentFromRequest(req))
-        .mapError(ex => DidException(ex))
+      agent <- ZIO.serviceWithZIO[AgentByHost](_.agentFromRequest(req))
       ret <- job.provideSomeEnvironment((env: ZEnvironment[R]) => env.add(agent))
     } yield ()
 
@@ -53,28 +50,26 @@ object AgentByHost {
       charlie <- MediatorMultiAgent.make(AgentProvider.charlie)
       local <- MediatorMultiAgent.make(AgentProvider.local)
     } yield AgentByHost(
-      Map(
+      defaultAgent = local,
+      agents = Map(
         Host.alice -> alice,
         Host.bob -> bob,
         Host.charlie -> charlie,
-        Host("localhost:8080") -> local,
       )
     )
   )
 }
 
-case class AgentByHost(agents: Map[Host, MediatorMultiAgent]) {
+case class AgentByHost(defaultAgent: MediatorMultiAgent, agents: Map[Host, MediatorMultiAgent]) {
 
-  def agentFromRequest(req: Request): zio.ZIO[Any, NoAgent, MediatorMultiAgent] =
-    AgentByHost.hostFromRequest(req) match
-      case None => ZIO.fail(NoAgent(s"Unknown host"))
-      case Some(host) =>
-        agents.get(host) match
-          case None        => ZIO.fail(NoAgent(s"No Agent config for $host"))
-          case Some(agent) => ZIO.succeed(agent)
+  def agentFromRequest(req: Request): zio.ZIO[Any, Nothing, MediatorMultiAgent] =
+    AgentByHost
+      .hostFromRequest(req)
+      .flatMap { host => agents.get(host).map(agent => ZIO.succeed(agent)) }
+      .getOrElse(ZIO.succeed(defaultAgent))
 
   def agentFromHost(host: Host): zio.ZIO[Any, NoAgent, MediatorMultiAgent] =
     agents.get(host) match
-      case None        => ZIO.fail(NoAgent(s"No Agent config for $host"))
+      case None        => ZIO.fail(NoAgent(s"No Agent config for '$host'"))
       case Some(agent) => ZIO.succeed(agent)
 }

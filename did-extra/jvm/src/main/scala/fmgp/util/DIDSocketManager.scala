@@ -10,6 +10,8 @@ import fmgp.did._
 import fmgp.did.comm._
 import fmgp.crypto.error._
 
+//FIXME REMOVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+@deprecated("this class will be removed and also is duplicated")
 case class DIDSocketManager(
     sockets: Map[SocketID, MyChannel] = Map.empty,
     ids: Map[FROMTO, Seq[SocketID]] = Map.empty,
@@ -17,13 +19,13 @@ case class DIDSocketManager(
     tapBy: Seq[SocketID] = Seq.empty,
 ) {
 
-  def link(from: VerificationMethodReferenced, socketID: SocketID): DIDSocketManager =
+  def link(vmr: VerificationMethodReferenced, socketID: SocketID): DIDSocketManager =
     if (!sockets.keySet.contains(socketID)) this // if sockets is close
     else
-      kids.get(from) match
+      kids.get(vmr) match
         case Some(seq) if seq.contains(socketID) => this
-        case Some(seq) => this.copy(kids = kids + (from -> (seq :+ socketID))).link(from.fromto, socketID)
-        case None      => this.copy(kids = kids + (from -> Seq(socketID))).link(from.fromto, socketID)
+        case Some(seq) => this.copy(kids = kids + (vmr -> (seq :+ socketID))).link(vmr.did.asFROMTO, socketID)
+        case None      => this.copy(kids = kids + (vmr -> Seq(socketID))).link(vmr.did.asFROMTO, socketID)
 
   def link(from: FROMTO, socketID: SocketID): DIDSocketManager =
     if (!sockets.keySet.contains(socketID)) this // if sockets is close
@@ -48,6 +50,7 @@ case class DIDSocketManager(
 
 }
 
+@deprecated("this class will be removed and also is duplicated")
 object DIDSocketManager {
   def inBoundSize = 5
   def outBoundSize = 3

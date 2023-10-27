@@ -34,7 +34,7 @@ import zio.http.MediaTypes
   *
   * curl 'http://localhost:8080/db' -H "host: alice.did.fmgp.app"
   *
-  * wscat -c ws://localhost:8080 --host "alice.did.fmgp.app" -H 'content-type: application/didcomm-encrypted+json'
+  * wscat -c ws://localhost:8080/ws
   *
   * curl -X POST localhost:8080 -H "host: alice.did.fmgp.app" -H 'content-type: application/didcomm-encrypted+json' -d
   * '{}'
@@ -89,35 +89,6 @@ object AppServer extends ZIOAppDefault {
           case Right(OutOfBandPlaintext(msg, data)) => Response.json(msg.toJsonPretty)
           case Right(OutOfBandSigned(msg, data))    => Response.json(msg.payload.content)
         )
-      } yield (ret)
-    },
-    Method.GET / "socket" -> handler { (req: Request) =>
-      for {
-        _ <- ZIO.log("socket")
-        agent <- AgentByHost.getAgentFor(req)
-        sm <- agent.didSocketManager.get
-        ret <- ZIO.succeed(Response.text(sm.toJsonPretty))
-      } yield (ret)
-    },
-    Method.POST / "socket" / string("id") -> handler { (id: String, req: Request) =>
-      for {
-        hub <- ZIO.service[Hub[String]]
-        agent <- AgentByHost.getAgentFor(req)
-        sm <- agent.didSocketManager.get
-        ret <- sm.ids
-          .get(FROMTO(id))
-          .toSeq
-          .flatMap { socketsID =>
-            socketsID.flatMap(id => sm.sockets.get(id).map(e => (id, e))).toSeq
-          } match {
-          case Seq() =>
-            req.body.asString.flatMap(e => hub.publish(s"socket missing for $id"))
-              *> ZIO.succeed(Response.text(s"socket missing"))
-          case seq =>
-            ZIO.foreach(seq) { (socketID, channel) =>
-              req.body.asString.flatMap(e => channel.socketOutHub.publish(e))
-            } *> ZIO.succeed(Response.text(s"message sended"))
-        }
       } yield (ret)
     },
     Method.POST / "ops" -> handler { (req: Request) =>

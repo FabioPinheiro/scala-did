@@ -477,8 +477,12 @@ object EncryptTool {
                           .map { case output: String =>
                             output.fromJson[EncryptedMessage] match {
                               case Left(value)                    => outputFromCallVar.set(None) // side efect
-                              case Right(value: EncryptedMessage) => outputFromCallVar.set(Some(value)) // side efect
+                              case Right(value: EncryptedMessage) => outputFromCallVar.set(Some(value))
                             }
+                          }
+                          .tapError { e =>
+                            println("ERROR:" + e.toString) // REMOVE
+                            ZIO.logError(e.toString) *> ZIO.succeed(outputFromCallVar.set(None)) // side efect
                           }
                           .provide(Global.resolverLayer)
                       )

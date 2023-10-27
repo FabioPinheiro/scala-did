@@ -17,4 +17,5 @@ object Host {
   val alice = Host("alice.did.fmgp.app")
   val bob = Host("bob.did.fmgp.app")
   val charlie = Host("charlie.did.fmgp.app")
+  val default = Host("localhost")
 }
