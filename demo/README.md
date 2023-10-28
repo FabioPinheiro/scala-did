@@ -48,18 +48,19 @@ java -jar /home/fabio/workspace/ScalaDID/demo/jvm/target/scala-3.3.1/scala-did-d
 **deploy with flyctl**
 
 ```shell
-NODE_OPTIONS=--openssl-legacy-provider sbt assemblyAll
+NODE_OPTIONS=--openssl-legacy-provider USE_SNAPSHOTS=true sbt assemblyAll
 flyctl deploy ./demo/
 ```
 
 **deploy by pushing docker image**
 
 ```shell
-NODE_OPTIONS=--openssl-legacy-provider sbt assemblyAll
+NODE_OPTIONS=--openssl-legacy-provider USE_SNAPSHOTS=true sbt assemblyAll
 docker build --tag scala_did_demo ./demo/
 docker tag scala_did_demo registry.fly.io/scala-did-demo
 # flyctl auth docker
 docker push registry.fly.io/scala-did-demo
+# 2023/10/28 +- 118.1MB
 # 2023/10/20 +- 117.3MB
 # 2023/09/24 +- 115.1MB
 # +- 52MB
