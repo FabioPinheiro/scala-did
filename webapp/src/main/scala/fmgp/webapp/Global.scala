@@ -5,15 +5,17 @@ import scala.scalajs.js.annotation.JSExport
 import org.scalajs.dom
 import com.raquo.laminar.api.L._
 import zio._
+import zio.json._
 
 import fmgp.did._
 import fmgp.did.comm._
 import fmgp.did.method.peer.DIDPeer
 import fmgp.did.agent.MessageStorage
-import fmgp.crypto.error.DidFail
+import fmgp.crypto.error._
 import scala.util.Try
 import scala.util.Failure
 import scala.util.Success
+import fmgp.Utils
 
 object Global {
 
@@ -112,5 +114,29 @@ object Global {
         println(s"DEBUG: Store messageRecive id: ${plaintext.id} FAIL: ${exception}")
         Failure(exception)
     }
+
+  def tryDecryptVerifyReciveMessagePrograme(msg: SignedMessage | EncryptedMessage): ZIO[Resolver, DidFail, Unit] =
+    for {
+      _ <- ZIO.log("")
+      tmpAgentProvider = agentProvider.now()
+      jobs = msg match
+        case sMsg: SignedMessage =>
+          Seq(
+            Utils
+              .verifyProgram(sMsg)
+              .map(e => Global.messageRecive(e._1, e._2)) // side effect!
+          )
+        case eMsg: EncryptedMessage =>
+          eMsg.recipientsSubject.toSeq.map { did =>
+            tmpAgentProvider.getAgentByDID(did) match
+              case None => ZIO.unit
+              case Some(agent) =>
+                Utils
+                  .decryptProgram(eMsg)
+                  .map(e => Global.messageRecive(e._1, e._2)) // side effect!
+                  .provideSomeEnvironment((e: ZEnvironment[Resolver]) => e ++ ZEnvironment(agent))
+          }
+      job <- ZIO.foreachDiscard(jobs)(e => e)
+    } yield () // Utils.runProgram(program.provideSomeLayer(Global.resolverLayer))
 
 }

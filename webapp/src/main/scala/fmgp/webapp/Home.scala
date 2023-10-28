@@ -30,12 +30,7 @@ object Home {
       p("Navigate to ", b("Decrypt Tool "), MyRouter.navigateTo(MyRouter.DecryptPage)),
       p("Navigate to ", b("Basic Message "), MyRouter.navigateTo(MyRouter.BasicMessagePage)),
       p("Navigate to ", b("Trust Ping "), MyRouter.navigateTo(MyRouter.TrustPingPage)),
-      p(
-        "Navigate to ",
-        b("TapIntoStream Tool "),
-        MyRouter.navigateTo(MyRouter.TapIntoStreamPage),
-        " (tap into all Alice's income messages)"
-      ),
+      p("Navigate to ", b("TapIntoStream Tool "), MyRouter.navigateTo(MyRouter.TapIntoStreamPage)),
       // p(
       //   "Navigate to ",
       //   b("Message DB"),

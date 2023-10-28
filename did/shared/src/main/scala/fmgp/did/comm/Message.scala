@@ -261,6 +261,7 @@ case class Recipient(
     encrypted_key: Base64,
     header: RecipientHeader,
 ) {
+  // TODO MAYBE return type TO instade of DIDSubject
   def recipientSubject: DIDSubject = header.didSubject
   def recipientKid: VerificationMethodReferenced = header.kid
 }

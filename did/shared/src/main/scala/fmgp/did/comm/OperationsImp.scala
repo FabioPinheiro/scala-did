@@ -133,7 +133,7 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
       skid = msg.`protected`.obj match
         case AnonProtectedHeader(epk, apv, typ, enc, alg)            => ??? // FIXME
         case AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) => skid
-      doc <- resolver.didDocument(skid.fromto)
+      doc <- resolver.didDocument(skid.did.asFROMTO)
       senderKey = doc.keyAgreementAll.find { e => e.vmr == skid }.get // FIXME get
       data <- cryptoOperations.authDecrypt(senderKey.key, keys, msg)
     } yield data

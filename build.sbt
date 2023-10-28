@@ -324,6 +324,7 @@ lazy val didExperiments = crossProject(JSPlatform, JVMPlatform)
   .jsConfigure(scalaJSViteConfigure) // Because of didJS now uses NPM libs
   .configure(docConfigure)
 
+//TODO Rename did-extra to did-framework
 lazy val didExtra = crossProject(JSPlatform, JVMPlatform)
   .in(file("did-extra"))
   .configure(notYetPublishedConfigure) // FIXME
@@ -332,9 +333,8 @@ lazy val didExtra = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.zioMunitTest.value,
   )
   .dependsOn(did % "compile;test->test")
-  .jvmSettings(
-    libraryDependencies += D.ziohttp.value,
-  )
+  .jvmSettings(libraryDependencies += D.ziohttp.value)
+  .jsSettings(libraryDependencies += D.dom.value)
   .jsConfigure(scalaJSViteConfigure) // Because of didJS now uses NPM libs
   .configure(docConfigure)
 

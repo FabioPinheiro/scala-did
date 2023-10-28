@@ -14,7 +14,6 @@ import fmgp.did._
 import fmgp.did.comm._
 import fmgp.did.comm.protocol.basicmessage2.BasicMessage
 import fmgp.did.method.peer.DIDPeer._
-import fmgp.did.method.peer.DidPeerResolver
 import fmgp.crypto.error._
 
 import fmgp.did.AgentProvider
@@ -63,7 +62,7 @@ object DecryptTool {
                   case (outsideMsg: EncryptedMessage, insideMsg: EncryptedMessage) =>
                     ZIO.fail(FailDecryptDoubleEncrypted(outsideMsg, insideMsg))
               )
-          Utils.runProgram(program.provideEnvironment(ZEnvironment(agent, DidPeerResolver())))
+          Utils.runProgram(program.provideSomeLayer(Global.resolverLayer).provideEnvironment(ZEnvironment(agent)))
       }
       .observe(owner)
 

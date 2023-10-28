@@ -25,7 +25,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
         '/ops': 'http://localhost:8080',
         '/makeKey/X25519': 'http://localhost:8080',
         '/makeKey/Ed25519': 'http://localhost:8080',
-        '^/tap/.*': {
+        '^/ws': {
           target: 'ws://localhost:8080',
           ws: true,
         },

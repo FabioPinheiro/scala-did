@@ -48,7 +48,6 @@ object VerificationMethodReferencedWithKey {
 
 case class VerificationMethodReferenced(value: String) extends VerificationMethod {
   def did = DIDSubject(value.split('#').head)
-  def fromto = FROMTO(value.split('#').head) // FIXME
   def id = value // TODO rename value to id
   def fragment = value.split("#", 2).drop(1).head // TODO make it type safe
 }
