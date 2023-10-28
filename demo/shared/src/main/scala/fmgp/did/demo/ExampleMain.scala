@@ -39,7 +39,7 @@ import fmgp.util.Base64
     afterDecryot <- authDecrypt(msg2).provideSomeLayer(Agent1Mediators.agentLayer)
   } yield ()
 
-  Unsafe.unsafe { implicit unsafe => // Run side efect
+  Unsafe.unsafe { implicit unsafe => // Run side effect
     Runtime.default.unsafe
       .run(program.provide(Operations.layerDefault ++ DidPeerResolver.layer))
       .getOrThrowFiberFailure()

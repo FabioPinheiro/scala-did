@@ -47,7 +47,7 @@ import fmgp.did.method.peer._
     _ <- Console.printLine(s"auth msg: ${msg3.toJson /*Pretty*/}")
   } yield ()
 
-  Unsafe.unsafe { implicit unsafe => // Run side efect
+  Unsafe.unsafe { implicit unsafe => // Run side effect
     Runtime.default.unsafe
       .run(
         program.provide(

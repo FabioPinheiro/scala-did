@@ -70,7 +70,7 @@ object EncryptTool {
               program(pMsg: PlaintextMessage, eMsg: EncryptedMessage)
                 .map(forwardMessageVar.set(_))
             )
-          } // Run side efect
+          } // Run side effect
         case _ => None
       }
       .observe(owner)
@@ -92,7 +92,7 @@ object EncryptTool {
           .either
           .map(_.map((pMsg, _)))
           .map(e => encryptedMessageVar.update(_ => Some(e)))
-        Unsafe.unsafe { implicit unsafe => // Run side efect
+        Unsafe.unsafe { implicit unsafe => // Run side effect
           Runtime.default.unsafe.fork(
             program.provideSomeLayer(Global.resolverLayer)
           )
@@ -106,7 +106,7 @@ object EncryptTool {
           .map(_.map((pMsg, _)))
           .map(e => encryptedMessageVar.update(_ => Some(e)))
 
-        Unsafe.unsafe { implicit unsafe => // Run side efect
+        Unsafe.unsafe { implicit unsafe => // Run side effect
           Runtime.default.unsafe.fork(
             program
               .provideSomeLayer(Global.resolverLayer)
@@ -130,7 +130,7 @@ object EncryptTool {
           .either
           .map(_.map((pMsg, _)))
           .map(e => signMessageVar.update(_ => Some(e)))
-        Unsafe.unsafe { implicit unsafe => // Run side efect
+        Unsafe.unsafe { implicit unsafe => // Run side effect
           Runtime.default.unsafe.fork(
             programSign
               .provideSomeLayer(Global.resolverLayer)
@@ -157,7 +157,7 @@ object EncryptTool {
             )
       } yield (ret)
 
-      Unsafe.unsafe { implicit unsafe => // Run side efect
+      Unsafe.unsafe { implicit unsafe => // Run side effect
         Runtime.default.unsafe.fork(
           program.provide(Global.resolverLayer)
         )
@@ -178,14 +178,16 @@ object EncryptTool {
       overflowWrap.:=("anywhere"),
       "Agent: ",
       " ",
-      code(child.text <-- Global.agentVar.signal.map(_.map(_.id.string).getOrElse(Global.noneOption)))
+      child <-- Global.agentVar.signal
+        .map(_.map(agent => code(AppUtils.linkToResolveDID(agent.id))).getOrElse(code(Global.noneOption))),
     ),
     p(
       overflowWrap.:=("anywhere"),
       "Send TO (used by Templates only. Does not influence the encryption): ",
       Global.makeSelectElementTO(Global.recipientVar),
       " ",
-      code(child.text <-- Global.recipientVar.signal.map(_.map(_.toDID.string).getOrElse(Global.noneOption))),
+      child <-- Global.recipientVar.signal
+        .map(_.map(to => code(AppUtils.linkToResolveDID(to.toDIDSubject))).getOrElse(code(Global.noneOption))),
     ),
     p(
       "Templates:",
@@ -380,7 +382,7 @@ object EncryptTool {
             pre(code(msg.toJsonPretty)),
             button(
               "Copy Plaintext Message to clipboard",
-              onClick --> Global.clipboardSideEffect(msg.toJson)
+              onClick --> { _ => Global.copyToClipboard(msg.toJson) }
             )
           )
       }
@@ -407,9 +409,9 @@ object EncryptTool {
                       eMsg,
                       from,
                       plaintext
-                    ) // side efect
+                    ) // side effect
                   )
-                Global.clipboardSideEffect(eMsg.toJson)
+                Global.copyToClipboard(eMsg.toJson)
               }
             )
           )
@@ -435,9 +437,9 @@ object EncryptTool {
                       sMsg,
                       from,
                       plaintext
-                    ) // side efect
+                    ) // side effect
                   )
-                Global.clipboardSideEffect(sMsg.toJson)
+                Global.copyToClipboard(sMsg.toJson)
               }
             )
           )
@@ -460,7 +462,7 @@ object EncryptTool {
         .map {
           case Some(curlStr) =>
             div(
-              button("Copy to curl", onClick --> Global.clipboardSideEffect(curlStr)),
+              button("Copy to curl", onClick --> { _ => Global.copyToClipboard(curlStr) }),
               button(
                 "Make HTTP POST",
                 onClick --> Sink.jsCallbackToSink(_ =>
@@ -470,19 +472,19 @@ object EncryptTool {
                         eMsg,
                         Global.agentVar.now().map(_.id.asFROM).getOrElse(???),
                         plaintext
-                      ) // side efect
+                      ) // side effect
                       Utils.runProgram(
                         Utils
                           .curlProgram(eMsg)
                           .map { case output: String =>
                             output.fromJson[EncryptedMessage] match {
-                              case Left(value)                    => outputFromCallVar.set(None) // side efect
+                              case Left(value)                    => outputFromCallVar.set(None) // side effect
                               case Right(value: EncryptedMessage) => outputFromCallVar.set(Some(value))
                             }
                           }
                           .tapError { e =>
                             println("ERROR:" + e.toString) // REMOVE
-                            ZIO.logError(e.toString) *> ZIO.succeed(outputFromCallVar.set(None)) // side efect
+                            ZIO.logError(e.toString) *> ZIO.succeed(outputFromCallVar.set(None)) // side effect
                           }
                           .provide(Global.resolverLayer)
                       )

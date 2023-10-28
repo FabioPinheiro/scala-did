@@ -62,7 +62,7 @@ object ServiceWorkerUtils {
 
   @scala.scalajs.js.annotation.JSExport
   def runSubscribeToNotifications =
-    Unsafe.unsafe { implicit unsafe => // Run side efect
+    Unsafe.unsafe { implicit unsafe => // Run side effect
       Runtime.default.unsafe.runToFuture({
         subscribeToNotifications
       })
@@ -87,7 +87,7 @@ object ServiceWorkerUtils {
 
   @scala.scalajs.js.annotation.JSExport
   def runPushNotificationsSubscription(id: String) =
-    Unsafe.unsafe { implicit unsafe => // Run side efect
+    Unsafe.unsafe { implicit unsafe => // Run side effect
       Runtime.default.unsafe.runToFuture({
         pushNotificationsSubscription(id)
       })

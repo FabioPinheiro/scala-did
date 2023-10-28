@@ -43,7 +43,7 @@ object ResolverTool {
         errorInfo => didDocumentVar.update(_ => Left(errorInfo.toString)),
         doc => didDocumentVar.update(_ => Right(doc))
       ).provide(Global.resolverLayer)
-      Unsafe.unsafe { implicit unsafe => Runtime.default.unsafe.fork(program) } // Run side efect
+      Unsafe.unsafe { implicit unsafe => Runtime.default.unsafe.fork(program) } // Run side effect
     }
     .observe(owner)
 
@@ -96,11 +96,13 @@ object ResolverTool {
     ),
     button(
       "Copy to clipboard",
-      onClick --> Global.clipboardSideEffect(
-        didDocumentVar.now() match
-          case Right(doc)      => doc.toJson
-          case Left(errorInfo) => errorInfo
-      )
+      onClick --> { _ =>
+        Global.copyToClipboard(
+          didDocumentVar.now() match
+            case Right(doc)      => doc.toJson
+            case Left(errorInfo) => errorInfo
+        )
+      }
     )
   )
 }

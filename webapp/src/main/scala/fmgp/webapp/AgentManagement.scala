@@ -64,7 +64,7 @@ object AgentManagement {
       }
     // .tap(_ => ZIO.succeed(urlEndpoint.ref.value = "")) // clean up
 
-    Unsafe.unsafe { implicit unsafe => // Run side efect
+    Unsafe.unsafe { implicit unsafe => // Run side effect
       Runtime.default.unsafe.runToFuture(
         programe.mapError(DidException(_))
       )
@@ -140,7 +140,7 @@ object AgentManagement {
                 )
               ),
               td(code("N/A")),
-              td(a(element.value.did, MyRouter.navigateTo(MyRouter.ResolverPage(element.value.did)))),
+              td(AppUtils.linkToResolveDID(element.value)),
             )
         }
       ),

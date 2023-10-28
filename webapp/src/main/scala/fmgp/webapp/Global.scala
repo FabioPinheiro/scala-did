@@ -1,5 +1,6 @@
 package fmgp.webapp
 
+import scala.util._
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
 import org.scalajs.dom
@@ -12,9 +13,6 @@ import fmgp.did.comm._
 import fmgp.did.method.peer.DIDPeer
 import fmgp.did.agent.MessageStorage
 import fmgp.crypto.error._
-import scala.util.Try
-import scala.util.Failure
-import scala.util.Success
 import fmgp.Utils
 
 object Global {
@@ -81,8 +79,9 @@ object Global {
     }
   )
 
-  def clipboardSideEffect(text: => String): Any => Unit =
-    (_: Any) => { dom.window.navigator.clipboard.writeText(text) }
+  /** side effect of writing the text to the clipboard */
+  def copyToClipboard(text: => String): Unit =
+    dom.window.navigator.clipboard.writeText(text) // side effect
 
   @JSExport
   def update(htmlPath: String) = {
@@ -97,10 +96,8 @@ object Global {
   def messageSend(msg: SignedMessage | EncryptedMessage, from: FROM, plaintext: PlaintextMessage) =
     messageStorageVar.tryUpdate {
       case Success(messageStorage) =>
-        println(s"DEBUG: Store messageSend id: ${plaintext.id}")
         Success(messageStorage.messageSend(msg, from, plaintext))
       case Failure(exception) =>
-        println(s"DEBUG: Store messageSend id: ${plaintext.id} FAIL: ${exception}")
         Failure(exception)
     }
 
@@ -108,10 +105,8 @@ object Global {
   def messageRecive(msg: SignedMessage | EncryptedMessage, plaintext: PlaintextMessage) =
     messageStorageVar.tryUpdate {
       case Success(messageStorage) =>
-        println(s"DEBUG: Store messageRecive id: ${plaintext.id}")
         Success(messageStorage.messageRecive(msg, plaintext))
       case Failure(exception) =>
-        println(s"DEBUG: Store messageRecive id: ${plaintext.id} FAIL: ${exception}")
         Failure(exception)
     }
 

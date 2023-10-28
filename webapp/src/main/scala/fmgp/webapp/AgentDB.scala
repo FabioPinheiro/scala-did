@@ -46,7 +46,7 @@ object AgentDB {
 
   def updateDB =
     val program: IO[DidFail, Option[MessageDB]] = Client.getDB()
-    Unsafe.unsafe { implicit unsafe => // Run side efect
+    Unsafe.unsafe { implicit unsafe => // Run side effect
       Runtime.default.unsafe.fork(
         program
           .map(db => dbVar.update(_ => db))

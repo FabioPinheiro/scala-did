@@ -115,7 +115,7 @@ val program = for {
   _ <- Console.printLine(msg.toJsonPretty)
 } yield ()
 
-Unsafe.unsafe { implicit unsafe => // Run side efect
+Unsafe.unsafe { implicit unsafe => // Run side effect
   Runtime.default.unsafe
     .run(program.provide(Operations.layerDefault ++ DidPeerResolver.layer))
     .getOrThrowFiberFailure()

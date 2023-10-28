@@ -9,7 +9,7 @@ import fmgp.webapp.ResolverTool
 
 object Utils {
 
-  def runProgram(program: ZIO[Any, DidFail, Unit]) = Unsafe.unsafe { implicit unsafe => // Run side efect
+  def runProgram(program: ZIO[Any, DidFail, Unit]) = Unsafe.unsafe { implicit unsafe => // Run side effect
     Runtime.default.unsafe.fork(
       program.catchAll { case error =>
         ZIO.succeed(println(error))

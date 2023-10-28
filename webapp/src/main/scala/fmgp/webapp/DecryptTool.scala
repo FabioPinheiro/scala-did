@@ -136,12 +136,14 @@ object DecryptTool {
     })),
     button(
       "Copy to clipboard",
-      onClick --> Global.clipboardSideEffect(
-        decryptMessageVar.now() match
-          case None                => "None"
-          case Some(Left(didFail)) => didFail.toString
-          case Some(Right(msg))    => msg.toJson
-      )
+      onClick --> { _ =>
+        Global.copyToClipboard(
+          decryptMessageVar.now() match
+            case None                => "None"
+            case Some(Left(didFail)) => didFail.toString
+            case Some(Right(msg))    => msg.toJson
+        )
+      }
     )
   )
 

@@ -8,7 +8,7 @@ import com.raquo.laminar.codecs._
 import com.raquo.laminar.api.L._
 
 import MyRouter._
-
+import fmgp.did._
 @JSExportTopLevel("AppUtils")
 object AppUtils { // TODO RENAME TO UIUtils
 
@@ -165,7 +165,9 @@ object AppUtils { // TODO RENAME TO UIUtils
         span(className("mdc-button__label"), text),
       )
     )
-
   }
+
+  def linkToResolveDID(subject: DIDSubject) =
+    a(subject.did, MyRouter.navigateTo(MyRouter.ResolverPage(subject.did)))
 
 }

@@ -20,13 +20,13 @@ object Client {
   // @scala.scalajs.js.annotation.JSExport var tmp: Any = _
 
   @scala.scalajs.js.annotation.JSExport
-  def runNewKeyX255199 = Unsafe.unsafe { implicit unsafe => // Run side efect
+  def runNewKeyX255199 = Unsafe.unsafe { implicit unsafe => // Run side effect
     Runtime.default.unsafe.runToFuture(
       newKeyX25519.map(key => println(key.toJsonPretty)).mapError(DidException(_))
     ) // .getOrThrowFiberFailure()
   }
   @scala.scalajs.js.annotation.JSExport
-  def runNewKeyEd255199 = Unsafe.unsafe { implicit unsafe => // Run side efect
+  def runNewKeyEd255199 = Unsafe.unsafe { implicit unsafe => // Run side effect
     Runtime.default.unsafe.runToFuture(
       newKeyEd255199.map(key => println(key.toJsonPretty)).mapError(DidException(_))
     ) // .getOrThrowFiberFailure()
@@ -93,7 +93,7 @@ object Client {
 
   // def runGetDB: CancelableFuture[Option[MessageDB]] = {
   //   val program: IO[DidFail, Option[MessageDB]] = getDB()
-  //   Unsafe.unsafe { implicit unsafe => // Run side efect
+  //   Unsafe.unsafe { implicit unsafe => // Run side effect
   //     Runtime.default.unsafe.runToFuture(
   //       program
   //         .catchAll(ex => ZIO.logError(ex.toString) *> ZIO.fail(new RuntimeException(ex.toString)))
