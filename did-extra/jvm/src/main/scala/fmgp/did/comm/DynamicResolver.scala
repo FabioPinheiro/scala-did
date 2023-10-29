@@ -1,13 +1,13 @@
-package fmgp.did.comm.mediator
+package fmgp.did.comm
 
 import zio._
 
 import fmgp.did._
-import fmgp.did.comm.FROMTO
 import fmgp.crypto.error._
 import fmgp.did.method.peer.DidPeerResolver
-import fmgp.did.uniresolver.Uniresolver
+// import fmgp.did.uniresolver.Uniresolver
 
+//TODO move out of the JVM into the
 final case class DynamicResolver(
     resolver: Resolver,
     didSocketManager: Ref[DIDSocketManager],
@@ -15,7 +15,7 @@ final case class DynamicResolver(
   override protected def didDocumentOf(did: FROMTO): IO[DidFail, DIDDocument] =
     for {
       docFromResolver <- resolver.didDocument(did)
-      sm <- didSocketManager.get
+      // sm <- didSocketManager.get
       doc = DIDDocumentClass(
         id = docFromResolver.id,
         alsoKnownAs = docFromResolver.alsoKnownAs,

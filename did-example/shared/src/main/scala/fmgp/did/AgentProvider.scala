@@ -39,7 +39,6 @@ object AgentProvider {
 
   case class AgentWithShortName(name: String, value: Agent) extends Agent {
     override def id = value.id
-    override def keys = value.keys
     override def keyStore = value.keyStore
 
     def toDIDWithShortName = DIDWithShortName(name, value.id)
@@ -263,38 +262,42 @@ object AgentProvider {
 
   val exampleAlice = new Agent {
     override def id: DID = DidExample.senderDIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExample.senderSecrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExample.senderSecrets.keys)
   }
 
   val exampleBob = new Agent {
     override def id: DID = DidExample.recipientDIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExample.recipientSecrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExample.recipientSecrets.keys)
   }
 
   val exampleSicpaAlice = new Agent {
     override def id: DID = DidExampleSicpaRustAlice.aliceDIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExampleSicpaRustAlice.aliceSecrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExampleSicpaRustAlice.aliceSecrets.keys)
   }
   val exampleSicpaBob = new Agent {
     override def id: DID = DidExampleSicpaRustBob.bobDIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExampleSicpaRustBob.bobSecrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExampleSicpaRustBob.bobSecrets.keys)
+
   }
   val exampleSicpaCharlie = new Agent {
     override def id: DID = DidExampleSicpaRustCharlie.charlieDIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExampleSicpaRustCharlie.charlieSecrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExampleSicpaRustCharlie.charlieSecrets.keys)
+
   }
 
   val exampleSicpaMediator1 = new Agent {
     override def id: DID = DidExampleSicpaRustMediator1.mediator1DIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExampleSicpaRustMediator1.mediator1Secrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExampleSicpaRustMediator1.mediator1Secrets.keys)
   }
   val exampleSicpaMediator2 = new Agent {
     override def id: DID = DidExampleSicpaRustMediator2.mediator2DIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExampleSicpaRustMediator2.mediator2Secrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExampleSicpaRustMediator2.mediator2Secrets.keys)
+
   }
   val exampleSicpaMediator3 = new Agent {
     override def id: DID = DidExampleSicpaRustMediator3.mediator3DIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExampleSicpaRustMediator3.mediator3Secrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExampleSicpaRustMediator3.mediator3Secrets.keys)
+
   }
 
   val localhost8080Alice = DIDPeer2.makeAgent(

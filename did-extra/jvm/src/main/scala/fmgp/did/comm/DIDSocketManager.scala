@@ -1,4 +1,4 @@
-package fmgp.did.comm.mediator
+package fmgp.did.comm
 
 import zio._
 import zio.json._

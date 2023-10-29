@@ -15,7 +15,6 @@ import laika.parse.code.SyntaxHighlighting
 import fmgp.crypto.error._
 import fmgp.did._
 import fmgp.did.comm._
-import fmgp.did.comm.mediator._
 import fmgp.did.comm.protocol._
 import fmgp.did.method.DidPeerUniresolverDriver
 import fmgp.did.method.peer.DidPeerResolver
@@ -176,7 +175,7 @@ object AppServer extends ZIOAppDefault {
   ).sandbox.toHttpApp
 
   val app: HttpApp[Hub[String] & AgentByHost & Operations & MessageDispatcher & DidPeerResolver] = (
-    MediatorMultiAgent.didCommApp ++ appTest ++ mdocMarkdown ++ appOther ++ appWebsite ++ DidPeerUniresolverDriver.resolverPeer
+    AgentWithSocketManager.didCommApp ++ appTest ++ mdocMarkdown ++ appOther ++ appWebsite ++ DidPeerUniresolverDriver.resolverPeer
   ) @@ (Middleware.cors) // ++ MiddlewareUtils.all)
 
   override val run = for {

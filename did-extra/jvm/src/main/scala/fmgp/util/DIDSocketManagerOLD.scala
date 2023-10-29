@@ -1,3 +1,4 @@
+/*
 package fmgp.util
 
 import zio._
@@ -11,7 +12,7 @@ import fmgp.did.comm._
 import fmgp.crypto.error._
 
 //FIXME REMOVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-@deprecated("this class will be removed and also is duplicated")
+//FIXME @deprecated("this class will be removed and also is duplicated")
 case class DIDSocketManager(
     sockets: Map[SocketID, MyChannel] = Map.empty,
     ids: Map[FROMTO, Seq[SocketID]] = Map.empty,
@@ -50,7 +51,7 @@ case class DIDSocketManager(
 
 }
 
-@deprecated("this class will be removed and also is duplicated")
+//FIXME @deprecated("this class will be removed and also is duplicated")
 object DIDSocketManager {
   def inBoundSize = 5
   def outBoundSize = 3
@@ -98,3 +99,4 @@ object DIDSocketManager {
     } yield ()
 
 }
+ */

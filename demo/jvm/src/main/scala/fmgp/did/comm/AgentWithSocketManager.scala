@@ -1,4 +1,4 @@
-package fmgp.did.comm.mediator
+package fmgp.did.comm
 
 import zio._
 import zio.json._
@@ -15,11 +15,13 @@ import fmgp.did.method.peer.DIDPeer.AgentDIDPeer
 import fmgp.did.demo.AgentByHost
 import io.netty.handler.codec.http.HttpHeaderNames
 
-case class MediatorMultiAgent(
-    id: DIDSubject,
-    keyStore: KeyStore, // Shound we make it lazy with ZIO
+//FIXME REMOVE AgentWithSocketManager
+case class AgentWithSocketManager(
+    override val id: DID,
+    override val keyStore: KeyStore, // Should we make it lazy with ZIO? I think so in the future we might want to separate the keys from the agent
     didSocketManager: Ref[DIDSocketManager],
-) {
+) extends Agent {
+
   val resolverLayer: ULayer[DynamicResolver] =
     DynamicResolver.resolverLayer(didSocketManager)
 
@@ -33,11 +35,13 @@ case class MediatorMultiAgent(
     )
 
   private def _didSubjectAux = id
-  private def _keyStoreAux = keyStore.keys.toSeq
-  val indentityLayer = ZLayer.succeed(new Agent {
-    override def id: DID = _didSubjectAux
-    override def keys: Seq[PrivateKey] = _keyStoreAux
-  })
+  private def _keyStoreAux = keyStore
+
+  val indentityLayer = ZLayer.succeed(this)
+  // val indentityLayer = ZLayer.succeed(new Agent {
+  //   override def id: DID = _didSubjectAux
+  //   override def keyStore: KeyStore = _keyStoreAux
+  // })
 
   val messageDispatcherLayer: ZLayer[Client & Scope, DidFail, MessageDispatcher] =
     MessageDispatcherJVM.layer.mapError(ex => SomeThrowable(ex))
@@ -69,7 +73,7 @@ case class MediatorMultiAgent(
       mSocketID: Option[SocketID],
   ): ZIO[Operations & MessageDispatcher, DidFail, Option[EncryptedMessage]] =
     for {
-      msg <- data.fromJson[EncryptedMessage] match
+      msg <- data.fromJson[EncryptedMessage] match // TODO support SignedMessage
         case Left(error) =>
           ZIO.logError(s"Data is not a EncryptedMessage: '$error'")
             *> ZIO.fail(FailToParse(error))
@@ -94,8 +98,8 @@ case class MediatorMultiAgent(
           }
           maybeSyncReplyMsg <-
             if (!msg.recipientsSubject.contains(id))
-              ZIO.logError(s"This mediator '${id.string}' is not a recipient")
-                *> ZIO.none
+              ZIO.logError(s"This agent '${id.string}' is not a recipient")
+                *> ZIO.none // TODO send a FAIL!!!!!!
             else
               for {
                 plaintextMessage <- decrypt(msg)
@@ -116,67 +120,17 @@ case class MediatorMultiAgent(
       }
       .provideSomeLayer(resolverLayer ++ indentityLayer ++ protocolHandlerLayer)
 
-  def createSocketApp(
-      annotationMap: Seq[LogAnnotation]
-  ): ZIO[MediatorMultiAgent & Operations & MessageDispatcher, Nothing, zio.http.Response] = {
-    import zio.http.ChannelEvent._
-    val SOCKET_ID = "SocketID"
-    Handler
-      .webSocket { channel => // WebSocketChannel = Channel[ChannelEvent[WebSocketFrame], ChannelEvent[WebSocketFrame]]
-        val channelId = scala.util.Random.nextLong().toString
-        channel.receiveAll {
-          case UserEventTriggered(UserEvent.HandshakeComplete) =>
-            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
-              ZIO.logDebug(s"HandshakeComplete $channelId") *>
-                DIDSocketManager.registerSocket(channel, channelId)
-            }
-          case UserEventTriggered(UserEvent.HandshakeTimeout) =>
-            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
-              ZIO.logWarning(s"HandshakeTimeout $channelId")
-            }
-          case ChannelEvent.Registered =>
-            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
-              DIDSocketManager.registerSocket(channel, channelId)
-            }
-          case ChannelEvent.Unregistered =>
-            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
-              DIDSocketManager.unregisterSocket(channel, channelId)
-            }
-          case ChannelEvent.Read(WebSocketFrame.Text(text)) =>
-            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
-              ZIO.log(s"GOT NEW Message in socket_ID $channelId TEXT: $text") *>
-                DIDSocketManager
-                  .newMessage(channel, text, channelId)
-                  .flatMap { case (socketID, encryptedMessage) => receiveMessage(encryptedMessage, Some(socketID)) }
-                  .debug
-                  .tapError(ex => ZIO.logError(s"Error: ${ex}"))
-                  .mapError(ex => DidException(ex))
-            }
-          case ChannelEvent.Read(any) =>
-            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
-              ZIO.logError(s"Unknown event type from '${channelId}': " + any.getClass())
-            }
-          case ChannelEvent.ExceptionCaught(ex) =>
-            ZIO.logAnnotate(LogAnnotation(SOCKET_ID, channelId), annotationMap: _*) {
-              ZIO.log(ex.getMessage())
-            }
-        }
-      }
-      .toResponse
-      .provideSomeEnvironment { (env) => env.add(env.get[MediatorMultiAgent].didSocketManager) }
-  }
-
 }
 
-object MediatorMultiAgent {
+object AgentWithSocketManager {
 
-  def make(id: DID, keyStore: KeyStore): ZIO[Any, Nothing, MediatorMultiAgent] = for {
+  def make(id: DID, keyStore: KeyStore): ZIO[Any, Nothing, AgentWithSocketManager] = for {
     sm <- DIDSocketManager.make
-  } yield MediatorMultiAgent(id, keyStore, sm)
+  } yield AgentWithSocketManager(id, keyStore, sm)
 
-  def make(agent: AgentDIDPeer): ZIO[Any, Nothing, MediatorMultiAgent] = for {
+  def make(agent: AgentDIDPeer): ZIO[Any, Nothing, AgentWithSocketManager] = for {
     sm <- DIDSocketManager.make
-  } yield MediatorMultiAgent(agent.id, agent.keyStore, sm)
+  } yield AgentWithSocketManager(agent.id, agent.keyStore, sm)
 
   // def didCommApp: HttpApp[Hub[String] & AgentByHost & Operations & MessageDispatcher] = Routes(
   def didCommApp = Routes(
@@ -184,8 +138,8 @@ object MediatorMultiAgent {
       for {
         agent <- AgentByHost.getAgentFor(req).debug
         annotationMap <- ZIO.logAnnotations.map(_.map(e => LogAnnotation(e._1, e._2)).toSeq)
-        ret <- agent
-          .createSocketApp(annotationMap)
+        ret <- SocketTMP
+          .createSocketApp(agent, annotationMap)
           .provideSomeEnvironment((env: ZEnvironment[Operations & MessageDispatcher]) => env.add(agent))
       } yield (ret)
     },
