@@ -11,7 +11,7 @@ object SocketTMP {
   def createSocketApp(
       agent: AgentWithSocketManager,
       annotationMap: Seq[LogAnnotation]
-  ): ZIO[AgentWithSocketManager & Operations & MessageDispatcher, Nothing, zio.http.Response] = {
+  ): ZIO[AgentWithSocketManager & Operations & MessageDispatcher, Nothing, Response] = {
     import zio.http.ChannelEvent._
     val SOCKET_ID = "SocketID"
     Handler
@@ -57,6 +57,7 @@ object SocketTMP {
             }
         }
       }
+      .tapErrorZIO(ex => ZIO.logError(ex.getMessage))
       .toResponse
       .provideSomeEnvironment { (env) => env.add(env.get[AgentWithSocketManager].didSocketManager) }
   }

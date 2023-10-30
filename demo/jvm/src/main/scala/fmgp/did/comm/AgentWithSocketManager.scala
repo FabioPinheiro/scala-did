@@ -14,6 +14,7 @@ import fmgp.did.method.peer.DidPeerResolver
 import fmgp.did.method.peer.DIDPeer.AgentDIDPeer
 import fmgp.did.demo.AgentByHost
 import io.netty.handler.codec.http.HttpHeaderNames
+import fmgp.util.TransportWSImp
 
 //FIXME REMOVE AgentWithSocketManager
 case class AgentWithSocketManager(
@@ -141,6 +142,13 @@ object AgentWithSocketManager {
         ret <- SocketTMP
           .createSocketApp(agent, annotationMap)
           .provideSomeEnvironment((env: ZEnvironment[Operations & MessageDispatcher]) => env.add(agent))
+      } yield (ret)
+    },
+    Method.GET / "wip" -> handler { (req: Request) => // TODO REMOVE
+      for {
+        annotationMap <- ZIO.logAnnotations.map(_.map(e => LogAnnotation(e._1, e._2)).toSeq)
+        webSocketApp = TransportWSImp.createWebSocketApp(annotationMap)
+        ret <- webSocketApp.toResponse // FIXME TODO
       } yield (ret)
     },
     Method.POST / trailing -> handler { (req: Request) =>

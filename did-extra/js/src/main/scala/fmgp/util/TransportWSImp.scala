@@ -31,6 +31,8 @@ class TransportWSImp[MSG](
 
 }
 
+type Err = Throwable
+
 object TransportWSImp {
   type MSG = String
 
@@ -38,16 +40,9 @@ object TransportWSImp {
 
   def layer: ZLayer[Any, Nothing, TransportWSImp[MSG]] = ZLayer.fromZIO(make())
 
-  def makeWSProgram: Websocket = new Websocket {
-    var state: Websocket.State = Websocket.State.CONNECTING
-    def onMessage(message: String): UIO[Unit] = ZIO.logDebug(s"onMessage: $message")
-    def onStateChange(s: Websocket.State): UIO[Unit] = ZIO.succeed({ state = s })
-  }
-
   def make(
       wsUrl: String = wsUrlFromWindowLocation, // "ws://localhost:8080/ws",
       boundSize: Int = 10,
-      wsProgram: Websocket = makeWSProgram,
   ): ZIO[Any, Nothing, TransportWSImp[MSG]] = for {
     outbound <- Queue.bounded[MSG](boundSize)
     inbound <- Hub.bounded[MSG](boundSize)
@@ -55,24 +50,25 @@ object TransportWSImp {
     // JS WebSocket bindings onOpen/onClose/onMessage/onError
     tmpWS = new dom.WebSocket(wsUrl)
 
+    wsProgram: Websocket[Err] = new Websocket[Err] {
+      override val socketID = "wsProgramJS"
+      def onMessageProgram(message: String): UIO[Unit] =
+        ZIO.logDebug(s"onMessage: $message") *> inbound.offer(message) *> ZIO.unit
+
+      def sendProgram(message: String) = ZIO.attempt(tmpWS.send(message))
+    }
+
     transportWS = new TransportWSImp[MSG](outbound, inbound, tmpWS)
     _ <- ZIO.logDebug("transportWS.bindings")
     _ <- ZIO.unit.delay(1.second).debug
     streamSendMessages <- ZStream.fromQueue(outbound).runForeach(data => ZIO.succeed(tmpWS.send(data))).fork
     streamOnMessage <- ZStream
-      .async[Any, Nothing, Unit] { callback =>
+      .async[Any, Err, Unit] { callback =>
         tmpWS.onopen = { (ev: dom.Event) =>
-          callback(
-            wsProgram.onStateChange(Websocket.State.OPEN) *>
-              wsProgram.onOpen(ev.`type`) *>
-              ZIO.succeed(Chunk())
-          )
+          callback(wsProgram.onOpen(ev.`type`).mapError(Option.apply(_)) *> ZIO.succeed(Chunk()))
         }
         tmpWS.onmessage = { (ev: dom.MessageEvent) =>
-          callback {
-            val data = ev.data.toString
-            wsProgram.onMessage(data) *> inbound.offer(data) *> ZIO.succeed(Chunk())
-          }
+          callback { wsProgram.onMessage(ev.data.toString).mapError(Option.apply(_)) *> ZIO.succeed(Chunk()) }
         }
         tmpWS.onerror = { (ev: dom.Event) =>
           val message = ev
@@ -80,18 +76,10 @@ object TransportWSImp {
             .message
             .asInstanceOf[js.UndefOr[String]]
             .fold("")("Error: " + _)
-          callback(
-            wsProgram.onStateChange(Websocket.State.CLOSED) *>
-              wsProgram.onError(ev.`type`, message) *>
-              ZIO.succeed(Chunk())
-          )
+          callback(wsProgram.onError(ev.`type`, message).mapError(Option.apply(_)) *> ZIO.succeed(Chunk()))
         }
         tmpWS.onclose = { (ev: dom.CloseEvent) =>
-          callback(
-            wsProgram.onStateChange(Websocket.State.CLOSED) *>
-              wsProgram.onClose(ev.reason) *>
-              ZIO.succeed(Chunk())
-          )
+          callback(wsProgram.onClose(ev.reason).mapError(Option.apply(_)) *> ZIO.succeed(Chunk()))
         }
       }
       .runDrain
