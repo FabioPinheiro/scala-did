@@ -94,7 +94,7 @@ object NFCScannerTool {
           div(
             p("NFC not supported on this device."),
             p(
-              "None: Web NFC API is a mobule only API. See ",
+              "None: Web NFC API is a mobile only API. See ",
               a(
                 href := "https://developer.mozilla.org/en-US/docs/Web/API/Web_NFC_API#browser_compatibility",
                 "Mozilla docs's about Web NFC API"
