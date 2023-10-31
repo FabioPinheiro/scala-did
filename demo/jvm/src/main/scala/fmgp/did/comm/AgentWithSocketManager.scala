@@ -75,9 +75,7 @@ case class AgentWithSocketManager(
   ): ZIO[Operations & MessageDispatcher, DidFail, Option[EncryptedMessage]] =
     for {
       msg <- data.fromJson[EncryptedMessage] match // TODO support SignedMessage
-        case Left(error) =>
-          ZIO.logError(s"Data is not a EncryptedMessage: '$error'")
-            *> ZIO.fail(FailToParse(error))
+        case Left(error) => ZIO.fail(FailToParse(error))
         case Right(message) =>
           ZIO.logDebug(
             "Message's recipients KIDs: " + message.recipientsKid.mkString(",") +
@@ -137,18 +135,9 @@ object AgentWithSocketManager {
   def didCommApp = Routes(
     Method.GET / "ws" -> handler { (req: Request) =>
       for {
-        agent <- AgentByHost.getAgentFor(req).debug
         annotationMap <- ZIO.logAnnotations.map(_.map(e => LogAnnotation(e._1, e._2)).toSeq)
-        ret <- SocketTMP
-          .createSocketApp(agent, annotationMap)
-          .provideSomeEnvironment((env: ZEnvironment[Operations & MessageDispatcher]) => env.add(agent))
-      } yield (ret)
-    },
-    Method.GET / "wip" -> handler { (req: Request) => // TODO REMOVE
-      for {
-        annotationMap <- ZIO.logAnnotations.map(_.map(e => LogAnnotation(e._1, e._2)).toSeq)
-        webSocketApp = TransportWSImp.createWebSocketApp(annotationMap)
-        ret <- webSocketApp.toResponse // FIXME TODO
+        webSocketApp = TransportWSImp.createWebSocketAppWithOperator(annotationMap)
+        ret <- webSocketApp.toResponse
       } yield (ret)
     },
     Method.POST / trailing -> handler { (req: Request) =>

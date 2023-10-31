@@ -10,28 +10,23 @@ import zio.stream._
 type OutErr = Nothing
 type InErr = Nothing
 
+type Err = Throwable
+
 /** this API is still a WIP
   *
   * The Auto reconnect feature was remove.
   */
 class TransportWSImp[MSG](
-    private val outboundBuf: Queue[MSG],
-    private val inboundBuf: Hub[MSG],
+    override val outboundBuf: Queue[MSG],
+    override val inboundBuf: Hub[MSG],
+    override val ws: Websocket[Err],
     /*private val*/ jsWS: dom.WebSocket,
-) extends Transport[Any, MSG] {
+) extends TransportWS[Any, MSG] {
 
-  def outbound: ZSink[Any, OutErr, MSG, Nothing, Unit] = ZSink.fromQueue(outboundBuf)
-  def inbound: ZStream[Any, InErr, MSG] = ZStream.fromHub(inboundBuf)
-
-  def send(message: MSG): zio.UIO[Boolean] =
-    ZIO.log(s"send $message") *>
-      outboundBuf.offer(message)
   def subscribe: ZIO[Scope, Nothing, Dequeue[MSG]] = inboundBuf.subscribe
   def recive[R, E](process: (MSG) => ZIO[R, E, Unit]) = inbound.runForeach(process)
 
 }
-
-type Err = Throwable
 
 object TransportWSImp {
   type MSG = String
@@ -58,7 +53,7 @@ object TransportWSImp {
       def sendProgram(message: String) = ZIO.attempt(tmpWS.send(message))
     }
 
-    transportWS = new TransportWSImp[MSG](outbound, inbound, tmpWS)
+    transportWS = new TransportWSImp[MSG](outbound, inbound, wsProgram, tmpWS)
     _ <- ZIO.logDebug("transportWS.bindings")
     _ <- ZIO.unit.delay(1.second).debug
     streamSendMessages <- ZStream.fromQueue(outbound).runForeach(data => ZIO.succeed(tmpWS.send(data))).fork
@@ -84,6 +79,5 @@ object TransportWSImp {
       }
       .runDrain
       .fork
-    _ <- ZIO.log("Make TransportWS created (and bindings done)")
   } yield transportWS
 }

@@ -1,11 +1,14 @@
 package fmgp.did.demo
 
+import scala.io.Source
+import java.io.File
+import java.io.FileNotFoundException
+
 import zio._
 import zio.json._
 import zio.stream._
 import zio.http._
-
-import scala.io.Source
+import zio.http.Header.ContentType
 
 import laika.api._
 import laika.format._
@@ -20,12 +23,9 @@ import fmgp.did.method.DidPeerUniresolverDriver
 import fmgp.did.method.peer.DidPeerResolver
 import fmgp.crypto.Curve
 import fmgp.crypto.KeyGenerator
-import fmgp.util.MiddlewareUtils
+import fmgp.util._
+
 // import zio.http.endpoint.RoutesMiddleware
-import java.io.File
-import java.io.FileNotFoundException
-import zio.http.Header.ContentType
-import zio.http.MediaTypes
 
 /** demoJVM/runMain fmgp.did.demo.AppServer
   *
@@ -174,7 +174,7 @@ object AppServer extends ZIOAppDefault {
     }.flatten
   ).sandbox.toHttpApp
 
-  val app: HttpApp[Hub[String] & AgentByHost & Operations & MessageDispatcher & DidPeerResolver] = (
+  val app: HttpApp[Operator & AgentByHost & Operations & MessageDispatcher & DidPeerResolver] = (
     AgentWithSocketManager.didCommApp ++ appTest ++ mdocMarkdown ++ appOther ++ appWebsite ++ DidPeerUniresolverDriver.resolverPeer
   ) @@ (Middleware.cors) // ++ MiddlewareUtils.all)
 
@@ -212,10 +212,11 @@ object AppServer extends ZIOAppDefault {
     myServer <- Server
       .serve(app)
       .provideSomeLayer(DidPeerResolver.layerDidPeerResolver)
-      .provideSomeLayer(AgentByHost.layer)
+      .provideSomeLayer(AgentByHost.layer) // TODO REMOVE this is still used by HTTP POSTs
+      .provideSomeLayer(OperatorImp.layer)
       .provideSomeLayer(Operations.layerDefault)
       .provideSomeLayer(client >>> MessageDispatcherJVM.layer)
-      .provideSomeEnvironment { (env: ZEnvironment[Server]) => env.add(myHub) }
+      // .provideSomeEnvironment { (env: ZEnvironment[Server]) => env.add(myHub) }
       .provide(Server.defaultWithPort(port))
       // .provide(
       //   Server.defaultWith(
