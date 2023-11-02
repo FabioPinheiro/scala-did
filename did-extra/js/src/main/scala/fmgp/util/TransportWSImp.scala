@@ -7,11 +7,6 @@ import zio.json._
 import fmgp.did.comm._
 import zio.stream._
 
-type OutErr = Nothing
-type InErr = Nothing
-
-type Err = Throwable
-
 /** this API is still a WIP
   *
   * The Auto reconnect feature was remove.
@@ -19,7 +14,7 @@ type Err = Throwable
 class TransportWSImp[MSG](
     override val outboundBuf: Queue[MSG],
     override val inboundBuf: Hub[MSG],
-    override val ws: Websocket[Err],
+    override val ws: Websocket[TransportWSImp.Err],
     /*private val*/ jsWS: dom.WebSocket,
 ) extends TransportWS[Any, MSG] {
 
@@ -30,6 +25,7 @@ class TransportWSImp[MSG](
 
 object TransportWSImp {
   type MSG = String
+  type Err = Throwable
 
   def wsUrlFromWindowLocation = org.scalajs.dom.window.location.origin.replaceFirst("http", "ws") + "/ws"
 

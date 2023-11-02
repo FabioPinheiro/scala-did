@@ -9,10 +9,10 @@ import fmgp.crypto.error._
 import fmgp.util.MyHeaders
 
 trait MessageDispatcher {
+  // TODO deprecate this
   def send(
       msg: EncryptedMessage,
       /*context*/
       destination: String,
-      xForwardedHost: Option[String],
   ): ZIO[Any, DidFail, String]
 }

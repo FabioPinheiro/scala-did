@@ -207,27 +207,25 @@ object AppServer extends ZIOAppDefault {
       }
       .map(_.flatMap(_.toIntOption).getOrElse(8080))
     _ <- ZIO.log(s"Starting server on port: $port")
-    client = Scope.default ++ Client.default
-    inboundHub <- Hub.bounded[String](5)
     myServer <- Server
       .serve(app)
-      .provideSomeLayer(DidPeerResolver.layerDidPeerResolver)
-      .provideSomeLayer(AgentByHost.layer) // TODO REMOVE this is still used by HTTP POSTs
-      .provideSomeLayer(OperatorImp.layer)
-      .provideSomeLayer(Operations.layerDefault)
-      .provideSomeLayer(client >>> MessageDispatcherJVM.layer)
-      // .provideSomeEnvironment { (env: ZEnvironment[Server]) => env.add(myHub) }
-      .provide(Server.defaultWithPort(port))
-      // .provide(
-      //   Server.defaultWith(
-      //     _.port(port)
-      //       .responseCompression(
-      //         Server.Config.ResponseCompressionConfig.default
-      //           // Server.Config.ResponseCompressionConfig.config
-      //           // Server.Config.ResponseCompressionConfig(0, IndexedSeq(Server.Config.CompressionOptions.gzip()))
-      //       )
-      //   )
-      // )
+      .provide(
+        DidPeerResolver.layerDidPeerResolver ++
+          AgentByHost.layer ++
+          OperatorImp.layer ++
+          Operations.layerDefault ++
+          AgentByHost.layer ++ // TODO REMOVE this is still used by HTTP POSTs
+          (Scope.default ++ Client.default >>> MessageDispatcherJVM.layer) ++
+          Server.defaultWithPort(port)
+          // Server.defaultWith(
+          //   _.port(port)
+          //     .responseCompression(
+          //       Server.Config.ResponseCompressionConfig.default
+          //         // Server.Config.ResponseCompressionConfig.config
+          //         // Server.Config.ResponseCompressionConfig(0, IndexedSeq(Server.Config.CompressionOptions.gzip()))
+          //     )
+          // )
+      )
       .debug
       .fork
     _ <- ZIO.log(s"Server Started")

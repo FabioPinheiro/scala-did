@@ -25,19 +25,18 @@ class MessageDispatcherJVM(client: Client, scope: Scope) extends MessageDispatch
   def send(
       msg: EncryptedMessage,
       /*context*/
-      destination: String,
-      xForwardedHost: Option[String],
+      destination: String
   ): ZIO[Any, DidFail, String] = {
     val contentTypeHeader = msg.`protected`.obj.typ
       .getOrElse(MediaTypes.ENCRYPTED)
       .pipe(e => Header.ContentType(ZMediaType(e.mainType, e.subType)))
-    val xForwardedHostHeader = xForwardedHost.map(x => Header.Custom(customName = MyHeaders.xForwardedHost, x))
+    // val xForwardedHostHeader = xForwardedHost.map(x => Header.Custom(customName = MyHeaders.xForwardedHost, x))
     for {
       res <- Client
         .request(
           Request
             .post(path = destination, body = Body.fromCharSequence(msg.toJson))
-            .setHeaders(Headers(Seq(Some(contentTypeHeader), xForwardedHostHeader).flatten))
+            .setHeaders(Headers(contentTypeHeader))
         )
         .tapError(ex => ZIO.logWarning(s"Fail when calling '$destination': ${ex.toString}"))
         .mapError(ex => SomeThrowable(ex))

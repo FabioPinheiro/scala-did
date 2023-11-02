@@ -86,16 +86,7 @@ trait ProtocolExecuterWithServices[-R <: ProtocolExecuter.Services] extends Prot
                         case None => ZIO.logWarning(s"No url to send message")
                         case Some(url) =>
                           ZIO.log(s"Send to url: $url") *>
-                            messageDispatcher.send(
-                              msg,
-                              url, // "http://localhost:8080", // FIXME REMOVE (use for local env)
-                              None
-                              // url match // FIXME REMOVE (use for local env)
-                              //   case http if http.startsWith("http://") => Some(url.drop(7).split(':').head.split('/').head)
-                              //   case https if https.startsWith("https://") =>
-                              //     Some(url.drop(8).split(':').head.split('/').head)
-                              //   case _ => None
-                            )
+                            messageDispatcher.send(msg, url)
                     } yield (jobToRun)
                     action match
                       case Reply(_)          => job

@@ -8,14 +8,11 @@ import fmgp.did.method.peer.DidPeerResolver
 // import fmgp.did.uniresolver.Uniresolver
 
 //TODO move out of the JVM into the
-final case class DynamicResolver(
-    resolver: Resolver,
-    didSocketManager: Ref[DIDSocketManager],
-) extends Resolver {
+final case class DynamicResolver(resolver: Resolver) extends Resolver {
   override protected def didDocumentOf(did: FROMTO): IO[DidFail, DIDDocument] =
     for {
       docFromResolver <- resolver.didDocument(did)
-      // sm <- didSocketManager.get
+      // sm <- transportManager.get
       doc = DIDDocumentClass(
         id = docFromResolver.id,
         alsoKnownAs = docFromResolver.alsoKnownAs,
@@ -32,6 +29,6 @@ final case class DynamicResolver(
 }
 
 object DynamicResolver {
-  def resolverLayer(didSocketManager: Ref[DIDSocketManager]): ZLayer[Any, Nothing, DynamicResolver] =
-    ZLayer.succeed(DynamicResolver(DidPeerResolver.default, didSocketManager))
+  def layer: ULayer[DynamicResolver] =
+    ZLayer.succeed(DynamicResolver(DidPeerResolver.default))
 }

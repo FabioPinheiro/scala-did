@@ -15,7 +15,7 @@ case class Operator(
   def getAgentExecutar(subject: Set[DIDSubject]): Set[AgentExecutar] =
     subject.flatMap(everybody.get)
 
-  def receiveTransport(transport: Transport[Any, String]) = // : UIO[Fiber.Runtime[Nothing, Unit]] =
+  def receiveTransport(transport: Transport[Any, String]): ZIO[Operations, Nothing, Unit] =
     transport.inbound
       .map(_.fromJson[EncryptedMessage]) // TODO sign message are also ok ...
       .collectRight // This filter any msg not EncryptedMessage

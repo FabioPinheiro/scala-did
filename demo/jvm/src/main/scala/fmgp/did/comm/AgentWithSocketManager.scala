@@ -20,11 +20,8 @@ import fmgp.util.TransportWSImp
 case class AgentWithSocketManager(
     override val id: DID,
     override val keyStore: KeyStore, // Should we make it lazy with ZIO? I think so in the future we might want to separate the keys from the agent
-    didSocketManager: Ref[DIDSocketManager],
+    transportManager: Ref[TransportManager],
 ) extends Agent {
-
-  val resolverLayer: ULayer[DynamicResolver] =
-    DynamicResolver.resolverLayer(didSocketManager)
 
   type Services = Resolver & Agent & Operations & MessageDispatcher
   val protocolHandlerLayer: ULayer[ProtocolExecuter[Services]] =
@@ -89,10 +86,10 @@ case class AgentWithSocketManager(
       mSocketID: Option[SocketID]
   ): ZIO[Operations & MessageDispatcher, DidFail, Option[EncryptedMessage]] =
     ZIO
-      .logAnnotate("msgHash", msg.hashCode.toString) {
+      .logAnnotate("msg_sha256", msg.sha256) {
         for {
-          _ <- ZIO.log(s"receiveMessage with hashCode: ${msg.hashCode}")
-          _ <- didSocketManager.get.flatMap { m =>
+          _ <- ZIO.log(s"receiveMessage with sha256: ${msg.sha256}")
+          _ <- transportManager.get.flatMap { m =>
             ZIO.foreach(msg.recipientsSubject)(subject => m.publish(subject.asTO, msg.toJson))
           }
           maybeSyncReplyMsg <-
@@ -107,7 +104,7 @@ case class AgentWithSocketManager(
                   case Some(socketID) =>
                     plaintextMessage.from match
                       case None       => ZIO.unit
-                      case Some(from) => didSocketManager.update { _.link(from.asFROMTO, socketID) }
+                      case Some(from) => transportManager.update { _.link(from.asFROMTO, socketID) }
                 // TODO Store context of the decrypt unwarping
                 // TODO SreceiveMessagetore context with MsgID and PIURI
                 protocolHandler <- ZIO.service[ProtocolExecuter[Services]]
@@ -117,18 +114,18 @@ case class AgentWithSocketManager(
               } yield ret
         } yield maybeSyncReplyMsg
       }
-      .provideSomeLayer(resolverLayer ++ indentityLayer ++ protocolHandlerLayer)
+      .provideSomeLayer(DynamicResolver.layer ++ indentityLayer ++ protocolHandlerLayer)
 
 }
 
 object AgentWithSocketManager {
 
   def make(id: DID, keyStore: KeyStore): ZIO[Any, Nothing, AgentWithSocketManager] = for {
-    sm <- DIDSocketManager.make
+    sm <- TransportManager.make
   } yield AgentWithSocketManager(id, keyStore, sm)
 
   def make(agent: AgentDIDPeer): ZIO[Any, Nothing, AgentWithSocketManager] = for {
-    sm <- DIDSocketManager.make
+    sm <- TransportManager.make
   } yield AgentWithSocketManager(agent.id, agent.keyStore, sm)
 
   // def didCommApp: HttpApp[Hub[String] & AgentByHost & Operations & MessageDispatcher] = Routes(

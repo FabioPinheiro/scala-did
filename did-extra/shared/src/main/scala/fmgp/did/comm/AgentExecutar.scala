@@ -1,22 +1,17 @@
 package fmgp.did.comm
 
 import zio._
+import zio.json._
+import fmgp.crypto.error._
 import fmgp.did._
+import fmgp.did.comm._
+import fmgp.did.comm.protocol._
 import fmgp.util._
 import zio.stream.ZStream
 
-case class AgentExecutar(agent: Agent) {
-  def subject: DIDSubject = agent.id.asDIDSubject
-  val scope = Scope.global // FIXME
+trait AgentExecutar {
+  def subject: DIDSubject
 
-  def program(transport: Transport[Any, String]) = transport.inbound
-    .mapZIO(eee => ZIO.log(s"AgentExecutar NEW MESSAGE IN inbound $eee"))
-    .runDrain
-    .forkIn(scope)
-
-  def receiveMsg(msg: EncryptedMessage, transport: Transport[Any, String]): UIO[Unit] =
-    for {
-      job <- program(transport)
-      _ <- transport.send(s"You are now connected to $subject")
-    } yield ()
+  /** This is the entry point. The Operator call this method */
+  def receiveMsg(msg: EncryptedMessage, transport: Transport[Any, String]): URIO[Operations, Unit]
 }
