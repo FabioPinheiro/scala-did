@@ -2,12 +2,12 @@ package fmgp.did.comm
 
 import zio._
 import zio.json._
+import zio.stream._
 import fmgp.crypto.error._
 import fmgp.did._
 import fmgp.did.comm._
 import fmgp.did.comm.protocol._
 import fmgp.util._
-import zio.stream.ZStream
 
 case class AgentExecutarImp(
     agent: Agent,
@@ -17,79 +17,84 @@ case class AgentExecutarImp(
   val indentityLayer = ZLayer.succeed(agent)
   override def subject: DIDSubject = agent.id.asDIDSubject
 
-  override def receiveMsg(msg: EncryptedMessage, transport: Transport[Any, String]): URIO[Operations, Unit] = {
-    def longRunningProgram(transport: Transport[Any, String]) = transport.inbound
-      .mapZIO(data =>
-        data.fromJson[EncryptedMessage] match // TODO sign message as also ok
-          case Left(value) => ZIO.log(s"AgentExecutar inbound: '$data'") *> ZIO.none
-          case Right(eMsg) => jobExecuterProtocol(eMsg, transport)
-      )
-      .runDrain
-      .forkIn(scope)
+  override def receiveMsg(
+      msg: SignedMessage | EncryptedMessage,
+      transport: TransportDIDComm[Any]
+  ): URIO[Operations, Unit] = {
     for {
-      job <- longRunningProgram(transport)
-      _ <- transport.send(s"You are now connected to $subject")
+      job <- transport.inbound
+        .mapZIO(msg => jobExecuterProtocol(msg, transport))
+        .runDrain
+        .forkIn(scope)
       ret <- jobExecuterProtocol(msg, transport) // Run a single time (for the message already read)
     } yield ()
   }
 
-  // FIXME REMOVE THIS
-  def messageDispatcher = new MessageDispatcher {
-    def send(
-        msg: EncryptedMessage,
-        /*context*/
-        destination: String
-    ): ZIO[Any, DidFail, String] = ZIO.log(s"SEND=${msg.toJson}") *> ZIO.succeed("/return data/")
-  }
-
   def jobExecuterProtocol(
-      eMsg: EncryptedMessage,
-      transport: Transport[Any, String],
-  ): URIO[Operations, Option[EncryptedMessage]] =
+      msg: SignedMessage | EncryptedMessage,
+      transport: TransportDIDComm[Any],
+  ): URIO[Operations, Unit] =
     this
-      .receiveMessage(eMsg, transport: Transport[Any, String])
+      .receiveMessage(msg, transport)
       .tapError(ex => ZIO.log(ex.toString))
       .provideSomeLayer(DynamicResolver.layer ++ AgentExecutarImp.protocolHandlerLayer ++ this.indentityLayer)
-      .provideSomeEnvironment((env: ZEnvironment[Operations]) => env.add(messageDispatcher))
       .orDieWith(ex => new RuntimeException(ex.toJson))
 
-  def receiveMessage(msg: EncryptedMessage, transport: Transport[Any, String]): ZIO[
-    Agent & Resolver & ProtocolExecuter[AgentExecutarImp.Services] & Operations & MessageDispatcher,
+  def receiveMessage(msg: SignedMessage | EncryptedMessage, transport: TransportDIDComm[Any]): ZIO[
+    Agent & Resolver & ProtocolExecuter[AgentExecutarImp.Services] & Operations,
     DidFail,
-    Option[EncryptedMessage]
-  ] =
-    ZIO.logAnnotate("msg_sha256", msg.sha256) {
-      for {
-        _ <- ZIO.log(s"receiveMessage with sha256: ${msg.sha256}")
-        agent <- ZIO.service[Agent]
-        _ <- transportManager.get.flatMap { m =>
-          ZIO.foreach(msg.recipientsSubject)(subject => m.publish(subject.asTO, msg.toJson))
-        }
-        maybeSyncReplyMsg <-
-          if (!msg.recipientsSubject.contains(agent.id.asDIDSubject))
-            ZIO.logError(
-              s"This agent '${agent.id.asDIDSubject}' is not a recipient"
-            ) *> ZIO.none // TODO send a FAIL!!!!!!
-          else
-            for {
-              plaintextMessage <- AgentExecutarImp.decrypt(msg)
-              _ <- plaintextMessage.from match
-                case None       => ZIO.unit
-                case Some(from) => transportManager.update { _.link(from.asFROMTO, transport) }
-              // TODO Store context of the decrypt unwarping
-              // TODO SreceiveMessagetore context with MsgID and PIURI
-              protocolHandler <- ZIO.service[ProtocolExecuter[AgentExecutarImp.Services]]
-              ret <- protocolHandler
-                .execute(plaintextMessage)
-                .tapError(ex => ZIO.logError(s"Error when execute Protocol: $ex"))
-            } yield ret
-      } yield maybeSyncReplyMsg
-    }
+    Unit
+  ] = ZIO.logAnnotate("msg_sha256", msg.sha256) {
+    for {
+      _ <- ZIO.logDebug(s"Receive message with sha256: '${msg.sha256}'")
+      agent <- ZIO.service[Agent]
+      recipientsSubject <- msg match
+        case eMsg: EncryptedMessage => ZIO.succeed(eMsg.recipientsSubject)
+        case sMsg: SignedMessage =>
+          ZIO.fromEither(sMsg.payloadAsPlaintextMessage).map(_.to.toSet.flatten.map(_.toDIDSubject))
+      _ <- transportManager.get.flatMap { m =>
+        ZIO.foreach(recipientsSubject)(subject => m.publish(subject.asTO, msg))
+      }
+      _ <-
+        if (!recipientsSubject.contains(agent.id.asDIDSubject)) {
+          ZIO.logError(s"This agent '${agent.id.asDIDSubject}' is not a recipient") // TODO send a FAIL!!!!!!
+        } else AgentExecutarImp.decrypt(msg).flatMap(pMsg => processMessage(pMsg, transport))
+    } yield ()
+  }
+
+  def processMessage(plaintextMessage: PlaintextMessage, transport: TransportDIDComm[Any]) = for {
+    _ <- plaintextMessage.from match
+      case None       => ZIO.unit
+      case Some(from) => transportManager.update { _.link(from.asFROMTO, transport) }
+    protocolHandler <- ZIO.service[ProtocolExecuter[AgentExecutarImp.Services]]
+    action <- protocolHandler
+      .program(plaintextMessage)
+      .tapError(ex => ZIO.logError(s"Error when execute Protocol: $ex"))
+    ret <- action match
+      case NoReply => ZIO.unit // TODO Maybe infor transport of immediately reply
+      case reply: AnyReply =>
+        import fmgp.did.comm.Operations._
+        for {
+          message <- reply.msg.to.toSeq.flatten match {
+            case Seq() =>
+              reply.msg.from match
+                case Some(from) => sign(reply.msg)
+                case None => ZIO.logError(s"No sender or recipient: ${reply.msg}") *> ZIO.fail(NoSenderOrRecipient)
+            case tos => // TODO FIXME is case is not a response
+              reply.msg.from match
+                case Some(from) => authEncrypt(reply.msg)
+                case None       => anonEncrypt(reply.msg)
+          }
+          _ <- plaintextMessage.return_route match
+            case Some(ReturnRoute.none) | None => transport.send(message) // FIXME transportManager pick the best way
+            case Some(ReturnRoute.all) | Some(ReturnRoute.thread) => transport.send(message)
+        } yield ()
+  } yield ()
 }
 
 object AgentExecutarImp {
 
-  type Services = Resolver & Agent & Operations & MessageDispatcher
+  type Services = Resolver & Agent & Operations // & MessageDispatcher
 
   def make(agent: Agent): ZIO[Any, Nothing, AgentExecutar] =
     TransportManager.make.map(AgentExecutarImp(agent, _))

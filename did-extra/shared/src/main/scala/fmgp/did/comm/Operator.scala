@@ -4,6 +4,7 @@ import zio._
 import zio.json._
 import fmgp.did._
 import fmgp.util._
+import fmgp.crypto.error._
 
 /** Telecommunications operator for DIDComm */
 case class Operator(
@@ -15,14 +16,23 @@ case class Operator(
   def getAgentExecutar(subject: Set[DIDSubject]): Set[AgentExecutar] =
     subject.flatMap(everybody.get)
 
-  def receiveTransport(transport: Transport[Any, String]): ZIO[Operations, Nothing, Unit] =
+  def receiveTransport(transport: TransportDIDComm[Any]): ZIO[Operations, DidFail, Unit] =
     transport.inbound
-      .map(_.fromJson[EncryptedMessage]) // TODO sign message are also ok ...
-      .collectRight // This filter any msg not EncryptedMessage
-      .mapZIO { msg =>
-        val toBeInfor = getAgentExecutar(msg.recipientsSubject)
-        ZIO.foreachParDiscard(toBeInfor)(contact => contact.receiveMsg(msg, transport)) *>
-          ZIO.succeed(true)
+      .mapZIO {
+        case sMsg: SignedMessage =>
+          ZIO
+            .fromEither(sMsg.payloadAsPlaintextMessage)
+            .flatMap { pMsg =>
+              val recipients = pMsg.to.toSet.flatten.map(_.toDIDSubject)
+              val toBeInfor = getAgentExecutar(recipients)
+              if (toBeInfor.isEmpty) ZIO.logWarning("No Agent to inform") *> ZIO.succeed(false)
+              else ZIO.foreachParDiscard(toBeInfor)(_.receiveMsg(sMsg, transport)) *> ZIO.succeed(true)
+            }
+        case eMsg: EncryptedMessage =>
+          val recipients = eMsg.recipientsSubject
+          val toBeInfor = getAgentExecutar(recipients)
+          if (toBeInfor.isEmpty) ZIO.logWarning("No Agent to inform") *> ZIO.succeed(false)
+          else ZIO.foreachParDiscard(toBeInfor)(_.receiveMsg(eMsg, transport)) *> ZIO.succeed(true)
       }
       .takeUntil(i => i)
       .runDrain

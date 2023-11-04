@@ -11,20 +11,20 @@ import fmgp.did.comm._
 
 class TransportDIDCommOverHTTP(
     destination: String,
-    inboundBuf: Hub[EncryptedMessage],
-) extends Transport[Client & Scope, EncryptedMessage] {
-  def id: String = Transport.nextTransportCounter
-  def inbound: ZStream[Client & Scope, Transport.InErr, EncryptedMessage] = ZStream.fromHub(inboundBuf)
-  def outbound: zio.stream.ZSink[Client & Scope, Transport.OutErr, EncryptedMessage, Nothing, Unit] =
-    ZSink.foreach { (msg: EncryptedMessage) =>
-      val contentTypeHeader = msg.`protected`.obj.typ
-        .getOrElse(MediaTypes.ENCRYPTED)
-        .pipe(e => Header.ContentType(MediaType(e.mainType, e.subType)))
+    inboundBuf: Hub[SignedMessage | EncryptedMessage],
+) extends TransportDIDComm[Client & Scope] {
+  def id: String = TransportID.ws
+  def inbound: ZStream[Client & Scope, Transport.InErr, SignedMessage | EncryptedMessage] = ZStream.fromHub(inboundBuf)
+  def outbound: zio.stream.ZSink[Client & Scope, Transport.OutErr, SignedMessage | EncryptedMessage, Nothing, Unit] =
+    ZSink.foreach { (msg: SignedMessage | EncryptedMessage) =>
+      val contentTypeHeader = msg match
+        case _: SignedMessage    => MediaTypes.SIGNED.pipe(e => Header.ContentType(MediaType(e.mainType, e.subType)))
+        case _: EncryptedMessage => MediaTypes.ENCRYPTED.pipe(e => Header.ContentType(MediaType(e.mainType, e.subType)))
       for {
         res <- Client
           .request(
             Request
-              .post(path = destination, body = Body.fromCharSequence(msg.toJson))
+              .post(path = destination, body = Body.fromCharSequence((msg: Message).toJson))
               .setHeaders(Headers(Seq(contentTypeHeader)))
           )
           .tapError(ex => ZIO.logWarning(s"Fail when calling '$destination': ${ex.toString}"))
@@ -44,7 +44,7 @@ object TransportDIDCommOverHTTP {
   def make(
       destination: String,
       boundSize: Int = 3,
-  ): ZIO[Any, Nothing, Transport[Client & Scope, EncryptedMessage]] = for {
-    inbound <- Hub.bounded[EncryptedMessage](boundSize)
+  ): ZIO[Any, Nothing, TransportDIDComm[Client & Scope]] = for {
+    inbound <- Hub.bounded[SignedMessage | EncryptedMessage](boundSize)
   } yield TransportDIDCommOverHTTP(destination, inbound)
 }

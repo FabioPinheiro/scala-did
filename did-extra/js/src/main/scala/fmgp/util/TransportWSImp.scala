@@ -12,11 +12,14 @@ import zio.stream._
   * The Auto reconnect feature was remove.
   */
 class TransportWSImp[MSG](
-    override val outboundBuf: Queue[MSG],
-    override val inboundBuf: Hub[MSG],
+    outboundBuf: Queue[MSG],
+    inboundBuf: Hub[MSG],
     override val ws: Websocket[TransportWSImp.Err],
     /*private val*/ jsWS: dom.WebSocket,
 ) extends TransportWS[Any, MSG] {
+
+  override def outbound: ZSink[Any, Transport.OutErr, MSG, Nothing, Unit] = ZSink.fromQueue(outboundBuf)
+  override def inbound: ZStream[Any, Transport.InErr, MSG] = ZStream.fromHub(inboundBuf)
 
   def subscribe: ZIO[Scope, Nothing, Dequeue[MSG]] = inboundBuf.subscribe
   def recive[R, E](process: (MSG) => ZIO[R, E, Unit]) = inbound.runForeach(process)

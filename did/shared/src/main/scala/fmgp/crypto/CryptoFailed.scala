@@ -82,6 +82,7 @@ package error {
   case class FailDecryptDoubleEncrypted(outsideMsg: EncryptedMessage, insideMsg: EncryptedMessage) extends CurveError
   case object AnonDecryptAuthMsgFailed extends CryptoFailed
   case object AuthDecryptAnonMsgFailed extends CryptoFailed
+  case object NoSenderOrRecipient extends CryptoFailed
   case object ValidationFailed extends CryptoFailed
 
   case object NoKeys extends CryptoFailed

@@ -174,8 +174,8 @@ object AppServer extends ZIOAppDefault {
     }.flatten
   ).sandbox.toHttpApp
 
-  val app: HttpApp[Operator & AgentByHost & Operations & MessageDispatcher & DidPeerResolver] = (
-    AgentWithSocketManager.didCommApp ++ appTest ++ mdocMarkdown ++ appOther ++ appWebsite ++ DidPeerUniresolverDriver.resolverPeer
+  val app: HttpApp[Operator & Operations & MessageDispatcher & DidPeerResolver] = (
+    DIDCommRoutes.app ++ appTest ++ mdocMarkdown ++ appOther ++ appWebsite ++ DidPeerUniresolverDriver.resolverPeer
   ) @@ (Middleware.cors) // ++ MiddlewareUtils.all)
 
   override val run = for {
@@ -211,10 +211,8 @@ object AppServer extends ZIOAppDefault {
       .serve(app)
       .provide(
         DidPeerResolver.layerDidPeerResolver ++
-          AgentByHost.layer ++
           OperatorImp.layer ++
           Operations.layerDefault ++
-          AgentByHost.layer ++ // TODO REMOVE this is still used by HTTP POSTs
           (Scope.default ++ Client.default >>> MessageDispatcherJVM.layer) ++
           Server.defaultWithPort(port)
           // Server.defaultWith(

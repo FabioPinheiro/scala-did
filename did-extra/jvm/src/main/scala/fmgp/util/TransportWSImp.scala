@@ -13,16 +13,36 @@ import fmgp.did.comm._
   * The Auto reconnect feature was remove.
   */
 class TransportWSImp[MSG](
-    override val outboundBuf: Queue[MSG],
-    override val inboundBuf: Hub[MSG],
+    outboundBuf: Queue[MSG],
+    inboundBuf: Hub[MSG],
     val ws: Websocket[Throwable],
-) extends TransportWS[Any, MSG]
+) extends TransportWS[Any, MSG] {
+
+  override def outbound: ZSink[Any, Transport.OutErr, MSG, Nothing, Unit] = ZSink.fromQueue(outboundBuf)
+  override def inbound: ZStream[Any, Transport.InErr, MSG] = ZStream.fromHub(inboundBuf)
+}
+
+class TransportDIDCommWS(transport: TransportWSImp[String]) extends TransportDIDComm[Any] {
+
+  /** Send to the other side. Out going Messages */
+  def outbound: ZSink[Any, Transport.OutErr, SignedMessage | EncryptedMessage, Nothing, Unit] =
+    transport.outbound.contramap((_: Message).toJson)
+
+  /** Reciving from the other side. Income Messages */
+  def inbound: ZStream[Any, Transport.InErr, SignedMessage | EncryptedMessage] =
+    transport.inbound.map(_.fromJson[Message]).collect {
+      case Right(sMsg: SignedMessage)    => sMsg
+      case Right(eMsg: EncryptedMessage) => eMsg
+    }
+
+  def id: TransportID = transport.id
+}
 
 object TransportWSImp {
 
   def createWebSocketAppWithOperator(
       annotationMap: Seq[LogAnnotation]
-  ): WebSocketApp[Operator & Operations & MessageDispatcher] =
+  ): WebSocketApp[Operator & Operations] =
     WebSocketApp(
       handler = Handler
         .fromFunctionZIO((channel: Channel[ChannelEvent[WebSocketFrame], ChannelEvent[WebSocketFrame]]) =>
@@ -35,7 +55,11 @@ object TransportWSImp {
                 .tapError(e => ZIO.logError(e.getMessage))
                 .fork
               op <- ZIO.service[Operator]
-              _ <- op.receiveTransport(transport)
+              transportWarp = TransportDIDCommWS(transport)
+              _ <- op
+                .receiveTransport(transportWarp)
+                .tapErrorCause(ZIO.logErrorCause(_))
+                .mapError(DidException(_))
               _ <- ws.join *> ZIO.log("WebsocketJVM CLOSE")
             } yield ws
           }

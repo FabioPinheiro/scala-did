@@ -5,13 +5,16 @@ import fmgp.did._
 import fmgp.did.comm.extension._
 import fmgp.util._
 import fmgp.crypto._
+import fmgp.crypto.error._
 import zio.json.ast.Json
 import zio.json.ast.JsonCursor
 
 import fmgp.did.comm.ReturnRoute
 
 /** DID Comm Message */
-sealed trait Message
+sealed trait Message {
+  def sha256: String
+}
 
 object Message {
   given decoder: JsonDecoder[Message] =
@@ -157,8 +160,18 @@ case class SignedMessage(
   def base64noSignature = signatures.head.`protected`.base64url + "." + payload.base64url
   def base64 = base64noSignature + "." + signatures.head.signature.value
 
-  def sha1 = sha256 // FIXME SHA1.digestToHex(this.toJson)
   def sha256 = SHA256.digestToHex(this.toJson)
+  def payloadAsMessage: Either[FailToParse, Message] =
+    payload.content.fromJson[Message] match
+      case Left(value)                   => Left(FailToParse(value))
+      case Right(pMsg: PlaintextMessage) => Right(pMsg)
+      case Right(sMsg: SignedMessage)    => Right(sMsg)
+      case Right(eMsg: EncryptedMessage) => Right(eMsg)
+  def payloadAsPlaintextMessage: Either[DidFail, PlaintextMessage] = payloadAsMessage.flatMap {
+    case pMsg: PlaintextMessage => Right(pMsg)
+    case sMsg: SignedMessage    => Left(FailDecryptDoubleSign(outsideMsg = this, insideMsg = sMsg))
+    case eMsg: EncryptedMessage => Left(FailDecryptSignThenEncrypted(outsideMsg = this, insideMsg = eMsg))
+  }
 }
 
 object SignedMessage {
@@ -230,7 +243,7 @@ trait EncryptedMessage extends Message {
   // extra
   def recipientsSubject = recipients.map(_.recipientSubject).toSet
   def recipientsKid = recipients.map(_.recipientKid).toSet
-  def sha1 = sha256 // FIXME
+
   def sha256 = SHA256.digestToHex(this.toJson)
   def isAnon = `protected`.obj match
     case AnonProtectedHeader(epk, apv, typ, enc, alg)            => true
