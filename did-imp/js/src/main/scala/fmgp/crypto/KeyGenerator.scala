@@ -3,11 +3,12 @@ package fmgp.crypto
 import zio._
 import zio.json._
 import scala.util.Try
+import fmgp.typings.jose.mod.generateKeyPair
+import fmgp.typings.jose.generateKeyPairMod.GenerateKeyPairResult
 
 import fmgp.crypto.error._
 import fmgp.crypto.OKPPrivateKey
-import typings.jose.mod.generateKeyPair
-import typings.jose.generateKeyPairMod.GenerateKeyPairResult
+
 import scala.scalajs.js.JSON
 
 // FIXME

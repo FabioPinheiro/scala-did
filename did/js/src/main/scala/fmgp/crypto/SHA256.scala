@@ -4,7 +4,7 @@ import java.security.MessageDigest
 import scala.scalajs.js.typedarray.Uint8Array
 import fmgp.util.bytes2Hex
 
-import typings.jsSha256
+import fmgp.typings.jsSha256
 
 object SHA256 {
   def digestToHex(str: String): String = bytes2Hex(digest(str))

@@ -118,6 +118,12 @@ lazy val V = new {
   val upickle = "3.1.3"
 }
 
+/** NPM Dependencies */
+lazy val NPM = new { // When update the dependencies also update in package.json
+  val sha256 = "js-sha256" -> "0.9.0"
+  val jose = "jose" -> "4.14.6"
+}
+
 /** Dependencies */
 lazy val D = new {
 
@@ -200,6 +206,16 @@ lazy val jsHeader =
     | * https://github.com/FabioPinheiro/scala-did
     | * Copyright: Fabio Pinheiro - fabiomgpinheiro@gmail.com
     | */""".stripMargin.trim() + "\n"
+
+lazy val scalaJSLibConfigure: Project => Project =
+  _.enablePlugins(ScalaJSPlugin)
+    .enablePlugins(ScalablyTypedConverterGenSourcePlugin)
+    .settings(
+      stShortModuleNames := true, // ShortModuleNames
+      stOutputPackage := "fmgp.typings", // shade into another package
+      useYarn := true,
+    )
+
 lazy val scalaJSViteConfigure: Project => Project =
   _.enablePlugins(ScalaJSPlugin)
     .enablePlugins(ScalablyTypedConverterExternalNpmPlugin)
@@ -312,7 +328,16 @@ lazy val did = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.zioMunitTest.value,
   )
   .jsSettings(libraryDependencies += D.scalajsJavaSecureRandom.value.cross(CrossVersion.for3Use2_13))
-  .jsConfigure(scalaJSViteConfigure)
+  .jsConfigure(scalaJSLibConfigure)
+  .jsSettings(
+    Compile / npmDependencies += NPM.sha256,
+    /* say we want to minimize all but keep these very specific things */
+    stMinimize := Selection.All,
+    stMinimizeKeep ++= List(
+      "jsSha256.mod.^",
+      "jsSha256.mod.sha256",
+    ),
+  )
   .configure(docConfigure)
 
 lazy val didExperiments = crossProject(JSPlatform, JVMPlatform)
@@ -325,7 +350,7 @@ lazy val didExperiments = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.zioMunitTest.value,
   )
   .dependsOn(did % "compile;test->test")
-  .jsConfigure(scalaJSViteConfigure) // Because of didJS now uses NPM libs
+  .jsConfigure(scalaJSLibConfigure) // Because of didJS now uses NPM libs
   .configure(docConfigure)
 
 //TODO Rename did-extra to did-framework
@@ -339,7 +364,7 @@ lazy val didExtra = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(did % "compile;test->test")
   .jvmSettings(libraryDependencies += D.ziohttp.value)
   .jsSettings(libraryDependencies += D.dom.value)
-  .jsConfigure(scalaJSViteConfigure) // Because of didJS now uses NPM libs
+  .jsConfigure(scalaJSLibConfigure) // Because of didJS now uses NPM libs
   .dependsOn(didResolverPeer) // publish
   .dependsOn(didResolverWeb) // publish
   // .dependsOn(didUniresolver) // NOT publish
@@ -363,7 +388,24 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
     libraryDependencies += "com.google.protobuf" % "protobuf-java" % "3.24.4",
   )
-  .jsConfigure(scalaJSViteConfigure)
+  .jsConfigure(scalaJSLibConfigure)
+  .jsSettings(
+    Compile / npmDependencies += NPM.jose,
+    /* say we want to minimize all but keep these very specific things */
+    stMinimize := Selection.All,
+    stMinimizeKeep ++= List(
+      "jose.mod.^",
+      "jose.mod.generateKeyPair",
+      "jose.mod.importJWK",
+      // "mod.jwtDecrypt",
+      "jose.mod.jwtVerify",
+      "jose.mod.GeneralSign",
+      "jose.TypesMod.JWK",
+      "jose.TypesMod.KeyLike",
+      "jose.TypesMod.CompactJWSHeaderParameters",
+      "jose.KeyGenerateKeyPairMod.GenerateKeyPairResult",
+    ),
+  )
   .jsSettings( // Add JS-specific settings here
     // Test / scalaJSUseMainModuleInitializer := true, Test / scalaJSUseTestModuleInitializer := false, Test / mainClass := Some("fmgp.crypto.MainTestJS")
     Test / parallelExecution := false,
@@ -403,7 +445,7 @@ lazy val didResolverPeer = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.76" % Test,
     libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.16-preview.1" % Test,
   )
-  .jsConfigure(scalaJSViteConfigure)
+  .jsConfigure(scalaJSLibConfigure)
   .dependsOn(did, multiformats)
   .dependsOn(didImp % "test->test") // To generate keys for tests
   .configure(docConfigure)
