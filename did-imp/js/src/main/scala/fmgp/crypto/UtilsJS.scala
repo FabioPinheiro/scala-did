@@ -1,12 +1,12 @@
 package fmgp.crypto
 
-import typings.jose.mod.importJWK
-import typings.jose.mod.jwtDecrypt
-import typings.jose.mod.jwtVerify
-import typings.jose.mod.GeneralSign
-import typings.jose.typesMod.JWK
-import typings.jose.typesMod.KeyLike
-import typings.jose.typesMod.CompactJWSHeaderParameters
+import fmgp.typings.jose.mod.importJWK
+// import fmgp.typings.jose.mod.jwtDecrypt
+import fmgp.typings.jose.mod.jwtVerify
+import fmgp.typings.jose.mod.GeneralSign
+import fmgp.typings.jose.typesMod.JWK
+import fmgp.typings.jose.typesMod.KeyLike
+import fmgp.typings.jose.typesMod.CompactJWSHeaderParameters
 
 import fmgp.did.comm._
 import fmgp.crypto.error._
