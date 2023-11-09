@@ -11,14 +11,22 @@ object MyRouter {
   sealed abstract class Page(
       val title: String,
       val icon: String // https://fonts.google.com/icons?selected=Material+Icons+Outlined
-  )
+  ) {
+    def makeI = i(
+      className("material-icons mdc-list-item__graphic"),
+      aria.hidden(true),
+      this.icon
+    )
+  }
 
   case object HomePage extends Page("Home", "home")
   case object SettingsPage extends Page("Settings", "settings")
   case class OOBPage(query_oob: String) extends Page("OutOfBand", "app_shortcut")
   object OOBPage { def apply(oob: OutOfBand) = new OOBPage(oob.data.urlBase64) }
   case object QRcodeScannerPage extends Page("QRcodeScanner", "qr_code_scanner")
-  case object NFCScannerPage extends Page("NFCScanner", "nfc")
+  case object NFCScannerPage extends Page("NFCScanner", "nfc") // or "contactless"
+  case object WebBluetoothPage extends Page("WebBluetooth", "bluetooth")
+  case object DiscordBotPage extends Page("DIscordBot", "smart_toy")
   case object DocPage extends Page("Doc", "menu_book")
   case object AgentManagementPage extends Page("AgentManagement", "manage_accounts")
   // case object DIDPage extends Page("DID", "visibility")
@@ -38,6 +46,8 @@ object MyRouter {
   given oobPageRW: ReadWriter[OOBPage] = macroRW
   given qrcodeScannerPageRW: ReadWriter[QRcodeScannerPage.type] = macroRW
   given nfcScannerPageRW: ReadWriter[NFCScannerPage.type] = macroRW
+  given webBluetoothPageRW: ReadWriter[WebBluetoothPage.type] = macroRW
+  given discordBotPageRW: ReadWriter[DiscordBotPage.type] = macroRW
   given docPageRW: ReadWriter[DocPage.type] = macroRW
   given keysPageRW: ReadWriter[AgentManagementPage.type] = macroRW
   // given agentDBPageRW: ReadWriter[AgentDBPage.type] = macroRW
@@ -72,6 +82,8 @@ object MyRouter {
     Route.static(DocPage, root / "doc" / endOfSegments, Router.localFragmentBasePath),
     Route.static(QRcodeScannerPage, root / "scanner" / endOfSegments, Router.localFragmentBasePath),
     Route.static(NFCScannerPage, root / "nfc" / endOfSegments, Router.localFragmentBasePath),
+    Route.static(WebBluetoothPage, root / "bluetooth" / endOfSegments, Router.localFragmentBasePath),
+    Route.static(DiscordBotPage, root / "discord" / endOfSegments, Router.localFragmentBasePath),
     Route.static(AgentManagementPage, root / "agentkeys" / endOfSegments, Router.localFragmentBasePath),
     // Route.static(AgentDBPage, root / "db" / endOfSegments, Router.localFragmentBasePath),
     Route.static(AgentMessageStoragePage, root / "agent" / endOfSegments, Router.localFragmentBasePath),

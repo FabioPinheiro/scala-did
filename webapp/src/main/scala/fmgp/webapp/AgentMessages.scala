@@ -23,8 +23,8 @@ object AgentMessageStorage {
       // job(ctx.owner)
       ()
     },
-    // code("AgentMessageStorage"),
-    // p("Agent Message Storage of ", child <-- Global.agentVar.signal.map(_.map(_.id.string).getOrElse("NONE"))),
+    code("AgentMessageStorage"),
+    p("Agent Message Storage of ", child <-- Global.agentVar.signal.map(_.map(_.id.string).getOrElse("NONE"))),
     // br(),
     div( // container
       padding := "12pt",

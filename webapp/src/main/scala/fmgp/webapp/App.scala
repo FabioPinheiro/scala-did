@@ -68,6 +68,8 @@ object App {
     .collectSignal[OOBPage](page => OutOfBandTool(page))
     .collectStatic(QRcodeScannerPage)(QRcodeScannerTool())
     .collectStatic(NFCScannerPage)(NFCScannerTool())
+    .collectStatic(WebBluetoothPage)(WebBluetoothTool())
+    .collectStatic(DiscordBotPage)(DiscordBotInfo())
     .collectStatic(DocPage)(Doc())
     .collectStatic(AgentManagementPage)(AgentManagement())
     // .collectStatic(AgentDBPage)(AgentDB())
@@ -86,6 +88,8 @@ object App {
     SettingsPage,
     QRcodeScannerPage,
     NFCScannerPage,
+    WebBluetoothPage,
+    DiscordBotPage,
     OOBPage(oobExample),
     ResolverPage(didExample),
     AgentManagementPage,

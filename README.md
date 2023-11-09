@@ -84,14 +84,8 @@ Want to see your project here? [Submit a PR]
   - support `from_prior`
   - support `sub` `iss` on JWT https://datatracker.ietf.org/doc/html/rfc7519
 - create module for protocols
-- routing:
-  - implement utilities for DID Agents [WIP]
-    - [DONE] HTTP POST
-    - [WIP] push notification
-    - [WIP] websocket
-    - [WIP-stop] NFC
-    - [TODO] bluetooth
-- maybe implement method `did:peer.3` (this is an extension)
+- maybe implement method `did:peer.3` and `did:peer.4`
+- [TODO] method `did:key`
 - maybe implement method `did:jwk` https://github.com/quartzjer/did-jwk
 - maybe implement methods ["KERI lite"](https://docs.google.com/presentation/d/1ksqVxeCAvqLjr67htWZ4JYaSnI8TUZIO7tDMF5npHTo/edit#slide=id.g1ca1fd90f33_0_0)
 - be part of the Adopters in https://github.com/sbt/sbt-ci-release/
