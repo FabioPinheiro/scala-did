@@ -12,7 +12,7 @@ To install ScalaDID in a scala project
 ```scala
  libraryDependencies += "app.fmgp" %% "did" % @VERSION@ // for DID and DID Comm
  libraryDependencies += "app.fmgp" %% "did-imp" % @VERSION@ // for crypto implementation
-//  libraryDependencies += "app.fmgp" %% "did-extra" % @VERSION@ //for hash utils
+ libraryDependencies += "app.fmgp" %% "did-framework" % @VERSION@ //for utils
  libraryDependencies += "app.fmgp" %% "did-peer" % @VERSION@ // for resolver of the did method `peer`
  libraryDependencies += "app.fmgp" %% "did-web" % @VERSION@ // for resolver the did method `web`
  libraryDependencies += "app.fmgp" %% "did-uniresolver" % @VERSION@ // for calling the resolver uniresolver

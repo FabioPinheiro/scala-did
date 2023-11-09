@@ -16,7 +16,7 @@ case class Operator(
   def getAgentExecutar(subject: Set[DIDSubject]): Set[AgentExecutar] =
     subject.flatMap(everybody.get)
 
-  def receiveTransport(transport: TransportDIDComm[Any]): ZIO[Operations, DidFail, Unit] =
+  def receiveTransport(transport: TransportDIDComm[Any]): ZIO[Operations & Resolver, DidFail, Unit] =
     transport.inbound
       .mapZIO {
         case sMsg: SignedMessage =>

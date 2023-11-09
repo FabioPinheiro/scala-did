@@ -6,10 +6,10 @@
 
 ## Report 
 
-|   date   |  all  |  did  |did-imp|did-extra|did-resolver-web|did-resolver-peer|multiformats|
-|:--------:|:-----:|:-----:|:-----:|:-------:|:--------------:|:---------------:|:----------:|
-|2022-11-26|29.21 %|25.31 %|57.60 %|    NA   |     81.58 %    |     27.50 %     |     NA
-|2022-01-31|18.88 %|14.25 %|39.63 %| 19.53 % |     81.58 %    |     34.58 %     |   85.77 %
+|    date    |   all   |   did   | did-imp | did-framework | did-resolver-web | did-resolver-peer | multiformats |
+|:----------:|:-------:|:-------:|:-------:|:-------------:|:----------------:|:-----------------:|:------------:|
+| 2022-11-26 | 29.21 % | 25.31 % | 57.60 % |      NA       |     81.58 %      |      27.50 %      |      NA      |
+| 2022-01-31 | 18.88 % | 14.25 % | 39.63 % |    19.53 %    |     81.58 %      |      34.58 %      |   85.77 %    |
 
 
 ## Report notes
@@ -22,6 +22,6 @@ You should open the reports with your browser. The reports will be in each modul
 - [all/aggregate](file:///home/fabio/workspace/ScalaDID/target/scala-3.3.1/scoverage-report/index.html)
 - [did](file:///home/fabio/workspace/ScalaDID/did/jvm/target/scala-3.3.1/scoverage-report/index.html)
 - [did-imp](file:///home/fabio/workspace/ScalaDID/did-imp/jvm/target/scala-3.3.1/scoverage-report/index.html)
-- [did-extra](file:///home/fabio/workspace/ScalaDID/did-extra/jvm/target/scala-3.3.1/scoverage-report/index.html)
+- [did-framework](file:///home/fabio/workspace/ScalaDID/did-framework/jvm/target/scala-3.3.1/scoverage-report/index.html)
 - [did-resolver-web](file:///home/fabio/workspace/ScalaDID/did-resolver-web/jvm/target/scala-3.3.1/scoverage-report/index.html)
 - [did-resolver-peer](file:///home/fabio/workspace/ScalaDID/did-resolver-peer/jvm/target/scala-3.3.1/scoverage-report/index.html)

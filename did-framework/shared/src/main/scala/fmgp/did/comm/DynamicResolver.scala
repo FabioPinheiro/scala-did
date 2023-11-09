@@ -4,8 +4,6 @@ import zio._
 
 import fmgp.did._
 import fmgp.crypto.error._
-import fmgp.did.method.peer.DidPeerResolver
-// import fmgp.did.uniresolver.Uniresolver
 
 //TODO move out of the JVM into the
 final case class DynamicResolver(resolver: Resolver) extends Resolver {
@@ -26,9 +24,4 @@ final case class DynamicResolver(resolver: Resolver) extends Resolver {
         service = docFromResolver.service, // TODO data from sm
       )
     } yield (doc)
-}
-
-object DynamicResolver {
-  def layer: ULayer[DynamicResolver] =
-    ZLayer.succeed(DynamicResolver(DidPeerResolver.default))
 }

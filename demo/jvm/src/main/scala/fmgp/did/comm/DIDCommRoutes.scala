@@ -16,9 +16,9 @@ import fmgp.util._
 
 object DIDCommRoutes {
 
-  def app: HttpApp[Operator & Operations] = routes.toHttpApp
+  def app: HttpApp[Operator & Operations & Resolver] = routes.toHttpApp
 
-  def routes: Routes[Operator & Operations, Nothing] = Routes(
+  def routes: Routes[Operator & Operations & Resolver, Nothing] = Routes(
     Method.GET / "ws" -> handler { (req: Request) =>
       for {
         annotationMap <- ZIO.logAnnotations.map(_.map(e => LogAnnotation(e._1, e._2)).toSeq)

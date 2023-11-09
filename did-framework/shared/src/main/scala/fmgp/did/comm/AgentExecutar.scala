@@ -15,6 +15,6 @@ trait AgentExecutar {
   def receiveMsg(
       msg: SignedMessage | EncryptedMessage,
       transport: TransportDIDComm[Any]
-  ): URIO[Operations, Unit]
+  ): URIO[Operations & Resolver, Unit]
 
 }

@@ -42,7 +42,7 @@ object TransportWSImp {
 
   def createWebSocketAppWithOperator(
       annotationMap: Seq[LogAnnotation]
-  ): WebSocketApp[Operator & Operations] =
+  ): WebSocketApp[Operator & Operations & Resolver] =
     WebSocketApp(
       handler = Handler
         .fromFunctionZIO((channel: Channel[ChannelEvent[WebSocketFrame], ChannelEvent[WebSocketFrame]]) =>

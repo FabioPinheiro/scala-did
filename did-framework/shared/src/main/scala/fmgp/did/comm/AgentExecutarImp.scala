@@ -20,7 +20,7 @@ case class AgentExecutarImp(
   override def receiveMsg(
       msg: SignedMessage | EncryptedMessage,
       transport: TransportDIDComm[Any]
-  ): URIO[Operations, Unit] = {
+  ): URIO[Operations & Resolver, Unit] = {
     for {
       job <- transport.inbound
         .mapZIO(msg => jobExecuterProtocol(msg, transport))
@@ -33,11 +33,11 @@ case class AgentExecutarImp(
   def jobExecuterProtocol(
       msg: SignedMessage | EncryptedMessage,
       transport: TransportDIDComm[Any],
-  ): URIO[Operations, Unit] =
+  ): URIO[Operations & Resolver, Unit] =
     this
       .receiveMessage(msg, transport)
       .tapError(ex => ZIO.log(ex.toString))
-      .provideSomeLayer(DynamicResolver.layer ++ AgentExecutarImp.protocolHandlerLayer ++ this.indentityLayer)
+      .provideSomeLayer(AgentExecutarImp.protocolHandlerLayer ++ this.indentityLayer)
       .orDieWith(ex => new RuntimeException(ex.toJson))
 
   def receiveMessage(msg: SignedMessage | EncryptedMessage, transport: TransportDIDComm[Any]): ZIO[
