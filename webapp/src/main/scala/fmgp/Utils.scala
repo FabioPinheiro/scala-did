@@ -3,6 +3,7 @@ package fmgp
 import zio._
 import zio.json._
 import fmgp.did._
+import fmgp.util._
 import fmgp.did.comm._
 import fmgp.crypto.error._
 import fmgp.webapp.ResolverTool
@@ -84,5 +85,15 @@ object Utils {
     OperationsClientRPC
       .verify2PlaintextMessage(sMsg)
       .map { pMsg => (sMsg, pMsg) }
+
+  def openWsProgram(wsUrl: String, timeout: Int = 10): ZIO[Any, Nothing, TransportDIDCommWS[Any]] =
+    for {
+      _ <- ZIO.log(s"openWsProgram to $wsUrl for $timeout")
+      // transport <- ZIO.service[TransportWSImp[String]]
+      transport <- TransportWSImp.make(wsUrl = wsUrl)
+      transportWarp = TransportDIDCommWS(transport)
+      closeFiber <- transportWarp.close.delay(duration = timeout.second).debug.fork
+      _ <- ZIO.log(s"The ws ${transportWarp.id} is open for more $timeout seconds")
+    } yield transportWarp
 
 }

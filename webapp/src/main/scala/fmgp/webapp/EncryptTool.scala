@@ -1,12 +1,15 @@
 package fmgp.webapp
 
-import org.scalajs.dom
-import scala.scalajs.js
 import scala.scalajs.js.timers._
-import js.JSConverters._
+import scala.scalajs.js.JSConverters._
 
-import com.raquo.laminar.api.L._
+import org.scalajs.dom
+import org.scalajs.dom.HTMLButtonElement
+import com.raquo.airstream.core.Sink
 import com.raquo.airstream.ownership._
+import com.raquo.laminar.api.L._
+import com.raquo.laminar.nodes.ReactiveHtmlElement
+
 import zio._
 import zio.json._
 
@@ -15,18 +18,77 @@ import fmgp.did.comm._
 import fmgp.did.comm.extension._
 import fmgp.did.method.peer.DIDPeer2
 import fmgp.did.uniresolver.Uniresolver
-import fmgp.crypto.error.DidFail
-import com.raquo.airstream.core.Sink
 import fmgp.did.comm.protocol.routing2.ForwardMessage
+import fmgp.crypto.error._
 import fmgp.Utils
 
 object EncryptTool {
 
+  sealed trait Command {
+    def index: Int
+    def uri: String
+    def command: String
+    def copyButton: ReactiveHtmlElement[HTMLButtonElement]
+    protected def program: ZIO[Resolver, DidFail, Unit]
+    def executeCommand: Fiber[Nothing, Unit] = Utils.runProgram(program.provide(Global.resolverLayer))
+    def executeCommandButton =
+      button(
+        "Execute Command",
+        onClick --> Sink.jsCallbackToSink(_ =>
+          encryptedMessageVar.now() match {
+            case Some(Right((plaintext, eMsg))) =>
+              Global.messageSend(
+                eMsg,
+                Global.agentVar.now().map(_.id.asFROM).getOrElse(???),
+                plaintext
+              ) // side effect
+              executeCommand // side effect
+            case _ => // None
+          }
+        )
+      )
+  }
+  case class CommandHttp(index: Int, uri: String, msg: EncryptedMessage) extends Command {
+    def command = s"""curl -X POST $uri -H 'content-type: application/didcomm-encrypted+json' -d '${msg.toJson}'"""
+    def copyButton = button("Copy curl command", onClick --> { _ => Global.copyToClipboard(command) })
+    def program = Client
+      .makeDIDCommPost(msg, uri) // TODO this should be a TransportDIDComm
+      .map { case output: String =>
+        val aux = output.fromJson[EncryptedMessage]
+        outputFromCallVar.update(e => e :+ aux) // side effect
+      }
+      .tapError { e =>
+        ZIO.logError(e.toString) *>
+          ZIO.succeed(outputFromCallVar.update(tmp => tmp :+ Left(e.toString()))) // side effect
+      }
+  }
+  case class CommandWs(index: Int, uri: String, msg: EncryptedMessage) extends Command {
+    def command = s"""wscat -c $uri -w 3 -x '${msg.toJson}'"""
+    def copyButton = button("Copy wscat command", onClick --> { _ => Global.copyToClipboard(command) })
+    def program =
+      for {
+        transport <- Utils.openWsProgram(uri)
+        _ <- transport.send(msg)
+        _ <- transport.inbound.foreach {
+          case eMsg: EncryptedMessage => ZIO.succeed(outputFromCallVar.update(_ :+ Right(eMsg)))
+          case sMsg: SignedMessage =>
+            ZIO.succeed(outputFromCallVar.update(_ :+ Left("UI not implemented for SignedMessage"))) // TODO
+        }
+      } yield ()
+
+    // Client.makeDIDCommWsMessage(msg, uri)
+  }
+  case class CommandInvalid(index: Int, uri: String) extends Command {
+    def command = s"unknown protocol: '$uri'"
+    def copyButton = button("Copy command", disabled := true)
+    def program = ZIO.fail(FailToParse(command))
+  }
+
   val encryptedMessageVar: Var[Option[Either[DidFail, (PlaintextMessage, EncryptedMessage)]]] = Var(initial = None)
   val signMessageVar: Var[Option[Either[DidFail, (PlaintextMessage, SignedMessage)]]] = Var(initial = None)
   val dataTextVar: Var[String] = Var(initial = MessageTemplate.exPlaintextMessage.toJsonPretty)
-  val curlCommandVar: Var[Option[String]] = Var(initial = None)
-  val outputFromCallVar = Var[Option[EncryptedMessage]](initial = None)
+  val commandSeqVar: Var[Seq[Command]] = Var(initial = Seq.empty)
+  val outputFromCallVar = Var[Seq[Either[String, SignedMessage | EncryptedMessage]]](initial = Seq.empty)
   val forwardMessageVar = Var[Option[ForwardMessage]](initial = None)
 
   def plaintextMessage = dataTextVar.signal.map(_.fromJson[PlaintextMessage])
@@ -34,8 +96,8 @@ object EncryptTool {
   def cleanupVars = {
     encryptedMessageVar.set(None)
     signMessageVar.set(None)
-    curlCommandVar.set(None)
-    outputFromCallVar.set(None)
+    commandSeqVar.set(Seq.empty)
+    outputFromCallVar.set(Seq.empty)
     forwardMessageVar.set(None)
   }
 
@@ -141,20 +203,21 @@ object EncryptTool {
     .observe(owner)
 
   // FIXME racing problem
-  def curlCommand(owner: Owner) = encryptedMessageVar.signal
+  def callCommand(owner: Owner) = encryptedMessageVar.signal
     .map(_.flatMap(_.toOption))
     .map(_.map { (_, eMsg) =>
       val program = for {
         resolver <- ZIO.service[Resolver]
         doc <- resolver.didDocument(TO(eMsg.recipientsSubject.head.string))
         didCommMessagingServices = doc.getDIDServiceDIDCommMessaging
-        mURI = didCommMessagingServices.flatMap(_.endpoints.map(e => e.uri)).headOption
-        ret = mURI match
-          case None => curlCommandVar.set(None)
-          case Some(uri) =>
-            curlCommandVar.set(
-              Some(s"""curl -X POST $uri -H 'content-type: application/didcomm-encrypted+json' -d '${eMsg.toJson}'""")
-            )
+        mURI = didCommMessagingServices.flatMap(_.endpoints.map(e => e.uri))
+        ret = commandSeqVar.set(
+          mURI.zipWithIndex.map {
+            case (uri, index) if uri.startsWith("ws:") | uri.startsWith("wss:")     => CommandWs(index, uri, eMsg)
+            case (uri, index) if uri.startsWith("http:") | uri.startsWith("https:") => CommandHttp(index, uri, eMsg)
+            case (uri, index)                                                       => CommandInvalid(index, uri)
+          }
+        )
       } yield (ret)
 
       Unsafe.unsafe { implicit unsafe => // Run side effect
@@ -170,7 +233,7 @@ object EncryptTool {
       callSignViaRPC(ctx.owner) // side effect
       callEncryptedViaRPC(ctx.owner) // side effect
       jobNextForward(ctx.owner) // side effect
-      curlCommand(ctx.owner) // side effect
+      callCommand(ctx.owner) // side effect
       ()
     },
     code("DecryptTool Page"),
@@ -456,60 +519,39 @@ object EncryptTool {
           pre(code(pMsg))
         )
     },
-    p(code(child.text <-- curlCommandVar.signal.map(_.getOrElse("curl")))),
     div(
-      child <-- curlCommandVar.signal
-        .map {
-          case Some(curlStr) =>
-            div(
-              button("Copy to curl", onClick --> { _ => Global.copyToClipboard(curlStr) }),
-              button(
-                "Make HTTP POST",
-                onClick --> Sink.jsCallbackToSink(_ =>
-                  encryptedMessageVar.now() match {
-                    case Some(Right((plaintext, eMsg))) =>
-                      Global.messageSend(
-                        eMsg,
-                        Global.agentVar.now().map(_.id.asFROM).getOrElse(???),
-                        plaintext
-                      ) // side effect
-                      Utils.runProgram(
-                        Utils
-                          .curlProgram(eMsg)
-                          .map { case output: String =>
-                            output.fromJson[EncryptedMessage] match {
-                              case Left(value)                    => outputFromCallVar.set(None) // side effect
-                              case Right(value: EncryptedMessage) => outputFromCallVar.set(Some(value))
-                            }
-                          }
-                          .tapError { e =>
-                            println("ERROR:" + e.toString) // REMOVE
-                            ZIO.logError(e.toString) *> ZIO.succeed(outputFromCallVar.set(None)) // side effect
-                          }
-                          .provide(Global.resolverLayer)
-                      )
-                    case _ => // None
-                  }
-                )
-              )
-            )
-          case None => div("Valid message")
-        }
-    ),
-    div(
-      child <-- outputFromCallVar.signal.map {
-        case None => new CommentNode("")
-        case Some(reply) =>
+      children <-- commandSeqVar.signal
+        .map(_.map { case c =>
           div(
-            p("Output of the HTTP Call"),
-            pre(code(reply.toJsonPretty)),
+            p(code(c.command)),
+            //  new CommentNode("")
+            div(
+              c.copyButton,
+              c.executeCommandButton,
+            )
+          )
+        })
+    ),
+    div(button("Clean output replies", onClick --> { _ => outputFromCallVar.set(Seq.empty) })),
+    div(
+      children <-- outputFromCallVar.signal.map(_.map {
+        // case Seq => new CommentNode("")
+        case Left(value) =>
+          div(
+            p("Output of the Call"),
+            pre(code(value)),
+          )
+        case Right(reply) =>
+          div(
+            p("Output of the Call"),
+            pre(code((reply: Message).toJsonPretty)),
             button(
               "Copy reply to Decryot Tool",
-              onClick --> { _ => DecryptTool.dataVar.set(reply.toJsonPretty) },
+              onClick --> { _ => DecryptTool.dataVar.set((reply: Message).toJsonPretty) },
               MyRouter.navigateTo(MyRouter.DecryptPage)
             )
           )
-      }
+      })
     ),
   )
 

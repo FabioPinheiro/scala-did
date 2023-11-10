@@ -90,6 +90,8 @@ object AgentProvider {
     Seq(
       AgentWithShortName("local", local),
       AgentWithShortName("alice", alice),
+      AgentWithShortName("aliceWs", aliceWs),
+      AgentWithShortName("aliceHttp&Ws", aliceHttpWs),
       AgentWithShortName("bob", bob),
       AgentWithShortName("charlie", charlie),
       AgentWithShortName("dave", dave),
@@ -109,6 +111,8 @@ object AgentProvider {
       AgentWithShortName("exampleSicpaMediator2", exampleSicpaMediator2),
       AgentWithShortName("exampleSicpaMediator3", exampleSicpaMediator3),
       AgentWithShortName("localhost8080Alice", localhost8080Alice),
+      AgentWithShortName("localhost8080AliceWs", localhost8080AliceWs),
+      AgentWithShortName("localhost8080AliceHttp&Ws", localhost8080AliceHttpWs),
       AgentWithShortName("localhost9000Alice", localhost9000Alice),
     ),
     Seq(
@@ -153,6 +157,7 @@ object AgentProvider {
   )
 
   private def aliceURL = s"https://alice.did.fmgp.app/"
+  private def aliceWsURL = s"wss://alice.did.fmgp.app/ws"
   private def bobURL = s"https://bob.did.fmgp.app/"
   private def charlieURL = s"https://charlie.did.fmgp.app/"
 
@@ -169,6 +174,21 @@ object AgentProvider {
     ),
     Seq(DIDPeerServiceEncoded(s = aliceURL))
   )
+  val aliceWs = DIDPeer2.makeAgent(
+    Seq(
+      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
+      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
+    ),
+    Seq(DIDPeerServiceEncoded(s = aliceWsURL))
+  )
+  val aliceHttpWs = DIDPeer2.makeAgent(
+    Seq(
+      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
+      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
+    ),
+    Seq(DIDPeerServiceEncoded(s = aliceURL), DIDPeerServiceEncoded(s = aliceWsURL))
+  )
+
   // did:peer:2.Ez6LSkGy3e2z54uP4U9HyXJXRpaF2ytsnTuVgh6SNNmCyGZQZ.Vz6Mkjdwvf9hWc6ibZndW9B97si92DSk9hWAhGYBgP9kUFk8Z
   val bob = DIDPeer2.makeAgent(
     Seq(
@@ -306,6 +326,21 @@ object AgentProvider {
       keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
     ),
     Seq(DIDPeerServiceEncoded(s = "http://localhost:8080"))
+  )
+  val localhost8080AliceWs = DIDPeer2.makeAgent(
+    Seq(
+      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
+      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
+    ),
+    Seq(DIDPeerServiceEncoded(s = "ws://localhost:8080/ws"))
+  )
+
+  val localhost8080AliceHttpWs = DIDPeer2.makeAgent(
+    Seq(
+      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
+      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
+    ),
+    Seq(DIDPeerServiceEncoded(s = "http://localhost:8080"), DIDPeerServiceEncoded(s = "ws://localhost:8080/ws"))
   )
 
   val localhost9000Alice = DIDPeer2.makeAgent(
