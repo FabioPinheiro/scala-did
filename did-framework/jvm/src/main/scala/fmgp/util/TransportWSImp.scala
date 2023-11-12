@@ -22,22 +22,6 @@ class TransportWSImp[MSG](
   override def inbound: ZStream[Any, Transport.InErr, MSG] = ZStream.fromHub(inboundBuf)
 }
 
-class TransportDIDCommWS(transport: TransportWSImp[String]) extends TransportDIDComm[Any] {
-
-  /** Send to the other side. Out going Messages */
-  def outbound: ZSink[Any, Transport.OutErr, SignedMessage | EncryptedMessage, Nothing, Unit] =
-    transport.outbound.contramap((_: Message).toJson)
-
-  /** Reciving from the other side. Income Messages */
-  def inbound: ZStream[Any, Transport.InErr, SignedMessage | EncryptedMessage] =
-    transport.inbound.map(_.fromJson[Message]).collect {
-      case Right(sMsg: SignedMessage)    => sMsg
-      case Right(eMsg: EncryptedMessage) => eMsg
-    }
-
-  def id: TransportID = transport.id
-}
-
 object TransportWSImp {
 
   def createWebSocketAppWithOperator(
@@ -84,6 +68,7 @@ object TransportWSImp {
               ZIO.fail(new RuntimeException(s"Message lost in inbound: '$message'"))
         }
       override def sendProgram(value: String) = channel.send(ChannelEvent.Read(WebSocketFrame.text(value)))
+      override def close = channel.shutdown
     }
     _ <- ZStream
       .fromQueue(outbound)

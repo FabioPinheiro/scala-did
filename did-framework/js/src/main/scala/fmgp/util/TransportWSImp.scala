@@ -15,7 +15,7 @@ class TransportWSImp[MSG](
     outboundBuf: Queue[MSG],
     inboundBuf: Hub[MSG],
     override val ws: Websocket[TransportWSImp.Err],
-    /*private val*/ jsWS: dom.WebSocket,
+    /*private*/ val jsWS: dom.WebSocket,
 ) extends TransportWS[Any, MSG] {
 
   override def outbound: ZSink[Any, Transport.OutErr, MSG, Nothing, Unit] = ZSink.fromQueue(outboundBuf)
@@ -49,7 +49,8 @@ object TransportWSImp {
       def onMessageProgram(message: String): UIO[Unit] =
         ZIO.logDebug(s"onMessage: $message") *> inbound.offer(message) *> ZIO.unit
 
-      def sendProgram(message: String) = ZIO.attempt(tmpWS.send(message))
+      override def sendProgram(message: String) = ZIO.attempt(tmpWS.send(message))
+      override def close = ZIO.succeed(tmpWS.close())
     }
 
     transportWS = new TransportWSImp[MSG](outbound, inbound, wsProgram, tmpWS)

@@ -12,6 +12,7 @@ import fmgp.util._
 case class AgentExecutarImp(
     agent: Agent,
     transportManager: Ref[TransportManager],
+    protocolHandler: ProtocolExecuter[Resolver & Agent & Operations, DidFail],
 ) extends AgentExecutar {
   val scope = Scope.global // TODO do not use global
   val indentityLayer = ZLayer.succeed(agent)
@@ -37,11 +38,12 @@ case class AgentExecutarImp(
     this
       .receiveMessage(msg, transport)
       .tapError(ex => ZIO.log(ex.toString))
-      .provideSomeLayer(AgentExecutarImp.protocolHandlerLayer ++ this.indentityLayer)
+      .provideSomeLayer(this.indentityLayer)
+      .provideSomeEnvironment((e: ZEnvironment[Resolver & Operations]) => e ++ ZEnvironment(protocolHandler))
       .orDieWith(ex => new RuntimeException(ex.toJson))
 
   def receiveMessage(msg: SignedMessage | EncryptedMessage, transport: TransportDIDComm[Any]): ZIO[
-    Agent & Resolver & ProtocolExecuter[AgentExecutarImp.Services] & Operations,
+    Agent & Resolver & Operations & ProtocolExecuter[AgentExecutarImp.Services, DidFail],
     DidFail,
     Unit
   ] = ZIO.logAnnotate("msg_sha256", msg.sha256) {
@@ -66,7 +68,7 @@ case class AgentExecutarImp(
     _ <- plaintextMessage.from match
       case None       => ZIO.unit
       case Some(from) => transportManager.update { _.link(from.asFROMTO, transport) }
-    protocolHandler <- ZIO.service[ProtocolExecuter[AgentExecutarImp.Services]]
+    protocolHandler <- ZIO.service[ProtocolExecuter[AgentExecutarImp.Services, DidFail]]
     action <- protocolHandler
       .program(plaintextMessage)
       .tapError(ex => ZIO.logError(s"Error when execute Protocol: $ex"))
@@ -96,16 +98,20 @@ object AgentExecutarImp {
 
   type Services = Resolver & Agent & Operations // & MessageDispatcher
 
-  def make(agent: Agent): ZIO[Any, Nothing, AgentExecutar] =
-    TransportManager.make.map(AgentExecutarImp(agent, _))
+  def make[S >: Resolver & Operations](
+      agent: Agent,
+      protocolHandler: ProtocolExecuter[Resolver & Agent & Operations, DidFail]
+  ): ZIO[Any, Nothing, AgentExecutar] =
+    TransportManager.make.map(AgentExecutarImp(agent, _, protocolHandler))
 
   // TODO move into the class
-  val protocolHandlerLayer: ULayer[ProtocolExecuter[Services]] = ZLayer.succeed(
-    ProtocolExecuterCollection[Services](
-      BasicMessageExecuter,
-      new TrustPingExecuter,
+  val basicProtocolHandlerLayer: ULayer[ProtocolExecuter[Services, DidFail]] =
+    ZLayer.succeed(
+      ProtocolExecuterCollection(
+        BasicMessageExecuter,
+        new TrustPingExecuter,
+      )(NullProtocolExecute)
     )
-  )
 
   // TODO move to another place & move validations and build a contex
   def decrypt(msg: Message): ZIO[Agent & Resolver & Operations, DidFail, PlaintextMessage] =

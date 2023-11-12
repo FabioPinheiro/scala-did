@@ -37,6 +37,7 @@ trait Websocket[E] {
 
   final def send(message: String): IO[E, Unit] =
     sendProgram(message)
+  def close: UIO[Unit]
 
   final def onHandshakeComplete = onOpen(evType = "HandshakeComplete")
   final def onHandshakeTimeout =
