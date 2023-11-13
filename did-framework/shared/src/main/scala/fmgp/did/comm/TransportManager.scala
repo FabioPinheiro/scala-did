@@ -62,11 +62,6 @@ object TransportManager {
       _ <- ZIO.log(s"RegisterTransport concluded")
     } yield ()
 
-  // def newMessage(channel: WebSocketChannel, data: String, channelId: String) =
-  //   for {
-  //     socketManager <- ZIO.service[Ref[TransportManager]]
-  //   } yield (channelId, data)
-
   def unregisterTransport(transportId: String) =
     for {
       socketManager <- ZIO.service[Ref[TransportManager]]

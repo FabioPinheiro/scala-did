@@ -29,10 +29,6 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
           target: 'ws://localhost:8080',
           ws: true,
         },
-        '^/wip': {
-          target: 'ws://localhost:8080',
-          ws: true,
-        },
       },
     },
     plugins: [

@@ -29,12 +29,7 @@ object DIDCommRoutes {
     Method.POST / trailing -> handler { (req: Request) =>
       val SignedTyp = MediaTypes.SIGNED.typ
       val EncryptedTyp = MediaTypes.ENCRYPTED.typ
-      // FIXME after https://github.com/zio/zio-http/issues/2416
-      // .header(Header.ContentType)
-      // .exists { h =>
-      //   h.mediaType.mainType == MediaTypes.mainType &&
-      //   (h.mediaType.subType == MediaTypes.SIGNED.subType || h.mediaType.subType == MediaTypes.ENCRYPTED.subType)
-      req.headers.get("content-type") match
+      req.header(Header.ContentType).map(_.mediaType.fullType) match
         case Some(`SignedTyp`) | Some(`EncryptedTyp`) =>
           (for {
             data <- req.body.asString

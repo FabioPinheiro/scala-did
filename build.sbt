@@ -364,9 +364,6 @@ lazy val didFramework = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(libraryDependencies += D.ziohttp.value)
   .jsSettings(libraryDependencies += D.dom.value)
   .jsConfigure(scalaJSLibConfigure) // Because of didJS now uses NPM libs
-  // .dependsOn(didResolverPeer) // publish
-  // .dependsOn(didResolverWeb) // publish
-  // .dependsOn(didUniresolver) // NOT publish
   .configure(docConfigure)
 
 lazy val didImp = crossProject(JSPlatform, JVMPlatform)

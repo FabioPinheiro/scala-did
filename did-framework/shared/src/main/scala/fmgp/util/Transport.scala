@@ -17,8 +17,6 @@ trait Transport[R, IN, OUT] {
 
   def send(message: OUT): ZIO[R, Nothing, Unit] =
     ZStream.succeed(message).run(outbound)
-  // def recive[R, E](process: (MSG) => ZIO[R, E, Unit]) =
-  //   inbound.runForeach(process(_))
 }
 
 object Transport {

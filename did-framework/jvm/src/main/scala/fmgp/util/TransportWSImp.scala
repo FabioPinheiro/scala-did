@@ -60,14 +60,14 @@ object TransportWSImp {
     inbound <- Hub.bounded[String](boundSize)
     ws = new Websocket[Throwable] {
       override val socketID: String = identifier
-      override def onMessageProgram(message: String) =
+      override def onMessage(message: String) =
         inbound.offer(message).flatMap {
           case true => ZIO.unit
           case false =>
             ZIO.logError(s"Message lost in inbound: '$message'") *>
               ZIO.fail(new RuntimeException(s"Message lost in inbound: '$message'"))
         }
-      override def sendProgram(value: String) = channel.send(ChannelEvent.Read(WebSocketFrame.text(value)))
+      override def send(value: String) = channel.send(ChannelEvent.Read(WebSocketFrame.text(value)))
       override def close = channel.shutdown
     }
     _ <- ZStream

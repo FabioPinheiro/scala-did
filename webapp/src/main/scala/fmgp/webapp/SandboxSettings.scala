@@ -63,7 +63,6 @@ object SandboxSettings {
           code("""<a href="web+did:peer:...">Alice DID</a>""")
         )
       ),
-
       // ### ServiceWorker ###
       h2("ServiceWorker"),
       div(
@@ -72,6 +71,20 @@ object SandboxSettings {
           onClick --> { _ => ServiceWorkerUtils.registerServiceWorker },
         ),
         "Done by default"
+      ),
+      // ### Transport ###
+      div(
+        h2("Transport timeout"),
+        p(
+          "Timeout before auto disconnect websockets (in seconds): ",
+          input(
+            `type` := "number",
+            stepAttr := "1",
+            minAttr := "1",
+            value <-- Global.transportTimeoutVar.signal.map(_.toString),
+            onInput.mapToValue --> { _.toIntOption.foreach(Global.transportTimeoutVar.set(_)) },
+          ),
+        )
       ),
     )
 

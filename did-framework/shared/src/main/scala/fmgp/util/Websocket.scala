@@ -3,46 +3,33 @@ package fmgp.util
 import zio._
 
 trait Websocket[E] {
-
-  // Task
-  protected def onOpenProgram(evType: String): IO[E, Unit] = ZIO.logDebug(s"WS Connected '$evType'")
-  protected def onCloseProgram(reason: String): IO[E, Unit] = ZIO.log(s"WS Closed because '${reason}'")
-  protected def onMessageProgram(message: String): IO[E, Unit]
-  protected def onErrorProgram(evType: String, errorMessage: String): IO[E, Unit] =
+  // Binding
+  def onOpen(evType: String): IO[E, Unit] =
+    // wsProgram.onStateChange(Websocket.State.OPEN) *>
+    ZIO.logDebug(s"WS Connected '$evType'")
+  def onClose(reason: String): IO[E, Unit] =
+    // wsProgram.onStateChange(Websocket.State.CLOSED) *>
+    ZIO.logDebug(s"WS Closed because '${reason}'")
+  def onMessage(message: String): IO[E, Unit]
+  def onError(evType: String, errorMessage: String): IO[E, Unit] =
+    // wsProgram.onStateChange(Websocket.State.CLOSED) *>
     ZIO.logError(s"WS Error (type:$evType): " + errorMessage)
 
   /** Transmits data to the server over the WebSocket connection. */
-  protected def sendProgram(message: String): IO[E, Unit]
-  // def send(data: String): IO[E, Unit]
-
-  // var state: Websocket.State = Websocket.State.CONNECTING
-  // Extra https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
-  // final def onStateChangeProgram(state: Websocket.State): UIO[Unit] = ZIO.succeed({ state = s })
+  def send(message: String): IO[E, Unit]
 
   // Metadata
   val socketID: String
 
-  // Binding
-  final def onOpen(evType: String): IO[E, Unit] =
-    // wsProgram.onStateChange(Websocket.State.OPEN) *>
-    onOpenProgram(evType)
-  final def onClose(reason: String): IO[E, Unit] =
-    // wsProgram.onStateChange(Websocket.State.CLOSED) *>
-    onCloseProgram(reason)
-  final def onMessage(message: String): IO[E, Unit] =
-    onMessageProgram(message)
-  final def onError(evType: String, errorMessage: String): IO[E, Unit] =
-    // wsProgram.onStateChange(Websocket.State.CLOSED) *>
-    onErrorProgram(evType, errorMessage)
-
-  final def send(message: String): IO[E, Unit] =
-    sendProgram(message)
   def close: UIO[Unit]
 
-  final def onHandshakeComplete = onOpen(evType = "HandshakeComplete")
-  final def onHandshakeTimeout =
-    ZIO.logWarning(s"HandshakeTimeout") *> onCloseProgram(reason = "HandshakeTimeout")
+  def onHandshakeComplete = onOpen(evType = "HandshakeComplete")
+  def onHandshakeTimeout =
+    ZIO.logWarning(s"HandshakeTimeout") *> onClose(reason = "HandshakeTimeout")
 
+  // var state: Websocket.State = Websocket.State.CONNECTING
+  // Extra https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
+  // final def onStateChangeProgram(state: Websocket.State): UIO[Unit] = ZIO.succeed({ state = s })
 }
 
 object Websocket {

@@ -37,11 +37,7 @@ object EncryptTool {
         onClick --> Sink.jsCallbackToSink(_ =>
           encryptedMessageVar.now() match {
             case Some(Right((plaintext, eMsg))) =>
-              Global.messageSend(
-                eMsg,
-                Global.agentVar.now().map(_.id.asFROM).getOrElse(???),
-                plaintext
-              ) // side effect
+              Global.messageSend(eMsg, Global.agentVar.now().map(_.id.asFROM).getOrElse(???), plaintext) // side effect
               executeCommand // side effect
             case _ => // None
           }
@@ -53,13 +49,9 @@ object EncryptTool {
     def copyButton = button("Copy curl command", onClick --> { _ => Global.copyToClipboard(command) })
     def program = Client
       .makeDIDCommPost(msg, uri) // TODO this should be a TransportDIDComm
-      .map { case output: String =>
-        val aux = output.fromJson[EncryptedMessage]
-        outputFromCallVar.update(e => e :+ aux) // side effect
-      }
+      .map { case output: String => outputFromCallVar.update(_ :+ output.fromJson[EncryptedMessage]) } // side effect
       .tapError { e =>
-        ZIO.logError(e.toString) *>
-          ZIO.succeed(outputFromCallVar.update(tmp => tmp :+ Left(e.toString()))) // side effect
+        ZIO.logError(e.toString) *> ZIO.succeed(outputFromCallVar.update(_ :+ Left(e.toString()))) // side effect
       }
   }
   case class CommandWs(index: Int, uri: String, msg: EncryptedMessage) extends Command {
@@ -67,7 +59,7 @@ object EncryptTool {
     def copyButton = button("Copy wscat command", onClick --> { _ => Global.copyToClipboard(command) })
     def program =
       for {
-        transport <- Utils.openWsProgram(uri)
+        transport <- Utils.openWsProgram(wsUrl = uri, timeout = Global.transportTimeoutVar.now())
         _ <- transport.send(msg)
         _ <- transport.inbound.foreach {
           case eMsg: EncryptedMessage => ZIO.succeed(outputFromCallVar.update(_ :+ Right(eMsg)))
@@ -75,8 +67,6 @@ object EncryptTool {
             ZIO.succeed(outputFromCallVar.update(_ :+ Left("UI not implemented for SignedMessage"))) // TODO
         }
       } yield ()
-
-    // Client.makeDIDCommWsMessage(msg, uri)
   }
   case class CommandInvalid(index: Int, uri: String) extends Command {
     def command = s"unknown protocol: '$uri'"
@@ -467,13 +457,7 @@ object EncryptTool {
                 Global.agentVar
                   .now()
                   .map(_.id.asFROM)
-                  .map(from =>
-                    Global.messageSend(
-                      eMsg,
-                      from,
-                      plaintext
-                    ) // side effect
-                  )
+                  .map(from => Global.messageSend(eMsg, from, plaintext)) // side effect
                 Global.copyToClipboard(eMsg.toJson)
               }
             )
@@ -495,13 +479,7 @@ object EncryptTool {
                 Global.agentVar
                   .now()
                   .map(_.id.asFROM)
-                  .foreach(from =>
-                    Global.messageSend(
-                      sMsg,
-                      from,
-                      plaintext
-                    ) // side effect
-                  )
+                  .foreach(from => Global.messageSend(sMsg, from, plaintext)) // side effect
                 Global.copyToClipboard(sMsg.toJson)
               }
             )
@@ -521,21 +499,16 @@ object EncryptTool {
     },
     div(
       children <-- commandSeqVar.signal
-        .map(_.map { case c =>
+        .map(_.map { case c => //  new CommentNode("")
           div(
             p(code(c.command)),
-            //  new CommentNode("")
-            div(
-              c.copyButton,
-              c.executeCommandButton,
-            )
+            div(c.copyButton, c.executeCommandButton)
           )
         })
     ),
     div(button("Clean output replies", onClick --> { _ => outputFromCallVar.set(Seq.empty) })),
     div(
       children <-- outputFromCallVar.signal.map(_.map {
-        // case Seq => new CommentNode("")
         case Left(value) =>
           div(
             p("Output of the Call"),

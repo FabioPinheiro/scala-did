@@ -46,10 +46,10 @@ object TransportWSImp {
 
     wsProgram: Websocket[Err] = new Websocket[Err] {
       override val socketID = "wsProgramJS"
-      def onMessageProgram(message: String): UIO[Unit] =
+      override def onMessage(message: String): UIO[Unit] =
         ZIO.logDebug(s"onMessage: $message") *> inbound.offer(message) *> ZIO.unit
 
-      override def sendProgram(message: String) = ZIO.attempt(tmpWS.send(message))
+      override def send(message: String) = ZIO.attempt(tmpWS.send(message))
       override def close = ZIO.succeed(tmpWS.close())
     }
 

@@ -17,7 +17,7 @@ trait ProtocolExecuter[-R, +E] { self =>
 
   def supportedPIURI: Seq[PIURI]
 
-  def program(plaintextMessage: PlaintextMessage): ZIO[R, E, Action] // = programAux(plaintextMessage)
+  def program(plaintextMessage: PlaintextMessage): ZIO[R, E, Action]
 
   final def mapError[E2](f: E => E2): ProtocolExecuter[R, E2] =
     flatMapError((e: E) => ZIO.succeed(f(e)))
