@@ -1,11 +1,14 @@
 package fmgp.did.demo
 
+import scala.io.Source
+import java.io.File
+import java.io.FileNotFoundException
+
 import zio._
 import zio.json._
 import zio.stream._
 import zio.http._
-
-import scala.io.Source
+import zio.http.Header.ContentType
 
 import laika.api._
 import laika.format._
@@ -15,18 +18,14 @@ import laika.parse.code.SyntaxHighlighting
 import fmgp.crypto.error._
 import fmgp.did._
 import fmgp.did.comm._
-import fmgp.did.comm.mediator._
 import fmgp.did.comm.protocol._
 import fmgp.did.method.DidPeerUniresolverDriver
 import fmgp.did.method.peer.DidPeerResolver
 import fmgp.crypto.Curve
 import fmgp.crypto.KeyGenerator
-import fmgp.util.MiddlewareUtils
+import fmgp.util._
+
 // import zio.http.endpoint.RoutesMiddleware
-import java.io.File
-import java.io.FileNotFoundException
-import zio.http.Header.ContentType
-import zio.http.MediaTypes
 
 /** demoJVM/runMain fmgp.did.demo.AppServer
   *
@@ -175,8 +174,8 @@ object AppServer extends ZIOAppDefault {
     }.flatten
   ).sandbox.toHttpApp
 
-  val app: HttpApp[Hub[String] & AgentByHost & Operations & MessageDispatcher & DidPeerResolver] = (
-    MediatorMultiAgent.didCommApp ++ appTest ++ mdocMarkdown ++ appOther ++ appWebsite ++ DidPeerUniresolverDriver.resolverPeer
+  val app: HttpApp[Operator & Operations & MessageDispatcher & DidPeerResolver] = (
+    DIDCommRoutes.app ++ appTest ++ mdocMarkdown ++ appOther ++ appWebsite ++ DidPeerUniresolverDriver.resolverPeer
   ) @@ (Middleware.cors) // ++ MiddlewareUtils.all)
 
   override val run = for {
@@ -208,26 +207,23 @@ object AppServer extends ZIOAppDefault {
       }
       .map(_.flatMap(_.toIntOption).getOrElse(8080))
     _ <- ZIO.log(s"Starting server on port: $port")
-    client = Scope.default ++ Client.default
-    inboundHub <- Hub.bounded[String](5)
     myServer <- Server
       .serve(app)
-      .provideSomeLayer(DidPeerResolver.layerDidPeerResolver)
-      .provideSomeLayer(AgentByHost.layer)
-      .provideSomeLayer(Operations.layerDefault)
-      .provideSomeLayer(client >>> MessageDispatcherJVM.layer)
-      .provideSomeEnvironment { (env: ZEnvironment[Server]) => env.add(myHub) }
-      .provide(Server.defaultWithPort(port))
-      // .provide(
-      //   Server.defaultWith(
-      //     _.port(port)
-      //       .responseCompression(
-      //         Server.Config.ResponseCompressionConfig.default
-      //           // Server.Config.ResponseCompressionConfig.config
-      //           // Server.Config.ResponseCompressionConfig(0, IndexedSeq(Server.Config.CompressionOptions.gzip()))
-      //       )
-      //   )
-      // )
+      .provide(
+        DidPeerResolver.layerDidPeerResolver ++
+          OperatorImp.layer ++
+          Operations.layerDefault ++
+          (Scope.default ++ Client.default >>> MessageDispatcherJVM.layer) ++
+          Server.defaultWithPort(port)
+          // Server.defaultWith(
+          //   _.port(port)
+          //     .responseCompression(
+          //       Server.Config.ResponseCompressionConfig.default
+          //         // Server.Config.ResponseCompressionConfig.config
+          //         // Server.Config.ResponseCompressionConfig(0, IndexedSeq(Server.Config.CompressionOptions.gzip()))
+          //     )
+          // )
+      )
       .debug
       .fork
     _ <- ZIO.log(s"Server Started")

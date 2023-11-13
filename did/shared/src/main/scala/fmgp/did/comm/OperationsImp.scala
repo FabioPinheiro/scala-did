@@ -19,7 +19,7 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
   def sign(msg: PlaintextMessage): ZIO[Agent, CryptoFailed, SignedMessage] =
     for {
       agent <- ZIO.service[Agent]
-      key = agent.keys.filter {
+      key = agent.keyStore.keys.toSeq.filter {
         case OKPPrivateKey(kty, Curve.X25519, d, x, kid) => false // TODO UnsupportedCurve
         case _                                           => true
       }.head // FIXME head
@@ -64,7 +64,7 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
         case None      => ZIO.fail(MissingFromHeader)
       docsFROM <- resolver.didDocument(fromDID)
       keyAgreementAll = docsFROM.keyAgreementAll
-      secretsFROM = agent.keys
+      secretsFROM = agent.keyStore.keys.toSeq
         .flatMap { key => key.kid.map(kid => VerificationMethodReferencedWithKey(kid, key)) }
         .filter(vmk => keyAgreementAll.exists(_.kid == vmk.kid))
       senderKeys = secretsFROM
@@ -106,7 +106,7 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
       agent <- ZIO.service[Agent]
       did = agent.id
       kidsNeeded = msg.recipients.map(_.header.kid)
-      keys = agent.keys
+      keys = agent.keyStore.keys.toSeq
         .flatMap(k =>
           k.kid.flatMap { kid =>
             val vmr = (VerificationMethodReferenced(kid))
@@ -122,7 +122,7 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
       agent <- ZIO.service[Agent]
       did = agent.id
       kidsNeeded = msg.recipients.map(_.header.kid)
-      keys = agent.keys
+      keys = agent.keyStore.keys.toSeq
         .flatMap(k =>
           k.kid.flatMap { kid =>
             val vmr = (VerificationMethodReferenced(kid))

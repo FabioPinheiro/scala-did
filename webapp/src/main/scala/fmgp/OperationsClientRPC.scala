@@ -15,7 +15,7 @@ object OperationsClientRPC extends Operations {
 
   override def sign(msg: PlaintextMessage): ZIO[Agent, CryptoFailed, SignedMessage] = for {
     agent <- ZIO.service[Agent]
-    obj = SignOpInput(AgentSimple(agent.id, agent.keys), msg): OpsInputRPC
+    obj = SignOpInput(AgentSimple(agent.id, agent.keyStore), msg): OpsInputRPC
     ret <- Client.makeOps(data = obj.toJson)
     out <- OpsOutputPRC.decoder
       .decodeJson(ret)
@@ -44,7 +44,7 @@ object OperationsClientRPC extends Operations {
   override def authEncrypt(msg: PlaintextMessage): ZIO[Agent & Resolver, DidFail, EncryptedMessage] = for {
     agent <- ZIO.service[Agent]
     // resolver <- ZIO.service[Resolver]
-    obj = AuthEncryptOpInput(AgentSimple(agent.id, agent.keys), msg): OpsInputRPC
+    obj = AuthEncryptOpInput(AgentSimple(agent.id, agent.keyStore), msg): OpsInputRPC
     ret <- Client.makeOps(data = obj.toJson)
     out <- OpsOutputPRC.decoder
       .decodeJson(ret)
@@ -60,7 +60,7 @@ object OperationsClientRPC extends Operations {
   override def authDecryptRaw(msg: EncryptedMessage): ZIO[Agent & Resolver, DidFail, Array[Byte]] = for {
     agent <- ZIO.service[Agent]
     // resolver <- ZIO.service[Resolver]
-    obj = AuthDecryptRawOpInput(AgentSimple(agent.id, agent.keys), msg): OpsInputRPC
+    obj = AuthDecryptRawOpInput(AgentSimple(agent.id, agent.keyStore), msg): OpsInputRPC
     ret <- Client.makeOps(data = obj.toJson)
     out <- OpsOutputPRC.decoder
       .decodeJson(ret)
@@ -91,7 +91,7 @@ object OperationsClientRPC extends Operations {
   override def anonDecryptRaw(msg: EncryptedMessage): ZIO[Agent, DidFail, Array[Byte]] = for {
     agent <- ZIO.service[Agent]
     // resolver <- ZIO.service[Resolver]
-    obj = AnonDecryptRawOpInput(AgentSimple(agent.id, agent.keys), msg): OpsInputRPC
+    obj = AnonDecryptRawOpInput(AgentSimple(agent.id, agent.keyStore), msg): OpsInputRPC
     ret <- Client.makeOps(data = obj.toJson)
     out <- OpsOutputPRC.decoder
       .decodeJson(ret)

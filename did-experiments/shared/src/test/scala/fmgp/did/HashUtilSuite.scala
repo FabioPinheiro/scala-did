@@ -10,7 +10,7 @@ import fmgp.did._
 import fmgp.did.comm._
 import fmgp.crypto._
 
-/** didExtraJVM/testOnly fmgp.did.HashSuite */
+/** didFrameworkJVM/testOnly fmgp.did.HashSuite */
 class HashSuite extends ZSuite with AssertionsHash {
 
   test(s"Compere the equals '==' of two Encrypted Messages") {

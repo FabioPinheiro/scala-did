@@ -10,6 +10,5 @@ import fmgp.crypto._
   */
 trait Agent { // Rename to Identity
   def id: DID
-  def keys: Seq[PrivateKey] // use KeyStore
-  def keyStore = KeyStore(keys.toSet)
+  def keyStore: KeyStore
 }

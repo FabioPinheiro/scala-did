@@ -127,7 +127,7 @@ flowchart BT
     end
     did-resolver-peer --> did
     did-resolver-web --> did
-    did-extra --> did
+    did-framework --> did
     did-imp --> did
   end
 
@@ -141,8 +141,8 @@ flowchart BT
   did-imp_js ----> jose:::JS
 
   %% subgraph demo/docs
-    webapp:::JS --> did-extra
-    demo --> did-extra
+    webapp:::JS --> did-framework
+    demo --> did-framework
     demo --> did-resolver-web
     demo --> did-resolver-peer
     webapp:::JS --> did-imp_js

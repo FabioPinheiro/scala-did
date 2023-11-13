@@ -3,6 +3,7 @@ package fmgp
 import zio._
 import zio.json._
 import fmgp.did._
+import fmgp.util._
 import fmgp.did.comm._
 import fmgp.crypto.error._
 import fmgp.webapp.ResolverTool
@@ -64,25 +65,27 @@ object Utils {
     OperationsClientRPC
       .decryptRaw(eMsg)
       .flatMap { data => Operations.parseMessage(data).map((eMsg, _)) }
-      .flatMap(msg =>
-        msg match
-          case (eMsg: EncryptedMessage, plaintext: PlaintextMessage) =>
-            ZIO.succeed((eMsg, plaintext))
-          case (eMsg: EncryptedMessage, sMsg: SignedMessage) =>
-            verifyProgram(sMsg: SignedMessage).map(e => (eMsg, e._2))
-          // sMsg.payload.content.fromJson[Message] match
-          //   case Left(value) => ZIO.fail(FailToParse(value))
-          //   case Right(plaintext: PlaintextMessage) => // TODO validate
-          //     ZIO.succeed((eMsg, plaintext))
-          //   case Right(value: SignedMessage)    => ZIO.fail(FailDecryptDoubleSign(sMsg, value))
-          //   case Right(value: EncryptedMessage) => ZIO.fail(FailDecryptSignThenEncrypted(sMsg, value))
-          case (outsideMsg: EncryptedMessage, insideMsg: EncryptedMessage) =>
-            ZIO.fail(FailDecryptDoubleEncrypted(outsideMsg, insideMsg))
-      )
+      .flatMap {
+        case (eMsg: EncryptedMessage, plaintext: PlaintextMessage) =>
+          ZIO.succeed((eMsg, plaintext))
+        case (eMsg: EncryptedMessage, sMsg: SignedMessage) =>
+          verifyProgram(sMsg: SignedMessage).map(e => (eMsg, e._2))
+        case (outsideMsg: EncryptedMessage, insideMsg: EncryptedMessage) =>
+          ZIO.fail(FailDecryptDoubleEncrypted(outsideMsg, insideMsg))
+      }
 
   def verifyProgram(sMsg: SignedMessage): ZIO[Resolver, CryptoFailed, (SignedMessage, PlaintextMessage)] =
     OperationsClientRPC
       .verify2PlaintextMessage(sMsg)
       .map { pMsg => (sMsg, pMsg) }
+
+  def openWsProgram(wsUrl: String, timeout: Int = 10): ZIO[Any, Nothing, TransportDIDCommWS[Any]] =
+    for {
+      _ <- ZIO.logDebug(s"openWsProgram to $wsUrl for $timeout")
+      transport <- TransportWSImp.make(wsUrl = wsUrl)
+      transportWarp = TransportDIDCommWS(transport)
+      closeFiber <- transportWarp.close.delay(duration = timeout.second).debug.fork
+      _ <- ZIO.logDebug(s"The ws ${transportWarp.id} is open for more $timeout seconds")
+    } yield transportWarp
 
 }

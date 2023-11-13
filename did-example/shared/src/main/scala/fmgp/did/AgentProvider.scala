@@ -39,7 +39,6 @@ object AgentProvider {
 
   case class AgentWithShortName(name: String, value: Agent) extends Agent {
     override def id = value.id
-    override def keys = value.keys
     override def keyStore = value.keyStore
 
     def toDIDWithShortName = DIDWithShortName(name, value.id)
@@ -91,6 +90,8 @@ object AgentProvider {
     Seq(
       AgentWithShortName("local", local),
       AgentWithShortName("alice", alice),
+      AgentWithShortName("aliceWs", aliceWs),
+      AgentWithShortName("aliceHttp&Ws", aliceHttpWs),
       AgentWithShortName("bob", bob),
       AgentWithShortName("charlie", charlie),
       AgentWithShortName("dave", dave),
@@ -110,6 +111,8 @@ object AgentProvider {
       AgentWithShortName("exampleSicpaMediator2", exampleSicpaMediator2),
       AgentWithShortName("exampleSicpaMediator3", exampleSicpaMediator3),
       AgentWithShortName("localhost8080Alice", localhost8080Alice),
+      AgentWithShortName("localhost8080AliceWs", localhost8080AliceWs),
+      AgentWithShortName("localhost8080AliceHttp&Ws", localhost8080AliceHttpWs),
       AgentWithShortName("localhost9000Alice", localhost9000Alice),
     ),
     Seq(
@@ -154,6 +157,7 @@ object AgentProvider {
   )
 
   private def aliceURL = s"https://alice.did.fmgp.app/"
+  private def aliceWsURL = s"wss://alice.did.fmgp.app/ws"
   private def bobURL = s"https://bob.did.fmgp.app/"
   private def charlieURL = s"https://charlie.did.fmgp.app/"
 
@@ -170,6 +174,21 @@ object AgentProvider {
     ),
     Seq(DIDPeerServiceEncoded(s = aliceURL))
   )
+  val aliceWs = DIDPeer2.makeAgent(
+    Seq(
+      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
+      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
+    ),
+    Seq(DIDPeerServiceEncoded(s = aliceWsURL))
+  )
+  val aliceHttpWs = DIDPeer2.makeAgent(
+    Seq(
+      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
+      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
+    ),
+    Seq(DIDPeerServiceEncoded(s = aliceURL), DIDPeerServiceEncoded(s = aliceWsURL))
+  )
+
   // did:peer:2.Ez6LSkGy3e2z54uP4U9HyXJXRpaF2ytsnTuVgh6SNNmCyGZQZ.Vz6Mkjdwvf9hWc6ibZndW9B97si92DSk9hWAhGYBgP9kUFk8Z
   val bob = DIDPeer2.makeAgent(
     Seq(
@@ -263,38 +282,42 @@ object AgentProvider {
 
   val exampleAlice = new Agent {
     override def id: DID = DidExample.senderDIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExample.senderSecrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExample.senderSecrets.keys)
   }
 
   val exampleBob = new Agent {
     override def id: DID = DidExample.recipientDIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExample.recipientSecrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExample.recipientSecrets.keys)
   }
 
   val exampleSicpaAlice = new Agent {
     override def id: DID = DidExampleSicpaRustAlice.aliceDIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExampleSicpaRustAlice.aliceSecrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExampleSicpaRustAlice.aliceSecrets.keys)
   }
   val exampleSicpaBob = new Agent {
     override def id: DID = DidExampleSicpaRustBob.bobDIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExampleSicpaRustBob.bobSecrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExampleSicpaRustBob.bobSecrets.keys)
+
   }
   val exampleSicpaCharlie = new Agent {
     override def id: DID = DidExampleSicpaRustCharlie.charlieDIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExampleSicpaRustCharlie.charlieSecrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExampleSicpaRustCharlie.charlieSecrets.keys)
+
   }
 
   val exampleSicpaMediator1 = new Agent {
     override def id: DID = DidExampleSicpaRustMediator1.mediator1DIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExampleSicpaRustMediator1.mediator1Secrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExampleSicpaRustMediator1.mediator1Secrets.keys)
   }
   val exampleSicpaMediator2 = new Agent {
     override def id: DID = DidExampleSicpaRustMediator2.mediator2DIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExampleSicpaRustMediator2.mediator2Secrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExampleSicpaRustMediator2.mediator2Secrets.keys)
+
   }
   val exampleSicpaMediator3 = new Agent {
     override def id: DID = DidExampleSicpaRustMediator3.mediator3DIDDocument.id
-    override def keys: Seq[fmgp.crypto.PrivateKey] = DidExampleSicpaRustMediator3.mediator3Secrets.keys.toSeq
+    override def keyStore: KeyStore = KeyStore(DidExampleSicpaRustMediator3.mediator3Secrets.keys)
+
   }
 
   val localhost8080Alice = DIDPeer2.makeAgent(
@@ -303,6 +326,21 @@ object AgentProvider {
       keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
     ),
     Seq(DIDPeerServiceEncoded(s = "http://localhost:8080"))
+  )
+  val localhost8080AliceWs = DIDPeer2.makeAgent(
+    Seq(
+      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
+      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
+    ),
+    Seq(DIDPeerServiceEncoded(s = "ws://localhost:8080/ws"))
+  )
+
+  val localhost8080AliceHttpWs = DIDPeer2.makeAgent(
+    Seq(
+      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
+      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
+    ),
+    Seq(DIDPeerServiceEncoded(s = "http://localhost:8080"), DIDPeerServiceEncoded(s = "ws://localhost:8080/ws"))
   )
 
   val localhost9000Alice = DIDPeer2.makeAgent(

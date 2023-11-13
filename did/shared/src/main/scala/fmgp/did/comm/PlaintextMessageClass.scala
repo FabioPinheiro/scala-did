@@ -5,6 +5,7 @@ import fmgp.did._
 import fmgp.did.comm.extension._
 
 import fmgp.did.comm.ReturnRoute
+import fmgp.crypto.SHA256
 case class PlaintextMessageClass(
     id: Required[MsgID],
     `type`: PIURI,
@@ -39,7 +40,9 @@ case class PlaintextMessageClass(
 
     // temporary field to mitigate limitations on other libraries
     typ: Option[String] = Some("application/didcomm-plain+json"),
-) extends PlaintextMessage
+) extends PlaintextMessage {
+  override lazy val sha256 = SHA256.digestToHex(this.toJson)
+}
 
 object PlaintextMessageClass {
   given decoder: JsonDecoder[PlaintextMessageClass] = DeriveJsonDecoder.gen[PlaintextMessageClass]

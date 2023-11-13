@@ -28,6 +28,8 @@ object Global {
   val agentProvider = Var(initial = AgentProvider.provider)
   def providerNow = agentProvider.now()
 
+  val transportTimeoutVar = Var[Int](initial = 10)
+
   /** Agent in use */
   val agentVar = Var[Option[Agent]](initial = None)
   val recipientVar = Var[Option[TO]](initial = None)

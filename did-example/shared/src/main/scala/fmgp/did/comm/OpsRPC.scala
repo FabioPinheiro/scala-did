@@ -21,8 +21,8 @@ object OpsOutputPRC {
   given encoder: JsonEncoder[OpsOutputPRC] = DeriveJsonEncoder.gen[OpsOutputPRC]
 }
 
-case class AgentSimple(didSubject: DIDSubject, keys: Seq[PrivateKey]) extends Agent {
-  def id: DID = didSubject
+case class AgentSimple(didSubject: DIDSubject, keyStore: KeyStore) extends Agent {
+  override def id: DID = didSubject
 }
 object AgentSimple {
   given JsonDecoder[AgentSimple] = DeriveJsonDecoder.gen[AgentSimple]

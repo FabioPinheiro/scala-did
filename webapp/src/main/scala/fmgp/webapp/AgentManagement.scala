@@ -128,7 +128,7 @@ object AgentManagement {
                   onClick --> { (ev) => Global.selectAgentByName(element.name) }
                 )
               ),
-              td(code(element.value.keys.size)),
+              td(code(element.value.keyStore.keys.size)),
               td(a(element.value.id.did, MyRouter.navigateTo(MyRouter.ResolverPage(element.value.id.did)))),
             )
           case element: AgentProvider.DIDWithShortName =>

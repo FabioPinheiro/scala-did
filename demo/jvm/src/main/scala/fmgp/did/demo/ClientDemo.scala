@@ -37,7 +37,7 @@ import fmgp.did.method.peer._
 
     pMediateRequest: PlaintextMessage = MediateRequest(from = pat.id, to = alice.id).toPlaintextMessage
     eMediateRequest <- Operations.authEncrypt(pMediateRequest)
-    eMediateGrantStr <- client.send(eMediateRequest, mediatorUrl, Some("alice.did.fmgp.app"))
+    eMediateGrantStr <- client.send(eMediateRequest, mediatorUrl)
     eMediateGrant = eMediateGrantStr.fromJson[EncryptedMessage].getOrElse(???)
     pMediateGrant <- Operations.authDecrypt(eMediateGrant).map(_.asInstanceOf[PlaintextMessage])
     mediateGrant = pMediateGrant.toMediateGrant.getOrElse(???)
@@ -50,7 +50,7 @@ import fmgp.did.method.peer._
       updates = Seq((exampleAlice.id, KeylistAction.add))
     ).toPlaintextMessage
     eKeylistUpdate <- Operations.authEncrypt(pKeylistUpdate)
-    eMediateGrantStr2 <- client.send(eKeylistUpdate, mediatorUrl, Some("alice.did.fmgp.app"))
+    eMediateGrantStr2 <- client.send(eKeylistUpdate, mediatorUrl)
     eKeylistResponse = eMediateGrantStr2.fromJson[EncryptedMessage].getOrElse(???)
     pKeylistResponse <- Operations
       .authDecrypt(eKeylistResponse)
@@ -59,21 +59,21 @@ import fmgp.did.method.peer._
     _ <- Console.printLine(s"KeylistResponse: ${keylistResponse.updated}")
 
     _ <- Console.printLine(s"#" * 100)
-    hello <- client.send(helloFromBob2Pat, mediatorUrl, Some("alice.did.fmgp.app"))
+    hello <- client.send(helloFromBob2Pat, mediatorUrl)
     _ <- Console.printLine(s"hello 1: '${hello}'")
 
     _ <- Console.printLine(s"#" * 100)
-    hello <- client.send(helloFromBob2AliceExample, mediatorUrl, Some("alice.did.fmgp.app"))
+    hello <- client.send(helloFromBob2AliceExample, mediatorUrl)
     _ <- Console.printLine(s"hello 2: '${hello}'")
 
     _ <- Console.printLine(s"#" * 100)
-    hello <- client.send(helloFromBob2AliceExample2, mediatorUrl, Some("alice.did.fmgp.app"))
+    hello <- client.send(helloFromBob2AliceExample2, mediatorUrl)
     _ <- Console.printLine(s"hello 3: '${hello}'")
 
     _ <- Console.printLine(s"#" * 100)
     deliveryRequest = DeliveryRequest(from = pat.id, to = alice.id, limit = 10, recipient_did = None).toPlaintextMessage
     eDeliveryRequest <- Operations.authEncrypt(deliveryRequest)
-    eMessageDeliveryStr <- client.send(eDeliveryRequest, mediatorUrl, Some("alice.did.fmgp.app"))
+    eMessageDeliveryStr <- client.send(eDeliveryRequest, mediatorUrl)
     eMessageDelivery = eMessageDeliveryStr.fromJson[EncryptedMessage].getOrElse(???)
     pMessageDelivery <- Operations.authDecrypt(eMessageDelivery).map(_.asInstanceOf[PlaintextMessage])
     messageDelivery = pMessageDelivery.toMessageDelivery.getOrElse(???)

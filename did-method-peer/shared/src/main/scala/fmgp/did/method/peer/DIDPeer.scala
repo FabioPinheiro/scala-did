@@ -116,8 +116,8 @@ object DIDPeer2 {
 
   def makeAgent(keySeq: Seq[PrivateKey], service: Seq[DIDPeerServiceEncoded] = Seq.empty): DIDPeer.AgentDIDPeer =
     new DIDPeer.AgentDIDPeer {
-      val id: DIDPeer2 = apply(keySeq, service)
-      val keys: Seq[PrivateKey] = keySeq.map(k => keyKidAbsolute(k, id))
+      override val id: DIDPeer2 = apply(keySeq, service)
+      override val keyStore: KeyStore = KeyStore(keySeq.map(k => keyKidAbsolute(k, id)).toSet)
     }
 
   def keyToElement(key: PrivateKey) = key match {

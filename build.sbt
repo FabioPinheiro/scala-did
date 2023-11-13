@@ -266,13 +266,13 @@ lazy val docConfigure: Project => Project =
 
 addCommandAlias(
   "testJVM",
-  ";didJVM/test; didExtraJVM/test; didImpJVM/test; " +
+  ";didJVM/test; didFrameworkJVM/test; didImpJVM/test; " +
     "didResolverPeerJVM/test; didResolverWebJVM/test; didUniresolverJVM/test; " +
     "multiformatsJVM/test"
 )
 addCommandAlias(
   "testJS",
-  ";didJS/test;  didExtraJS/test;  didImpJS/test;  " +
+  ";didJS/test;  didFrameworkJS/test;  didImpJS/test;  " +
     "didResolverPeerJS/test;  didResolverWebJS/test;  didUniresolverJS/test;  " +
     "multiformatsJS/test"
 )
@@ -305,7 +305,7 @@ lazy val root = project
   .in(file("."))
   .settings(publish / skip := true)
   .aggregate(did.js, did.jvm) // publish
-  .aggregate(didExtra.js, didExtra.jvm) // publish
+  .aggregate(didFramework.js, didFramework.jvm) // publish
   .aggregate(didExperiments.js, didExperiments.jvm) // NOT publish
   .aggregate(didImp.js, didImp.jvm) // publish
   .aggregate(multiformats.js, multiformats.jvm) // publish
@@ -353,12 +353,11 @@ lazy val didExperiments = crossProject(JSPlatform, JVMPlatform)
   .jsConfigure(scalaJSLibConfigure) // Because of didJS now uses NPM libs
   .configure(docConfigure)
 
-//TODO Rename did-extra to did-framework
-lazy val didExtra = crossProject(JSPlatform, JVMPlatform)
-  .in(file("did-extra"))
-  .configure(notYetPublishedConfigure) // FIXME
+lazy val didFramework = crossProject(JSPlatform, JVMPlatform)
+  .in(file("did-framework"))
+  .configure(publishConfigure)
   .settings(
-    name := "did-extra",
+    name := "did-framework",
     libraryDependencies += D.zioMunitTest.value,
   )
   .dependsOn(did % "compile;test->test")
@@ -526,7 +525,7 @@ lazy val webapp = project
 lazy val didExample = crossProject(JSPlatform, JVMPlatform)
   .in(file("did-example"))
   .settings(publish / skip := true)
-  .dependsOn(did, didImp, didExtra, didResolverPeer, didResolverWeb, didUniresolver)
+  .dependsOn(did, didImp, didFramework, didResolverPeer, didResolverWeb, didUniresolver)
 
 // disabled
 // lazy val mediator = crossProject(JSPlatform, JVMPlatform)
@@ -536,7 +535,7 @@ lazy val didExample = crossProject(JSPlatform, JVMPlatform)
 //   .jvmSettings(
 //     libraryDependencies += D.ziohttp.value,
 //   )
-//   .dependsOn(did, didImp, didExtra, didResolverPeer)
+//   .dependsOn(did, didImp, didFramework, didResolverPeer)
 
 lazy val demo = crossProject(JSPlatform, JVMPlatform)
   .in(file("demo"))
@@ -558,7 +557,7 @@ lazy val demo = crossProject(JSPlatform, JVMPlatform)
     Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "mdoc",
     Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "vite" / "dist",
   )
-  .dependsOn(did, didImp, didExtra, didResolverPeer, didResolverWeb, didUniresolver, didExample)
+  .dependsOn(did, didImp, didFramework, didResolverPeer, didResolverWeb, didUniresolver, didExample)
 
 val webjarsPattern = "(META-INF/resources/webjars/.*)".r
 ThisBuild / assemblyMergeStrategy := {
