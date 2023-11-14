@@ -48,7 +48,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
         injectManifest: {
           // injectionPoint: null,
           // additionalManifestEntries: ['robots.txt'],
-          maximumFileSizeToCacheInBytes: 12000000,
+          maximumFileSizeToCacheInBytes: 18000000,//12000000,
         },
         // includeAssets: ['favicon.ico'],
         manifest: {
