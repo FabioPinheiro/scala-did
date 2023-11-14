@@ -193,14 +193,14 @@ object AppServer extends ZIOAppDefault {
     myHub <- Hub.sliding[String](5)
     _ <- ZStream.fromHub(myHub).run(ZSink.foreach((str: String) => ZIO.logInfo("HUB: " + str))).fork
     pord <- System
-      .property("PORD")
+      .env("PORD")
       .flatMap {
         case None        => System.property("pord")
         case Some(value) => ZIO.succeed(Some(value))
       }
       .map(_.flatMap(_.toBooleanOption).getOrElse(false))
     port <- System
-      .property("PORT")
+      .env("PORT")
       .flatMap {
         case None        => System.property("port")
         case Some(value) => ZIO.succeed(Some(value))
