@@ -17,6 +17,7 @@ import fmgp._
 
 @scala.scalajs.js.annotation.JSExportTopLevel("HttpClient")
 object Client {
+  val urlHost = window.location.protocol + "//" + window.location.host
   // @scala.scalajs.js.annotation.JSExport var tmp: Any = _
 
   @scala.scalajs.js.annotation.JSExport

@@ -20,15 +20,14 @@ import fmgp.did.comm.protocol.oobinvitation.*
 import fmgp.did.method.peer.DIDPeer._
 import fmgp.did.method.peer.DidPeerResolver
 import fmgp.webapp.MyRouter.OOBPage
-import com.raquo.laminar.nodes.ReactiveElement
+import fmgp.Utils
 
 import typings.qrScanner.mod.QrScanner
 import typings.qrScanner.mod.QrScanner.Camera
 import typings.qrScanner.mod.QrScanner.ScanResult
 import typings.qrScanner.mod.{default as QrScannerDefault}
 import typings.qrScanner.anon.CalculateScanRegion
-import typings.qrcodeGenerator
-import typings.qrcodeGenerator.anon.CellSize
+import typings.qrScanner.mod.QrScanner.ScanRegion
 
 @js.annotation.JSExportTopLevel("QRcodeTool")
 object QRcodeTool {
@@ -52,7 +51,7 @@ object QRcodeTool {
 
   val qrcodeVar = Var[Option[String]](initial = None)
 
-  val videoContainer = videoTag()
+  val videoContainer = videoTag(width := "100%")
 
   // When sarting will download the file: ./vendors-node_modules_qr-scanner_qr-scanner-worker_min_js-library.js
   var qrScanner: Option[QrScanner] = None
@@ -69,21 +68,34 @@ object QRcodeTool {
       CalculateScanRegion()
         .setHighlightCodeOutline(true)
         .setHighlightScanRegion(true)
+        .setCalculateScanRegion { htmlVideoElement =>
+          ScanRegion() // Check any QRcode in the screen
+            .setDownScaledHeight(0)
+            .setDownScaledWidth(0)
+        }
     )
     qrScanner = Some(tmp) // side effect
-    updateListOfCameras // side effect
-    // startQrScanner() // side effect
+
+    Utils.runProgram(
+      ZIO.fromPromiseJS(tmp.start()) *>
+        ZIO // updateListOfCameras
+          .fromPromiseJS(QrScannerDefault.listCameras(true))
+          .map(e => e.toSeq)
+          .map { c =>
+            camerasVar.set(c) // side effect
+            cameraSelectedVar.set(c.headOption) // side effect
+          }
+    )
   }
 
   @js.annotation.JSExport
   def startQrScanner(cameraId: Option[String] = None) = {
     (qrScanner, cameraId) match
-      case (None, _) =>
-      case (Some(scanner), None) =>
-        scanner.start()
+      case (None, _)             =>
+      case (Some(scanner), None) => Utils.runProgram(ZIO.fromPromiseJS(scanner.start()))
       case (Some(scanner), Some(id)) =>
-        scanner.start()
-        scanner.setCamera(id)
+        Utils.runProgram(ZIO.fromPromiseJS(scanner.start()) *> ZIO.fromPromiseJS(scanner.setCamera(id)))
+
   }
 
   @js.annotation.JSExport
@@ -101,16 +113,15 @@ object QRcodeTool {
   val camerasVar = Var[Seq[Camera]](initial = Seq.empty)
   val cameraSelectedVar = Var[Option[Camera]](initial = None)
 
-  def updateListOfCameras = {
-    implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
-    QrScannerDefault.listCameras(true).toFuture.map(e => e.toSeq).map { c =>
-      camerasVar.set(c) // side effect
-      cameraSelectedVar.set(c.headOption) // side effect
-    }
-  }
-
   def uiQRcodeScanner =
     div(
+      onMountCallback { ctx =>
+        initQrScanner
+        // job(ctx.owner)
+      },
+      onUnmountCallback { ctx =>
+        destroyQrScanner
+      },
       div(
         child <-- camerasVar.signal.map { cameras =>
           select(
@@ -127,7 +138,6 @@ object QRcodeTool {
           )
         }
       ),
-      // div(videoContainer),
       div(children <-- qrcodeVar.signal.map {
         case None => Seq(p("No QRcode detected"))
         case Some(data) =>
@@ -138,7 +148,8 @@ object QRcodeTool {
                 pre(code(oobMsg.msg.toJsonPretty)),
                 p("Open with the ", b("OOB Tool "), MyRouter.navigateTo(MyRouter.OOBPage(oobMsg))),
               )
-      })
+      }),
+      div(videoContainer),
     )
 
   // ##################################################################################################################
@@ -150,19 +161,8 @@ object QRcodeTool {
     accept = Some(Seq("didcomm/v2")),
   )
 
-  val oobBaseVar: Var[String] = Var(initial = "https://did.fmgp.app/#/")
+  val oobBaseVar: Var[String] = Var(initial = Client.urlHost + "/#/")
   val dataVar: Var[String] = Var(initial = invitation.toPlaintextMessage.toJsonPretty)
-
-  val divQRCode = div(width := "80%")
-
-  // setup
-  def updateSVG(data: String) = {
-    val aux = qrcodeGenerator.mod.^.apply(qrcodeGenerator.TypeNumber.`0`, qrcodeGenerator.ErrorCorrectionLevel.L)
-    aux.addData(data)
-    aux.make()
-    val cellSize = CellSize().setScalable(true)
-    divQRCode.ref.innerHTML = aux.createSvgTag(cellSize)
-  }
 
   def uiMakeQRcode = div(
     p("Insert the Message below to create the QRcode of a OOB (out of band) Message."),
@@ -183,7 +183,23 @@ object QRcodeTool {
         case Right(msg) =>
           val oob = OutOfBand.from(msg)
           val oobStr = oob.makeURI(oobBase)
-          updateSVG(oobStr)
+          val divQRCode = div(width := "90%")
+          def updateSVG = {
+            implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+            typings.qrcode.mod
+              .toCanvas(oobStr, typings.qrcode.mod.QRCodeRenderersOptions())
+              .toFuture
+              .onComplete {
+                case scala.util.Success(value) => divQRCode.ref.replaceChildren(value)
+                case scala.util.Failure(js.JavaScriptException(error: js.Error)) =>
+                  val info = p("Unable to create a QRcode becuase: " + error.message)
+                  divQRCode.ref.replaceChildren(info.ref)
+                case scala.util.Failure(exception) =>
+                  exception.printStackTrace()
+                  divQRCode.ref.replaceChildren("ERROR: " + exception.getMessage)
+              }
+          }
+          updateSVG
           Seq(
             div(code(a(wordBreak.breakAll, oobStr, MyRouter.navigateTo(MyRouter.OOBPage(oob))))),
             divQRCode,
@@ -194,13 +210,6 @@ object QRcodeTool {
   // ##################################################################################################################
 
   def apply(): HtmlElement = div(
-    onMountCallback { ctx =>
-      initQrScanner
-      // job(ctx.owner)
-    },
-    onUnmountCallback { ctx =>
-      destroyQrScanner
-    },
     div(code("QrCode Tool")),
     div(
       p(
@@ -224,7 +233,6 @@ object QRcodeTool {
         startQrScanner()
         uiQRcodeScanner
     },
-    div(width := "80%", videoContainer)
   )
 
 }

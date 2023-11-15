@@ -60,6 +60,7 @@ docker build --tag scala_did_demo ./demo/
 docker tag scala_did_demo registry.fly.io/scala-did-demo
 # flyctl auth docker
 docker push registry.fly.io/scala-did-demo
+# 2023/11/15 +- 124.1MB
 # 2023/10/28 +- 118.1MB
 # 2023/10/20 +- 117.3MB
 # 2023/09/24 +- 115.1MB

@@ -20,12 +20,13 @@
     "vite-plugin-pwa": "^0.16.4"
   },
   "dependencies": {
+    "@types/qrcode": "^1.5.5",
     "jose": "^4.14.6",
     "js-sha256": "^0.9.0",
     "material-components-web": "^12.0.0",
     "mermaid": "^9.3.0",
     "multiformats": "^9.6.4",
     "qr-scanner": "^1.4.2",
-    "qrcode-generator": "^1.4.4"
+    "qrcode": "^1.5.3"
   }
 }

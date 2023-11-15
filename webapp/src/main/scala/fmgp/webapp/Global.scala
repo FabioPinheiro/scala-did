@@ -38,19 +38,6 @@ object Global {
   val dids = agentProvider.signal.map(_.agetnsNames.sorted)
   val didsTO = agentProvider.signal.map(_.identitiesNames.sorted)
 
-  def agent2Host: Option[String] = {
-    Global.agentVar
-      .now() // TODO REMOVE .now()
-      .flatMap(agent =>
-        agentProvider.now().nameOfAgent(agent.id) match { // TODO REMOVE .now()
-          case Some("alice")   => Some("alice.did.fmgp.app")
-          case Some("bob")     => Some("bob.did.fmgp.app")
-          case Some("charlie") => Some("charlie.did.fmgp.app")
-          case _               => None
-        }
-      )
-  }
-
   def selectAgentByName(didName: String) = Global.agentVar.update(e => Global.providerNow.getAgentByName(didName))
   def selectAgentDID(subject: DIDSubject) = Global.agentVar.update(e => Global.providerNow.getAgentByDID(subject))
 
