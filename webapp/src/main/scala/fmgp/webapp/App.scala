@@ -15,6 +15,7 @@ import fmgp.did.DidExample
 import org.scalajs.dom.ServiceWorkerRegistration
 import scala.scalajs.js.JSON
 import fmgp.webapp.AgentManagement
+
 object App {
 
   val oobExample =
@@ -66,7 +67,7 @@ object App {
     .collectStatic(HomePage)(Home())
     .collectStatic(SettingsPage)(SandboxSettings())
     .collectSignal[OOBPage](page => OutOfBandTool(page))
-    .collectStatic(QRcodeScannerPage)(QRcodeScannerTool())
+    .collectStatic(QRcodePage)(QRcodeTool())
     .collectStatic(NFCScannerPage)(NFCScannerTool())
     .collectStatic(WebBluetoothPage)(WebBluetoothTool())
     .collectStatic(DiscordBotPage)(DiscordBotInfo())
@@ -86,7 +87,7 @@ object App {
   private val linkPages: List[Page] = List(
     HomePage,
     SettingsPage,
-    QRcodeScannerPage,
+    QRcodePage,
     NFCScannerPage,
     WebBluetoothPage,
     DiscordBotPage,

@@ -50,9 +50,10 @@ object OutOfBandTool {
           ),
           (
             OutOfBand.safeBase64(e.query_oob) match
-              case Left(value)                       => value
-              case Right(OutOfBandSigned(msg, data)) => pre(code(msg.toJsonPretty))
-              case Right(OutOfBandPlaintext(msg, data)) =>
+              case Left(value)                                   => value
+              case Right(OutOfBand(msg: EncryptedMessage, data)) => pre(code(msg.toJsonPretty))
+              case Right(OutOfBand(msg: SignedMessage, data))    => pre(code(msg.toJsonPretty))
+              case Right(OutOfBand(msg: PlaintextMessage, data)) =>
                 Seq(
                   p("Message:"),
                   pre(code(msg.toJsonPretty)),

@@ -30,7 +30,7 @@ class TransportDIDCommOverHTTP(
           .tapError(ex => ZIO.logWarning(s"Fail when calling '$destination': ${ex.toString}"))
           .orDie
         data <- res.body.asString
-          .tapError(ex => ZIO.logError(s"Fail parce http response body: ${ex.getMessage}"))
+          .tapError(ex => ZIO.logError(s"Fail parse http response body: ${ex.getMessage}"))
           .orDie
         _ <- res.status.isError match
           case true  => ZIO.logError(data)

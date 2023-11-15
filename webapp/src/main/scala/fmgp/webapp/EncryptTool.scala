@@ -436,7 +436,8 @@ object EncryptTool {
             button(
               "Copy Plaintext Message to clipboard",
               onClick --> { _ => Global.copyToClipboard(msg.toJson) }
-            )
+            ),
+            QRcodeTool.buttonMakeQRcode(msg),
           )
       }
     ),
@@ -446,6 +447,10 @@ object EncryptTool {
         case None              => Seq(code("None"))
         case Some(Left(error)) => Seq(code("Error when encrypting " + error.toJsonPretty))
         case Some(Right((plaintext, eMsg))) =>
+          def sideEffectMessageSend = Global.agentVar
+            .now()
+            .map(_.id.asFROM)
+            .foreach(from => Global.messageSend(eMsg, from, plaintext)) // side effect
           Seq(
             h6(
               "(NOTE: This is executed as a RPC call to the JVM server, since the JS version has not yet been fully implemented)"
@@ -453,14 +458,9 @@ object EncryptTool {
             pre(code(eMsg.toJsonPretty)),
             button(
               "Copy Encrypted Message to clipboard",
-              onClick --> { _ =>
-                Global.agentVar
-                  .now()
-                  .map(_.id.asFROM)
-                  .map(from => Global.messageSend(eMsg, from, plaintext)) // side effect
-                Global.copyToClipboard(eMsg.toJson)
-              }
-            )
+              onClick --> (_ => { sideEffectMessageSend; Global.copyToClipboard(eMsg.toJson) })
+            ),
+            QRcodeTool.buttonMakeQRcode(eMsg, sideEffect = sideEffectMessageSend),
           )
       },
     ),
@@ -470,19 +470,18 @@ object EncryptTool {
         case None              => Seq(code("None"))
         case Some(Left(error)) => Seq(code("Error when signing " + error.toJsonPretty))
         case Some(Right((plaintext, sMsg))) =>
+          def sideEffectMessageSend = Global.agentVar
+            .now()
+            .map(_.id.asFROM)
+            .foreach(from => Global.messageSend(sMsg, from, plaintext)) // side effect
           Seq(
             h6("(NOTE: This is executed as a RPC call to the JVM server)"),
             pre(code(sMsg.toJsonPretty)),
             button(
               "Copy Sign Message to clipboard",
-              onClick --> { _ =>
-                Global.agentVar
-                  .now()
-                  .map(_.id.asFROM)
-                  .foreach(from => Global.messageSend(sMsg, from, plaintext)) // side effect
-                Global.copyToClipboard(sMsg.toJson)
-              }
-            )
+              onClick --> (_ => { sideEffectMessageSend; Global.copyToClipboard(sMsg.toJson) })
+            ),
+            QRcodeTool.buttonMakeQRcode(sMsg, sideEffect = sideEffectMessageSend),
           )
       }
     ),
@@ -506,20 +505,18 @@ object EncryptTool {
           )
         })
     ),
+    hr(),
     div(button("Clean output replies", onClick --> { _ => outputFromCallVar.set(Seq.empty) })),
-    div(
+    ul(
       children <-- outputFromCallVar.signal.map(_.map {
-        case Left(value) =>
-          div(
-            p("Output of the Call"),
-            pre(code(value)),
-          )
+        case Left(value) => li("Fail to parse due to", pre(code(value)))
         case Right(reply) =>
-          div(
-            p("Output of the Call"),
-            pre(code((reply: Message).toJsonPretty)),
+          li(
+            title := (reply: Message).toJsonPretty,
+            "Got a message",
+            button("Copy to clipboard", onClick --> { _ => Global.copyToClipboard((reply: Message).toJson) }),
             button(
-              "Copy reply to Decryot Tool",
+              "Copy to Decryot Tool",
               onClick --> { _ => DecryptTool.dataVar.set((reply: Message).toJsonPretty) },
               MyRouter.navigateTo(MyRouter.DecryptPage)
             )

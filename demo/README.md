@@ -13,7 +13,7 @@ serviceworker / fastLinkJS
 **Run Frontend:**
 
 ```shell
-npm run build
+NODE_OPTIONS=--openssl-legacy-provider sbt 'serviceworker/fullLinkJS'; npm run build
 npm run preview
 
 # OR with live reload

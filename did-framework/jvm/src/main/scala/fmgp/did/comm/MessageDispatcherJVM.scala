@@ -41,7 +41,7 @@ class MessageDispatcherJVM(client: Client, scope: Scope) extends MessageDispatch
         .tapError(ex => ZIO.logWarning(s"Fail when calling '$destination': ${ex.toString}"))
         .mapError(ex => SomeThrowable(ex))
       data <- res.body.asString
-        .tapError(ex => ZIO.logError(s"Fail parce http response body: ${ex.toString}"))
+        .tapError(ex => ZIO.logError(s"Fail parse http response body: ${ex.toString}"))
         .mapError(ex => SomeThrowable(ex))
       _ <- res.status.isError match
         case true  => ZIO.logError(data)

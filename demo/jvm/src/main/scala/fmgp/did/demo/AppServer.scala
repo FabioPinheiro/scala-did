@@ -84,9 +84,10 @@ object AppServer extends ZIOAppDefault {
       for {
         _ <- ZIO.log("oob")
         ret <- ZIO.succeed(OutOfBand.oob(req.url.encode) match
-          case Left(error)                          => Response.text(error).copy(status = Status.BadRequest)
-          case Right(OutOfBandPlaintext(msg, data)) => Response.json(msg.toJsonPretty)
-          case Right(OutOfBandSigned(msg, data))    => Response.json(msg.payload.content)
+          case Left(error)                                   => Response.text(error).copy(status = Status.BadRequest)
+          case Right(OutOfBand(msg: PlaintextMessage, data)) => Response.json(msg.toJsonPretty)
+          case Right(OutOfBand(msg: SignedMessage, data))    => Response.json(msg.payload.content)
+          case Right(OutOfBand(msg: EncryptedMessage, data)) => Response.json(msg.toJsonPretty)
         )
       } yield (ret)
     },

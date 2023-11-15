@@ -15,6 +15,7 @@ import fmgp.did.comm.protocol.basicmessage2.BasicMessage
 import fmgp.did.method.peer.DidPeerResolver
 import fmgp.did.method.peer.DIDPeer
 import fmgp.did.agent._
+import typings.std.stdStrings.childList
 
 object AgentMessageStorage {
 
@@ -38,17 +39,9 @@ object AgentMessageStorage {
         case (Some(agent), messageStorage) =>
           messageStorage.storageItems.reverse.map {
             case StorageItem(msg, plaintext, from, to, timestamp) if from.contains(agent.id.asFROM) =>
-              outgoingMgs(
-                msgId = plaintext.id,
-                to = to,
-                content = plaintext.`type`.value
-              )
+              outgoingMgs(msg = msg, plaintext = plaintext, to = to)
             case StorageItem(msg, plaintext, from, to, timestamp) if to.contains(agent.id.asTO) =>
-              incomeMgs(
-                msgId = plaintext.id,
-                from = from,
-                content = plaintext.`type`.value
-              )
+              incomeMgs(msg = msg, plaintext = plaintext, mFrom = from)
             case storageItem =>
               div()
           }
@@ -58,60 +51,77 @@ object AgentMessageStorage {
 
   def apply(): HtmlElement = rootElement
 
-  def incomeMgs(msgId: MsgID, from: Option[FROM], content: String) = div(
-    display.flex,
-    div( // message row Left (income)
-      className := "mdc-card",
-      maxWidth := "90%",
-      margin := "4pt",
-      padding := "8pt",
+  def incomeMgs(
+      msg: Option[SignedMessage | EncryptedMessage],
+      plaintext: PlaintextMessage,
+      mFrom: Option[FROM],
+  ) = {
+    val divFROM = mFrom match
+      case None => div(overflowWrap.breakWord, "FROM: <unknown sender>") // overflow.hidden // textOverflow.ellipsis,
+      case Some(from) =>
+        val name = Global.providerNow.nameOfIdentity(from.toDID).getOrElse(from.value)
+        div(overflowWrap.breakWord, "FROM: ", code(name))
+
+    div(
       display.flex,
-      flexDirection.row,
-      div(padding := "8pt", paddingBottom := "6pt", i(className("material-icons"), "face")), // avatar
-      div(
-        width := "90%",
-        div(" MsgID - ", code(msgId.value)),
+      div( // message row Left (income)
+        backgroundColor := mFrom.map(e => Colors.fromSeed(e.value)).getOrElse("#00ffff66"), // aqua
+        className := "mdc-card",
+        maxWidth := "90%",
+        margin := "4pt",
+        padding := "8pt",
+        display.flex,
+        flexDirection.row,
+        div(padding := "8pt", paddingBottom := "6pt", i(className("material-icons"), "face_6")), // avatar
         div(
-          overflowWrap.breakWord,
-          // overflow.hidden,
-          // textOverflow.ellipsis,
-          "FROM: ",
-          code(from.map(_.value).getOrElse(""))
+          width := "90%",
+          div("MsgID: ", code(plaintext.id.value)),
+          divFROM,
+          div(plaintext.`type`.value), // content
         ),
-        div(content),
+        title := plaintext.toJsonPretty,
       )
     )
-  )
+  }
 
-  def outgoingMgs(msgId: MsgID, to: Set[TO], content: String) = div(
-    display.flex,
-    flexDirection.rowReverse,
-    div( // message row Right (outgoing)
-      className := "mdc-card",
-      maxWidth := "90%",
-      margin := "4pt",
-      padding := "8pt",
+  def outgoingMgs(
+      msg: Option[SignedMessage | EncryptedMessage],
+      plaintext: PlaintextMessage,
+      to: Set[TO]
+  ) = {
+    val divTO =
+      if (to.isEmpty) div(overflowWrap.breakWord, "TO: nobody in specific")
+      else {
+        val names = to.map { v => Global.providerNow.nameOfIdentity(v.toDID).getOrElse(v.value) }.toSeq
+        div(overflowWrap.breakWord, "TO: ", names.map(name => code(name + "; ")))
+      }
+
+    div(
       display.flex,
       flexDirection.rowReverse,
-      div(padding := "8pt", paddingBottom := "6pt", i(className("material-icons"), "face")), // avatar
-      div(
-        width := "90%",
-        div(" MsgID - ", code(msgId.value)),
+      div( // message row Right (outgoing)
+        backgroundColor := to.headOption.map(e => Colors.fromSeed(e.value)).getOrElse("#bisque"),
+        className := "mdc-card",
+        maxWidth := "90%",
+        margin := "4pt",
+        padding := "8pt",
+        display.flex,
+        flexDirection.rowReverse,
+        div(padding := "8pt", paddingBottom := "6pt", i(className("material-icons"), "face")), // avatar
         div(
-          overflowWrap.breakWord,
-          // overflow.hidden,
-          // textOverflow.ellipsis,
-          "TO: ",
-          code(to.map(_.value).mkString(";"))
+          width := "90%",
+          div("MsgID: ", code(plaintext.id.value)),
+          divTO,
+          div(plaintext.`type`.value),
+          // div(
+          //   className := "mdc-card__primary-action",
+          //   tabIndex := 0,
+          //   "action",
+          //   div(className := "mdc-card__ripple")
+          // ),
         ),
-        div(content),
-        // div(
-        //   className := "mdc-card__primary-action",
-        //   tabIndex := 0,
-        //   "action",
-        //   div(className := "mdc-card__ripple")
-        // ),
+        title := plaintext.toJsonPretty,
       )
     )
-  )
+  }
 }

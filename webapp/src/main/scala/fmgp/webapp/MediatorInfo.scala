@@ -16,7 +16,7 @@ object MediatorInfo {
     goal = Some("RequestMediate"),
     accept = Some(Seq("didcomm/v2")),
   )
-  val qrCodeData = OutOfBandPlaintext.from(invitation.toPlaintextMessage).makeURI("https://did.fmgp.app/#/")
+  val qrCodeData = OutOfBand.from(invitation.toPlaintextMessage).makeURI("https://did.fmgp.app/#/")
 
   val divQRCode = div()
   {

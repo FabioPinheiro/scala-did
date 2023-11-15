@@ -24,16 +24,15 @@ class OutOfBandSuite extends FunSuite {
 
   test(s"OutOfBand invitation as PlaintextMessage") {
     assert(OutOfBand.parse(oobURI).isDefined)
-    val ret1 = OutOfBand.oobPlaintext(oobURI)
-    val ret2 = OutOfBand.oob(oobURI)
+    val ret = OutOfBand.oob(oobURI)
     val expeted = oobMessage.fromJson[PlaintextMessage].tap(o => assert(o.isRight)).getOrElse(fail("Must be Right"))
 
-    assert(ret1.isRight)
-    assertEquals(ret1, ret2)
-    ret2 match
-      case Left(value)                          => fail("Must be Right")
-      case Right(OutOfBandPlaintext(msg, data)) => assertEquals(msg, expeted)
-      case Right(OutOfBandSigned(msg, data))    => fail("Must be a OutOfBandPlaintext")
+    assert(ret.isRight)
+    ret match
+      case Left(value)                                   => fail("Must be Right")
+      case Right(OutOfBand(msg: PlaintextMessage, data)) => assertEquals(msg, expeted)
+      case Right(OutOfBand(msg: SignedMessage, data))    => fail("Must be an OutOfBand with SignedMessage")
+      case Right(OutOfBand(msg: EncryptedMessage, data)) => fail("Must be an OutOfBand with EncryptedMessage")
   }
 
   test(s"OutOfBand invitation as PlaintextMessage from Mediator") {

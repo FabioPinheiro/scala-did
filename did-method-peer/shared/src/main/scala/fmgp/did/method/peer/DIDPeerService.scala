@@ -94,7 +94,7 @@ case class DIDPeerServiceEncodedNew(base64: Base64) extends DIDPeerServiceEncode
             )
           case Some(Json.Obj(_)) => // new format
             Obj(json.fields :+ ("id", Json.Str(serviceId(`DIDCommMessaging`)))).as[DIDService] match {
-              case Left(error)       => Left(s"DIDPeerServiceEncoded fail to parce service: $error")
+              case Left(error)       => Left(s"DIDPeerServiceEncoded fail to parse service: $error")
               case Right(newService) => Right(newService)
             }
           case Some(anyJson) => Left("Field 'serviceEndpoint' MUST be a json object or string")

@@ -28,7 +28,7 @@ object Home {
       showPage(MyRouter.AgentManagementPage, "Agent Management"),
       showPage(MyRouter.AgentMessageStoragePage, "Agent Message Storage"),
       showPage(MyRouter.OOBPage(App.oobExample), "OOB Tool"),
-      showPage(MyRouter.QRcodeScannerPage, "DIDComm over QRcode"),
+      showPage(MyRouter.QRcodePage, "DIDComm over QRcode"),
       showPage(MyRouter.NFCScannerPage, "DIDComm over NFC"),
       showPage(MyRouter.ResolverPage(App.didExample), "DID Resolver Tool"),
       showPage(MyRouter.EncryptPage, "Encrypt Tool"),
