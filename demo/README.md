@@ -4,20 +4,24 @@
 
 **Run Server:**
 
+```shell
+# Build Frontend
+NODE_OPTIONS=--openssl-legacy-provider sbt 'serviceworker/fullLinkJS';
+npm run build
+```
+
 ```sbt
 NODE_OPTIONS=--openssl-legacy-provider sbt
 serviceworker / fastLinkJS
 ~ demoJVM/reStart
 ```
 
+Open [chrome://inspect/#devices](chrome://inspect/#devices)
+
 **Run Frontend:**
 
 ```shell
-NODE_OPTIONS=--openssl-legacy-provider sbt 'serviceworker/fullLinkJS'; npm run build
-npm run preview
-
-# OR with live reload
-
+# Live reload
 NODE_OPTIONS=--openssl-legacy-provider sbt '~webapp/fastLinkJS' # run on another console
 npm run dev
 ```

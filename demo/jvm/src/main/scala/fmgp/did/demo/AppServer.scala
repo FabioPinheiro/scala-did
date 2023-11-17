@@ -152,12 +152,16 @@ object AppServer extends ZIOAppDefault {
       import zio.http.template._
       Response
         .html(
-          ul( // Custom UI to list all the files in the directory
-            (li(a(href := "..", "..")) +: Source
-              .fromResource("assets")
-              .getLines()
-              .map { file => li(a(href := file, file)): Html }
-              .toSeq): _*
+          html(
+            body(
+              ul( // Custom UI to list all the files in the directory
+                (li(a(href := "..", "..")) +: Source
+                  .fromResource("assets")
+                  .getLines()
+                  .map { file => li(a(href := file, file)): Html }
+                  .toSeq): _*
+              )
+            )
           )
         )
     },

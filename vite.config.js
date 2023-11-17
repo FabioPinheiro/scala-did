@@ -63,18 +63,41 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
           "lang": "en",
           "categories": ["education", "did"],
           "icons": [
-            { "src": "https://web.dev/images/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
-            { "src": "https://web.dev/images/android-chrome-maskable-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-            { "src": "https://web.dev/images/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
+            { "src": "https://web.dev/_pwa/web/icons/icon-72x72.png", "sizes": "72x72", "type": "image/png" },
+            { "src": "https://web.dev/_pwa/web/icons/icon-144x144.png", "sizes": "144x144", "type": "image/png", "purpose": "any maskable" },
+            { "src": "https://web.dev/_pwa/web/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png" },
           ],
           "protocol_handlers": [{ "protocol": "did", "url": "/#/resolver/%s" }],
-          "screenshots": [
-            { "src": "https://web.dev/images/screenshot1.png", "sizes": "540x720", "type": "image/png" },
-            { "src": "https://web.dev/images/screenshot2.png", "sizes": "540x720", "type": "image/png" },
-            { "src": "https://web.dev/images/screenshot3.png", "sizes": "540x720", "type": "image/png" }
-          ],
           "shortcuts": [{ "name": "Mediator", "url": "/#/mediator" }],
-          "splash_pages": null
+          "splash_pages": null,
+          "share_target": {
+            "action": "/#/?_oob=",
+            "method": "POST",
+            "enctype": "multipart/form-data",
+            "params": {
+              "title": "name",
+              "text": "description",
+              "url": "link",
+              "files": [
+                {
+                  "name": "lists",
+                  "accept": ["text/csv", ".csv"]
+                },
+                {
+                  "name": "photos",
+                  "accept": ["image/svg+xml", ".svg"]
+                },
+                {
+                  "name": "image",
+                  "accept": ["image/jpeg", "image/jfif", ".jpeg", ".jpe", ".jpg", ".jfif", ".jfi"]
+                },
+                {
+                  "name": "file",
+                  "accept": ["*/*"]
+                }
+              ]
+            }
+          },
         }
       }),
       viteCompression(),

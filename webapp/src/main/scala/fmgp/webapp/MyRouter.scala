@@ -26,7 +26,7 @@ object MyRouter {
   case object QRcodePage extends Page("QRcode", "qr_code_scanner")
   case object NFCScannerPage extends Page("NFCScanner", "nfc") // or "contactless"
   case object WebBluetoothPage extends Page("WebBluetooth", "bluetooth")
-  case object DiscordBotPage extends Page("DIscordBot", "smart_toy")
+  case object DiscordBotPage extends Page("DiscordBot", "smart_toy")
   case object DocPage extends Page("Doc", "menu_book")
   case object AgentManagementPage extends Page("AgentManagement", "manage_accounts")
   // case object DIDPage extends Page("DID", "visibility")
