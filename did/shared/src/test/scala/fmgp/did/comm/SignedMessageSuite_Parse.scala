@@ -17,9 +17,9 @@ class SignedMessageSuite_Parse extends FunSuite {
   // ### parse ###
 
   test("parse SignedMessage") {
-    val str = SignedMessageExample.exampleSignatureEdDSA_json.fromJson[SignedMessage] match {
+    val str = SignedMessageExamples.exampleSignatureEdDSA_json.fromJson[SignedMessage] match {
       case Left(error) => fail(error)
-      case Right(obj)  => assertEquals(obj, SignedMessageExample.exampleSignatureEdDSA_obj)
+      case Right(obj)  => assertEquals(obj, SignedMessageExamples.exampleSignatureEdDSA_obj)
     }
   }
 }

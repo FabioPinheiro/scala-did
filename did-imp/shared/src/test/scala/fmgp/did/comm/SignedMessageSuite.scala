@@ -17,9 +17,9 @@ class SignedMessageSuite extends FunSuite {
   // ### parse ###
 
   test("parse SignedMessage") {
-    val str = SignedMessageExample.exampleSignatureEdDSA_json.fromJson[SignedMessage] match {
+    val str = SignedMessageExamples.exampleSignatureEdDSA_json.fromJson[SignedMessage] match {
       case Left(error) => fail(error)
-      case Right(obj)  => assertEquals(obj, SignedMessageExample.exampleSignatureEdDSA_obj)
+      case Right(obj)  => assertEquals(obj, SignedMessageExamples.exampleSignatureEdDSA_obj)
     }
   }
 
@@ -34,7 +34,7 @@ class SignedMessageSuite extends FunSuite {
 
   test("verify plaintextMessage example using ECKey secp256k1") {
     val key: ECPrivateKey = JWKExamples.senderKeySecp256k1.fromJson[ECPrivateKey].toOption.get
-    verify(key.toPublicKey, SignedMessageExample.exampleSignatureES256K_obj)
+    verify(key.toPublicKey, SignedMessageExamples.exampleSignatureES256K_obj)
       .map(e => assert(e))
   }
 
@@ -48,7 +48,7 @@ class SignedMessageSuite extends FunSuite {
 
   test("verify plaintextMessage example using ECKey P-256") {
     val key: ECPrivateKey = JWKExamples.senderKeyP256.fromJson[ECPrivateKey].toOption.get
-    verify(key.toPublicKey, SignedMessageExample.exampleSignatureES256_obj)
+    verify(key.toPublicKey, SignedMessageExamples.exampleSignatureES256_obj)
       .map(e => assert(e))
   }
 
@@ -63,7 +63,7 @@ class SignedMessageSuite extends FunSuite {
 
   test("verify plaintextMessage example using ECKey Ed25519") {
     val key = JWKExamples.senderKeyEd25519.fromJson[PrivateKey].toOption.get
-    verify(key.toPublicKey, SignedMessageExample.exampleSignatureEdDSA_obj)
+    verify(key.toPublicKey, SignedMessageExamples.exampleSignatureEdDSA_obj)
       .map(e => assert(e))
   }
 
@@ -71,7 +71,7 @@ class SignedMessageSuite extends FunSuite {
 
   test("fail verify plaintextMessage using ECKey secp256k1") {
     val key: ECPrivateKey = JWKExamples.senderKeySecp256k1.fromJson[ECPrivateKey].toOption.get
-    verify(key.toPublicKey, SignedMessageExample.exampleSignatureEdDSA_failSignature_obj)
+    verify(key.toPublicKey, SignedMessageExamples.exampleSignatureEdDSA_failSignature_obj)
       .map(e => assert(!e))
   }
 

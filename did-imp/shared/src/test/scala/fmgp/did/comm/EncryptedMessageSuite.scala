@@ -152,7 +152,7 @@ class EncryptedMessageSuite extends ZSuite {
               val signbyKey = JWKExamples.senderKeyEd25519.fromJson[OKPPublicKey].toOption.get
               verify(signbyKey, msg).map { b =>
                 assert(b)
-                assertEquals(msg, SignedMessageExample.exampleSignatureEdDSA_obj)
+                assertEquals(msg, SignedMessageExamples.exampleSignatureEdDSA_obj)
               }
             case msg => ZIO.fail(s"msg is not of the type SignedMessage: $msg")
           }
@@ -209,7 +209,7 @@ class EncryptedMessageSuite extends ZSuite {
             assert(data3.isInstanceOf[SignedMessage])
             data3.asInstanceOf[SignedMessage]
           }
-        } yield assertEquals(message3, SignedMessageExample.exampleSignatureEdDSA_obj)
+        } yield assertEquals(message3, SignedMessageExamples.exampleSignatureEdDSA_obj)
       case data => ZIO.dieMessage(data.toString)
     }
 

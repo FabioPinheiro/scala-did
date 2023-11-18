@@ -12,9 +12,11 @@ extension (msg: PlaintextMessage)
   def toForwardMessage: Either[String, ForwardMessage] =
     ForwardMessage.fromPlaintextMessage(msg)
 
-extension (msg: EncryptedMessage)
+extension (msg: SignedMessage | EncryptedMessage)
   def toAttachmentJson: Either[String, Attachment] =
-    msg.toJsonAST.map(json => Attachment(data = AttachmentDataJson(json = json)))
+    msg match
+      case sMsg: SignedMessage    => sMsg.toJsonAST.map(json => Attachment(data = AttachmentDataJson(json = json)))
+      case eMsg: EncryptedMessage => eMsg.toJsonAST.map(json => Attachment(data = AttachmentDataJson(json = json)))
 
 /** The Forward Message is sent by the sender to the mediator to forward (the data) to a recipient.
   *
@@ -39,7 +41,7 @@ sealed trait ForwardMessage {
   def from: Option[FROM]
   def next: DIDSubject
   def expires_time: NotRequired[UTCEpoch]
-  def msg: EncryptedMessage
+  def msg: SignedMessage | EncryptedMessage
 
   // methods
   def `type` = ForwardMessage.piuri
@@ -63,10 +65,12 @@ final case class ForwardMessageBase64(
     from: Option[FROM],
     next: DIDSubject, // TODO is this on the type TO?
     expires_time: NotRequired[UTCEpoch] = None,
-    msg: EncryptedMessage,
+    msg: SignedMessage | EncryptedMessage,
 ) extends ForwardMessage {
   def toAttachments: Attachment = Attachment(
-    data = AttachmentDataBase64(Base64.encode(msg.toJson))
+    data = msg match
+      case sMsg: SignedMessage    => AttachmentDataBase64(Base64.encode(sMsg.toJson))
+      case eMsg: EncryptedMessage => AttachmentDataBase64(Base64.encode(eMsg.toJson))
   )
 
 }
@@ -77,11 +81,13 @@ final case class ForwardMessageJson(
     from: Option[FROM],
     next: DIDSubject, // TODO is this on the type TO? //IMPROVE next MUST? be one o recipients
     expires_time: NotRequired[UTCEpoch] = None,
-    msg: EncryptedMessage,
+    msg: SignedMessage | EncryptedMessage,
 ) extends ForwardMessage {
   def toAttachments: Attachment = Attachment(
     /** toJSON_RFC7159 MUST not fail! */
-    data = AttachmentDataJson(msg.toJsonAST.getOrElse(JSON_RFC7159()))
+    data = msg match
+      case sMsg: SignedMessage    => AttachmentDataJson(sMsg.toJsonAST.getOrElse(JSON_RFC7159()))
+      case eMsg: EncryptedMessage => AttachmentDataJson(eMsg.toJsonAST.getOrElse(JSON_RFC7159()))
   )
 }
 
@@ -119,10 +125,27 @@ object ForwardMessage {
                     case AttachmentDataLinks(links, hash) =>
                       Left(s"'$piuri' MUST of the Attachment type Base64 or Json (instead of Link)")
                     case AttachmentDataBase64(base64) =>
-                      base64.decodeToString.fromJson[EncryptedMessage] match
+                      base64.decodeToString.fromJson[Message] match
                         case Left(error) =>
-                          Left(s"'$piuri' fail to parse the attachment (base64) as an EncryptedMessage due to: $error")
-                        case Right(nextMsg) =>
+                          Left(
+                            s"'$piuri' fail to parse the attachment (base64) as an EncryptedMessage or SignedMessage due to: $error"
+                          )
+                        case Right(nextMsg: PlaintextMessage) =>
+                          Left(
+                            s"'$piuri' fail to parse the attachment (base64) because the next Message is a PlaintextMessage: ${nextMsg.toJson}"
+                          )
+                        case Right(nextMsg: EncryptedMessage) =>
+                          Right(
+                            ForwardMessageJson(
+                              id = msg.id,
+                              to = msg.to.getOrElse(Set.empty),
+                              from = msg.from,
+                              next = body.next,
+                              expires_time = msg.expires_time,
+                              msg = nextMsg,
+                            )
+                          )
+                        case Right(nextMsg: SignedMessage) =>
                           Right(
                             ForwardMessageBase64(
                               id = msg.id,
@@ -134,10 +157,27 @@ object ForwardMessage {
                             )
                           )
                     case AttachmentDataJson(json) =>
-                      json.as[EncryptedMessage] match
+                      json.as[Message] match
                         case Left(error) =>
-                          Left(s"'$piuri' fail to parse the attachment (json) as an EncryptedMessage due to: $error")
-                        case Right(nextMsg) =>
+                          Left(
+                            s"'$piuri' fail to parse the attachment (json) as an EncryptedMessage or SignedMessage due to: $error"
+                          )
+                        case Right(nextMsg: PlaintextMessage) =>
+                          Left(
+                            s"'$piuri' fail to parse the attachment (json) because the next Message is a PlaintextMessage: ${nextMsg.toJson}"
+                          )
+                        case Right(nextMsg: EncryptedMessage) =>
+                          Right(
+                            ForwardMessageJson(
+                              id = msg.id,
+                              to = msg.to.getOrElse(Set.empty),
+                              from = msg.from,
+                              next = body.next,
+                              expires_time = msg.expires_time,
+                              msg = nextMsg,
+                            )
+                          )
+                        case Right(nextMsg: SignedMessage) =>
                           Right(
                             ForwardMessageJson(
                               id = msg.id,
@@ -166,9 +206,13 @@ object ForwardMessage {
       id: MsgID = MsgID(),
       to: Set[TO] = Set.empty,
       next: DIDSubject,
-      msg: EncryptedMessage,
-  ) =
-    if (!msg.recipientsSubject.contains(next))
+      msg: SignedMessage | EncryptedMessage,
+  ) = {
+    val recipients = msg match
+      case sMsg: SignedMessage =>
+        sMsg.payloadAsPlaintextMessage.map(_.to.toSet.flatten.map(_.toDIDSubject)).getOrElse(Set.empty)
+      case eMsg: EncryptedMessage => eMsg.recipientsSubject
+    if (!recipients.contains(next))
       Left("'next' shound be one of the recipients")
     else
       Right(
@@ -180,12 +224,13 @@ object ForwardMessage {
           msg = msg,
         )
       )
+  }
 
   // TODO make a test (but need a implementation )
   def makeForwardMessage(
       to: TO, // Mediator
       next: DIDSubject,
-      msg: EncryptedMessage
+      msg: SignedMessage | EncryptedMessage
   ): ZIO[Operations & Resolver, DidFail, EncryptedMessage] =
     buildForwardMessage(next = next, msg = msg, to = Set(to)) match
       case Left(error1) => ZIO.fail(FailToEncodeMessage(piuri, error1))

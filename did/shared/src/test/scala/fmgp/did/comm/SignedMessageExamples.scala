@@ -4,7 +4,7 @@ import zio._
 import zio.json._
 import fmgp.util.{Base64, Base64Obj}
 
-object SignedMessageExample {
+object SignedMessageExamples {
 
   def allSignedMessage_json = Seq(
     exampleSignatureEdDSA_json,
@@ -114,6 +114,39 @@ object SignedMessageExample {
         signature =
           SignatureJWM("gcW3lVifhyR48mLHbbpnGZQuziskR5-wXf6IoBlpa9SzERfSG9I7oQ9pssmHZwbvJvyMvxskpH5oudw1W3X5Qg"),
         header = Some(JWMHeader("did:example:alice#key-1")),
+      )
+    )
+  )
+
+  /** SignedMessage of a trust-ping from Alice to Bob
+    *
+    * Created with https://did.fmgp.app/#/encrypt
+    */
+  val exampleTrustPingFromAliceToBob_json = """{
+    |"payload" : "eyJpZCI6ImE3Yzk1MDQ2LTVjZTktNDM2OS1hNThiLWQxNzlmYmU5MmZjZCIsInR5cGUiOiJodHRwczovL2RpZGNvbW0ub3JnL3RydXN0LXBpbmcvMi4wL3BpbmciLCJ0byI6WyJkaWQ6ZXhhbXBsZTpib2IiXSwiZnJvbSI6ImRpZDpleGFtcGxlOmFsaWNlIiwiYm9keSI6eyJyZXNwb25zZV9yZXF1ZXN0ZWQiOnRydWV9LCJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXBsYWluK2pzb24ifQ",
+    |"signatures" : [
+    |  {
+    |    "protected" : "eyJraWQiOiJkaWQ6ZXhhbXBsZTphbGljZSNrZXktMyIsImFsZyI6IkVTMjU2SyJ9",
+    |    "signature" : "pzZ6R6mrHmvqfd3I16MW3yEO1xqBNybYD-N4bLIRaAoRLRpfA5WCOPpLv8gSxZm_IjAfLCrfvFj73VcB2qebPQ"
+    |  }
+    |]
+    |}""".stripMargin
+
+  /** SignedMessage of a trust-ping from Alice to Bob
+    *
+    * Created with https://did.fmgp.app/#/encrypt
+    */
+  val exampleTrustPingFromAliceToBob_obj = SignedMessage(
+    Payload.fromBase64url(
+      "eyJpZCI6ImE3Yzk1MDQ2LTVjZTktNDM2OS1hNThiLWQxNzlmYmU5MmZjZCIsInR5cGUiOiJodHRwczovL2RpZGNvbW0ub3JnL3RydXN0LXBpbmcvMi4wL3BpbmciLCJ0byI6WyJkaWQ6ZXhhbXBsZTpib2IiXSwiZnJvbSI6ImRpZDpleGFtcGxlOmFsaWNlIiwiYm9keSI6eyJyZXNwb25zZV9yZXF1ZXN0ZWQiOnRydWV9LCJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXBsYWluK2pzb24ifQ"
+    ),
+    Seq(
+      JWMSignatureObj(
+        `protected` = Base64("eyJraWQiOiJkaWQ6ZXhhbXBsZTphbGljZSNrZXktMyIsImFsZyI6IkVTMjU2SyJ9")
+          .unsafeAsObj[SignProtectedHeader],
+        signature =
+          SignatureJWM("pzZ6R6mrHmvqfd3I16MW3yEO1xqBNybYD-N4bLIRaAoRLRpfA5WCOPpLv8gSxZm_IjAfLCrfvFj73VcB2qebPQ"),
+        header = None,
       )
     )
   )

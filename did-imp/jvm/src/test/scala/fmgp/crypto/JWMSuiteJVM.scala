@@ -28,7 +28,7 @@ class JWMSuiteJVM extends FunSuite {
 
     val ecPublicJWK: ECKey = ecJWK.toPublicJWK()
     assert(ecPublicJWK.verify(jwsObject, JWAAlgorithm.ES256K))
-    assert(ecPublicJWK.verify(SignedMessageExample.exampleSignatureES256K_obj, JWAAlgorithm.ES256K))
+    assert(ecPublicJWK.verify(SignedMessageExamples.exampleSignatureES256K_obj, JWAAlgorithm.ES256K))
   }
 
 }

@@ -23,7 +23,7 @@ class MessageSuite extends ZSuite {
   }
 
   test("Parse SignedMessage") {
-    SignedMessageExample.allSignedMessage_json.map { str =>
+    SignedMessageExamples.allSignedMessage_json.map { str =>
       str.fromJson[Message] match {
         case Left(error) => fail(error)
         case Right(obj) =>
@@ -55,7 +55,7 @@ class MessageSuite extends ZSuite {
   }
 
   test("Encode SignedMessage") {
-    SignedMessageExample.allSignedMessage_json.map { str =>
+    SignedMessageExamples.allSignedMessage_json.map { str =>
       str.fromJson[Message] match {
         case Left(error) => fail(error)
         case Right(obj)  => assertEquals(obj.toJson.fromJson[Json], str.fromJson[Json])
