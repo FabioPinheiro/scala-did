@@ -11,8 +11,8 @@ import fmgp.did._
 
 import laika.api._
 import laika.format._
-import laika.markdown.github.GitHubFlavor
-import laika.parse.code.SyntaxHighlighting
+import laika.format.Markdown.GitHubFlavor
+import laika.config.SyntaxHighlighting
 
 import org.scalajs.dom.{DOMParser, MIMEType}
 

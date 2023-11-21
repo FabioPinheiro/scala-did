@@ -62,7 +62,7 @@ addSbtPlugin("io.spray" % "sbt-revolver" % "0.10.0")
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.11.1")
 
 // mdoc - https://github.com/scalameta/mdoc/tags
-addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.3.7")
+addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.5.1")
 
 // Deploy demo - https://github.com/sbt/sbt-assembly/tags
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.1.3")

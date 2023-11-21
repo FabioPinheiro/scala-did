@@ -111,7 +111,7 @@ lazy val V = new {
   val logbackClassic = "1.2.10"
   val scalaLogging = "3.9.4"
 
-  val laika = "0.19.5"
+  val laika = "1.0.0"
 
   val laminar = "16.0.0"
   val waypoint = "7.0.0"
@@ -159,7 +159,7 @@ lazy val D = new {
   // For munit https://scalameta.org/munit/docs/getting-started.html#scalajs-setup
   val munit = Def.setting("org.scalameta" %%% "munit" % V.munit % Test)
 
-  val laika = Def.setting("org.planet42" %%% "laika-core" % V.laika) // JVM & JS
+  val laika = Def.setting("org.typelevel" %%% "laika-core" % V.laika) // JVM & JS
 
   // For WEBAPP
   val laminar = Def.setting("com.raquo" %%% "laminar" % V.laminar)
