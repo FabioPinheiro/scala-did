@@ -24,6 +24,7 @@ import fmgp.did.method.peer.DidPeerResolver
 import fmgp.crypto.Curve
 import fmgp.crypto.KeyGenerator
 import fmgp.util._
+import fmgp.did.framework.Operator
 
 // import zio.http.endpoint.RoutesMiddleware
 
@@ -179,7 +180,7 @@ object AppServer extends ZIOAppDefault {
     }.flatten
   ).sandbox.toHttpApp
 
-  val app: HttpApp[Operator & Operations & MessageDispatcher & DidPeerResolver] = (
+  val app: HttpApp[Operator & Operations & DidPeerResolver] = (
     DIDCommRoutes.app ++ appTest ++ mdocMarkdown ++ appOther ++ appWebsite ++ DidPeerUniresolverDriver.resolverPeer
   ) @@ (Middleware.cors) // ++ MiddlewareUtils.all)
 
@@ -216,9 +217,9 @@ object AppServer extends ZIOAppDefault {
       .serve(app)
       .provide(
         DidPeerResolver.layerDidPeerResolver ++
-          OperatorImp.layer ++
+          (Client.default ++ Scope.default) >>> OperatorImp.layer ++
           Operations.layerDefault ++
-          (Scope.default ++ Client.default >>> MessageDispatcherJVM.layer) ++
+          DidPeerResolver.layerDidPeerResolver ++
           Server.defaultWithPort(port)
           // Server.defaultWith(
           //   _.port(port)

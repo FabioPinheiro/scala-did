@@ -1,11 +1,10 @@
-package fmgp.util
+package fmgp.did.framework
 
 import zio._
 import zio.json._
 import zio.stream._
+import fmgp.did._
 import fmgp.did.comm._
-
-trait TransportDIDComm[R] extends Transport[R, SignedMessage | EncryptedMessage, SignedMessage | EncryptedMessage]
 
 class TransportDIDCommWS[R](transport: TransportWS[R, String]) extends TransportDIDComm[R] {
 

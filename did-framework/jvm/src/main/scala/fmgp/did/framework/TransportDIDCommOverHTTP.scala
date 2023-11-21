@@ -1,12 +1,12 @@
-package fmgp.util
+package fmgp.did.framework
 
 import scala.util.chaining._
 import zio._
 import zio.json._
 import zio.stream._
 import zio.http._
-import fmgp.did._
 import fmgp.crypto.error._
+import fmgp.did._
 import fmgp.did.comm._
 
 class TransportDIDCommOverHTTP(
@@ -47,4 +47,12 @@ object TransportDIDCommOverHTTP {
   ): ZIO[Any, Nothing, TransportDIDComm[Client & Scope]] = for {
     inbound <- Hub.bounded[SignedMessage | EncryptedMessage](boundSize)
   } yield TransportDIDCommOverHTTP(destination, inbound)
+
+  def makeWithEnvironment(
+      destination: String,
+      boundSize: Int = 3,
+      env: ZEnvironment[Client & Scope]
+  ): ZIO[Any, Nothing, TransportDIDComm[Any]] = for {
+    inbound <- Hub.bounded[SignedMessage | EncryptedMessage](boundSize)
+  } yield TransportDIDCommOverHTTP(destination, inbound).provide(env)
 }

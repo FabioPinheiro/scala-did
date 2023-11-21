@@ -28,6 +28,7 @@ object Global {
   val agentProvider = Var(initial = AgentProvider.provider)
   def providerNow = agentProvider.now()
 
+  // TODO rename to transportTimeFrame
   val transportTimeoutVar = Var[Int](initial = 10)
 
   /** Agent in use */

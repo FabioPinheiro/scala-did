@@ -10,8 +10,10 @@ import fmgp.crypto._
 import fmgp.crypto.error._
 import fmgp.did._
 import fmgp.did.comm._
+import fmgp.did.framework._
 import fmgp.did.method.peer.DidPeerResolver
 import fmgp.did.method.peer.DIDPeer.AgentDIDPeer
+import fmgp.did.demo.AppConfig
 import fmgp.util._
 
 object DIDCommRoutes {
@@ -51,8 +53,8 @@ object DIDCommRoutes {
             fiber <- operator.receiveTransport(transport).fork
             _ <- inboundQueue.offer(msg)
             ret <- outboundQueue.take
-              .timeout(3.seconds)
-              .tap(e => ZIO.logWarning("Request Timeout").when(e.isEmpty))
+              .timeout(AppConfig.timeout)
+              .tap(e => ZIO.logDebug("Request Timeout").when(e.isEmpty))
               .map {
                 case None => Response.status(Status.Accepted)
                 case Some(msg: SignedMessage) =>

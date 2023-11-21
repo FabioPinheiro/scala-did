@@ -1,3 +1,4 @@
+/*
 package fmgp.did.demo
 
 import zio._
@@ -96,3 +97,4 @@ import fmgp.did.method.peer._
       .getOrThrowFiberFailure()
   }
 }
+ */

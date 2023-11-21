@@ -1,4 +1,4 @@
-package fmgp.did.comm
+package fmgp.util
 
 import scala.util.chaining._
 
@@ -9,8 +9,18 @@ import zio.http.{MediaType => ZMediaType, _}
 import fmgp.did._
 import fmgp.did.comm._
 import fmgp.crypto.error._
-import fmgp.util.MyHeaders
 
+@deprecated
+trait MessageDispatcher {
+  // TODO deprecate this
+  def send(
+      msg: EncryptedMessage,
+      /*context*/
+      destination: String,
+  ): ZIO[Any, DidFail, String]
+}
+
+@deprecated
 object MessageDispatcherJVM {
   val layer: ZLayer[Client & Scope, Throwable, MessageDispatcher] =
     ZLayer.fromZIO(
@@ -21,6 +31,7 @@ object MessageDispatcherJVM {
     )
 }
 
+@deprecated
 class MessageDispatcherJVM(client: Client, scope: Scope) extends MessageDispatcher {
   def send(
       msg: EncryptedMessage,

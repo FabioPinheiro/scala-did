@@ -1,11 +1,15 @@
-package fmgp.util
+package fmgp.did.framework
 
 import zio._
 import zio.stream._
-import fmgp.did.comm._
+import fmgp.did._
+import fmgp.did.comm.{SignedMessage, EncryptedMessage}
 
+type TransportDIDComm[R] = Transport[R, SignedMessage | EncryptedMessage, SignedMessage | EncryptedMessage]
+
+//TODO maybe remove the R ? Do we really need it?
 /** The goal is to make this DID Comm library Transport-agnostic */
-trait Transport[R, IN, OUT] {
+trait Transport[R, IN, OUT] { self =>
 
   /** Send to the other side. Out going Messages */
   def outbound: ZSink[R, Transport.OutErr, OUT, Nothing, Unit]
@@ -17,11 +21,26 @@ trait Transport[R, IN, OUT] {
 
   def send(message: OUT): ZIO[R, Nothing, Unit] =
     ZStream.succeed(message).run(outbound)
+
+  def provide(env: ZEnvironment[R]): Transport[Any, IN, OUT] = Transport.Provided(self, env)
 }
 
 object Transport {
   type OutErr = Nothing
   type InErr = Nothing
+
+  private[framework] final case class Provided[Env, IN, OUT](
+      transport: Transport[Env, IN, OUT],
+      env: ZEnvironment[Env],
+  ) extends Transport[Any, IN, OUT] {
+
+    def outbound: ZSink[Any, Transport.OutErr, OUT, Nothing, Unit] = transport.outbound.provideEnvironment(env)
+    def inbound: ZStream[Any, Transport.InErr, IN] = transport.inbound.provideEnvironment(env)
+    def id: TransportID = transport.id
+    override def send(message: OUT): ZIO[Any, Nothing, Unit] = transport.send(message).provideEnvironment(env)
+
+    override def toString() = s"Transport.Provided(${transport}, ${env})"
+  }
 }
 
 object TransportID:

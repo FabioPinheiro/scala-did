@@ -88,20 +88,20 @@ object Client {
   def makeDIDCommPost(
       data: EncryptedMessage,
       url: String
-  ): IO[SomeThrowable, String] = {
+  ): IO[SomeThrowable, Option[String]] = {
     val request = new RequestInit {
       method = HttpMethod.POST
       headers = new Headers().tap(_.append("content-type", "application/didcomm-encrypted+json"))
       // headers = js.Array(js.Array("content-type", "application/didcomm-encrypted+json"))
       body = data.toJson
-      // mode = RequestMode.`no-cors` // NOTE! this is make eveting not to work!
+      // mode = RequestMode.`no-cors` // NOTE! this is make everything not to work!
       mode = RequestMode.cors
       cache = RequestCache.`no-cache`
     }
-
     ZIO
       .fromPromiseJS(fetch(url, request))
       .flatMap(e => ZIO.fromPromiseJS(e.text()))
+      .map(str => if (str.isEmpty) None else Some(str))
       .catchAll(ex => ZIO.fail(SomeThrowable(ex)))
   }
 

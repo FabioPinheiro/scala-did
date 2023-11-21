@@ -1,4 +1,4 @@
-package fmgp.did.comm
+package fmgp.did.framework
 
 import zio._
 import zio.json._
@@ -15,7 +15,11 @@ case class TransportManager(
     transports: Seq[TransportDIDComm[Any]] = Seq.empty,
     ids: Map[FROMTO, Seq[TransportID]] = Map.empty,
     kids: Map[VerificationMethodReferenced, Seq[TransportID]] = Map.empty,
-) {
+    transportFactory: TransportFactory
+) extends TransportDispatcher {
+
+  override def openTransport(uri: String): UIO[TransportDIDComm[Any]] =
+    transportFactory.openTransport(uri) // FIXME TODO register Transport
 
   def link(vmr: VerificationMethodReferenced, transportID: TransportID): TransportManager =
     if (!transports.map(_.id).contains(transportID)) this // if transport is close
@@ -49,11 +53,29 @@ case class TransportManager(
     ZIO.foreach(myChannels) { _.send(msg) }
   }
 
+  override def send(
+      to: TO,
+      msg: SignedMessage | EncryptedMessage,
+      thid: Option[MsgID], // TODO use
+      pthid: Option[MsgID], // TODO use
+  ): ZIO[Resolver & Agent & Operations, DidFail, Unit] =
+    sendViaDIDCommMessagingService(to, msg).unit
+
+  override def sendViaDIDCommMessagingService(
+      to: TO,
+      msg: SignedMessage | EncryptedMessage
+  ): ZIO[Resolver & Agent & Operations, DidFail, Either[String, TransportDIDComm[Any]]] =
+    super.sendViaDIDCommMessagingService(to, msg)
+
 }
 
 object TransportManager {
 
-  def make = Ref.make(TransportManager())
+  def make: URIO[TransportFactory, Ref[TransportManager]] =
+    for {
+      transportFactory <- ZIO.service[TransportFactory]
+      ref <- Ref.make(TransportManager(transportFactory = transportFactory))
+    } yield ref
 
   def registerTransport(transport: TransportDIDComm[Any]) =
     for {

@@ -49,10 +49,18 @@ object EncryptTool {
     def copyButton = button("Copy curl command", onClick --> { _ => Global.copyToClipboard(command) })
     def program = Client
       .makeDIDCommPost(msg, uri) // TODO this should be a TransportDIDComm
-      .map { case output: String => outputFromCallVar.update(_ :+ output.fromJson[EncryptedMessage]) } // side effect
-      .tapError { e =>
-        ZIO.logError(e.toString) *> ZIO.succeed(outputFromCallVar.update(_ :+ Left(e.toString()))) // side effect
+      .map { // side effects
+        case None => Left(s"Zero responses in this Transport in the time frame of ${Global.transportTimeoutVar.now()}s")
+        case Some(output) =>
+          output.fromJson[EncryptedMessage] match
+            case Left(fail) => Left(s"Fail to parse due to: '$fail'")
+            case right      => right
       }
+      .tapBoth(
+        error => ZIO.logError(error.toString) *> ZIO.succeed(outputFromCallVar.update(_ :+ Left(error.toString()))),
+        item => ZIO.succeed(outputFromCallVar.update(_ :+ item)) // side effect
+      )
+      .unit
   }
   case class CommandWs(index: Int, uri: String, msg: EncryptedMessage) extends Command {
     def command = s"""wscat -c $uri -w 3 -x '${msg.toJson}'"""
@@ -509,7 +517,7 @@ object EncryptTool {
     div(button("Clean output replies", onClick --> { _ => outputFromCallVar.set(Seq.empty) })),
     ul(
       children <-- outputFromCallVar.signal.map(_.map {
-        case Left(value) => li("Fail to parse due to", pre(code(value)))
+        case Left(value) => li(pre(code(value)))
         case Right(reply) =>
           li(
             title := (reply: Message).toJsonPretty,

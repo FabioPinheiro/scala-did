@@ -1,4 +1,4 @@
-package fmgp.util
+package fmgp.did.framework
 
 import zio._
 import zio.stream._

@@ -1,4 +1,4 @@
-package fmgp.did.comm
+package fmgp.did.framework
 
 import zio._
 import zio.json._
@@ -7,9 +7,8 @@ import fmgp.crypto.error._
 import fmgp.did._
 import fmgp.did.comm._
 import fmgp.did.comm.protocol._
-import fmgp.util._
 
-case class AgentExecutarImp(
+class AgentExecutarImp(
     agent: Agent,
     transportManager: Ref[TransportManager],
     protocolHandler: ProtocolExecuter[Resolver & Agent & Operations, DidFail],
@@ -18,20 +17,24 @@ case class AgentExecutarImp(
   val indentityLayer = ZLayer.succeed(agent)
   override def subject: DIDSubject = agent.id.asDIDSubject
 
+  override def acceptTransport(transport: TransportDIDComm[Any]): URIO[Operations & Resolver, Unit] =
+    transport.inbound
+      .mapZIO(msg => jobExecuterProtocol(msg, transport))
+      .runDrain
+      .forkIn(scope)
+      .unit // From Fiber.Runtime[fmgp.util.Transport.InErr, Unit] to Unit
+
   override def receiveMsg(
       msg: SignedMessage | EncryptedMessage,
       transport: TransportDIDComm[Any]
   ): URIO[Operations & Resolver, Unit] = {
     for {
-      job <- transport.inbound
-        .mapZIO(msg => jobExecuterProtocol(msg, transport))
-        .runDrain
-        .forkIn(scope)
+      job <- acceptTransport(transport)
       ret <- jobExecuterProtocol(msg, transport) // Run a single time (for the message already read)
     } yield ()
   }
 
-  def jobExecuterProtocol(
+  private def jobExecuterProtocol(
       msg: SignedMessage | EncryptedMessage,
       transport: TransportDIDComm[Any],
   ): URIO[Operations & Resolver, Unit] =
@@ -39,11 +42,10 @@ case class AgentExecutarImp(
       .receiveMessage(msg, transport)
       .tapError(ex => ZIO.log(ex.toString))
       .provideSomeLayer(this.indentityLayer)
-      .provideSomeEnvironment((e: ZEnvironment[Resolver & Operations]) => e ++ ZEnvironment(protocolHandler))
       .orDieWith(ex => new RuntimeException(ex.toJson))
 
   def receiveMessage(msg: SignedMessage | EncryptedMessage, transport: TransportDIDComm[Any]): ZIO[
-    Agent & Resolver & Operations & ProtocolExecuter[AgentExecutarImp.Services, DidFail],
+    Agent & Resolver & Operations,
     DidFail,
     Unit
   ] = ZIO.logAnnotate("msg_sha256", msg.sha256) {
@@ -60,15 +62,20 @@ case class AgentExecutarImp(
       _ <-
         if (!recipientsSubject.contains(agent.id.asDIDSubject)) {
           ZIO.logError(s"This agent '${agent.id.asDIDSubject}' is not a recipient") // TODO send a FAIL!!!!!!
-        } else AgentExecutarImp.decrypt(msg).flatMap(pMsg => processMessage(pMsg, transport))
+        } else {
+          for {
+
+            pMsg <- AgentExecutarImp.decrypt(msg)
+            _ <- pMsg.from match
+              case None       => ZIO.unit
+              case Some(from) => transportManager.update { _.link(from.asFROMTO, transport) }
+            _ <- processMessage(pMsg, transport)
+          } yield ()
+        }
     } yield ()
   }
 
-  def processMessage(plaintextMessage: PlaintextMessage, transport: TransportDIDComm[Any]) = for {
-    _ <- plaintextMessage.from match
-      case None       => ZIO.unit
-      case Some(from) => transportManager.update { _.link(from.asFROMTO, transport) }
-    protocolHandler <- ZIO.service[ProtocolExecuter[AgentExecutarImp.Services, DidFail]]
+  private def processMessage(plaintextMessage: PlaintextMessage, transport: TransportDIDComm[Any]) = for {
     action <- protocolHandler
       .program(plaintextMessage)
       .tapError(ex => ZIO.logError(s"Error when execute Protocol: $ex"))
@@ -88,7 +95,17 @@ case class AgentExecutarImp(
                 case None       => anonEncrypt(reply.msg)
           }
           _ <- plaintextMessage.return_route match
-            case Some(ReturnRoute.none) | None => transport.send(message) // FIXME transportManager pick the best way
+            case Some(ReturnRoute.none) | None =>
+              for {
+                transportDispatcher: TransportDispatcher <- transportManager.get
+                _ <- reply.msg.to.toSeq.flatten match {
+                  case Seq() => ZIO.logWarning("This reply message will be sented to nobody: " + reply.msg.toJson)
+                  case tos =>
+                    ZIO.foreachParDiscard(tos) { to =>
+                      transportDispatcher.send(to = to, msg = message, thid = reply.msg.thid, pthid = reply.msg.pthid)
+                    }
+                }
+              } yield ()
             case Some(ReturnRoute.all) | Some(ReturnRoute.thread) => transport.send(message)
         } yield ()
   } yield ()
@@ -96,13 +113,16 @@ case class AgentExecutarImp(
 
 object AgentExecutarImp {
 
-  type Services = Resolver & Agent & Operations // & MessageDispatcher
+  type Services = Resolver & Agent & Operations
 
   def make[S >: Resolver & Operations](
       agent: Agent,
       protocolHandler: ProtocolExecuter[Resolver & Agent & Operations, DidFail]
-  ): ZIO[Any, Nothing, AgentExecutar] =
-    TransportManager.make.map(AgentExecutarImp(agent, _, protocolHandler))
+  ): ZIO[TransportFactory, Nothing, AgentExecutar] =
+    for {
+      transportManager <- TransportManager.make
+      agentExecutar = new AgentExecutarImp(agent, transportManager, protocolHandler)
+    } yield agentExecutar
 
   // TODO move into the class
   val basicProtocolHandlerLayer: ULayer[ProtocolExecuter[Services, DidFail]] =

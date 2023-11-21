@@ -1,15 +1,16 @@
 package fmgp.did.comm
 
 import zio._
+import zio.http._
 
-import fmgp.did._
-import fmgp.util._
-import fmgp.did.comm.protocol.ProtocolExecuter
 import fmgp.crypto.error.DidFail
+import fmgp.did._
+import fmgp.did.comm.protocol.ProtocolExecuter
+import fmgp.did.framework._
 
 object OperatorImp {
-  val layer: ZLayer[Any, Nothing, Operator] =
-    AgentExecutarImp.basicProtocolHandlerLayer >>>
+  val layer: ZLayer[Client & Scope, Nothing, Operator] =
+    (TransportFactoryImp.layer ++ AgentExecutarImp.basicProtocolHandlerLayer) >>>
       ZLayer.fromZIO(
         for {
           protocolHandler <- ZIO.service[ProtocolExecuter[Resolver & Agent & Operations, DidFail]]

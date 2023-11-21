@@ -5,6 +5,7 @@ import zio.json._
 import fmgp.did._
 import fmgp.util._
 import fmgp.did.comm._
+import fmgp.did.framework._
 import fmgp.crypto.error._
 import fmgp.webapp.ResolverTool
 
@@ -28,7 +29,7 @@ object Utils {
     .map(_.map((pMsg, _)))
     .flatMap(ZIO.fromEither)
 
-  def curlProgram(msg: EncryptedMessage): ZIO[Resolver, DidFail, String] = for {
+  def curlProgram(msg: EncryptedMessage): ZIO[Resolver, DidFail, Option[String]] = for {
     resolver <- ZIO.service[Resolver]
     doc <- resolver.didDocument(TO(msg.recipientsSubject.head.string))
     didCommMessagingServices = doc.getDIDServiceDIDCommMessaging
@@ -43,12 +44,14 @@ object Utils {
       tmp <- Utils.programEncryptMessage(msg) // encrypt
       pMsg = tmp._1
       eMsg = tmp._2
-      responseMsg <- Utils
-        .curlProgram(eMsg)
-        .flatMap(_.fromJson[EncryptedMessage] match
-          case Left(value)        => ZIO.fail(FailToParse(value))
-          case Right(responseMsg) => ZIO.succeed(responseMsg)
-        )
+      maybeResponseData <- Utils.curlProgram(eMsg)
+      responseMsg <- maybeResponseData match
+        case None => ZIO.fail("Response not text Data in body")
+        case Some(data) =>
+          data.fromJson[EncryptedMessage] match {
+            case Left(value)        => ZIO.fail(FailToParse(value))
+            case Right(responseMsg) => ZIO.succeed(responseMsg)
+          }
       response <- OperationsClientRPC.decrypt(responseMsg).flatMap {
         case value: EncryptedMessage     => ZIO.fail(FailDecryptDoubleEncrypted(responseMsg, value))
         case plaintext: PlaintextMessage => ZIO.succeed(plaintext)

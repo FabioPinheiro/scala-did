@@ -1,10 +1,10 @@
-package fmgp.did.comm
+package fmgp.did.framework
 
 import zio._
 import zio.json._
-import fmgp.did._
-import fmgp.util._
 import fmgp.crypto.error._
+import fmgp.did._
+import fmgp.did.comm._
 
 /** Telecommunications operator for DIDComm */
 case class Operator(
