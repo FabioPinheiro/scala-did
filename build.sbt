@@ -576,28 +576,73 @@ ThisBuild / assemblyMergeStrategy := {
 /** Copy the Documentation and Generate an Scala object to Store */
 def makeDocSources = Def
   .task {
-    val resourceFile = rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "mdoc" / "readme.md"
-    val originalFile = rootPaths.value.apply("BASE").toFile() / "docs" / "readme.md"
+    val resourceFolder = rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "mdoc"
+    val log = streams.value.log
+    val aux = resourceFolder
+      .list()
+      .toSeq
+      .map { fileName =>
+        val resourceFile = rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "mdoc" / fileName
+        val originalFile = rootPaths.value.apply("BASE").toFile() / "docs" / fileName // "readme.md"
+
+        // TODO do the if
+        // if (!sourceFile.exists() || sourceFile.lastModified() < resourceFile.lastModified()) {
+        val file =
+          if (resourceFile.exists()) resourceFile
+          else {
+            log.warn("makeDocSources: the resourceFile does not exists. Using the originalFile")
+            originalFile
+          }
+        val contentREAMDE = IO
+          .read(file)
+          .replaceAllLiterally("$", "$$")
+          .replaceAllLiterally("\"\"\"", "\"\"$\"")
+        // }
+        val valName = fileName.toLowerCase.replace(".", "_").replace("-", "_")
+
+        (
+          s"""    "${fileName.toLowerCase}" -> $valName""",
+          s"""  final val $valName = raw\"\"\"$contentREAMDE\"\"\""""
+        )
+      }
+
     val sourceDir = (Compile / sourceManaged).value
     val sourceFile = sourceDir / "DocSource.scala"
-    val log = streams.value.log
-    if (!sourceFile.exists() || sourceFile.lastModified() < resourceFile.lastModified()) {
-      val file =
-        if (resourceFile.exists()) resourceFile
-        else {
-          log.warn("makeDocSources: the resourceFile does not exists. Using the originalFile")
-          originalFile
-        }
-      val contentREAMDE = IO
-        .read(file)
-        .replaceAllLiterally("$", "$$")
-        .replaceAllLiterally("\"\"\"", "\"\"$\"")
-      val scalaCode = s"""
-      |package fmgp.did
-      |object DocSource {
-      |  final val readme = raw\"\"\"$contentREAMDE\"\"\"
-      |}""".stripMargin
-      IO.write(sourceFile, scalaCode)
-    }
+    val scalaCode = s"""
+        |package fmgp.did
+        |object DocSource {
+        |
+        |${aux.map(_._2).mkString("\n\n")}
+        |
+        |  final val all = Map(
+        |${aux.map(_._1).mkString(",\n")}
+        |  )
+        |
+        |}""".stripMargin
+    IO.write(sourceFile, scalaCode)
+
+    // val resourceFile = rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "mdoc" / "readme.md"
+    // val originalFile = rootPaths.value.apply("BASE").toFile() / "docs" / "readme.md"
+    // val sourceDir = (Compile / sourceManaged).value
+    // val sourceFile = sourceDir / "DocSource.scala"
+    // val log = streams.value.log
+    // if (!sourceFile.exists() || sourceFile.lastModified() < resourceFile.lastModified()) {
+    //   val file =
+    //     if (resourceFile.exists()) resourceFile
+    //     else {
+    //       log.warn("makeDocSources: the resourceFile does not exists. Using the originalFile")
+    //       originalFile
+    //     }
+    //   val contentREAMDE = IO
+    //     .read(file)
+    //     .replaceAllLiterally("$", "$$")
+    //     .replaceAllLiterally("\"\"\"", "\"\"$\"")
+    //   val scalaCode = s"""
+    //   |package fmgp.did
+    //   |object DocSource {
+    //   |  final val readme = raw\"\"\"$contentREAMDE\"\"\"
+    //   |}""".stripMargin
+    //   IO.write(sourceFile, scalaCode)
+    // }
     Seq(sourceFile)
   }

@@ -49,7 +49,7 @@ object Home {
       showPage(MyRouter.BasicMessagePage, "Basic Message"),
       showPage(MyRouter.TrustPingPage, "Trust Ping"),
       showPage(MyRouter.TapIntoStreamPage, "TapIntoStream Tool"),
-      showPage(MyRouter.DocPage, "Documentation for scala-did lib"),
+      showPage(MyRouter.DocPage(Seq()), "Documentation for scala-did lib"),
       br(),
       p("Ideas for experiments and applications:"),
       ul(

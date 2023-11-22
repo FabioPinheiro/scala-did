@@ -71,7 +71,7 @@ object App {
     .collectStatic(NFCScannerPage)(NFCScannerTool())
     .collectStatic(WebBluetoothPage)(WebBluetoothTool())
     .collectStatic(DiscordBotPage)(DiscordBotInfo())
-    .collectStatic(DocPage)(Doc())
+    .collectSignal[DocPage](page => Doc(page))
     .collectStatic(AgentManagementPage)(AgentManagement())
     // .collectStatic(AgentDBPage)(AgentDB())
     .collectStatic(AgentMessageStoragePage)(AgentMessageStorage())
@@ -98,7 +98,7 @@ object App {
     DecryptPage,
     TapIntoStreamPage,
     // AgentDBPage,
-    DocPage,
+    DocPage(Seq()),
     BasicMessagePage,
     TrustPingPage,
     // DAppStorePage,
