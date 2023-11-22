@@ -113,8 +113,6 @@ flowchart BT
   did --> zio
   zio-json --> zio
   did --> zio-json
-  did-mediator ---> zhttp:::JVM
-  did-mediator --> did 
   did-resolver-web ----> zhttp:::JVM
 
   subgraph fmgp libraries

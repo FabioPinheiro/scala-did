@@ -314,7 +314,6 @@ lazy val root = project
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
   .aggregate(didExample.js, didExample.jvm)
   .aggregate(demo.jvm, demo.js)
-  // .aggregate(mediator.jvm, mediator.js) // disabled
   .aggregate(webapp, serviceworker)
 
 lazy val did = crossProject(JSPlatform, JVMPlatform)
@@ -526,16 +525,6 @@ lazy val didExample = crossProject(JSPlatform, JVMPlatform)
   .in(file("did-example"))
   .settings(publish / skip := true)
   .dependsOn(did, didImp, didFramework, didResolverPeer, didResolverWeb, didUniresolver)
-
-// disabled
-// lazy val mediator = crossProject(JSPlatform, JVMPlatform)
-//   .in(file("did-mediator"))
-//   .settings(publish / skip := true)
-//   .settings(name := "did-mediator")
-//   .jvmSettings(
-//     libraryDependencies += D.ziohttp.value,
-//   )
-//   .dependsOn(did, didImp, didFramework, didResolverPeer)
 
 lazy val demo = crossProject(JSPlatform, JVMPlatform)
   .in(file("demo"))
