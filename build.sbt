@@ -320,8 +320,9 @@ lazy val root = project
   .aggregate(didResolverPeer.js, didResolverPeer.jvm) // publish
   .aggregate(didResolverWeb.js, didResolverWeb.jvm) // publish
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
-  .aggregate(didExample.js, didExample.jvm)
+  .aggregate(docs) // just to aggregate the command clean
   // Move to a new repository
+  .aggregate(didExample.js, didExample.jvm)
   .aggregate(webapp, serviceworker)
   .aggregate(demo.jvm, demo.js)
 
@@ -525,9 +526,13 @@ lazy val webapp = project
   )
   .settings( // for doc
     libraryDependencies += D.laika.value,
-    Compile / sourceGenerators += makeDocSources.taskValue,
+    Compile / sourceGenerators += {
+      val needThis: Task[Unit] = (docs / mdoc).toTask("").taskValue
+      val generateCode: Task[Seq[File]] = makeDocSources.taskValue
+      needThis.flatMap(unit => generateCode)
+      // I have no clue what I did here but types match and its working =)
+    },
   )
-  .dependsOn(docs)
   .dependsOn(didExample.js)
   .dependsOn(serviceworker)
 
