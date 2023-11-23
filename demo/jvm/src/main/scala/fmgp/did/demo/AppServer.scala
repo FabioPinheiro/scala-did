@@ -10,11 +10,6 @@ import zio.stream._
 import zio.http._
 import zio.http.Header.ContentType
 
-import laika.api._
-import laika.format._
-import laika.markdown.github.GitHubFlavor
-import laika.parse.code.SyntaxHighlighting
-
 import fmgp.crypto.error._
 import fmgp.did._
 import fmgp.did.comm._
@@ -43,31 +38,6 @@ import fmgp.did.framework.Operator
   * localhost:8080/resolver/did:peer:2.Ez6LSq12DePnP5rSzuuy2HDNyVshdraAbKzywSBq6KweFZ3WH.Vz6MksEtp5uusk11aUuwRHzdwfTxJBUaKaUVVXwFSVsmUkxKF.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6OTA5My8iLCJyIjpbXSwiYSI6WyJkaWRjb21tL3YyIl19
   */
 object AppServer extends ZIOAppDefault {
-
-  def mdocMarkdown = Routes(
-    Method.GET / "mdoc" / string("path") -> handler { (path: String, req: Request) => path }
-      .flatMap(path => Handler.fromResource(s"$path")),
-  ).sandbox.toHttpApp
-
-  def mdocHTML = Routes(
-    Method.GET / "doc" / string("path") -> handler { (path: String, req: Request) => path }
-      .flatMap { path =>
-        val transformer = Transformer
-          .from(Markdown)
-          .to(HTML)
-          .using(GitHubFlavor, SyntaxHighlighting)
-          .build
-
-        Handler.fromResource(s"$path").mapZIO {
-          _.body.asString.map { data =>
-            val result = transformer.transform(data) match
-              case Left(value)  => value.message
-              case Right(value) => value
-            Response.html(result)
-          }
-        }
-      }
-  )
 
   def appTest = Routes(
     // Method.GET / "text" -> handler(ZIO.succeed(Response.text("Hello World!"))),
@@ -181,7 +151,7 @@ object AppServer extends ZIOAppDefault {
   ).sandbox.toHttpApp
 
   val app: HttpApp[Operator & Operations & DidPeerResolver] = (
-    DIDCommRoutes.app ++ appTest ++ mdocMarkdown ++ appOther ++ appWebsite ++ DidPeerUniresolverDriver.resolverPeer
+    DIDCommRoutes.app ++ appTest ++ DocsApp.mdocHTML /*++ mdocMarkdown*/ ++ appOther ++ appWebsite ++ DidPeerUniresolverDriver.resolverPeer
   ) @@ (Middleware.cors) // ++ MiddlewareUtils.all)
 
   override val run = for {

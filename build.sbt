@@ -63,27 +63,35 @@ lazy val publishConfigure: Project => Project = _.settings(
 //     )
 // )
 
-/** run with 'docs/mdoc' */
-lazy val docs = project // new documentation project
-  .in(file("docs-build")) // important: it must not be docs/
+/** run with 'docs/clean' then 'docs/mdoc' and then 'docs/laikaSite' */
+lazy val docs = project
+  .in(file("docs"))
   .settings(skip / publish := true)
+  .enablePlugins(LaikaPlugin)
+  .enablePlugins(MdocPlugin)
   .settings(
-    cleanFiles += rootPaths.value.apply("BASE").toFile() / "docs-build",
-    //   mdocJS := Some(webapp),
-    //   // https://scalameta.org/mdoc/docs/js.html#using-scalajs-bundler
-    //   mdocJSLibraries := ((webapp / Compile / fullOptJS) / webpack).value,
-    mdoc := {
-      //     val log = streams.value.log
-      (mdoc).evaluated
-      //     scala.sys.process.Process("pwd") ! log
-      //     scala.sys.process.Process(
-      //       "md2html" :: "docs-build/target/mdoc/readme.md" :: Nil
-      //     ) #> file("docs-build/target/mdoc/readme.html") ! log
-    },
+    mdocVariables := Map("VERSION" -> version.value),
+    mdocIn := baseDirectory.value / "src",
+    mdocExtraArguments := Seq("--no-link-hygiene"),
+    scalacOptions ~= {
+      def disableUnusedWarningsForMdoc(options: Seq[String]): Seq[String] =
+        options.map { opt =>
+          if (opt.startsWith("-Ywarn-unused")) opt + ",-locals,-explicits" else opt
+        }
+      disableUnusedWarningsForMdoc
+    }
   )
-  .settings(mdocVariables := Map("VERSION" -> version.value))
-  .dependsOn(did.jvm) // , webapp) // jsdocs)
-  .enablePlugins(MdocPlugin) // , DocusaurusPlugin)
+  .settings(
+    name := "scala-did-docs",
+    laikaTheme := ManualSettings.themeProvider(version.value),
+    laikaConfig := LaikaConfig.defaults, // ManualSettings.config,
+    laikaExtensions := Seq(laika.format.Markdown.GitHubFlavor, laika.config.SyntaxHighlighting),
+    Laika / sourceDirectories := Seq(mdocOut.value),
+    Laika / target := baseDirectory.value / "target",
+    laikaSite / target := target.value / "site" / "did-doc",
+    laikaIncludeAPI := true,
+  )
+  .dependsOn(did.jvm)
 
 /** Versions */
 lazy val V = new {
@@ -257,7 +265,7 @@ lazy val docConfigure: Project => Project =
     autoAPIMappings := true,
     Compile / doc / target := {
       val path = rootPaths.value.apply("BASE").toFile() /
-        "docs-build" / "target" / "api" / name.value / baseDirectory.value.getName
+        "docs" / "target" / "api" / name.value / baseDirectory.value.getName
       println(path.getAbsolutePath())
       path
     },
@@ -277,9 +285,9 @@ addCommandAlias(
     "multiformatsJS/test"
 )
 addCommandAlias("testAll", ";testJVM;testJS")
-addCommandAlias("fastPackAll", "docs/mdoc;doc;compile;serviceworker/fastLinkJS;webapp/fastLinkJS")
-addCommandAlias("fullPackAll", "docs/mdoc;doc;compile;serviceworker/fullLinkJS;webapp/fullLinkJS")
-addCommandAlias("cleanAll", "clean;docs/clean")
+addCommandAlias("docsAll", "docs/mdoc;doc;docs/laikaSite")
+addCommandAlias("fastPackAll", "compile;docsAll;serviceworker/fastLinkJS;webapp/fastLinkJS")
+addCommandAlias("fullPackAll", "compile;docsAll;serviceworker/fullLinkJS;webapp/fullLinkJS")
 addCommandAlias("assemblyAll", "installFrontend;fullPackAll;buildFrontend;demoJVM/assembly")
 addCommandAlias("live", "fastPackAll;~demoJVM/reStart")
 addCommandAlias("ciJob", "installFrontend;fullPackAll;buildFrontend;testAll")
@@ -313,8 +321,9 @@ lazy val root = project
   .aggregate(didResolverWeb.js, didResolverWeb.jvm) // publish
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
   .aggregate(didExample.js, didExample.jvm)
-  .aggregate(demo.jvm, demo.js)
+  // Move to a new repository
   .aggregate(webapp, serviceworker)
+  .aggregate(demo.jvm, demo.js)
 
 lazy val did = crossProject(JSPlatform, JVMPlatform)
   .in(file("did"))
@@ -518,7 +527,8 @@ lazy val webapp = project
     libraryDependencies += D.laika.value,
     Compile / sourceGenerators += makeDocSources.taskValue,
   )
-  .dependsOn(did.js, didExample.js)
+  .dependsOn(docs)
+  .dependsOn(didExample.js)
   .dependsOn(serviceworker)
 
 lazy val didExample = crossProject(JSPlatform, JVMPlatform)
@@ -542,8 +552,9 @@ lazy val demo = crossProject(JSPlatform, JVMPlatform)
     assembly / assemblyJarName := "scala-did-demo-server.jar",
     libraryDependencies += D.ziohttp.value,
     Compile / unmanagedResourceDirectories += baseDirectory.value / "src" / "main" / "extra-resources",
-    Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "api",
-    Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "mdoc",
+    Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "api",
+    // Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "mdoc"
+    Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "site",
     Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "vite" / "dist",
   )
   .dependsOn(did, didImp, didFramework, didResolverPeer, didResolverWeb, didUniresolver, didExample)
@@ -565,14 +576,14 @@ ThisBuild / assemblyMergeStrategy := {
 /** Copy the Documentation and Generate an Scala object to Store */
 def makeDocSources = Def
   .task {
-    val resourceFolder = rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "mdoc"
+    val resourceFolder = rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "mdoc"
     val log = streams.value.log
     val aux = resourceFolder
       .list()
       .toSeq
       .map { fileName =>
-        val resourceFile = rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "mdoc" / fileName
-        val originalFile = rootPaths.value.apply("BASE").toFile() / "docs" / fileName // "readme.md"
+        val resourceFile = rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "mdoc" / fileName
+        val originalFile = rootPaths.value.apply("BASE").toFile() / "docs" / "src" / fileName // "readme.md"
 
         // TODO do the if
         // if (!sourceFile.exists() || sourceFile.lastModified() < resourceFile.lastModified()) {
@@ -609,29 +620,5 @@ def makeDocSources = Def
         |
         |}""".stripMargin
     IO.write(sourceFile, scalaCode)
-
-    // val resourceFile = rootPaths.value.apply("BASE").toFile() / "docs-build" / "target" / "mdoc" / "readme.md"
-    // val originalFile = rootPaths.value.apply("BASE").toFile() / "docs" / "readme.md"
-    // val sourceDir = (Compile / sourceManaged).value
-    // val sourceFile = sourceDir / "DocSource.scala"
-    // val log = streams.value.log
-    // if (!sourceFile.exists() || sourceFile.lastModified() < resourceFile.lastModified()) {
-    //   val file =
-    //     if (resourceFile.exists()) resourceFile
-    //     else {
-    //       log.warn("makeDocSources: the resourceFile does not exists. Using the originalFile")
-    //       originalFile
-    //     }
-    //   val contentREAMDE = IO
-    //     .read(file)
-    //     .replaceAllLiterally("$", "$$")
-    //     .replaceAllLiterally("\"\"\"", "\"\"$\"")
-    //   val scalaCode = s"""
-    //   |package fmgp.did
-    //   |object DocSource {
-    //   |  final val readme = raw\"\"\"$contentREAMDE\"\"\"
-    //   |}""".stripMargin
-    //   IO.write(sourceFile, scalaCode)
-    // }
     Seq(sourceFile)
   }

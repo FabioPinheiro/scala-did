@@ -38,6 +38,6 @@ To receive messages, you can use the following code:
 
 ## Further Resources
 
-The [library's documentation]
-The [DIDComm V2 specification](https://identity.foundation/didcomm-messaging/spec/)
-The [Decentralized Identity Foundation (DIF)][https://identity.foundation/]
+The library's documentation 
+The DIDComm V2 specification - (https://identity.foundation/didcomm-messaging/spec/)
+The Decentralized Identity Foundation (DIF) - https://identity.foundation/
