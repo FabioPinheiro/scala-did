@@ -11,7 +11,7 @@ object ManualSettings {
 
   private object links {
     val github = "https://github.com/FabioPinheiro/scala-did"
-    val scaladoc = "https://did.fmgp.app/api/index.html"
+    val scaladoc = "https://doc.did.fmgp.app/api/"
     val javadoc = "https://javadoc.io/doc/app.fmgp"
     val demo = "https://did.fmgp.app"
     val discord = "https://discord.gg/atala"
@@ -80,11 +80,11 @@ object ManualSettings {
         TextLink.internal(Root / "limitations.md", "Limitations"),
         TextLink.internal(Root / "troubleshooting.md", "Troubleshooting"),
         TextLink.internal(Root / "external-documentation.md", "Tools and Links"),
+        TextLink.external(links.scaladoc, "Scaladoc"),
+        TextLink.external(links.javadoc, "API Javadoc"),
       ),
       projectLinks = Seq(
         TextLink.external(links.github, "Source on GitHub"),
-        TextLink.external(links.scaladoc, "Merged Scaladoc"),
-        TextLink.external(links.javadoc, "API Javadoc"),
         TextLink.external(links.demo, "Live Demo"),
       ),
       teasers = Seq(

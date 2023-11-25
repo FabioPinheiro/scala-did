@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "clean": "rm -rf node_modules",
     "build_for_sourcemap": "NODE_OPTIONS='--max-old-space-size=4096' vite build",
     "build": "vite build",
     "preview": "vite preview"
