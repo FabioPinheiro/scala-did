@@ -308,12 +308,14 @@ addCommandAlias(
 addCommandAlias("testAll", ";testJVM;testJS")
 addCommandAlias("docAll", "doc;docs/unidoc")
 addCommandAlias("siteAll", "docs/mdoc;docs/laikaSite")
-addCommandAlias("fastPackAll", "compile;serviceworker/fastLinkJS;webapp/fastLinkJS")
-addCommandAlias("fullPackAll", "compile;serviceworker/fullLinkJS;webapp/fullLinkJS")
 addCommandAlias("assemblyAll", "docAll;siteAll;installFrontend;fullPackAll;buildFrontend;demoJVM/assembly")
-addCommandAlias("live", "fastPackAll;~demoJVM/reStart")
-addCommandAlias("ciJob", "docAll;siteAll;installFrontend;fullPackAll;buildFrontend;testAll")
+addCommandAlias("live", "fastPackAll;~demoJVM/reStart") // Missing the buildFrontend
+addCommandAlias("ciJobLib", "compile;testAll")
+addCommandAlias("ciJobFrontend", "installFrontend;fullPackAll;buildFrontend")
 
+// Note fastPackAll and fullPackAll needs installFrontend (scala-did/node_modules/typescript/lib must exist)
+addCommandAlias("fastPackAll", "serviceworker/fastLinkJS;webapp/fastLinkJS")
+addCommandAlias("fullPackAll", "serviceworker/fullLinkJS;webapp/fullLinkJS")
 lazy val installFrontend = taskKey[Unit]("Install all NPM package")
 installFrontend := {
   val npmInstall = Process("npm" :: "install" :: Nil)
@@ -342,7 +344,11 @@ lazy val root = project
   .aggregate(didResolverWeb.js, didResolverWeb.jvm) // publish
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
   .aggregate(docs) // just to aggregate the command clean
-  // Move to a new repository
+
+// Move to a new repository
+lazy val all = project
+  .in(file("allProjects"))
+  .aggregate(root)
   .aggregate(didExperiments.js, didExperiments.jvm) // NOT publish
   .aggregate(didExample.js, didExample.jvm)
   .aggregate(serviceworker)
