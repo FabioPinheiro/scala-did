@@ -11,23 +11,16 @@ object ManualSettings {
 
   private object links {
     val github = "https://github.com/FabioPinheiro/scala-did"
+    val scaladoc = "https://did.fmgp.app/api/index.html"
     val javadoc = "https://javadoc.io/doc/app.fmgp"
     val demo = "https://did.fmgp.app"
     val discord = "https://discord.gg/atala"
   }
 
-  // val config: LaikaConfig = LaikaConfig.defaults
-  //   .withConfigValue(LinkConfig.empty.addApiLinks(ApiLinks(paths.apiURL)))
+  val config: LaikaConfig = LaikaConfig.defaults
+    .withConfigValue(LaikaKeys.site.apiPath, "api")
+    .withConfigValue(LinkConfig.empty.addApiLinks(ApiLinks(links.javadoc + "/did_3/0.1.0-M15/index.html")))
   //   .withConfigValue(LinkValidation.Global(Seq(Root / "api")))
-  //   .withConfigValue(
-  //     Selections(
-  //       SelectionConfig(
-  //         "config",
-  //         ChoiceConfig("sbt", "sbt Plugin"),
-  //         ChoiceConfig("library", "Library API")
-  //       ).withSeparateEbooks
-  //     )
-  //   )
   //   .withConfigValue(LaikaKeys.artifactBaseName, s"laika-${versions.current.displayValue}")
   //   .withConfigValue(LaikaKeys.versioned, true)
 
@@ -90,8 +83,9 @@ object ManualSettings {
       ),
       projectLinks = Seq(
         TextLink.external(links.github, "Source on GitHub"),
-        TextLink.external(links.demo, "Live Demo"),
+        TextLink.external(links.scaladoc, "Merged Scaladoc"),
         TextLink.external(links.javadoc, "API Javadoc"),
+        TextLink.external(links.demo, "Live Demo"),
       ),
       teasers = Seq(
         Teaser(

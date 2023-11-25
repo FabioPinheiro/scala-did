@@ -63,11 +63,29 @@ lazy val publishConfigure: Project => Project = _.settings(
 //     )
 // )
 
-/** run with 'docs/clean' then 'docs/mdoc' and then 'docs/laikaSite' */
+/** https://docs.scala-lang.org/scala3/guides/scaladoc/settings.html */
+lazy val docConfigure: Project => Project =
+  _.settings(
+    autoAPIMappings := true,
+    Compile / doc / target := {
+      val path = rootPaths.value.apply("BASE").toFile() /
+        "docs" / "target" / "scaladoc" / "apis" / name.value / baseDirectory.value.getName
+      // REMOVE println(path.getAbsolutePath())
+      path
+    },
+    apiURL := Some(url(s"https://did.fmgp.app/apis/${name.value}/${baseDirectory.value.getName}")),
+  )
+
+/** Custom commands:
+  *   - doc
+  *   - docs/mdoc
+  *   - docs/laikaSite
+  *   - docs/unidoc
+  *   - docs/previewSite
+  */
 lazy val docs = project
   .in(file("docs"))
   .settings(skip / publish := true)
-  .enablePlugins(LaikaPlugin)
   .enablePlugins(MdocPlugin)
   .settings(
     mdocVariables := Map("VERSION" -> version.value),
@@ -81,15 +99,31 @@ lazy val docs = project
       disableUnusedWarningsForMdoc
     }
   )
+  .enablePlugins(LaikaPlugin)
   .settings(
     name := "scala-did-docs",
     laikaTheme := ManualSettings.themeProvider(version.value),
-    laikaConfig := LaikaConfig.defaults, // ManualSettings.config,
+    laikaConfig := ManualSettings.config,
     laikaExtensions := Seq(laika.format.Markdown.GitHubFlavor, laika.config.SyntaxHighlighting),
     Laika / sourceDirectories := Seq(mdocOut.value),
     Laika / target := baseDirectory.value / "target",
     laikaSite / target := target.value / "site" / "did-doc",
-    laikaIncludeAPI := true,
+    laikaIncludeAPI := false,
+  )
+  .enablePlugins(ScalaUnidocPlugin)
+  .settings(
+    ScalaUnidoc / unidoc / target := target.value / "scaladoc" / "unidoc",
+    ScalaUnidoc / unidoc / unidocProjectFilter := {
+      inProjects(
+        did.jvm,
+        didFramework.jvm,
+        didImp.jvm,
+        multiformats.jvm,
+        didResolverPeer.jvm,
+        didResolverWeb.jvm,
+        didUniresolver.jvm,
+      ), // or inAnyProject -- inProjects(...)
+    }
   )
   .dependsOn(did.jvm)
 
@@ -259,19 +293,6 @@ lazy val buildInfoConfigure: Project => Project = _.enablePlugins(BuildInfoPlugi
     ),
   )
 
-/** https://docs.scala-lang.org/scala3/guides/scaladoc/settings.html */
-lazy val docConfigure: Project => Project =
-  _.settings(
-    autoAPIMappings := true,
-    Compile / doc / target := {
-      val path = rootPaths.value.apply("BASE").toFile() /
-        "docs" / "target" / "api" / name.value / baseDirectory.value.getName
-      println(path.getAbsolutePath())
-      path
-    },
-    apiURL := Some(url(s"https://did.fmgp.app/apis/${name.value}/${baseDirectory.value.getName}")),
-  )
-
 addCommandAlias(
   "testJVM",
   ";didJVM/test; didFrameworkJVM/test; didImpJVM/test; " +
@@ -285,12 +306,13 @@ addCommandAlias(
     "multiformatsJS/test"
 )
 addCommandAlias("testAll", ";testJVM;testJS")
-addCommandAlias("docsAll", "docs/mdoc;doc;docs/laikaSite")
-addCommandAlias("fastPackAll", "compile;docsAll;serviceworker/fastLinkJS;webapp/fastLinkJS")
-addCommandAlias("fullPackAll", "compile;docsAll;serviceworker/fullLinkJS;webapp/fullLinkJS")
-addCommandAlias("assemblyAll", "installFrontend;fullPackAll;buildFrontend;demoJVM/assembly")
+addCommandAlias("docAll", "doc;docs/unidoc")
+addCommandAlias("siteAll", "docs/mdoc;docs/laikaSite")
+addCommandAlias("fastPackAll", "compile;serviceworker/fastLinkJS;webapp/fastLinkJS")
+addCommandAlias("fullPackAll", "compile;serviceworker/fullLinkJS;webapp/fullLinkJS")
+addCommandAlias("assemblyAll", "docAll;siteAll;installFrontend;fullPackAll;buildFrontend;demoJVM/assembly")
 addCommandAlias("live", "fastPackAll;~demoJVM/reStart")
-addCommandAlias("ciJob", "installFrontend;fullPackAll;buildFrontend;testAll")
+addCommandAlias("ciJob", "docAll;siteAll;installFrontend;fullPackAll;buildFrontend;testAll")
 
 lazy val installFrontend = taskKey[Unit]("Install all NPM package")
 installFrontend := {
@@ -314,7 +336,6 @@ lazy val root = project
   .settings(publish / skip := true)
   .aggregate(did.js, did.jvm) // publish
   .aggregate(didFramework.js, didFramework.jvm) // publish
-  .aggregate(didExperiments.js, didExperiments.jvm) // NOT publish
   .aggregate(didImp.js, didImp.jvm) // publish
   .aggregate(multiformats.js, multiformats.jvm) // publish
   .aggregate(didResolverPeer.js, didResolverPeer.jvm) // publish
@@ -322,8 +343,10 @@ lazy val root = project
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
   .aggregate(docs) // just to aggregate the command clean
   // Move to a new repository
+  .aggregate(didExperiments.js, didExperiments.jvm) // NOT publish
   .aggregate(didExample.js, didExample.jvm)
-  .aggregate(webapp, serviceworker)
+  .aggregate(serviceworker)
+  .aggregate(webapp)
   .aggregate(demo.jvm, demo.js)
 
 lazy val did = crossProject(JSPlatform, JVMPlatform)
@@ -557,7 +580,7 @@ lazy val demo = crossProject(JSPlatform, JVMPlatform)
     assembly / assemblyJarName := "scala-did-demo-server.jar",
     libraryDependencies += D.ziohttp.value,
     Compile / unmanagedResourceDirectories += baseDirectory.value / "src" / "main" / "extra-resources",
-    Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "api",
+    Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "scaladoc",
     // Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "mdoc"
     Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "site",
     Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "vite" / "dist",

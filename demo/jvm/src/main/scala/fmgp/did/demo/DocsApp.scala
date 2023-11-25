@@ -54,32 +54,19 @@ object DocsApp {
       for {
         path <- extractPath
         file <- Handler.getResourceAsFile("did-doc/" + path.dropLeadingSlash.encode)
-        http <-
-        // Rendering a custom UI to list all the files in the directory
-        extractRequest >>> {
+        http <- extractRequest >>> {
           if (file.isDirectory) {
             // Accessing the files in the directory
             val files = file.listFiles.toList.sortBy(_.getName)
-            val base = "/doc/"
-            val rest = path.dropTrailingSlash
-
-            println("11-" + path.encode)
-            println("22-" + rest)
-
-            // Custom UI to list all the files in the directory
-            Handler.template(s"File Explorer ~$base$rest") {
-              ul(
-                li(a(href := s"$base$rest", "..")),
-                files.map { file => li(a(href := s"$base${rest}${file.getName}", file.getName)) },
+            val auxPath = path./:("/doc")
+            Handler.template(s"File Explorer ~$auxPath") {
+              ul( // Custom UI to list all the files in the directory
+                li(a(href := s"${auxPath.dropRight(1)}", "..")),
+                files.map { file => li(a(href := s"${auxPath.addTrailingSlash}${file.getName}", file.getName)) },
               )
             }
-          }
-
-          // Return the file if it's a static resource
-          else if (file.isFile) Handler.fromFile(file)
-
-          // Return a 404 if the file doesn't exist
-          else Handler.notFound
+          } else if (file.isFile) Handler.fromFile(file) // Return the file if it's a static resource
+          else Handler.notFound // Return a 404 if the file doesn't exist
         }
       } yield http
 
@@ -94,6 +81,54 @@ object DocsApp {
       //     case s if s.endsWith(".css")  => Header.ContentType(MediaType.text.css)
       //     case s                        => Header.ContentType(MediaType.text.plain)
       //   Handler.fromResource(fullPath).map(_.addHeader(headerContentType))
+    },
+    Method.GET / "apis" / trailing -> handler {
+      val extractPath = Handler.param[(Path, Request)](_._1)
+      val extractRequest = Handler.param[(Path, Request)](_._2)
+      import zio.http.template._
+
+      for {
+        path <- extractPath
+        file <- Handler.getResourceAsFile("apis/" + path.dropLeadingSlash.encode)
+        http <- extractRequest >>> {
+          if (file.isDirectory) {
+            // Accessing the files in the directory
+            val files = file.listFiles.toList.sortBy(_.getName)
+            val auxPath = path./:("/apis")
+            Handler.template(s"File Explorer ~$auxPath") {
+              ul( // Custom UI to list all the files in the directory
+                li(a(href := s"${auxPath.dropRight(1)}", "..")),
+                files.map { file => li(a(href := s"${auxPath.addTrailingSlash}${file.getName}", file.getName)) },
+              )
+            }
+          } else if (file.isFile) Handler.fromFile(file) // Return the file if it's a static resource
+          else Handler.notFound // Return a 404 if the file doesn't exist
+        }
+      } yield http
+    },
+    Method.GET / "api" / trailing -> handler {
+      val extractPath = Handler.param[(Path, Request)](_._1)
+      val extractRequest = Handler.param[(Path, Request)](_._2)
+      import zio.http.template._
+
+      for {
+        path <- extractPath
+        file <- Handler.getResourceAsFile("unidoc/" + path.dropLeadingSlash.encode)
+        http <- extractRequest >>> {
+          if (file.isDirectory) {
+            // Accessing the files in the directory
+            val files = file.listFiles.toList.sortBy(_.getName)
+            val auxPath = path./:("/api")
+            Handler.template(s"File Explorer ~$auxPath") {
+              ul( // Custom UI to list all the files in the directory
+                li(a(href := s"${auxPath.dropRight(1)}", "..")),
+                files.map { file => li(a(href := s"${auxPath.addTrailingSlash}${file.getName}", file.getName)) },
+              )
+            }
+          } else if (file.isFile) Handler.fromFile(file) // Return the file if it's a static resource
+          else Handler.notFound // Return a 404 if the file doesn't exist
+        }
+      } yield http
     },
   ).sandbox.toHttpApp
 
