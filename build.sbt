@@ -414,13 +414,13 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings( // Add JVM-specific settings here
     libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.77", // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
     libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.77", // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
-    libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.35", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt
+    libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.37.1", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt
     // https://bitbucket.org/connect2id/nimbus-jose-jwt/branches/compare/release-9.35%0Drelease-9.32
 
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
     libraryDependencies += "com.google.crypto.tink" % "tink" % "1.11.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
-    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "3.24.4",
+    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "3.25.1",
   )
   .jsConfigure(scalaJSLibConfigure)
   .jsSettings(

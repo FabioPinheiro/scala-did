@@ -70,5 +70,5 @@ addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.5.0") // https://github.com/sb
 // addSbtPlugin("org.typelevel" % "sbt-typelevel-site" % "0.6.2") // https://typelevel.org/sbt-typelevel/site.html
 
 // Deploy demo - https://github.com/sbt/sbt-assembly/tags
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.1.3")
+addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.1.5")
 addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.2")
