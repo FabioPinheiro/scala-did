@@ -148,7 +148,7 @@ lazy val V = new {
   val zioPrelude = "1.0.0-RC21"
 
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time
-  val scalaJavaTime = "2.3.0"
+  val scalaJavaTime = "2.5.0"
 
   val logbackClassic = "1.2.10"
   val scalaLogging = "3.9.4"
