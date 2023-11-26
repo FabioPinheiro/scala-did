@@ -73,7 +73,7 @@ lazy val docConfigure: Project => Project =
       // REMOVE println(path.getAbsolutePath())
       path
     },
-    apiURL := Some(url(s"https://did.fmgp.app/apis/${name.value}/${baseDirectory.value.getName}")),
+    apiURL := Some(url(s"https://doc.did.fmgp.app/api/")), // or s"https://javadoc.io/doc/app.fmgp/${name.value}_3"
   )
 
 /** Custom commands:
