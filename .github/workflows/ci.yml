@@ -47,6 +47,9 @@ jobs:
       #   run: sbt -v -mem 2048 -J-Xmx5120m "ciJobLib"
       #   env:
       #     NODE_OPTIONS: "--openssl-legacy-provider" # This is need after node-version "16"
+      - name: Scalafmt
+        continue-on-error: true
+        run: sbt -v scalafmtCheckAll
       - name: Compile
         run: sbt -v compile
       - name: Test
