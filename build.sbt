@@ -179,7 +179,7 @@ lazy val D = new {
   )
 
   /* Depend on the scalajs-dom library. It provides static types for the browser DOM APIs. */
-  val dom = Def.setting("org.scala-js" %%% "scalajs-dom" % V.scalajsDom)
+  val scalajsDom = Def.setting("org.scala-js" %%% "scalajs-dom" % V.scalajsDom)
 
   val zio = Def.setting("dev.zio" %%% "zio" % V.zio)
   val zioStreams = Def.setting("dev.zio" %%% "zio-streams" % V.zio)
@@ -363,8 +363,10 @@ lazy val did = crossProject(JSPlatform, JVMPlatform)
   .settings(
     name := "did",
     libraryDependencies += D.zioJson.value,
+    libraryDependencies += D.zio.value, // Just to force a version bump (including scalajsDom)
     libraryDependencies += D.zioMunitTest.value,
   )
+  .jsSettings(libraryDependencies += D.scalajsDom.value) // just to really really force a version bump
   .jsSettings(libraryDependencies += D.scalajsJavaSecureRandom.value.cross(CrossVersion.for3Use2_13))
   .jsConfigure(scalaJSLibConfigure)
   .jsSettings(
@@ -400,7 +402,7 @@ lazy val didFramework = crossProject(JSPlatform, JVMPlatform)
   )
   .dependsOn(did % "compile;test->test")
   .jvmSettings(libraryDependencies += D.ziohttp.value)
-  .jsSettings(libraryDependencies += D.dom.value)
+  .jsSettings(libraryDependencies += D.scalajsDom.value)
   .jsConfigure(scalaJSLibConfigure) // Because of didJS now uses NPM libs
   .configure(docConfigure)
 
@@ -510,7 +512,7 @@ lazy val didUniresolver = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(libraryDependencies += D.ziohttp.value)
   // .enablePlugins(ScalaJSBundlerPlugin).jsSettings(Test / npmDependencies += "node-fetch" -> "3.3.0")
   .jsSettings( // TODO https://scalacenter.github.io/scalajs-bundler/reference.html#jsdom
-    libraryDependencies += D.dom.value,
+    libraryDependencies += D.scalajsDom.value,
     // jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
     // Test / requireJsDomEnv := true,
   )
@@ -531,7 +533,7 @@ lazy val serviceworker = project
     scalaJSModuleInitializers := Seq( // scalaJSUseMainModuleInitializer := true,
       ModuleInitializer.mainMethod("fmgp.serviceworker.SW", "main").withModuleID("sw")
     ),
-    libraryDependencies += D.dom.value,
+    libraryDependencies += D.scalajsDom.value,
     libraryDependencies ++= Seq(D.zio.value, D.zioJson.value),
   )
 
