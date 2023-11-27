@@ -10,14 +10,14 @@ import zio.stream._
 import zio.http._
 import zio.http.Header.ContentType
 
+import fmgp.crypto._
 import fmgp.crypto.error._
 import fmgp.did._
 import fmgp.did.comm._
 import fmgp.did.comm.protocol._
-import fmgp.did.method.DidPeerUniresolverDriver
 import fmgp.did.method.peer.DidPeerResolver
-import fmgp.crypto.Curve
-import fmgp.crypto.KeyGenerator
+import fmgp.did.method.hardcode.HardcodeResolver
+import fmgp.did.uniresolver.Uniresolver
 import fmgp.util._
 import fmgp.did.framework.Operator
 
@@ -150,9 +150,20 @@ object AppServer extends ZIOAppDefault {
     }.flatten
   ).sandbox.toHttpApp
 
-  val app: HttpApp[Operator & Operations & DidPeerResolver] = (
-    DIDCommRoutes.app ++ appTest ++ DocsApp.mdocHTML /*++ mdocMarkdown*/ ++ appOther ++ appWebsite ++ DidPeerUniresolverDriver.resolverPeer
+  val app: HttpApp[Operator & Operations & Resolver] = (
+    DIDCommRoutes.app ++ appTest ++ DocsApp.mdocHTML /*++ mdocMarkdown*/ ++ appOther ++ appWebsite // ++ DidPeerUniresolverDriver.resolverPeer
   ) @@ (Middleware.cors) // ++ MiddlewareUtils.all)
+
+  val resolverLayer = ZLayer.fromZIO(makeResolver)
+  def makeResolver: ZIO[Client & Scope, Nothing, MultiFallbackResolver] = for {
+    // FIX -> has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource
+    uniresolver <- Uniresolver.make()
+    multiResolver = MultiFallbackResolver(
+      HardcodeResolver.default,
+      DidPeerResolver.default,
+      uniresolver,
+    )
+  } yield multiResolver
 
   override val run = for {
     _ <- Console.printLine(
@@ -186,10 +197,10 @@ object AppServer extends ZIOAppDefault {
     myServer <- Server
       .serve(app)
       .provide(
-        DidPeerResolver.layerDidPeerResolver ++
-          (Client.default ++ Scope.default) >>> OperatorImp.layer ++
+        (Client.default ++ Scope.default) >>>
+          OperatorImp.layer ++
           Operations.layerDefault ++
-          DidPeerResolver.layerDidPeerResolver ++
+          resolverLayer.project(i => i: Resolver) ++ // DidPeerResolver.layerDidPeerResolver ++
           Server.defaultWithPort(port)
           // Server.defaultWith(
           //   _.port(port)

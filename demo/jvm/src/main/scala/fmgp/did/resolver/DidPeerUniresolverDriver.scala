@@ -1,3 +1,4 @@
+/*
 package fmgp.did.method
 
 import zio._
@@ -11,6 +12,7 @@ import fmgp.did.DIDDocument
 import fmgp.did.uniresolver.DIDResolutionResult
 import zio.http.MediaTypes
 
+//TODO REMOVE
 object DidPeerUniresolverDriver {
 
   val resolverPeer = Routes(
@@ -48,3 +50,4 @@ object DidPeerUniresolverDriver {
     }
   ).toHttpApp
 }
+ */

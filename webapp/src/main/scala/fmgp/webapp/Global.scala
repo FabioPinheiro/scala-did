@@ -8,22 +8,27 @@ import com.raquo.laminar.api.L._
 import zio._
 import zio.json._
 
+import fmgp.crypto.error._
 import fmgp.did._
 import fmgp.did.comm._
-import fmgp.did.method.peer.DIDPeer
 import fmgp.did.agent.MessageStorage
-import fmgp.crypto.error._
+import fmgp.did.method.peer.DidPeerResolver
+import fmgp.did.method.hardcode.HardcodeResolver
+import fmgp.did.uniresolver.Uniresolver
 import fmgp.Utils
 
 object Global {
 
-  val resolverLayer = ZLayer.succeed(
-    MultiResolver(
-      fmgp.did.method.hardcode.HardcodeResolver.default,
-      // Uniresolver.default, //FIX -> has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource
-      fmgp.did.method.peer.DidPeerResolver.default,
+  val resolverLayer = ZLayer.fromZIO(makeResolver)
+  def makeResolver: ZIO[Any, Nothing, MultiFallbackResolver] = for {
+    // FIX -> has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource
+    uniresolver <- Uniresolver.make()
+    multiResolver = MultiFallbackResolver(
+      HardcodeResolver.default,
+      DidPeerResolver.default,
+      uniresolver,
     )
-  )
+  } yield multiResolver
 
   val agentProvider = Var(initial = AgentProvider.provider)
   def providerNow = agentProvider.now()

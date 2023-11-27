@@ -12,8 +12,9 @@ import scala.scalajs.js
 import org.scalajs.dom._
 
 object Uniresolver {
-  val default = Uniresolver("https://dev.uniresolver.io/1.0/identifiers/")
-  val layerDefault: ULayer[Resolver] = ZLayer.succeed(default)
+  val defaultEndpoint = "https://dev.uniresolver.io/1.0/identifiers/"
+  def make(url: String = defaultEndpoint): ZIO[Any, Nothing, Uniresolver] = ZIO.succeed(Uniresolver(url))
+  def layer(url: String = defaultEndpoint): ULayer[Resolver] = ZLayer.succeed(Uniresolver(url))
 }
 
 case class Uniresolver(uniresolverServer: String) extends Resolver {

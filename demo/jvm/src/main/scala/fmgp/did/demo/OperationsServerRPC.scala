@@ -12,7 +12,7 @@ import fmgp.did.uniresolver.Uniresolver
 
 object OperationsServerRPC {
 
-  def ops(input: String): ZIO[Any, DidException, String] =
+  def ops(input: String): ZIO[Resolver, DidException, String] =
     input.fromJson[OpsInputRPC] match {
       case Left(error) => ZIO.fail(DidException(FailToParse(error)))
       case Right(value) =>
@@ -59,15 +59,15 @@ object OperationsServerRPC {
         } yield (result.toJson)
         tmp
           .provideSomeLayer(Operations.layerDefault)
-          .provideSomeLayer(
-            ZLayer.succeed(
-              MultiResolver(
-                HardcodeResolver.default,
-                // Uniresolver.default,
-                DidPeerResolver.default,
-              )
-            )
-          )
+      // .provideSomeLayer(
+      //   ZLayer.succeed(
+      //     MultiResolver(
+      //       HardcodeResolver.default,
+      //       // Uniresolver.default,
+      //       DidPeerResolver.default,
+      //     )
+      //   )
+      // )
     }
 
 }
