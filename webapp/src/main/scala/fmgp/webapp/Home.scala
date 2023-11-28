@@ -24,6 +24,9 @@ object Home {
   def apply(): HtmlElement = // rootElement
     div(
       p("Sandbox for DID Comm v2.1"),
+      // showPage(MyRouter.DocPage(Seq()), "Documentation for scala-did lib"),
+      AppUtils.openDocumentation,
+      br(),
       showPage(MyRouter.SettingsPage, "Settings Page"),
       showPage(MyRouter.AgentManagementPage, "Agent Management"),
       showPage(MyRouter.AgentMessageStoragePage, "Agent Message Storage"),
@@ -49,12 +52,12 @@ object Home {
       showPage(MyRouter.BasicMessagePage, "Basic Message"),
       showPage(MyRouter.TrustPingPage, "Trust Ping"),
       showPage(MyRouter.TapIntoStreamPage, "TapIntoStream Tool"),
-      showPage(MyRouter.DocPage(Seq()), "Documentation for scala-did lib"),
       br(),
       p("Ideas for experiments and applications:"),
       ul(
         li("[Done] DID Comm over Websocket"),
         li("[WIP] DID Comm over Push API"),
+        li("GitHub action step: a simple DID agent that sends a message"),
         li("DID Comm Protocol to Bootstrap WebRTC"),
         li("DID Comm over WebRTC: This would be indeed very interesting"),
         li("DID Comm over Email (in top of a SMTP server): Prove the control/ownership of emails addresses"),
@@ -63,9 +66,10 @@ object Home {
         li("DID Comm over Audio Waves"),
       ),
       br(),
-      p("DIDs:"),
+      p("DIDs setup:"),
       div(child <-- statementVar.signal.map(e => getHtml(e)))
     )
+
   def getHtml(statement: Option[Statement], indent: Int = 0): ReactiveHtmlElement[HTMLElement] =
     div(className("mermaid"), statementToMermaid(statement), onMountCallback(ctx => { Global.update("div.mermaid") }))
 

@@ -555,15 +555,15 @@ lazy val webapp = project
     libraryDependencies ++= Seq(D.laminar.value, D.waypoint.value, D.upickle.value),
     libraryDependencies ++= Seq(D.zio.value, D.zioJson.value),
   )
-  .settings( // for doc
-    libraryDependencies += D.laika.value,
-    Compile / sourceGenerators += {
-      val needThis: Task[Unit] = (docs / mdoc).toTask("").taskValue
-      val generateCode: Task[Seq[File]] = makeDocSources.taskValue
-      needThis.flatMap(unit => generateCode)
-      // I have no clue what I did here but types match and its working =)
-    },
-  )
+  // .settings( // for doc
+  //   libraryDependencies += D.laika.value,
+  //   Compile / sourceGenerators += {
+  //     val needThis: Task[Unit] = (docs / mdoc).toTask("").taskValue
+  //     val generateCode: Task[Seq[File]] = makeDocSources.taskValue
+  //     needThis.flatMap(unit => generateCode)
+  //     // I have no clue what I did here but types match and its working =)
+  //   },
+  // )
   .dependsOn(didExample.js)
   .dependsOn(serviceworker)
 

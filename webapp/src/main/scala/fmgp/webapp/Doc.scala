@@ -1,3 +1,4 @@
+/*
 package fmgp.webapp
 
 import org.scalajs.dom
@@ -53,7 +54,7 @@ object Doc {
     }
     .build
     .parser
-    .parse(fmgp.did.DocSource.quickstart_basic_examples_md)
+    .parse(fmgp.did.DocSource._01_about_01_scala_did_md)
   // .transform(fmgp.did.DocSource.quickstart_basic_examples_md, laika.ast.Path(List("doc", "fixme")) match
   // case Left(value)  => value.message
   // case Right(value) => value
@@ -86,3 +87,4 @@ object Doc {
     )
   }
 }
+ */

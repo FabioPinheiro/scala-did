@@ -122,38 +122,94 @@ object AppUtils { // TODO RENAME TO UIUtils
   }
 
   val drawerScrim = div(className("mdc-drawer-scrim"))
-  def drawer(linkPages: List[Page], currentPage: Signal[Page]) =
+
+  def drawer(
+      currentPage: Signal[Page],
+      linkPages: List[Page],
+      wipLinkPages: List[Page],
+      deprecatedLinkPages: List[Page]
+  ) =
     asideTag(
       className("mdc-drawer mdc-drawer--modal"),
       div(
         className("mdc-drawer__header"),
-        h3(className("mdc-drawer__title"), "FMGP scala-did"),
+        h3(className("mdc-drawer__title"), "FMGP Scala-DID"),
         h6(className("mdc-drawer__subtitle"), "fabiomgpinheiro@gmail.com"),
       ),
       div(
         className("mdc-drawer__content"),
         navTag(
           className("mdc-list"),
-          linkPages.map(page =>
-            a(
-              className <-- currentPage.map { p =>
-                if (p == page) "mdc-list-item mdc-list-item--activated" else "mdc-list-item"
-              },
-              aria.current := "page",
-              tabIndex(0),
-              span(className("mdc-list-item__ripple")),
-              i(
-                className("material-icons mdc-list-item__graphic"),
-                aria.hidden(true),
-                page.icon
-              ),
-              navigateTo(page),
-              span(className("mdc-list-item__text"), page.title),
-            ),
-          )
+          linkPages.map(page => drawerAux(currentPage, page)),
+          hr(className := "mdc-list-divider"),
+          h6(className := "mdc-list-group__subheader", "WIP Tools"),
+          wipLinkPages.map(page => drawerAux(currentPage, page)),
+          hr(className := "mdc-list-divider"),
+          h6(className := "mdc-list-group__subheader", "Deprecated Tools"),
+          deprecatedLinkPages.map(page => drawerAux(currentPage, page)),
+          hr(className := "mdc-list-divider"),
+          h6(className := "mdc-list-group__subheader", "External Links"),
+          drawerItemExternalLink(
+            url = "https://doc.did.fmgp.app/",
+            icon = "menu_book",
+            text = "Scala-DID Documentation"
+          ),
+          drawerItemExternalLink(
+            url = "https://doc.did.fmgp.app/api/",
+            icon = "api",
+            text = "Scala-DID Scaladoc API"
+          ),
+          drawerItemExternalLink(
+            url = "https://github.com/FabioPinheiro/scala-did",
+            icon = "code",
+            text = "Scala-DID Source"
+          ),
+          drawerItemExternalLink(
+            url = "https://identity.foundation/didcomm-messaging/spec/",
+            icon = "menu_book",
+            text = "DID Comm V2 Specification"
+          ),
+          drawerItemExternalLink(
+            url = "https://didcomm.org/search/?page=1",
+            icon = "design_services",
+            text = "DID Comm Protocols"
+          ),
+          drawerItemExternalLink(
+            url = "https://dev.uniresolver.io/",
+            icon = "travel_explore",
+            text = "Universal Resolver"
+          ),
+          drawerItemExternalLink(url = "https://demo.didcomm.org/", icon = "chat", text = "Chat Demo"),
+          drawerItemExternalLink(url = "https://didlint.ownyourdata.eu/", icon = "fact_check", text = "DID Lint"),
         )
       )
     )
+
+  private def drawerAux(currentPage: Signal[Page], page: Page) = a(
+    className <-- currentPage.map { p =>
+      if (p == page) "mdc-list-item mdc-list-item--activated" else "mdc-list-item"
+    },
+    aria.current := "page",
+    tabIndex(0),
+    span(className("mdc-list-item__ripple")),
+    i(
+      className("material-icons mdc-list-item__graphic"),
+      aria.hidden(true),
+      page.icon
+    ),
+    navigateTo(page),
+    span(className("mdc-list-item__text"), page.title),
+  )
+  private def drawerItemExternalLink(url: String, icon: String, text: String) = a(
+    href := url,
+    target := "_blank",
+    className := "mdc-list-item",
+    aria.current := "page",
+    tabIndex(0),
+    span(className("mdc-list-item__ripple")),
+    i(className("material-icons mdc-list-item__graphic"), aria.hidden(true), icon),
+    span(className("mdc-list-item__text"), text),
+  )
 
   def myButton(text: String) = {
     div(
@@ -169,5 +225,13 @@ object AppUtils { // TODO RENAME TO UIUtils
 
   def linkToResolveDID(subject: DIDSubject) =
     a(subject.did, MyRouter.navigateTo(MyRouter.ResolverPage(subject.did)))
+
+  def openDocumentation = a(
+    href := "https://doc.did.fmgp.app/",
+    "Open ",
+    b("Documentation"),
+    // MyRouter.navigateTo(page),
+    i(className("material-icons mdc-list-item__graphic"), aria.hidden(true), "menu_book")
+  )
 
 }

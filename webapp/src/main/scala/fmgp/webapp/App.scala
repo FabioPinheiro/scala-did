@@ -32,7 +32,12 @@ object App {
 
     lazy val appElement = {
       div(
-        AppUtils.drawer(linkPages, MyRouter.router.currentPageSignal),
+        AppUtils.drawer(
+          currentPage = MyRouter.router.currentPageSignal,
+          linkPages = linkPages,
+          wipLinkPages = wipLinkPages,
+          deprecatedLinkPages = deprecatedLinkPages
+        ),
         AppUtils.drawerScrim,
         AppUtils.topBarHeader(MyRouter.router.currentPageSignal.map {
           case p: HomePage.type => "DID Comm v2 - Playground"
@@ -71,7 +76,7 @@ object App {
     .collectStatic(NFCScannerPage)(NFCScannerTool())
     .collectStatic(WebBluetoothPage)(WebBluetoothTool())
     .collectStatic(DiscordBotPage)(DiscordBotInfo())
-    .collectSignal[DocPage](page => Doc(page))
+    // .collectSignal[DocPage](page => Doc(page))
     .collectStatic(AgentManagementPage)(AgentManagement())
     // .collectStatic(AgentDBPage)(AgentDB())
     .collectStatic(AgentMessageStoragePage)(AgentMessageStorage())
@@ -88,17 +93,23 @@ object App {
     SettingsPage,
     QRcodePage,
     NFCScannerPage,
-    WebBluetoothPage,
-    DiscordBotPage,
     OOBPage(oobExample),
     ResolverPage(didExample),
     AgentManagementPage,
     AgentMessageStoragePage,
     EncryptPage,
     DecryptPage,
+  )
+
+  private val wipLinkPages: List[Page] = List(
+    WebBluetoothPage,
+    DiscordBotPage,
+  )
+
+  private val deprecatedLinkPages: List[Page] = List(
     TapIntoStreamPage,
     // AgentDBPage,
-    DocPage(Seq()),
+    // DocPage(Seq()),
     BasicMessagePage,
     TrustPingPage,
     // DAppStorePage,

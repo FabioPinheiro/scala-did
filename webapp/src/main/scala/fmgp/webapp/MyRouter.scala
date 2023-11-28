@@ -27,7 +27,7 @@ object MyRouter {
   case object NFCScannerPage extends Page("NFCScanner", "nfc") // or "contactless"
   case object WebBluetoothPage extends Page("WebBluetooth", "bluetooth")
   case object DiscordBotPage extends Page("DiscordBot", "smart_toy")
-  case class DocPage(path: Seq[String]) extends Page("Doc", "menu_book")
+  // case class DocPage(path: Seq[String]) extends Page("Doc", "menu_book")
   case object AgentManagementPage extends Page("AgentManagement", "manage_accounts")
   // case object DIDPage extends Page("DID", "visibility")
   // case object AgentDBPage extends Page("MessageDB", "folder_open")
@@ -47,7 +47,7 @@ object MyRouter {
   given nfcScannerPageRW: ReadWriter[NFCScannerPage.type] = macroRW
   given webBluetoothPageRW: ReadWriter[WebBluetoothPage.type] = macroRW
   given discordBotPageRW: ReadWriter[DiscordBotPage.type] = macroRW
-  given docPageRW: ReadWriter[DocPage] = macroRW
+  // given docPageRW: ReadWriter[DocPage] = macroRW
   given keysPageRW: ReadWriter[AgentManagementPage.type] = macroRW
   // given agentDBPageRW: ReadWriter[AgentDBPage.type] = macroRW
   given agentMessageStoragePageRW: ReadWriter[AgentMessageStoragePage.type] = macroRW
@@ -91,12 +91,12 @@ object MyRouter {
     Route.static(TrustPingPage, root / "trustping" / endOfSegments, Router.localFragmentBasePath),
     Route.static(TapIntoStreamPage, root / "stream" / endOfSegments, Router.localFragmentBasePath),
     Route.static(DAppStorePage, root / "dapp" / endOfSegments, Router.localFragmentBasePath),
-    Route[DocPage, List[String]](
-      encode = page => page.path.toList,
-      decode = arg => DocPage(path = if (arg.isEmpty) Seq("readme.md") else arg.toSeq),
-      pattern = root / "doc" / remainingSegments,
-      Router.localFragmentBasePath
-    ),
+    // Route[DocPage, List[String]](
+    //   encode = page => page.path.toList,
+    //   decode = arg => DocPage(path = if (arg.isEmpty) Seq("readme.md") else arg.toSeq),
+    //   pattern = root / "doc" / remainingSegments,
+    //   Router.localFragmentBasePath
+    // ),
   )
 
   val router = new Router[Page](
