@@ -139,7 +139,7 @@ lazy val V = new {
   // val scalajsLogging = "1.1.2-SNAPSHOT" //"1.1.2"
 
   // https://mvnrepository.com/artifact/dev.zio/zio
-  val zio = "2.0.18"
+  val zio = "2.0.19"
   val zioJson = "0.6.2"
   val zioMunitTest = "0.2.0"
   val zioHttp =
