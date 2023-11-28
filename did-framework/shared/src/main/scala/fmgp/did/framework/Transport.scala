@@ -11,6 +11,12 @@ type TransportDIDComm[R] = Transport[R, SignedMessage | EncryptedMessage, Signed
 /** The goal is to make this DID Comm library Transport-agnostic */
 trait Transport[R, IN, OUT] { self =>
 
+  /** Describe properties about the Flow (direction) of data for this transport */
+  def transmissionFlow: Transport.TransmissionFlow
+
+  /** Describe properties about the Type connection in this transport */
+  def transmissionType: Transport.TransmissionType
+
   /** Send to the other side. Out going Messages */
   def outbound: ZSink[R, Transport.OutErr, OUT, Nothing, Unit]
 
@@ -34,6 +40,8 @@ object Transport {
       env: ZEnvironment[Env],
   ) extends Transport[Any, IN, OUT] {
 
+    def transmissionFlow: Transport.TransmissionFlow = transport.transmissionFlow
+    def transmissionType: Transport.TransmissionType = transport.transmissionType
     def outbound: ZSink[Any, Transport.OutErr, OUT, Nothing, Unit] = transport.outbound.provideEnvironment(env)
     def inbound: ZStream[Any, Transport.InErr, IN] = transport.inbound.provideEnvironment(env)
     def id: TransportID = transport.id
@@ -41,6 +49,32 @@ object Transport {
 
     override def toString() = s"Transport.Provided(${transport}, ${env})"
   }
+
+  // ############################
+  // ### transport properties ###
+  // ############################
+
+  /** Describe properties about the Flow (direction) of data */
+  enum TransmissionFlow:
+    case Sending extends TransmissionFlow
+    case Receiving extends TransmissionFlow
+    case BothWays extends TransmissionFlow
+
+  // object TransmissionFlow {
+  //   given decoder: JsonDecoder[TransmissionFlow] = JsonDecoder.string.mapOrFail(e => safeValueOf(TransmissionFlow.valueOf(e)))
+  //   given encoder: JsonEncoder[TransmissionFlow] = JsonEncoder.string.contramap((e: TransmissionFlow) => e.toString)
+  // }
+
+  /** Describe properties about the Type connection */
+  enum TransmissionType:
+    case SingleTransmission extends TransmissionType
+    case MultiTransmissions extends TransmissionType
+
+  // object TransmissionType {
+  //   given decoder: JsonDecoder[TransmissionType] = JsonDecoder.string.mapOrFail(e => safeValueOf(TransmissionType.valueOf(e)))
+  //   given encoder: JsonEncoder[TransmissionType] = JsonEncoder.string.contramap((e: TransmissionType) => e.toString)
+  // }
+
 }
 
 object TransportID:

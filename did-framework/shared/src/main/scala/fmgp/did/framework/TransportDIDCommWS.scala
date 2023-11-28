@@ -8,6 +8,9 @@ import fmgp.did.comm._
 
 class TransportDIDCommWS[R](transport: TransportWS[R, String]) extends TransportDIDComm[R] {
 
+  def transmissionFlow = Transport.TransmissionFlow.BothWays
+  def transmissionType = Transport.TransmissionType.MultiTransmissions
+
   /** Send to the other side. Out going Messages */
   def outbound: ZSink[R, Transport.OutErr, SignedMessage | EncryptedMessage, Nothing, Unit] =
     transport.outbound.contramap((_: Message).toJson)

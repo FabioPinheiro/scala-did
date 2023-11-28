@@ -13,6 +13,10 @@ class TransportDIDCommOverHTTP(
     destination: String,
     inboundBuf: Hub[SignedMessage | EncryptedMessage],
 ) extends TransportDIDComm[Client & Scope] {
+
+  def transmissionFlow = Transport.TransmissionFlow.BothWays
+  def transmissionType = Transport.TransmissionType.SingleTransmission
+
   def id: String = TransportID.ws
   def inbound: ZStream[Client & Scope, Transport.InErr, SignedMessage | EncryptedMessage] = ZStream.fromHub(inboundBuf)
   def outbound: zio.stream.ZSink[Client & Scope, Transport.OutErr, SignedMessage | EncryptedMessage, Nothing, Unit] =

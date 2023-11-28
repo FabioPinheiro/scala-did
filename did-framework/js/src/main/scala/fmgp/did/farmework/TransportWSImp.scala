@@ -18,6 +18,9 @@ class TransportWSImp[MSG](
     /*private*/ val jsWS: dom.WebSocket,
 ) extends TransportWS[Any, MSG] {
 
+  def transmissionFlow = Transport.TransmissionFlow.BothWays
+  def transmissionType = Transport.TransmissionType.MultiTransmissions
+
   override def outbound: ZSink[Any, Transport.OutErr, MSG, Nothing, Unit] = ZSink.fromQueue(outboundBuf)
   override def inbound: ZStream[Any, Transport.InErr, MSG] = ZStream.fromHub(inboundBuf)
 
