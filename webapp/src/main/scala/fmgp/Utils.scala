@@ -8,6 +8,7 @@ import fmgp.did.comm._
 import fmgp.did.framework._
 import fmgp.crypto.error._
 import fmgp.webapp.ResolverTool
+import fmgp.webapp.Global
 
 object Utils {
 
@@ -53,14 +54,18 @@ object Utils {
             case Right(responseMsg) => ZIO.succeed(responseMsg)
           }
       response <- OperationsClientRPC.decrypt(responseMsg).flatMap {
-        case value: EncryptedMessage     => ZIO.fail(FailDecryptDoubleEncrypted(responseMsg, value))
-        case plaintext: PlaintextMessage => ZIO.succeed(plaintext)
+        case value: EncryptedMessage => ZIO.fail(FailDecryptDoubleEncrypted(responseMsg, value))
+        case plaintext: PlaintextMessage =>
+          ZIO.succeed(Global.messageRecive(eMsg, plaintext)) // side effect!
+            *> ZIO.succeed(plaintext)
         case sMsg @ SignedMessage(payload, signatures) =>
           payload.content.fromJson[Message] match
-            case Left(value)                        => ZIO.fail(FailToParse(value))
-            case Right(plaintext: PlaintextMessage) => ZIO.succeed(plaintext)
-            case Right(value: SignedMessage)        => ZIO.fail(FailDecryptDoubleSign(sMsg, value))
-            case Right(value: EncryptedMessage)     => ZIO.fail(FailDecryptSignThenEncrypted(sMsg, value))
+            case Left(value) => ZIO.fail(FailToParse(value))
+            case Right(plaintext: PlaintextMessage) =>
+              ZIO.succeed(Global.messageRecive(eMsg, plaintext)) // side effect!
+                *> ZIO.succeed(plaintext)
+            case Right(value: SignedMessage)    => ZIO.fail(FailDecryptDoubleSign(sMsg, value))
+            case Right(value: EncryptedMessage) => ZIO.fail(FailDecryptSignThenEncrypted(sMsg, value))
       }
     } yield response
 

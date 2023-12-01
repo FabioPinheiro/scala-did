@@ -73,7 +73,7 @@ object AgentManagement {
 
   object V2 {
     import mediatorcoordination2._
-    def mediateRequest(msg: MediateRequest) = Utils
+    def mediateRequest(msg: => MediateRequest) = Utils
       .sendAndReceiveProgram(msg.toPlaintextMessage)
       .map { response =>
         response.toMediateGrantOrDeny match
@@ -82,7 +82,7 @@ object AgentManagement {
           case Right(m: MediateDeny)  => println(MediateDeny)
       }
 
-    def recipientUpdate(msg: KeylistUpdate) = Utils
+    def recipientUpdate(msg: => KeylistUpdate) = Utils
       .sendAndReceiveProgram(msg.toPlaintextMessage)
       .map { response =>
         response.toKeylistResponse match
@@ -93,7 +93,7 @@ object AgentManagement {
 
   object V3 {
     import mediatorcoordination3._
-    def mediateRequest(msg: MediateRequest) = Utils
+    def mediateRequest(msg: => MediateRequest) = Utils
       .sendAndReceiveProgram(msg.toPlaintextMessage)
       .map(_.toMediateGrantOrDeny match {
         case Left(value)            => println(s"ERROR: $value")
@@ -101,7 +101,7 @@ object AgentManagement {
         case Right(m: MediateDeny)  => println(m)
       })
 
-    def recipientUpdate(msg: RecipientUpdate) = Utils
+    def recipientUpdate(msg: => RecipientUpdate) = Utils
       .sendAndReceiveProgram(msg.toPlaintextMessage)
       .map(_.toRecipientResponse match {
         case Left(value)                 => println(s"ERROR: $value")
@@ -194,27 +194,27 @@ object AgentManagement {
           val (mrV2, mrpV2, ruV2, rupV2) = {
             import mediatorcoordination2._
             import V2._
-            val mr = MediateRequest(from = agent.id, to = mediatorDID)
-            val mrp = mediateRequest(mr).provideEnvironment(env)
-            val ru = KeylistUpdate(
+            def mr = MediateRequest(from = agent.id, to = mediatorDID)
+            def mrp = mediateRequest(mr).provideEnvironment(env)
+            def ru = KeylistUpdate(
               from = agent.id,
               to = mediatorDID,
               updates = Seq((mediatorDID.asFROMTO, mediatorcoordination2.KeylistAction.add))
             )
-            val rup = recipientUpdate(ru).provideEnvironment(env)
+            def rup = recipientUpdate(ru).provideEnvironment(env)
             (mr, mrp, ru, rup)
           }
           val (mrV3, mrpV3, ruV3, rupV3) = {
             import mediatorcoordination3._
             import V3._
-            val mr = MediateRequest(from = agent.id, to = mediatorDID)
-            val mrp = mediateRequest(mr).provideEnvironment(env)
-            val ru = RecipientUpdate(
+            def mr = MediateRequest(from = agent.id, to = mediatorDID)
+            def mrp = mediateRequest(mr).provideEnvironment(env)
+            def ru = RecipientUpdate(
               from = agent.id,
               to = mediatorDID,
               updates = Seq((mediatorDID.asFROMTO, RecipientAction.add))
             )
-            val rup = recipientUpdate(ru).provideEnvironment(env)
+            def rup = recipientUpdate(ru).provideEnvironment(env)
             (mr, mrp, ru, rup)
           }
           val pickupMsg = DeliveryRequest(from = agent.id, to = mediatorDID, limit = 100, recipient_did = None)
