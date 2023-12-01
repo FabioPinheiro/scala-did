@@ -125,7 +125,7 @@ lazy val docs = project
       ), // or inAnyProject -- inProjects(...)
     }
   )
-  .dependsOn(did.jvm)
+  .dependsOn(did.jvm, didImp.jvm, didResolverPeer.jvm)
 
 /** Versions */
 lazy val V = new {
@@ -614,12 +614,13 @@ def makeDocSources = Def
   .task {
     val resourceFolder = rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "mdoc"
     val log = streams.value.log
-    val aux = resourceFolder
-      .list()
-      .toSeq
-      .map { fileName =>
-        val resourceFile = rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "mdoc" / fileName
-        val originalFile = rootPaths.value.apply("BASE").toFile() / "docs" / "src" / fileName // "readme.md"
+    def processFiles(files: Seq[String]): Seq[(String, String)] = files.flatMap { fileName =>
+      val resourceFile = rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "mdoc" / fileName
+      val originalFile = rootPaths.value.apply("BASE").toFile() / "docs" / "src" / fileName // "readme.md"
+
+      if (resourceFile.isDirectory()) {
+        processFiles(resourceFile.list().map(fileName + "/" + _).toSeq)
+      } else {
 
         // TODO do the if
         // if (!sourceFile.exists() || sourceFile.lastModified() < resourceFile.lastModified()) {
@@ -634,13 +635,18 @@ def makeDocSources = Def
           .replaceAllLiterally("$", "$$")
           .replaceAllLiterally("\"\"\"", "\"\"$\"")
         // }
-        val valName = fileName.toLowerCase.replace(".", "_").replace("-", "_")
+        val valName = "_" + fileName.toLowerCase.replace(".", "_").replace("-", "_").replace("/", "_")
 
-        (
-          s"""    "${fileName.toLowerCase}" -> $valName""",
-          s"""  final val $valName = raw\"\"\"$contentREAMDE\"\"\""""
+        Seq(
+          (
+            s"""    "${fileName.toLowerCase}" -> $valName""",
+            s"""  final val $valName = raw\"\"\"$contentREAMDE\"\"\""""
+          )
         )
       }
+    }
+
+    val aux = processFiles(resourceFolder.list().toSeq)
 
     val sourceDir = (Compile / sourceManaged).value
     val sourceFile = sourceDir / "DocSource.scala"

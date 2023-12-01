@@ -44,7 +44,7 @@ object ManualSettings {
     .site
     .footer(
       TemplateString("Documentation website for "),
-      Emphasized("Scala-did"),
+      Emphasized("Scala-DID"),
       TemplateString(" a DID Comm library for scala.")
     )
     // .site
@@ -73,13 +73,11 @@ object ManualSettings {
       ),
       license = Some("Apache 2.0"),
       documentationLinks = Seq(
-        TextLink.internal(Root / "readme.md", "README"),
-        TextLink.internal(Root / "quickstart-get-started.md", "Quickstart"),
-        TextLink.internal(Root / "quickstart-basic-examples.md", "Examples"),
-        TextLink.internal(Root / "test-coverage.md", "Test Coverage"),
-        TextLink.internal(Root / "limitations.md", "Limitations"),
-        TextLink.internal(Root / "troubleshooting.md", "Troubleshooting"),
-        TextLink.internal(Root / "external-documentation.md", "Tools and Links"),
+        TextLink.internal(Root / "01-about" / "01-scala-did.md", "About"),
+        TextLink.internal(Root / "02-quickstart" / "01-setup-environment.md", "Quickstart"),
+        // TextLink.internal(Root / "quickstart-basic-examples.md", "Examples"),
+        // TextLink.internal(Root / "test-coverage.md", "Test Coverage"),
+        TextLink.internal(Root / "01-about" / "09-external-documentation.md", "Tools and Links"),
         TextLink.external(links.scaladoc, "Scaladoc"),
         TextLink.external(links.javadoc, "API Javadoc"),
       ),

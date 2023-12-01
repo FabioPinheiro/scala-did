@@ -1,4 +1,4 @@
-# Getting Started with DIDComm Messaging in Scala
+# Getting Started with DIDComm Messaging
 
 Here's a basic example of how to send a message using the library:
 
@@ -18,12 +18,6 @@ val message = new BasicMessage(
 
 
 message.toPlaintextMessage.toJsonPretty
-
-// TODO Send the message
-// didcomm.send(message).onComplete {
-//   case Success(_) => println("Message sent!")
-//   case Failure(err) => println(s"Error: $err")
-// }
 ```
 
 

@@ -10,7 +10,7 @@ Start an isolated environment to experiment with some code samples (3/5 mins)
 
 `docker run --rm  -it --entrypoint /bin/sh virtuslab/scala-cli`
 
-```bash
+```shell
 scala-cli repl \
   --dependency app.fmgp::did::@VERSION@ \
   --dependency app.fmgp::did-imp::@VERSION@ \
@@ -27,7 +27,7 @@ scala-cli repl \
 
 To install the library on `sbt`, you can use the following lines to your `build.sbt`:
 
-```sbt
+```scala sbt
  libraryDependencies += "app.fmgp" %% "did" % @VERSION@
  libraryDependencies += "app.fmgp" %% "did-imp" % @VERSION@ // for the DIDComm implementation
  libraryDependencies += "app.fmgp" %% "did-resolver-peer" % @VERSION@ // for hash utils
@@ -35,7 +35,7 @@ To install the library on `sbt`, you can use the following lines to your `build.
 
 In a crossProject for the JSPlatform and JVMPlatform this shoud use this instead:
 
-```sbt
+```scala sbt
  libraryDependencies += "app.fmgp" %%% "did" % @VERSION@
  libraryDependencies += "app.fmgp" %%% "did-imp" % @VERSION@ // for the DIDComm implementation
  libraryDependencies += "app.fmgp" %%% "did-resolver-peer" % @VERSION@ // for hash utils
@@ -43,7 +43,7 @@ In a crossProject for the JSPlatform and JVMPlatform this shoud use this instead
 
 ## Coursier Download
 
-```bash 
+```shell
 coursier fetch app.fmgp:did_3:@VERSION@ -r sonatype:snapshots
 # -r https://oss.sonatype.org/content/repositories/snapshots
 
