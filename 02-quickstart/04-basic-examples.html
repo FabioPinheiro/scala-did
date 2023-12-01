@@ -20,9 +20,9 @@
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono:500">
   
-  <link rel="stylesheet" type="text/css" href="helium/site/icofont.min.css" />
-    <link rel="stylesheet" type="text/css" href="helium/site/laika-helium.css" />
-  <script src="helium/site/laika-helium.js"></script>
+  <link rel="stylesheet" type="text/css" href="../helium/site/icofont.min.css" />
+    <link rel="stylesheet" type="text/css" href="../helium/site/laika-helium.css" />
+  <script src="../helium/site/laika-helium.js"></script>
   
   
   <script> /* for avoiding page load transitions */ </script>
@@ -40,7 +40,7 @@
     
   </div>
 
-  <a class="icon-link glyph-link" href="index.html"><i class="icofont-laika home" title="Home">&#xef47;</i></a>
+  <a class="icon-link glyph-link" href="../"><i class="icofont-laika home" title="Home">&#xef47;</i></a>
 
   <div class="row links">
     
@@ -87,16 +87,19 @@
   </div>
 
   <ul class="nav-list">
-    <li class="level1 nav-leaf"><a href="example.js.html">Example JS</a></li>
-    <li class="level1 nav-leaf"><a href="external-documentation.html">External documentation</a></li>
-    <li class="level1 nav-leaf"><a href="limitations.html">Limitations</a></li>
-    <li class="level1 active nav-leaf"><a href="#">Basic Example</a></li>
-    <li class="level1 nav-leaf"><a href="quickstart-get-started.html">Getting Started with DIDComm Messaging in Scala</a></li>
-    <li class="level1 nav-leaf"><a href="quickstart-setup-environment.html">Setup environment</a></li>
-    <li class="level1 nav-leaf"><a href="readme.html">Scala-did</a></li>
-    <li class="level1 nav-leaf"><a href="test-coverage.html">Test coverage</a></li>
-    <li class="level1 nav-leaf"><a href="test-interoperability.html">Interoperability</a></li>
-    <li class="level1 nav-leaf"><a href="troubleshooting.html">Troubleshooting</a></li>
+    <li class="level1 nav-header">About Scala-DID</li>
+    <li class="level2 nav-leaf"><a href="../01-about/01-scala-did.html">Scala DID</a></li>
+    <li class="level2 nav-leaf"><a href="../01-about/09-external-documentation.html">External documentation</a></li>
+    <li class="level1 nav-header">Quickstart Guides</li>
+    <li class="level2 nav-leaf"><a href="01-setup-environment.html">Setup environment</a></li>
+    <li class="level2 nav-leaf"><a href="02-install-dependency.html">Import Library</a></li>
+    <li class="level2 nav-leaf"><a href="03-imports.html">Config imports</a></li>
+    <li class="level2 active nav-leaf"><a href="#">Basic Example</a></li>
+    <li class="level2 nav-leaf"><a href="05-did-comm-examples.html">Getting Started with DIDComm Messaging</a></li>
+    <li class="level1 nav-header">Troubleshooting and Limitations</li>
+    <li class="level2 nav-leaf"><a href="../08-others/limitations.html">Limitations</a></li>
+    <li class="level2 nav-leaf"><a href="../08-others/test-coverage.html">Test coverage</a></li>
+    <li class="level2 nav-leaf"><a href="../08-others/troubleshooting.html">Troubleshooting</a></li>
   </ul>
 
 </nav>
@@ -108,27 +111,20 @@
   <p class="header"><a href="#">Basic Example</a></p>
 
   <ul class="nav-list">
-    <li class="level1 nav-leaf"><a href="#common-imports">Common Imports</a></li>
     <li class="level1 nav-leaf"><a href="#parse-a-did-document">Parse a DID Document</a></li>
-    <li class="level1 nav-leaf"><a href="#make-did-peer-identities">Make DID Peer identities</a></li>
+    <li class="level1 nav-node"><a href="#make-did-peer-identities">Make DID Peer identities</a></li>
+    <li class="level2 nav-leaf"><a href="#resolve-did-peer-identities">Resolve did:peer identities</a></li>
     <li class="level1 nav-leaf"><a href="#trust-ping-example">Trust Ping example</a></li>
     <li class="level1 nav-leaf"><a href="#encrypt">Encrypt</a></li>
   </ul>
 
-  <p class="footer"><a href="https://github.com/FabioPinheiro/scala-did/blob/master/docs/src/quickstart-basic-examples.md"><i class="icofont-laika edit" title="Edit">&#xef10;</i>Source for this page</a></p>
+  <p class="footer"><a href="https://github.com/FabioPinheiro/scala-did/blob/master/docs/src/02-quickstart/04-basic-examples.md"><i class="icofont-laika edit" title="Edit">&#xef10;</i>Source for this page</a></p>
 </nav>
 
 
       <main class="content">
 
         <h1 id="basic-example" class="title">Basic Example</h1>
-        
-        <h2 id="common-imports" class="section"><a class="anchor-link left" href="#common-imports"><i class="icofont-laika link">&#xef71;</i></a>Common Imports</h2>
-        <p>Here are the usfull imports for most of the cases:</p>
-        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">zio</span><span>.</span><span class="identifier">_</span><span>
-</span><span class="keyword">import</span><span> </span><span class="identifier">zio</span><span>.</span><span class="identifier">json</span><span>.</span><span class="identifier">_</span><span>
-</span><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">did</span><span>.</span><span class="identifier">_</span><span>
-</span><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">did</span><span>.</span><span class="identifier">comm</span><span>.</span><span class="identifier">_</span></code></pre>
         
         <h2 id="parse-a-did-document" class="section"><a class="anchor-link left" href="#parse-a-did-document"><i class="icofont-laika link">&#xef71;</i></a>Parse a DID Document</h2>
         <pre><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">documentString</span><span> = </span><span class="string-literal">&quot;&quot;&quot;{
@@ -178,27 +174,26 @@
         The return value would have been Left, containing the information why failed to parse.</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="string-literal">&quot;not a json&quot;</span><span>.</span><span class="identifier">fromJson</span><span>[</span><span class="type-name">DIDDocument</span><span>]
 </span><span class="comment">// res1: Either[String, DIDDocument] = Left(value = &quot;(expected &#39;{&#39; got &#39;n&#39;)&quot;)</span></code></pre>
-        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="string-literal">&quot;&quot;&quot;{&quot;some_json&quot;: &quot;but_not_a_valid_document&quot;}&quot;&quot;&quot;</span><span>
-  .</span><span class="identifier">fromJson</span><span>[</span><span class="type-name">DIDDocument</span><span>]
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="string-literal">&quot;&quot;&quot;{&quot;some_json&quot;: &quot;but_not_a_valid_document&quot;}&quot;&quot;&quot;</span><span>.</span><span class="identifier">fromJson</span><span>[</span><span class="type-name">DIDDocument</span><span>]
 </span><span class="comment">// res2: Either[String, DIDDocument] = Left(value = &quot;.id(missing)&quot;)</span></code></pre>
         <p>Another <strong>Important Point</strong> is that there is no failed here everywhere on this library! We work with values.
         <strong><em>(Any error/exception will be considered a bug and reports are appreciated)</em></strong></p>
         <p>This this allowed us to this allowed us to build programs build (ZIO) programs. That can are executed at any point in time.</p>
         
         <h2 id="make-did-peer-identities" class="section"><a class="anchor-link left" href="#make-did-peer-identities"><i class="icofont-laika link">&#xef71;</i></a>Make DID Peer identities</h2>
-        <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">crypto</span><span>.</span><span class="identifier">_</span><span>
-</span><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">did</span><span>.</span><span class="identifier">method</span><span>.</span><span class="identifier">peer</span><span>.</span><span class="identifier">_</span><span>
+        <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">crypto</span><span>.*
+</span><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">did</span><span>.</span><span class="identifier">method</span><span>.</span><span class="identifier">peer</span><span>.*
 
-</span><span class="keyword">val</span><span> </span><span class="identifier">sender</span><span> = </span><span class="type-name">DIDPeer2</span><span>.</span><span class="identifier">makeAgent</span><span>(
+</span><span class="keyword">val</span><span> </span><span class="identifier">alice</span><span> = </span><span class="type-name">DIDPeer2</span><span>.</span><span class="identifier">makeAgent</span><span>(
   </span><span class="type-name">Seq</span><span>(
-    </span><span class="type-name">OKPPrivateKey</span><span>(</span><span class="comment">// keyAgreement
+    </span><span class="type-name">OKPPrivateKey</span><span>( </span><span class="comment">// keyAgreement
 </span><span>      </span><span class="identifier">kty</span><span> = </span><span class="type-name">KTY</span><span>.</span><span class="type-name">OKP</span><span>,
       </span><span class="identifier">crv</span><span> = </span><span class="type-name">Curve</span><span>.</span><span class="type-name">X25519</span><span>,
       </span><span class="identifier">d</span><span> = </span><span class="string-literal">&quot;Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c&quot;</span><span>,
       </span><span class="identifier">x</span><span> = </span><span class="string-literal">&quot;Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw&quot;</span><span>,
       </span><span class="identifier">kid</span><span> = </span><span class="type-name">None</span><span>
     ),
-    </span><span class="type-name">OKPPrivateKey</span><span>(</span><span class="comment">//keyAuthentication
+    </span><span class="type-name">OKPPrivateKey</span><span>( </span><span class="comment">// keyAuthentication
 </span><span>      </span><span class="identifier">kty</span><span> = </span><span class="type-name">KTY</span><span>.</span><span class="type-name">OKP</span><span>,
       </span><span class="identifier">crv</span><span> = </span><span class="type-name">Curve</span><span>.</span><span class="type-name">Ed25519</span><span>,
       </span><span class="identifier">d</span><span> = </span><span class="string-literal">&quot;INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug&quot;</span><span>,
@@ -207,46 +202,124 @@
     )
   ),
   </span><span class="type-name">Seq</span><span>(</span><span class="type-name">DIDPeerServiceEncoded</span><span>(</span><span class="string-literal">&quot;https://alice.did.fmgp.app/&quot;</span><span>))
-)</span></code></pre>
+)
+</span><span class="comment">// alice: AgentDIDPeer = fmgp.did.method.peer.DIDPeer2$$anon$4@4f82c453
+</span><span>
+</span><span class="identifier">alice</span><span>.</span><span class="identifier">id</span><span>.</span><span class="identifier">asDIDSubject</span><span>
+</span><span class="comment">// res3: DIDSubject = &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ&quot;
+</span><span>
+</span><span class="identifier">alice</span><span>.</span><span class="identifier">id</span><span>.</span><span class="identifier">document</span><span>.</span><span class="identifier">toJsonPretty</span><span>
+</span><span class="comment">// res4: String = &quot;&quot;&quot;{
+//   &quot;id&quot; : &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ&quot;,
+//   &quot;authentication&quot; : [
+//     {
+//       &quot;id&quot; : &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ#6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd&quot;,
+//       &quot;controller&quot; : &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ&quot;,
+//       &quot;type&quot; : &quot;JsonWebKey2020&quot;,
+//       &quot;publicKeyJwk&quot; : {
+//         &quot;kty&quot; : &quot;OKP&quot;,
+//         &quot;crv&quot; : &quot;Ed25519&quot;,
+//         &quot;x&quot; : &quot;MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA&quot;
+//       }
+//     }
+//   ],
+//   &quot;keyAgreement&quot; : [
+//     {
+//       &quot;id&quot; : &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ#6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y&quot;,
+//       &quot;controller&quot; : &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ&quot;,
+//       &quot;type&quot; : &quot;JsonWebKey2020&quot;,
+//       &quot;publicKeyJwk&quot; : {
+//         &quot;kty&quot; : &quot;OKP&quot;,
+//         &quot;crv&quot; : &quot;X25519&quot;,
+//         &quot;x&quot; : &quot;Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw&quot;
+//       }
+//     }
+//   ],
+//   &quot;service&quot; : [
+//     {
+//       &quot;id&quot; : &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ#didcommmessaging-0&quot;,
+//       &quot;type&quot; : &quot;DIDCommMessaging&quot;,
+//       &quot;serviceEndpoint&quot; : {
+//         &quot;uri&quot; : &quot;https://alice.did.fmgp.app/&quot;,
+//         &quot;accept&quot; : [
+//           &quot;didcomm/v2&quot;
+// ...</span></code></pre>
+        
+        <h3 id="resolve-did-peer-identities" class="section"><a class="anchor-link left" href="#resolve-did-peer-identities"><i class="icofont-laika link">&#xef71;</i></a>Resolve did:peer identities</h3>
+        <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">did</span><span>.</span><span class="identifier">method</span><span>.</span><span class="identifier">peer</span><span>.*
+
+</span><span class="keyword">val</span><span> </span><span class="identifier">program1</span><span> = </span><span class="type-name">DidPeerResolver</span><span>.</span><span class="identifier">didDocument</span><span>(</span><span class="type-name">DIDPeer</span><span>(</span><span class="identifier">alice</span><span>.</span><span class="identifier">id</span><span>.</span><span class="identifier">asDIDSubject</span><span>))
+</span><span class="comment">// program1: ZIO[Any, Nothing, DIDDocument] = Sync(
+//   trace = &quot;fmgp.did.method.peer.DidPeerResolver.genesisDocument(DidPeerResolver.scala:32)&quot;,
+//   eval = zio.ZIOCompanionVersionSpecific$$Lambda$19107/0x0000000804900040@6f74f3...
+</span><span>
+</span><span class="type-name">Unsafe</span><span>.</span><span class="identifier">unsafe</span><span> { </span><span class="keyword">implicit</span><span> </span><span class="identifier">unsafe</span><span> =&gt; </span><span class="comment">// Run side effect
+</span><span>  </span><span class="type-name">Runtime</span><span>.</span><span class="keyword">default</span><span>.</span><span class="identifier">unsafe</span><span>
+    .</span><span class="identifier">run</span><span>(</span><span class="identifier">program1</span><span>)
+    .</span><span class="identifier">getOrThrowFiberFailure</span><span>()
+}
+</span><span class="comment">// res5: DIDDocument = DIDDocumentClass(
+//   id = &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ&quot;,
+// ...</span></code></pre>
         
         <h2 id="trust-ping-example" class="section"><a class="anchor-link left" href="#trust-ping-example"><i class="icofont-laika link">&#xef71;</i></a>Trust Ping example</h2>
-        <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">did</span><span>.</span><span class="identifier">comm</span><span>.</span><span class="identifier">protocol</span><span>.</span><span class="identifier">trustping2</span><span>.</span><span class="identifier">_</span><span> </span><span class="comment">// For the protocol specific stuff
+        <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">did</span><span>.</span><span class="identifier">comm</span><span>.</span><span class="identifier">protocol</span><span>.</span><span class="identifier">trustping2</span><span>.* </span><span class="comment">// For the protocol // For the protocol
 </span><span>
 </span><span class="keyword">val</span><span> </span><span class="identifier">ping</span><span> = </span><span class="type-name">TrustPingWithRequestedResponse</span><span>(
-  </span><span class="identifier">from</span><span> = </span><span class="identifier">yeah</span><span> </span><span class="identifier">exactly</span><span>.</span><span class="identifier">id</span><span>,
+  </span><span class="identifier">from</span><span> = </span><span class="identifier">alice</span><span>.</span><span class="identifier">id</span><span>,
   </span><span class="identifier">to</span><span> = </span><span class="type-name">TO</span><span>(</span><span class="string-literal">&quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ&quot;</span><span>)
 )
-
+</span><span class="comment">// ping: TrustPingWithRequestedResponse = TrustPingWithRequestedResponse(
+//   id = &quot;30a2dfdb-e5bc-4224-ab4b-6bd185888834&quot;,
+//   from = &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ&quot;,
+//   to = &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ&quot;
+// )
+</span><span>
 </span><span class="identifier">ping</span><span>.</span><span class="identifier">toPlaintextMessage</span><span>.</span><span class="identifier">toJsonPretty</span><span>
-</span><span class="comment">// val res0: String = {
-//   &quot;id&quot; : &quot;3dda13f7-daa3-4ccf-a3f0-9f5f5a8fad47&quot;,
+</span><span class="comment">// res6: String = &quot;&quot;&quot;{
+//   &quot;id&quot; : &quot;30a2dfdb-e5bc-4224-ab4b-6bd185888834&quot;,
 //   &quot;type&quot; : &quot;https://didcomm.org/trust-ping/2.0/ping&quot;,
 //   &quot;to&quot; : [
-//     &quot;did:peer:2.Ez6LSkGy3e2z54uP4U9HyXJXRpaF2ytsnTuVgh6SNNmCyGZQZ.Vz6Mkjdwvf9hWc6ibZndW9B97si92DSk9hWAhGYBgP9kUFk8Z.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9ib2IuZGlkLmZtZ3AuYXBwLyIsInIiOltdLCJhIjpbImRpZGNvbW0vdjIiXX0&quot;
+//     &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ&quot;
 //   ],
 //   &quot;from&quot; : &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ&quot;,
 //   &quot;body&quot; : {
 //     &quot;response_requested&quot; : true
-//   }
-// }</span></code></pre>
+//   },
+//   &quot;typ&quot; : &quot;application/didcomm-plain+json&quot;
+// }&quot;&quot;&quot;</span></code></pre>
         
         <h2 id="encrypt" class="section"><a class="anchor-link left" href="#encrypt"><i class="icofont-laika link">&#xef71;</i></a>Encrypt</h2>
-        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="type-name">Operations</span><span>.</span><span class="identifier">_</span><span>
-</span><span class="keyword">val</span><span> </span><span class="identifier">program</span><span> = </span><span class="keyword">for</span><span> {
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="type-name">Operations</span><span>.*
+
+</span><span class="keyword">val</span><span> </span><span class="identifier">program2</span><span> = </span><span class="keyword">for</span><span> {
   </span><span class="identifier">msg</span><span> &lt;- </span><span class="identifier">authEncrypt</span><span>(</span><span class="identifier">ping</span><span>.</span><span class="identifier">toPlaintextMessage</span><span>).</span><span class="identifier">provideSomeLayer</span><span>(</span><span class="type-name">ZLayer</span><span>.</span><span class="identifier">succeed</span><span>(</span><span class="identifier">alice</span><span>))
   </span><span class="identifier">_</span><span> &lt;- </span><span class="type-name">Console</span><span>.</span><span class="identifier">printLine</span><span>(</span><span class="identifier">msg</span><span>.</span><span class="identifier">toJsonPretty</span><span>)
-} </span><span class="keyword">yield</span><span> ()
-
-</span><span class="type-name">Unsafe</span><span>.</span><span class="identifier">unsafe</span><span> { </span><span class="keyword">implicit</span><span> </span><span class="identifier">unsafe</span><span> =&gt; </span><span class="comment">// Run side effect
+} </span><span class="keyword">yield</span><span> ()</span></code></pre>
+        <pre><code class="nohighlight"><span class="type-name">Unsafe</span><span>.</span><span class="identifier">unsafe</span><span> { </span><span class="keyword">implicit</span><span> </span><span class="identifier">unsafe</span><span> =&gt; </span><span class="comment">// Run side effect
 </span><span>  </span><span class="type-name">Runtime</span><span>.</span><span class="keyword">default</span><span>.</span><span class="identifier">unsafe</span><span>
-    .</span><span class="identifier">run</span><span>(</span><span class="identifier">program</span><span>.</span><span class="identifier">provide</span><span>(</span><span class="type-name">Operations</span><span>.</span><span class="identifier">layerDefault</span><span> ++ </span><span class="type-name">DidPeerResolver</span><span>.</span><span class="identifier">layer</span><span>))
+    .</span><span class="identifier">run</span><span>(</span><span class="identifier">program2</span><span>.</span><span class="identifier">provide</span><span>(</span><span class="type-name">Operations</span><span>.</span><span class="identifier">layerDefault</span><span> ++ </span><span class="type-name">DidPeerResolver</span><span>.</span><span class="identifier">layer</span><span>))
     .</span><span class="identifier">getOrThrowFiberFailure</span><span>()
-}</span></code></pre>
+}
+</span><span class="comment">// {
+//   &quot;ciphertext&quot; : &quot;-VzKHkBgziPsmpJ0erp9-ZfcNXTLirp-Hy25kZXknTno2TZk1rkbztwLzvhvnzizusvmeffbMgbd_PaYrRe_6liXIdTfE7vEdWMrb5AjGcD6C4D9G_JVMW6378Ip-Bae50iw-M1hDNg0UPDOaSMhuqPtS5O7-NhI9wkeGul9_gR8rVP7U9fJz43MIjFNiyzEDy6FAqWOvYjnbV5JkBSCoFNnnSg6JTNRU6RzD9s_0n9QrxhtuLMDaLSe3GicRwRkIW727hU_BCIClUSAtu9o6Vu0eFPEqWOh8_s8epUrIbluK0WKtM8mKbZSf01VSbND0yayezz-KWOO59vgxDIn77QOUIb6k7BqgZF4IWj6tSut-IMJUgFqQcuRtLexkpymiAJSrICXEr4JdATTEAaHosRKoAPIWp6qiv6SCvyOTWsWXY-208JVZXoIm-FPfuxux-9mNUOL2j66xhkKfbgqVPjwyVVqx1giCzsyHEFKKkdEFDUqhfSZd0tpqY72PEjZBJh1v5TA0Jbn2aVBN6CNp7ZZ-LCDIs9UiKU2HBgD3TEMPjy2IMkuaULuTkrWqKjk-OjhOgRLgZbOlrSHynwRzJbNWPYRmBmhzLz1IGj01GJA2_IGvd46htD0PCtnTyVWHxMKvQETL99447Pxipc2T6eLh2oqe504gNXLbIlcTf3ONLKW3-cpslU3BZoD8tnI_XKzrb4dXVR0JJSwMLwbIIavJWgaHGwGlWLNHSg4OJ8gSOA9ZVVRUtbr0x6g2cRAfT0QVaJmINLx_NUmUOHhSPZb-CPlgi-R-w9flHDu2r4&quot;,
+//   &quot;protected&quot; : &quot;eyJlcGsiOnsia3R5IjoiT0tQIiwiY3J2IjoiWDI1NTE5IiwieCI6IjVILVI1c0l3Nm5kblA0MnhxZlhnQ2I5bDdGdUFOS3p4eERWTlJHMlhEU1UifSwiYXB2IjoiLWNOQ3l0eFVrSHpSRE5SckV2Vm05S0VmZzhZcUtQVnVVcVg1a0VLbU9yMCIsInNraWQiOiJkaWQ6cGVlcjoyLkV6NkxTZ2h3U0U0Mzd3bkRFMXB0M1g2aFZEVVF6U2pzSHppbnBYM1hGdk1qUkFtN3kuVno2TWtoaDFlNUNFWVlxNkpCVWNUWjZDcDJyYW5DV1JydjdZYXgzTGU0TjU5UjZkZC5TZXlKMElqb2laRzBpTENKeklqb2lhSFIwY0hNNkx5OWhiR2xqWlM1a2FXUXVabTFuY0M1aGNIQXZJaXdpY2lJNlcxMHNJbUVpT2xzaVpHbGtZMjl0YlM5Mk1pSmRmUSM2TFNnaHdTRTQzN3duREUxcHQzWDZoVkRVUXpTanNIemlucFgzWEZ2TWpSQW03eSIsImFwdSI6IlpHbGtPbkJsWlhJNk1pNUZlalpNVTJkb2QxTkZORE0zZDI1RVJURndkRE5ZTm1oV1JGVlJlbE5xYzBoNmFXNXdXRE5ZUm5aTmFsSkJiVGQ1TGxaNk5rMXJhR2d4WlRWRFJWbFpjVFpLUWxWalZGbzJRM0F5Y21GdVExZFNjblkzV1dGNE0weGxORTQxT1ZJMlpHUXVVMlY1U2pCSmFtOXBXa2N3YVV4RFNucEphbTlwWVVoU01HTklUVFpNZVRsb1lrZHNhbHBUTld0aFYxRjFXbTB4Ym1ORE5XaGpTRUYyU1dsM2FXTnBTVFpYTVRCelNXMUZhVTlzYzJsYVIyeHJXVEk1ZEdKVE9USk5hVXBrWmxFak5reFRaMmgzVTBVME16ZDNia1JGTVhCME0xZzJhRlpFVlZGNlUycHpTSHBwYm5CWU0xaEdkazFxVWtGdE4zayIsInR5cCI6ImFwcGxpY2F0aW9uL2RpZGNvbW0tZW5jcnlwdGVkK2pzb24iLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiRUNESC0xUFUrQTI1NktXIn0&quot;,
+//   &quot;recipients&quot; : [
+//     {
+//       &quot;encrypted_key&quot; : &quot;sIgNjUOSWX3qEKrWNGzWc3zI2cj6OhT2I58iFB_JuPRcYZGE7Csigdj8tKM3Tp_x5704KYVtRczA2KiPcWXcnIm93pRgv7RM&quot;,
+//       &quot;header&quot; : {
+//         &quot;kid&quot; : &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ#6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y&quot;
+//       }
+//     }
+//   ],
+//   &quot;tag&quot; : &quot;AdQxtGVpToXknTzUo2yJqhAW5q8B1Y2XBFCA6_-WvF8&quot;,
+//   &quot;iv&quot; : &quot;yKsTwk8NcBwF5H4gP3qtTA&quot;
+// }</span></code></pre>
 
         
 <hr class="footer-rule"/>
 <footer>
-  Documentation website for <em>Scala-did</em> a DID Comm library for scala.
+  Documentation website for <em>Scala-DID</em> a DID Comm library for scala.
 </footer>
 
 

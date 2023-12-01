@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="Typelevel Laika + Helium Theme" />
-  <title>Example JS</title>
+  <title>Test coverage</title>
   
   
   <meta name="description" content="Scala-did a DID Comm library for scala"/>
@@ -20,9 +20,9 @@
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono:500">
   
-  <link rel="stylesheet" type="text/css" href="helium/site/icofont.min.css" />
-    <link rel="stylesheet" type="text/css" href="helium/site/laika-helium.css" />
-  <script src="helium/site/laika-helium.js"></script>
+  <link rel="stylesheet" type="text/css" href="../helium/site/icofont.min.css" />
+    <link rel="stylesheet" type="text/css" href="../helium/site/laika-helium.css" />
+  <script src="../helium/site/laika-helium.js"></script>
   
   
   <script> /* for avoiding page load transitions */ </script>
@@ -40,7 +40,7 @@
     
   </div>
 
-  <a class="icon-link glyph-link" href="index.html"><i class="icofont-laika home" title="Home">&#xef47;</i></a>
+  <a class="icon-link glyph-link" href="../"><i class="icofont-laika home" title="Home">&#xef47;</i></a>
 
   <div class="row links">
     
@@ -87,16 +87,19 @@
   </div>
 
   <ul class="nav-list">
-    <li class="level1 active nav-leaf"><a href="#">Example JS</a></li>
-    <li class="level1 nav-leaf"><a href="external-documentation.html">External documentation</a></li>
-    <li class="level1 nav-leaf"><a href="limitations.html">Limitations</a></li>
-    <li class="level1 nav-leaf"><a href="quickstart-basic-examples.html">Basic Example</a></li>
-    <li class="level1 nav-leaf"><a href="quickstart-get-started.html">Getting Started with DIDComm Messaging in Scala</a></li>
-    <li class="level1 nav-leaf"><a href="quickstart-setup-environment.html">Setup environment</a></li>
-    <li class="level1 nav-leaf"><a href="readme.html">Scala-did</a></li>
-    <li class="level1 nav-leaf"><a href="test-coverage.html">Test coverage</a></li>
-    <li class="level1 nav-leaf"><a href="test-interoperability.html">Interoperability</a></li>
-    <li class="level1 nav-leaf"><a href="troubleshooting.html">Troubleshooting</a></li>
+    <li class="level1 nav-header">About Scala-DID</li>
+    <li class="level2 nav-leaf"><a href="../01-about/01-scala-did.html">Scala DID</a></li>
+    <li class="level2 nav-leaf"><a href="../01-about/09-external-documentation.html">External documentation</a></li>
+    <li class="level1 nav-header">Quickstart Guides</li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/01-setup-environment.html">Setup environment</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/02-install-dependency.html">Import Library</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/03-imports.html">Config imports</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/04-basic-examples.html">Basic Example</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/05-did-comm-examples.html">Getting Started with DIDComm Messaging</a></li>
+    <li class="level1 nav-header">Troubleshooting and Limitations</li>
+    <li class="level2 nav-leaf"><a href="limitations.html">Limitations</a></li>
+    <li class="level2 active nav-leaf"><a href="#">Test coverage</a></li>
+    <li class="level2 nav-leaf"><a href="troubleshooting.html">Troubleshooting</a></li>
   </ul>
 
 </nav>
@@ -105,33 +108,131 @@
 
       
 <nav id="page-nav">
-  <p class="header"><a href="#">Example JS</a></p>
+  <p class="header"><a href="#">Test coverage</a></p>
 
   <ul class="nav-list">
+    <li class="level1 nav-node"><a href="#report">Report</a></li>
+    <li class="level2 nav-leaf"><a href="#statement-coverage">Statement coverage</a></li>
+    <li class="level2 nav-leaf"><a href="#branch-coverage">Branch coverage</a></li>
+    <li class="level1 nav-leaf"><a href="#report-notes">Report notes</a></li>
+    <li class="level1 nav-leaf"><a href="#report-output">Report output</a></li>
   </ul>
 
-  <p class="footer"><a href="https://github.com/FabioPinheiro/scala-did/blob/master/docs/src/example.js.md"><i class="icofont-laika edit" title="Edit">&#xef10;</i>Source for this page</a></p>
+  <p class="footer"><a href="https://github.com/FabioPinheiro/scala-did/blob/master/docs/src/08-others/test-coverage.md"><i class="icofont-laika edit" title="Edit">&#xef10;</i>Source for this page</a></p>
 </nav>
 
 
       <main class="content">
 
-        <h1 id="example-js" class="title">Example JS</h1>
-        <p>To install my project</p>
-        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">org</span><span>.</span><span class="identifier">scalajs</span><span>.</span><span class="identifier">dom</span><span>.</span><span class="identifier">window</span><span>.</span><span class="identifier">_</span><span>
-</span><span class="keyword">import</span><span> </span><span class="identifier">jsdocs</span><span>.</span><span class="identifier">_</span><span>
-
-</span><span class="keyword">val</span><span> </span><span class="identifier">progress</span><span> = </span><span class="keyword">new</span><span> </span><span class="type-name">Progress</span><span>()
-</span><span class="identifier">node</span><span>.</span><span class="identifier">innerHTML</span><span> = </span><span class="identifier">progress</span><span>.</span><span class="identifier">tick</span><span>(</span><span class="number-literal">5</span><span>)
-</span><span class="identifier">setInterval</span><span>({ () =&gt;
-  </span><span class="comment">// `node` variable is a DOM element in scope.
-</span><span>  </span><span class="identifier">node</span><span>.</span><span class="identifier">innerHTML</span><span> = </span><span class="identifier">progress</span><span>.</span><span class="identifier">tick</span><span>(</span><span class="number-literal">5</span><span>)
-}, </span><span class="number-literal">100</span><span>)</span></code></pre>
+        <h1 id="test-coverage" class="title">Test coverage</h1>
+        <ol class="arabic">
+          <li><code>sbt clean coverage testJVM</code> - Run tests</li>
+          <li><code>sbt coverageReport</code> - Generate reports</li>
+          <li><code>sbt coverageAggregate</code> - Aggregate reports</li>
+        </ol>
+        
+        <h2 id="report" class="section"><a class="anchor-link left" href="#report"><i class="icofont-laika link">&#xef71;</i></a>Report</h2>
+        
+        <h3 id="statement-coverage" class="section"><a class="anchor-link left" href="#statement-coverage"><i class="icofont-laika link">&#xef71;</i></a>Statement coverage</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>date</th>
+              <th>all</th>
+              <th>did</th>
+              <th>did-imp</th>
+              <th>did-framework</th>
+              <th>did-resolver-web</th>
+              <th>did-resolver-peer</th>
+              <th>uniresolver</th>
+              <th>multiformats</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2022-11-26</td>
+              <td>29.21 %</td>
+              <td>25.31 %</td>
+              <td>57.60 %</td>
+              <td>NA</td>
+              <td>81.58 %</td>
+              <td>27.50 %</td>
+              <td>NA</td>
+              <td>NA</td>
+            </tr>
+            <tr>
+              <td>2022-01-31</td>
+              <td>18.88 %</td>
+              <td>14.25 %</td>
+              <td>39.63 %</td>
+              <td>NA</td>
+              <td>81.58 %</td>
+              <td>34.58 %</td>
+              <td>NA</td>
+              <td>85.77 %</td>
+            </tr>
+            <tr>
+              <td>2023-12-01</td>
+              <td>12.79 %</td>
+              <td>10.82  %</td>
+              <td>44.02 %</td>
+              <td>NA</td>
+              <td>81.58 %</td>
+              <td>81.58 %</td>
+              <td>12.33</td>
+              <td>85.77 %</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <h3 id="branch-coverage" class="section"><a class="anchor-link left" href="#branch-coverage"><i class="icofont-laika link">&#xef71;</i></a>Branch coverage</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>date</th>
+              <th>all</th>
+              <th>did</th>
+              <th>did-imp</th>
+              <th>did-framework</th>
+              <th>did-resolver-web</th>
+              <th>did-resolver-peer</th>
+              <th>uniresolver</th>
+              <th>multiformats</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2023-12-01</td>
+              <td>36.65 %</td>
+              <td>29.70 %</td>
+              <td>30.77 %</td>
+              <td>NA</td>
+              <td>75.00 %</td>
+              <td>0 %?</td>
+              <td>100.00 %</td>
+              <td>81.82 %</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <h2 id="report-notes" class="section"><a class="anchor-link left" href="#report-notes"><i class="icofont-laika link">&#xef71;</i></a>Report notes</h2>
+        <p>The aggregated report contends reports from the unpublished modules.</p>
+        
+        <h2 id="report-output" class="section"><a class="anchor-link left" href="#report-output"><i class="icofont-laika link">&#xef71;</i></a>Report output</h2>
+        <p>You should open the reports with your browser. The reports will be in each module <code>target/scala-&lt;scala-version&gt;/scoverage-report</code></p>
+        <ul>
+          <li><code>all/aggregate</code> -&gt; <code>/target/scala-3.3.1/scoverage-report/index.html</code></li>
+          <li><code>did</code> -&gt; <code>/did/jvm/target/scala-3.3.1/scoverage-report/index.html</code></li>
+          <li><code>did-imp</code> -&gt; <code>/did-imp/jvm/target/scala-3.3.1/scoverage-report/index.html</code></li>
+          <li><code>did-framework</code> -&gt; <code>/did-framework/jvm/target/scala-3.3.1/scoverage-report/index.html</code></li>
+          <li><code>did-resolver-web</code> -&gt; <code>/did-resolver-web/jvm/target/scala-3.3.1/scoverage-report/index.html</code></li>
+          <li><code>did-resolver-peer</code> -&gt; <code>/did-resolver-peer/jvm/target/scala-3.3.1/scoverage-report/index.html</code></li>
+        </ul>
 
         
 <hr class="footer-rule"/>
 <footer>
-  Documentation website for <em>Scala-did</em> a DID Comm library for scala.
+  Documentation website for <em>Scala-DID</em> a DID Comm library for scala.
 </footer>
 
 

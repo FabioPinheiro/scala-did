@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="Typelevel Laika + Helium Theme" />
-  <title>Troubleshooting</title>
+  <title>External documentation</title>
   
   
   <meta name="description" content="Scala-did a DID Comm library for scala"/>
@@ -20,9 +20,9 @@
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono:500">
   
-  <link rel="stylesheet" type="text/css" href="helium/site/icofont.min.css" />
-    <link rel="stylesheet" type="text/css" href="helium/site/laika-helium.css" />
-  <script src="helium/site/laika-helium.js"></script>
+  <link rel="stylesheet" type="text/css" href="../helium/site/icofont.min.css" />
+    <link rel="stylesheet" type="text/css" href="../helium/site/laika-helium.css" />
+  <script src="../helium/site/laika-helium.js"></script>
   
   
   <script> /* for avoiding page load transitions */ </script>
@@ -40,7 +40,7 @@
     
   </div>
 
-  <a class="icon-link glyph-link" href="index.html"><i class="icofont-laika home" title="Home">&#xef47;</i></a>
+  <a class="icon-link glyph-link" href="../"><i class="icofont-laika home" title="Home">&#xef47;</i></a>
 
   <div class="row links">
     
@@ -87,16 +87,19 @@
   </div>
 
   <ul class="nav-list">
-    <li class="level1 nav-leaf"><a href="example.js.html">Example JS</a></li>
-    <li class="level1 nav-leaf"><a href="external-documentation.html">External documentation</a></li>
-    <li class="level1 nav-leaf"><a href="limitations.html">Limitations</a></li>
-    <li class="level1 nav-leaf"><a href="quickstart-basic-examples.html">Basic Example</a></li>
-    <li class="level1 nav-leaf"><a href="quickstart-get-started.html">Getting Started with DIDComm Messaging in Scala</a></li>
-    <li class="level1 nav-leaf"><a href="quickstart-setup-environment.html">Setup environment</a></li>
-    <li class="level1 nav-leaf"><a href="readme.html">Scala-did</a></li>
-    <li class="level1 nav-leaf"><a href="test-coverage.html">Test coverage</a></li>
-    <li class="level1 nav-leaf"><a href="test-interoperability.html">Interoperability</a></li>
-    <li class="level1 active nav-leaf"><a href="#">Troubleshooting</a></li>
+    <li class="level1 nav-header">About Scala-DID</li>
+    <li class="level2 nav-leaf"><a href="01-scala-did.html">Scala DID</a></li>
+    <li class="level2 active nav-leaf"><a href="#">External documentation</a></li>
+    <li class="level1 nav-header">Quickstart Guides</li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/01-setup-environment.html">Setup environment</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/02-install-dependency.html">Import Library</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/03-imports.html">Config imports</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/04-basic-examples.html">Basic Example</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/05-did-comm-examples.html">Getting Started with DIDComm Messaging</a></li>
+    <li class="level1 nav-header">Troubleshooting and Limitations</li>
+    <li class="level2 nav-leaf"><a href="../08-others/limitations.html">Limitations</a></li>
+    <li class="level2 nav-leaf"><a href="../08-others/test-coverage.html">Test coverage</a></li>
+    <li class="level2 nav-leaf"><a href="../08-others/troubleshooting.html">Troubleshooting</a></li>
   </ul>
 
 </nav>
@@ -105,47 +108,33 @@
 
       
 <nav id="page-nav">
-  <p class="header"><a href="#">Troubleshooting</a></p>
+  <p class="header"><a href="#">External documentation</a></p>
 
   <ul class="nav-list">
   </ul>
 
-  <p class="footer"><a href="https://github.com/FabioPinheiro/scala-did/blob/master/docs/src/troubleshooting.md"><i class="icofont-laika edit" title="Edit">&#xef10;</i>Source for this page</a></p>
+  <p class="footer"><a href="https://github.com/FabioPinheiro/scala-did/blob/master/docs/src/01-about/09-external-documentation.md"><i class="icofont-laika edit" title="Edit">&#xef10;</i>Source for this page</a></p>
 </nav>
 
 
       <main class="content">
 
-        <h1 id="troubleshooting" class="title">Troubleshooting</h1>
+        <h1 id="external-documentation" class="title">External documentation</h1>
         <ul>
-          <li>On Node v16 and v17 you need use the legacy openssl:</li>
+          <li>Decentralized Identifiers (DIDs) v1.0 - W3C Proposed Recommendation 03 August 2021 <a href="https://w3c.github.io/did-core/">LINK GitHub</a> or <a href="https://www.w3.org/TR/did-core/">LINK W3C</a></li>
+          <li>DID Comm - <a href="https://identity.foundation/didcomm-messaging/spec/">https://identity.foundation/didcomm-messaging/spec/</a></li>
+          <li>DID Comm protocols - <a href="https://didcomm.org/search/?page=1">https://didcomm.org/search/?page=1</a></li>
+          <li>DID Comm - Wallet and Credential Interaction (WACI) - <a href="https://identity.foundation/waci-didcomm/">https://identity.foundation/waci-didcomm/</a></li>
+          <li>Future Work (maybe):</li>
         </ul>
         <ul>
-          <li>Error: <code>error:0308010C:digital envelope routines::unsupported</code></li>
-        </ul>
-        <ul>
-          <li>
-            <p>Solution:</p>
-            <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">export</span><span> NODE_OPTIONS=--openssl-legacy-provider</span></code></pre>
-          </li>
-          <li>
-            <p>Missing jsdom</p>
-          </li>
-        </ul>
-        <ul>
-          <li>Error: Error: Cannot find module &#39;jsdom&#39;</li>
-        </ul>
-        <ul>
-          <li>
-            Solution:
-            <pre><code>yarn add jsdom --dev</code></pre>
-          </li>
+          <li>DID Credentials -&gt; <a href="https://www.w3.org/TR/vc-data-model/">Verifiable Credentials Data Model v1.1</a></li>
         </ul>
 
         
 <hr class="footer-rule"/>
 <footer>
-  Documentation website for <em>Scala-did</em> a DID Comm library for scala.
+  Documentation website for <em>Scala-DID</em> a DID Comm library for scala.
 </footer>
 
 

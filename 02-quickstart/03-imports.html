@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="Typelevel Laika + Helium Theme" />
-  <title>Limitations</title>
+  <title>Config imports</title>
   
   
   <meta name="description" content="Scala-did a DID Comm library for scala"/>
@@ -20,9 +20,9 @@
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono:500">
   
-  <link rel="stylesheet" type="text/css" href="helium/site/icofont.min.css" />
-    <link rel="stylesheet" type="text/css" href="helium/site/laika-helium.css" />
-  <script src="helium/site/laika-helium.js"></script>
+  <link rel="stylesheet" type="text/css" href="../helium/site/icofont.min.css" />
+    <link rel="stylesheet" type="text/css" href="../helium/site/laika-helium.css" />
+  <script src="../helium/site/laika-helium.js"></script>
   
   
   <script> /* for avoiding page load transitions */ </script>
@@ -40,7 +40,7 @@
     
   </div>
 
-  <a class="icon-link glyph-link" href="index.html"><i class="icofont-laika home" title="Home">&#xef47;</i></a>
+  <a class="icon-link glyph-link" href="../"><i class="icofont-laika home" title="Home">&#xef47;</i></a>
 
   <div class="row links">
     
@@ -87,16 +87,19 @@
   </div>
 
   <ul class="nav-list">
-    <li class="level1 nav-leaf"><a href="example.js.html">Example JS</a></li>
-    <li class="level1 nav-leaf"><a href="external-documentation.html">External documentation</a></li>
-    <li class="level1 active nav-leaf"><a href="#">Limitations</a></li>
-    <li class="level1 nav-leaf"><a href="quickstart-basic-examples.html">Basic Example</a></li>
-    <li class="level1 nav-leaf"><a href="quickstart-get-started.html">Getting Started with DIDComm Messaging in Scala</a></li>
-    <li class="level1 nav-leaf"><a href="quickstart-setup-environment.html">Setup environment</a></li>
-    <li class="level1 nav-leaf"><a href="readme.html">Scala-did</a></li>
-    <li class="level1 nav-leaf"><a href="test-coverage.html">Test coverage</a></li>
-    <li class="level1 nav-leaf"><a href="test-interoperability.html">Interoperability</a></li>
-    <li class="level1 nav-leaf"><a href="troubleshooting.html">Troubleshooting</a></li>
+    <li class="level1 nav-header">About Scala-DID</li>
+    <li class="level2 nav-leaf"><a href="../01-about/01-scala-did.html">Scala DID</a></li>
+    <li class="level2 nav-leaf"><a href="../01-about/09-external-documentation.html">External documentation</a></li>
+    <li class="level1 nav-header">Quickstart Guides</li>
+    <li class="level2 nav-leaf"><a href="01-setup-environment.html">Setup environment</a></li>
+    <li class="level2 nav-leaf"><a href="02-install-dependency.html">Import Library</a></li>
+    <li class="level2 active nav-leaf"><a href="#">Config imports</a></li>
+    <li class="level2 nav-leaf"><a href="04-basic-examples.html">Basic Example</a></li>
+    <li class="level2 nav-leaf"><a href="05-did-comm-examples.html">Getting Started with DIDComm Messaging</a></li>
+    <li class="level1 nav-header">Troubleshooting and Limitations</li>
+    <li class="level2 nav-leaf"><a href="../08-others/limitations.html">Limitations</a></li>
+    <li class="level2 nav-leaf"><a href="../08-others/test-coverage.html">Test coverage</a></li>
+    <li class="level2 nav-leaf"><a href="../08-others/troubleshooting.html">Troubleshooting</a></li>
   </ul>
 
 </nav>
@@ -105,54 +108,31 @@
 
       
 <nav id="page-nav">
-  <p class="header"><a href="#">Limitations</a></p>
+  <p class="header"><a href="#">Config imports</a></p>
 
   <ul class="nav-list">
-    <li class="level1 nav-leaf"><a href="#limitations-in-js-atm">Limitations in JS ATM</a></li>
-    <li class="level1 nav-leaf"><a href="#warning-about-arbitrary-json"><strong>Warning</strong> about arbitrary JSON</a></li>
+    <li class="level1 nav-leaf"><a href="#common-imports">Common Imports</a></li>
   </ul>
 
-  <p class="footer"><a href="https://github.com/FabioPinheiro/scala-did/blob/master/docs/src/limitations.md"><i class="icofont-laika edit" title="Edit">&#xef10;</i>Source for this page</a></p>
+  <p class="footer"><a href="https://github.com/FabioPinheiro/scala-did/blob/master/docs/src/02-quickstart/03-imports.md"><i class="icofont-laika edit" title="Edit">&#xef10;</i>Source for this page</a></p>
 </nav>
 
 
       <main class="content">
 
-        <h1 id="limitations" class="title">Limitations</h1>
+        <h1 id="config-imports" class="title">Config imports</h1>
         
-        <h2 id="limitations-in-js-atm" class="section"><a class="anchor-link left" href="#limitations-in-js-atm"><i class="icofont-laika link">&#xef71;</i></a>Limitations in JS ATM</h2>
-        <p>ATM no library has native JavaScript support for <code>ECHD-1PU</code> and <code>XC20P</code>.</p>
-        <ul>
-          <li><code>ECHD-1PU</code> is used to create AUTHCRYPT message</li>
-          <li><code>XC20P</code> is optional and is used for content encryption of the message on ANONCRYPT</li>
-        </ul>
-        <p><a href="https://identity.foundation/didcomm-messaging/spec/#sender-authenticated-encryption">For an encrypted DIDComm message, the JWA of <code>ECDH-1PU</code> MUST be used within the structure of a JWE.</a></p>
-        <p>The <code>XC20P</code> used for Anoncrypt but is optional.</p>
-        <p>You can read the <a href="https://hackmd.io/@IyhpRay4QVC_ozugDsQAQg/S1QlYJN0d">JavaScript JOSE Proposal</a> from DIF (Decentralized Identity Foundation).
-        Also the discussion on the <code>jose</code> npm Library <a href="https://github.com/panva/jose/discussions/237">https://github.com/panva/jose/discussions/237</a></p>
-        
-        <h2 id="warning-about-arbitrary-json" class="section"><a class="anchor-link left" href="#warning-about-arbitrary-json"><i class="icofont-laika link">&#xef71;</i></a><strong>Warning</strong> about arbitrary JSON</h2>
-        <ul>
-          <li><strong>Considerations about potential attacks on arbitrary JSON</strong></li>
-        </ul>
-        <p>ATM the field <code>attachments</code> in <code>PlaintextMessage</code> is arbitrary JSON.
-        Like almost all json decoder libraries is easy for the final user to introduce potential well-known DOS attacks vectors.</p>
-        <p><strong>Solution one</strong></p>
-        <p>We plan to make a parametric <code>[T]</code> version of <code>PlaintextMessage</code> where the <code>attachments</code> is a type <code>T</code> (defined by the user).
-        On this version, the user needs to provide a <code>given</code> that encoded that type at compile time!</p>
-        <p>We will provide a macro that generates this decoder at compile time for <code>T</code>. Based on all DID Comm message types the user wants to support.</p>
-        <p><code>T</code> is the union type of all DID Comm message types supported by the user.
-        The specialized decoder of a message will be chosen by the field <code>type</code> of the message.</p>
-        <p>With the macro provided by <code>zio.json</code>. The user can automatically generate highly optimized encoders and decoders at compile type. For each DID Comm message types.</p>
-        <p><strong>Solution two</strong></p>
-        <p>This solution will be an addition with what we have.</p>
-        <p>We will have a method on <code>PlaintextMessage</code>, where the attachments data will be bytes/string.</p>
-        <p>So the user can do whatever he wants. <em>It still has the same vulnerabilities considerations as what we have, but is no longer our responsibility</em></p>
+        <h2 id="common-imports" class="section"><a class="anchor-link left" href="#common-imports"><i class="icofont-laika link">&#xef71;</i></a>Common Imports</h2>
+        <p>Here are the usfull imports for most of the cases:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">zio</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">zio</span><span>.</span><span class="identifier">json</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">did</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">did</span><span>.</span><span class="identifier">comm</span><span>.</span><span class="identifier">_</span></code></pre>
 
         
 <hr class="footer-rule"/>
 <footer>
-  Documentation website for <em>Scala-did</em> a DID Comm library for scala.
+  Documentation website for <em>Scala-DID</em> a DID Comm library for scala.
 </footer>
 
 

@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="Typelevel Laika + Helium Theme" />
-  <title>Scala-did</title>
+  <title>Scala DID</title>
   
   
   <meta name="description" content="Scala-did a DID Comm library for scala"/>
@@ -20,9 +20,9 @@
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono:500">
   
-  <link rel="stylesheet" type="text/css" href="helium/site/icofont.min.css" />
-    <link rel="stylesheet" type="text/css" href="helium/site/laika-helium.css" />
-  <script src="helium/site/laika-helium.js"></script>
+  <link rel="stylesheet" type="text/css" href="../helium/site/icofont.min.css" />
+    <link rel="stylesheet" type="text/css" href="../helium/site/laika-helium.css" />
+  <script src="../helium/site/laika-helium.js"></script>
   
   
   <script> /* for avoiding page load transitions */ </script>
@@ -40,7 +40,7 @@
     
   </div>
 
-  <a class="icon-link glyph-link" href="index.html"><i class="icofont-laika home" title="Home">&#xef47;</i></a>
+  <a class="icon-link glyph-link" href="../"><i class="icofont-laika home" title="Home">&#xef47;</i></a>
 
   <div class="row links">
     
@@ -87,16 +87,19 @@
   </div>
 
   <ul class="nav-list">
-    <li class="level1 nav-leaf"><a href="example.js.html">Example JS</a></li>
-    <li class="level1 nav-leaf"><a href="external-documentation.html">External documentation</a></li>
-    <li class="level1 nav-leaf"><a href="limitations.html">Limitations</a></li>
-    <li class="level1 nav-leaf"><a href="quickstart-basic-examples.html">Basic Example</a></li>
-    <li class="level1 nav-leaf"><a href="quickstart-get-started.html">Getting Started with DIDComm Messaging in Scala</a></li>
-    <li class="level1 nav-leaf"><a href="quickstart-setup-environment.html">Setup environment</a></li>
-    <li class="level1 active nav-leaf"><a href="#">Scala-did</a></li>
-    <li class="level1 nav-leaf"><a href="test-coverage.html">Test coverage</a></li>
-    <li class="level1 nav-leaf"><a href="test-interoperability.html">Interoperability</a></li>
-    <li class="level1 nav-leaf"><a href="troubleshooting.html">Troubleshooting</a></li>
+    <li class="level1 nav-header">About Scala-DID</li>
+    <li class="level2 active nav-leaf"><a href="#">Scala DID</a></li>
+    <li class="level2 nav-leaf"><a href="09-external-documentation.html">External documentation</a></li>
+    <li class="level1 nav-header">Quickstart Guides</li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/01-setup-environment.html">Setup environment</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/02-install-dependency.html">Import Library</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/03-imports.html">Config imports</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/04-basic-examples.html">Basic Example</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/05-did-comm-examples.html">Getting Started with DIDComm Messaging</a></li>
+    <li class="level1 nav-header">Troubleshooting and Limitations</li>
+    <li class="level2 nav-leaf"><a href="../08-others/limitations.html">Limitations</a></li>
+    <li class="level2 nav-leaf"><a href="../08-others/test-coverage.html">Test coverage</a></li>
+    <li class="level2 nav-leaf"><a href="../08-others/troubleshooting.html">Troubleshooting</a></li>
   </ul>
 
 </nav>
@@ -105,71 +108,55 @@
 
       
 <nav id="page-nav">
-  <p class="header"><a href="#">Scala-did</a></p>
+  <p class="header"><a href="#">Scala DID</a></p>
 
   <ul class="nav-list">
-    <li class="level1 nav-leaf"><a href="#getting-started-with-scala-did">Getting Started with Scala-did</a></li>
-    <li class="level1 nav-leaf"><a href="#site-map">Site Map</a></li>
+    <li class="level1 nav-leaf"><a href="#badges">Badges</a></li>
+    <li class="level1 nav-node"><a href="#design-goals">Design Goals</a></li>
+    <li class="level2 nav-leaf"><a href="#specification-compliant">Specification compliant</a></li>
+    <li class="level2 nav-leaf"><a href="#purely-functional">Purely Functional</a></li>
+    <li class="level2 nav-leaf"><a href="#simples-to-use">Simples to use</a></li>
   </ul>
 
-  <p class="footer"><a href="https://github.com/FabioPinheiro/scala-did/blob/master/docs/src/readme.md"><i class="icofont-laika edit" title="Edit">&#xef10;</i>Source for this page</a></p>
+  <p class="footer"><a href="https://github.com/FabioPinheiro/scala-did/blob/master/docs/src/01-about/01-scala-did.md"><i class="icofont-laika edit" title="Edit">&#xef10;</i>Source for this page</a></p>
 </nav>
 
 
       <main class="content">
 
-        <h1 id="scala-did" class="title">Scala-did</h1>
-        <p>A Scala &amp; Scala.js implementation of DID and DID Comm messaging spec.</p>
+        <h1 id="scala-did" class="title">Scala DID</h1>
+        <p>Scala DID is a Scala/ScalaJS library for DID and DIDcomm v2.</p>
         <p>DIDComm is a secure messaging protocol for decentralized identities (DIDs).
         This library allows you to easily integrate DIDComm messaging into your application.</p>
+        <p>The one of the main goals of this library is to make DID Comm v2 <strong>type safety</strong> and <strong>easy to use</strong>.</p>
+        <p>The <a href="https://github.com/FabioPinheiro/scala-did">repository</a> also contes the <a href="https://did.fmgp.app/"><strong>LIVE DEMO (DIDComm&#39;s Sandbox)</strong></a>
+        The <strong>PoC Mediator</strong> was move to the <a href="https://github.com/input-output-hk/atala-prism-mediator">Atala PRISM DID Comm Mediator</a> where a production ready mediator is being developed and maintain.</p>
         
-        <h2 id="getting-started-with-scala-did" class="section"><a class="anchor-link left" href="#getting-started-with-scala-did"><i class="icofont-laika link">&#xef71;</i></a>Getting Started with Scala-did</h2>
-        <p>To install ScalaDID in a scala project</p>
-        <pre class="keep-together pdf epub"><code class="nohighlight"><span> </span><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;app.fmgp&quot;</span><span> %% </span><span class="string-literal">&quot;did&quot;</span><span> % </span><span class="number-literal">0.1.0</span><span>-</span><span class="type-name">M16</span><span> </span><span class="comment">// for DID and DID Comm
-</span><span> </span><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;app.fmgp&quot;</span><span> %% </span><span class="string-literal">&quot;did-imp&quot;</span><span> % </span><span class="number-literal">0.1.0</span><span>-</span><span class="type-name">M16</span><span> </span><span class="comment">// for crypto implementation
-</span><span> </span><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;app.fmgp&quot;</span><span> %% </span><span class="string-literal">&quot;did-framework&quot;</span><span> % </span><span class="number-literal">0.1.0</span><span>-</span><span class="type-name">M16</span><span> </span><span class="comment">//for utils
-</span><span> </span><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;app.fmgp&quot;</span><span> %% </span><span class="string-literal">&quot;did-peer&quot;</span><span> % </span><span class="number-literal">0.1.0</span><span>-</span><span class="type-name">M16</span><span> </span><span class="comment">// for resolver of the did method `peer`
-</span><span> </span><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;app.fmgp&quot;</span><span> %% </span><span class="string-literal">&quot;did-web&quot;</span><span> % </span><span class="number-literal">0.1.0</span><span>-</span><span class="type-name">M16</span><span> </span><span class="comment">// for resolver the did method `web`
-</span><span> </span><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;app.fmgp&quot;</span><span> %% </span><span class="string-literal">&quot;did-uniresolver&quot;</span><span> % </span><span class="number-literal">0.1.0</span><span>-</span><span class="type-name">M16</span><span> </span><span class="comment">// for calling the resolver uniresolver</span></code></pre>
-        <p>In a crossProject for the JSPlatform and JVMPlatform this should be <code>%%%</code> instead of <code>%%</code></p>
+        <h2 id="badges" class="section"><a class="anchor-link left" href="#badges"><i class="icofont-laika link">&#xef71;</i></a>Badges</h2>
+        <p><img src="https://img.shields.io/maven-central/v/app.fmgp/did_3" alt="Maven Central">
+        <a href="https://github.com/FabioPinheiro/scala-did/actions/workflows/ci.yml"><img src="https://github.com/FabioPinheiro/scala-did/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+        <a href="https://github.com/FabioPinheiro/scala-did/actions/workflows/scala-steward.yml"><img src="https://github.com/FabioPinheiro/scala-did/actions/workflows/scala-steward.yml/badge.svg" alt="Scala Steward"></a></p>
+        <p><a href="https://index.scala-lang.org/fabiopinheiro/scala-did/did"><img src="https://index.scala-lang.org/fabiopinheiro/scala-did/did/latest-by-scala-version.svg?platform=jvm" alt="did Scala version support"></a>
+        <a href="https://index.scala-lang.org/fabiopinheiro/scala-did/did"><img src="https://index.scala-lang.org/fabiopinheiro/scala-did/did/latest-by-scala-version.svg?platform=sjs1" alt="did Scala version support"></a></p>
         
-        <h2 id="site-map" class="section"><a class="anchor-link left" href="#site-map"><i class="icofont-laika link">&#xef71;</i></a>Site Map</h2>
-        <ul>
-          <li>This readme Scala-did (REAMDE.md)</li>
-          <li><a href="external-documentation.html">External documentation</a></li>
-          <li><strong>Quickstart</strong></li>
-        </ul>
-        <ul>
-          <li><a href="quickstart-get-started.html">Get Started</a></li>
-        </ul>
-        <ul>
-          <li><a href="quickstart-basic-examples.html">Basic Examples</a></li>
-        </ul>
-        <ul>
-          <li>
-            <a href="quickstart-setup-environment.html">Setup Environment</a>
-            <ul>
-              <li><a href="quickstart-setup-environment.html#scala-cli-on-docker">scala-cli on docker</a>- recommended way just to get the feeling of the library</li>
-              <li><a href="quickstart-setup-environment.html#sbt-setup">sbt setup</a> - for any project.</li>
-              <li><a href="quickstart-setup-environment.html#coursier-download">coursier download</a>
-              with some code samples</li>
-            </ul>
-          </li>
-          <li><strong>Test</strong></li>
-        </ul>
-        <ul>
-          <li><a href="test-coverage.html">Test coverage</a></li>
-        </ul>
-        <ul>
-          <li><a href="test-interoperability.html">Interoperability</a></li>
-          <li><a href="limitations.html">Limitations</a></li>
-          <li><a href="troubleshooting.html">Troubleshooting</a></li>
-        </ul>
+        <h2 id="design-goals" class="section"><a class="anchor-link left" href="#design-goals"><i class="icofont-laika link">&#xef71;</i></a>Design Goals</h2>
+        
+        <h3 id="specification-compliant" class="section"><a class="anchor-link left" href="#specification-compliant"><i class="icofont-laika link">&#xef71;</i></a>Specification compliant</h3>
+        <p>We tryied to follow the <a href="https://identity.foundation/didcomm-messaging/spec/">DID Comm Specification</a>.</p>
+        
+        <h3 id="purely-functional" class="section"><a class="anchor-link left" href="#purely-functional"><i class="icofont-laika link">&#xef71;</i></a>Purely Functional</h3>
+        <p>The Library API is <strong>purely functional</strong>.
+        The internal implementetion tries also to be <strong>purely functional</strong>, and any call to the dependency libory (for cryptography) encapsulates and handel the error in a Functional way.
+        All the error are value so the user know exactly what to expect by the signatures of the methods. </p>
+        
+        <h3 id="simples-to-use" class="section"><a class="anchor-link left" href="#simples-to-use"><i class="icofont-laika link">&#xef71;</i></a>Simples to use</h3>
+        <p><code>&quot;But I just want to send/read a message!&quot;</code> - We are create a Framework to facilitate some of the mundane tasks and boilerplate code. Like to open ws connections or making http calls.</p>
+        <p>We also have an implementation for most of the <a href="https://didcomm.org/">DID Comm Protocalls</a> of the official repository.</p>
 
         
 <hr class="footer-rule"/>
 <footer>
-  Documentation website for <em>Scala-did</em> a DID Comm library for scala.
+  Documentation website for <em>Scala-DID</em> a DID Comm library for scala.
 </footer>
 
 
