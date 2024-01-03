@@ -37,6 +37,7 @@ Following is a partial list of companies and project using DID Comm to craft app
 Want to see your project here? [Submit a PR]
 
 - [DID Comm - Playground](https://did.fmgp.app/)
+- [DID Comm Action - Send messages from Github jobs](https://github.com/fabiopinheiro/did-comm-action)
 - [Atala PRISM](https://atalaprism.io/)
   - [DID Comm Mediator](https://github.com/input-output-hk/atala-prism-mediator)
 

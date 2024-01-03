@@ -2,7 +2,7 @@
 
 Setup an environment for quick start
 
-The Library is published to sonatype maven:
+The Library is published to ![Maven Central](https://img.shields.io/maven-central/v/app.fmgp/did_3) through sonatype maven.
 
 ## scala-cli on docker
 
