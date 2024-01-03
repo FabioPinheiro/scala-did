@@ -54,11 +54,6 @@ object ResolverTool {
     },
     code("DID Resolver Page"),
     p(
-      "The supports any did method from the ",
-      a(href := "https://dev.uniresolver.io/", target := "_blank", "Universal Resolver"),
-      " is disabled due to the CORS policy been blocked. But is still access directly."
-    ),
-    p(
       "Agent: ",
       Global.makeSelectElementDID(didVar),
       " ",

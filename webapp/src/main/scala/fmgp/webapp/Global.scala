@@ -85,7 +85,7 @@ object Global {
     typings.mermaid.mod.default.init(config, htmlPath)
   }
 
-  val messageStorageVar = Var[MessageStorage](initial = MessageStorage.example)
+  val messageStorageVar = Var[MessageStorage](initial = MessageStorage.empty)
 
   /** Store in BD */
   def messageSend(msg: SignedMessage | EncryptedMessage, from: FROM, plaintext: PlaintextMessage) =
