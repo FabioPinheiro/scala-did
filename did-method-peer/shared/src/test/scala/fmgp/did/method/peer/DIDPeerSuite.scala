@@ -177,6 +177,12 @@ class DIDPeerSuite extends ZSuite {
   // ##############################################################################################
   // New DIDPeerServiceEncoded -> because of  https://github.com/Indicio-tech/didcomm-demo/issues/2
 
+  /** Old example of the DID Peer's services
+    *
+    * This example will eventually be removed. Since 'serviceEndpoint' is a string instead of object with 'uri',
+    * 'routingKeys' and 'accept' properties inside.
+    */
+  @deprecated("serviceEndpoint with old structure")
   val ex1Str =
     """[{"t":"dm","s":"https://did.fmgp.app","r":[],"a":["didcomm/v2"]},{"t":"dm","s":"ws://did.fmgp.app","r":[],"a":["didcomm/v2"]}]"""
   val ex1AfterRemoveAbbreviation =
@@ -240,6 +246,7 @@ class DIDPeerSuite extends ZSuite {
       |]""".stripMargin.replaceAll("\n", "").replaceAll(" ", "")
 
   test("test DIDPeerServiceEncoded abbreviation ex1") {
+    @scala.annotation.nowarn("cat=deprecation")
     val ret = DIDPeerServiceEncoded.abbreviation(ex1Str.fromJson[Json].getOrElse(???))
     assertEquals(
       ret.toJson,
@@ -256,6 +263,7 @@ class DIDPeerSuite extends ZSuite {
   }
 
   test("test DIDPeerServiceEncoded get services ex1") {
+    @scala.annotation.nowarn("cat=deprecation")
     val service = DIDPeerServiceEncodedNew(Base64.encode(ex1Str))
       .getDIDService(didSubject = DIDSubject("did:test:s1"), previouslyNumberOfService = 0)
     assertEquals(service.size, 2)
