@@ -12,6 +12,7 @@ import DIDPeerExamples._
 import fmgp.did.method.peer.DidPeerResolver
 import zio.json.ast.Json
 import fmgp.util.Base64
+import scala.util.matching.Regex
 
 /** didResolverPeerJVM/testOnly fmgp.did.method.peer.DIDPeerSuite */
 class DIDPeerSuite extends ZSuite {
@@ -266,5 +267,34 @@ class DIDPeerSuite extends ZSuite {
       .getDIDService(didSubject = DIDSubject("did:test:s2"), previouslyNumberOfService = 0)
     assertEquals(service.size, 1)
     assertEquals(service.toJson, ex2Services)
+  }
+
+  test("method makeAgent must fill the 'kid' based on index") {
+    val alice = DIDPeer2.makeAgent(
+      Seq(
+        OKPPrivateKey( // keyAgreement
+          kty = KTY.OKP,
+          crv = Curve.X25519,
+          d = "Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c",
+          x = "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw",
+          kid = None
+        ),
+        OKPPrivateKey( // keyAuthentication
+          kty = KTY.OKP,
+          crv = Curve.Ed25519,
+          d = "INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug",
+          x = "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA",
+          kid = None
+        )
+      )
+    )
+
+    val kidPattern: Regex = "^.*#key-[0-9]+$".r
+
+    alice.keyStore.keys.foreach { key =>
+      key.kid match
+        case None      => fail("kid must be define")
+        case Some(kid) => assert(kidPattern.matches(kid), "'kid' must follow the kid pattern")
+    }
   }
 }
