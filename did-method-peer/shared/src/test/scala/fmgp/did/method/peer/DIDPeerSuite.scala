@@ -12,6 +12,7 @@ import DIDPeerExamples._
 import fmgp.did.method.peer.DidPeerResolver
 import zio.json.ast.Json
 import fmgp.util.Base64
+import scala.util.matching.Regex
 
 /** didResolverPeerJVM/testOnly fmgp.did.method.peer.DIDPeerSuite */
 class DIDPeerSuite extends ZSuite {
@@ -176,6 +177,12 @@ class DIDPeerSuite extends ZSuite {
   // ##############################################################################################
   // New DIDPeerServiceEncoded -> because of  https://github.com/Indicio-tech/didcomm-demo/issues/2
 
+  /** Old example of the DID Peer's services
+    *
+    * This example will eventually be removed. Since 'serviceEndpoint' is a string instead of object with 'uri',
+    * 'routingKeys' and 'accept' properties inside.
+    */
+  @deprecated("serviceEndpoint with old structure")
   val ex1Str =
     """[{"t":"dm","s":"https://did.fmgp.app","r":[],"a":["didcomm/v2"]},{"t":"dm","s":"ws://did.fmgp.app","r":[],"a":["didcomm/v2"]}]"""
   val ex1AfterRemoveAbbreviation =
@@ -239,6 +246,7 @@ class DIDPeerSuite extends ZSuite {
       |]""".stripMargin.replaceAll("\n", "").replaceAll(" ", "")
 
   test("test DIDPeerServiceEncoded abbreviation ex1") {
+    @scala.annotation.nowarn("cat=deprecation")
     val ret = DIDPeerServiceEncoded.abbreviation(ex1Str.fromJson[Json].getOrElse(???))
     assertEquals(
       ret.toJson,
@@ -255,6 +263,7 @@ class DIDPeerSuite extends ZSuite {
   }
 
   test("test DIDPeerServiceEncoded get services ex1") {
+    @scala.annotation.nowarn("cat=deprecation")
     val service = DIDPeerServiceEncodedNew(Base64.encode(ex1Str))
       .getDIDService(didSubject = DIDSubject("did:test:s1"), previouslyNumberOfService = 0)
     assertEquals(service.size, 2)
@@ -266,5 +275,34 @@ class DIDPeerSuite extends ZSuite {
       .getDIDService(didSubject = DIDSubject("did:test:s2"), previouslyNumberOfService = 0)
     assertEquals(service.size, 1)
     assertEquals(service.toJson, ex2Services)
+  }
+
+  test("method makeAgent must fill the 'kid' based on index") {
+    val alice = DIDPeer2.makeAgent(
+      Seq(
+        OKPPrivateKey( // keyAgreement
+          kty = KTY.OKP,
+          crv = Curve.X25519,
+          d = "Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c",
+          x = "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw",
+          kid = None
+        ),
+        OKPPrivateKey( // keyAuthentication
+          kty = KTY.OKP,
+          crv = Curve.Ed25519,
+          d = "INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug",
+          x = "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA",
+          kid = None
+        )
+      )
+    )
+
+    val kidPattern: Regex = "^.*#key-[0-9]+$".r
+
+    alice.keyStore.keys.foreach { key =>
+      key.kid match
+        case None      => fail("kid must be define")
+        case Some(kid) => assert(kidPattern.matches(kid), "'kid' must follow the kid pattern")
+    }
   }
 }

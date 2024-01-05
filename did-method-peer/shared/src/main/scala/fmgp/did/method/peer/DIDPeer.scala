@@ -36,28 +36,29 @@ case class DIDPeer2(elements: Seq[DIDPeer2.Element]) extends DIDPeer {
   def numalgo: 2 = 2
   def specificId: String = "" + numalgo + elements.map(_.encode).mkString(".", ".", "")
 
+  def indexedElements = elements.zipWithIndex
+
   override def document: DIDDocument = DIDDocumentClass(
     id = this,
     authentication = Some(
-      elements
-        .collect { case e: DIDPeer2.ElementV =>
-          VerificationMethodEmbeddedJWK(
-            id = this.string + "#" + e.mb.value.drop(1),
-            controller = this.did,
-            `type` = "JsonWebKey2020",
-            publicKeyJwk = OKPPublicKey(
-              kty = KTY.OKP,
-              crv = Curve.Ed25519, // TODO PLZ FIX BLACKMAGIC of did:peer! (zero documentation & unexpected logic)
-              x = DIDPeer.decodeKey(e.mb.value),
-              kid = None
-            )
+      indexedElements.collect { case (e: DIDPeer2.ElementV, index: Int) =>
+        VerificationMethodEmbeddedJWK(
+          id = this.string + "#key-" + (index + 1),
+          controller = this.did,
+          `type` = "JsonWebKey2020",
+          publicKeyJwk = OKPPublicKey(
+            kty = KTY.OKP,
+            crv = Curve.Ed25519, // TODO PLZ FIX BLACKMAGIC of did:peer! (zero documentation & unexpected logic)
+            x = DIDPeer.decodeKey(e.mb.value),
+            kid = None
           )
-        }
+        )
+      }
     ),
     keyAgreement = Some(
-      elements.collect { case e: DIDPeer2.ElementE =>
+      indexedElements.collect { case (e: DIDPeer2.ElementE, index: Int) =>
         VerificationMethodEmbeddedJWK(
-          id = this.string + "#" + e.mb.value.drop(1),
+          id = this.string + "#key-" + (index + 1),
           controller = this.did,
           `type` = "JsonWebKey2020",
           publicKeyJwk = OKPPublicKey(
@@ -117,7 +118,15 @@ object DIDPeer2 {
   def makeAgent(keySeq: Seq[PrivateKey], service: Seq[DIDPeerServiceEncoded] = Seq.empty): DIDPeer.AgentDIDPeer =
     new DIDPeer.AgentDIDPeer {
       override val id: DIDPeer2 = apply(keySeq, service)
-      override val keyStore: KeyStore = KeyStore(keySeq.map(k => keyKidAbsolute(k, id)).toSet)
+      override val keyStore: KeyStore = KeyStore(
+        keySeq.zipWithIndex.map { case (key, index) =>
+          key match
+            case k @ OKPPrivateKey(kty, crv, d, x, Some(kid))   => k
+            case k @ OKPPrivateKey(kty, crv, d, x, None)        => k.copy(kid = Some(id.did + "#key-" + (index + 1)))
+            case k @ ECPrivateKey(kty, crv, d, x, y, Some(kid)) => k
+            case k @ ECPrivateKey(kty, crv, d, x, y, None)      => k.copy(kid = Some(id.did + "#key-" + (index + 1)))
+        }.toSet
+      )
     }
 
   def keyToElement(key: PrivateKey) = key match {
@@ -139,6 +148,8 @@ object DIDPeer2 {
     case ECPrivateKey(kty, crv, d, x, y, kid)     => ??? // TODO
   }
 
+  /** This is the old (undefined) format of kid based on the key's encoded */
+  @deprecated("The new format of the kid is based on index")
   def keyKidAbsolute(key: PrivateKey, did: DIDPeer) = key match
     case k @ OKPPrivateKey(kty, crv, d, x, kid) =>
       k.copy(kid = Some(did.did + "#" + keyToElement(k).encode.drop(2))) // FIXME .drop(2) 'Sz'

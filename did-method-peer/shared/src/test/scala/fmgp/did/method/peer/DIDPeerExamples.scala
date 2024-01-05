@@ -63,13 +63,11 @@ object DIDPeerExamples {
        {
            "id": "did:peer:2.Ez6LSbysY2xFMRpGMhb7tFTLMpeuPRaqaWM1yECx2AtzE3KCc.Vz6MkqRYqQiSgvZQdnBytw86Qbs2ZWUkGv22od935YF4s8M7V.Vz6MkgoLTnTypo3tDRwCkZXSccTPHRLhF4ZnjhueYAFpEX6vg.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9lbmRwb2ludCIsInIiOlsiZGlkOmV4YW1wbGU6c29tZW1lZGlhdG9yI3NvbWVrZXkiXSwiYSI6WyJkaWRjb21tL3YyIiwiZGlkY29tbS9haXAyO2Vudj1yZmM1ODciXX0#didcommmessaging-0",
            "type": "DIDCommMessaging",
-           "serviceEndpoint": "https://example.com/endpoint",
-           "routingKeys": [
-               "did:example:somemediator#somekey"
-           ],
-           "accept": [
-                "didcomm/v2", "didcomm/aip2;env=rfc587"
-           ]
+           "serviceEndpoint": {
+               "uri":"https://example.com/endpoint",
+               "routingKeys": ["did:example:somemediator#somekey"],
+               "accept": ["didcomm/v2", "didcomm/aip2;env=rfc587"]
+           }
        }
    ]
 }"""
@@ -79,11 +77,16 @@ object DIDPeerExamples {
 
   val myExampleDID =
     "did:peer:2.Ez6LSj4X4MjeLXLi6Bnd8gp4crnUD7fBtVFH1xpUmtit5MJNE.Vz6MkwU5tsPanWKYgdEMd1oPghvAoQn41dccHUqkhxJUNdAAY.SeyJ0IjoiZG0iLCJzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3Rlc3QiLCJyIjpbXSwiYSI6WyJkaWRjb21tL3YyIl19"
-  val myExampleDIDDocument = """{
+
+  /** After https://github.com/FabioPinheiro/scala-did/issues/162:
+    *   - The id #6LSj4X4MjeLXLi6Bnd8gp4crnUD7fBtVFH1xpUmtit5MJNE is now '#key-2'
+    *   - The id #6MkwU5tsPanWKYgdEMd1oPghvAoQn41dccHUqkhxJUNdAAY is now '#key-1'
+    */
+  val myExampleDIDDocument = s"""{
   "id": "did:peer:2.Ez6LSj4X4MjeLXLi6Bnd8gp4crnUD7fBtVFH1xpUmtit5MJNE.Vz6MkwU5tsPanWKYgdEMd1oPghvAoQn41dccHUqkhxJUNdAAY.SeyJ0IjoiZG0iLCJzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3Rlc3QiLCJyIjpbXSwiYSI6WyJkaWRjb21tL3YyIl19",
   "authentication": [
     {
-      "id": "did:peer:2.Ez6LSj4X4MjeLXLi6Bnd8gp4crnUD7fBtVFH1xpUmtit5MJNE.Vz6MkwU5tsPanWKYgdEMd1oPghvAoQn41dccHUqkhxJUNdAAY.SeyJ0IjoiZG0iLCJzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3Rlc3QiLCJyIjpbXSwiYSI6WyJkaWRjb21tL3YyIl19#6MkwU5tsPanWKYgdEMd1oPghvAoQn41dccHUqkhxJUNdAAY",
+      "id": "did:peer:2.Ez6LSj4X4MjeLXLi6Bnd8gp4crnUD7fBtVFH1xpUmtit5MJNE.Vz6MkwU5tsPanWKYgdEMd1oPghvAoQn41dccHUqkhxJUNdAAY.SeyJ0IjoiZG0iLCJzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3Rlc3QiLCJyIjpbXSwiYSI6WyJkaWRjb21tL3YyIl19#key-2",
       "controller": "did:peer:2.Ez6LSj4X4MjeLXLi6Bnd8gp4crnUD7fBtVFH1xpUmtit5MJNE.Vz6MkwU5tsPanWKYgdEMd1oPghvAoQn41dccHUqkhxJUNdAAY.SeyJ0IjoiZG0iLCJzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3Rlc3QiLCJyIjpbXSwiYSI6WyJkaWRjb21tL3YyIl19",
       "type": "JsonWebKey2020",
       "publicKeyJwk": {
@@ -95,7 +98,7 @@ object DIDPeerExamples {
   ],
   "keyAgreement": [
     {
-      "id": "did:peer:2.Ez6LSj4X4MjeLXLi6Bnd8gp4crnUD7fBtVFH1xpUmtit5MJNE.Vz6MkwU5tsPanWKYgdEMd1oPghvAoQn41dccHUqkhxJUNdAAY.SeyJ0IjoiZG0iLCJzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3Rlc3QiLCJyIjpbXSwiYSI6WyJkaWRjb21tL3YyIl19#6LSj4X4MjeLXLi6Bnd8gp4crnUD7fBtVFH1xpUmtit5MJNE",
+      "id": "did:peer:2.Ez6LSj4X4MjeLXLi6Bnd8gp4crnUD7fBtVFH1xpUmtit5MJNE.Vz6MkwU5tsPanWKYgdEMd1oPghvAoQn41dccHUqkhxJUNdAAY.SeyJ0IjoiZG0iLCJzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3Rlc3QiLCJyIjpbXSwiYSI6WyJkaWRjb21tL3YyIl19#key-1",
       "controller": "did:peer:2.Ez6LSj4X4MjeLXLi6Bnd8gp4crnUD7fBtVFH1xpUmtit5MJNE.Vz6MkwU5tsPanWKYgdEMd1oPghvAoQn41dccHUqkhxJUNdAAY.SeyJ0IjoiZG0iLCJzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3Rlc3QiLCJyIjpbXSwiYSI6WyJkaWRjb21tL3YyIl19",
       "type": "JsonWebKey2020",
       "publicKeyJwk": {
@@ -122,11 +125,15 @@ object DIDPeerExamples {
   def rootsid_ex_peer2_did =
     "did:peer:2.Ez6LSms555YhFthn1WV8ciDBpZm86hK9tp83WojJUmxPGk1hZ.Vz6MkmdBjMyB4TS5UbbQw54szm8yvMMf1ftGV2sQVYAxaeWhE.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLnJvb3RzaWQuY2xvdWQiLCJhIjpbImRpZGNvbW0vdjIiXX0"
 
+  /** After https://github.com/FabioPinheiro/scala-did/issues/162:
+    *   - The id #6MkmdBjMyB4TS5UbbQw54szm8yvMMf1ftGV2sQVYAxaeWhE is now '#key-2'
+    *   - The id #6LSms555YhFthn1WV8ciDBpZm86hK9tp83WojJUmxPGk1hZ is now '#key-1'
+    */
   val rootsid_ex_peer2_didDocument = """{
     |  "id" : "did:peer:2.Ez6LSms555YhFthn1WV8ciDBpZm86hK9tp83WojJUmxPGk1hZ.Vz6MkmdBjMyB4TS5UbbQw54szm8yvMMf1ftGV2sQVYAxaeWhE.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLnJvb3RzaWQuY2xvdWQiLCJhIjpbImRpZGNvbW0vdjIiXX0",
     |  "authentication" : [
     |    {
-    |      "id" : "did:peer:2.Ez6LSms555YhFthn1WV8ciDBpZm86hK9tp83WojJUmxPGk1hZ.Vz6MkmdBjMyB4TS5UbbQw54szm8yvMMf1ftGV2sQVYAxaeWhE.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLnJvb3RzaWQuY2xvdWQiLCJhIjpbImRpZGNvbW0vdjIiXX0#6MkmdBjMyB4TS5UbbQw54szm8yvMMf1ftGV2sQVYAxaeWhE",
+    |      "id" : "did:peer:2.Ez6LSms555YhFthn1WV8ciDBpZm86hK9tp83WojJUmxPGk1hZ.Vz6MkmdBjMyB4TS5UbbQw54szm8yvMMf1ftGV2sQVYAxaeWhE.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLnJvb3RzaWQuY2xvdWQiLCJhIjpbImRpZGNvbW0vdjIiXX0#key-2",
     |      "controller" : "did:peer:2.Ez6LSms555YhFthn1WV8ciDBpZm86hK9tp83WojJUmxPGk1hZ.Vz6MkmdBjMyB4TS5UbbQw54szm8yvMMf1ftGV2sQVYAxaeWhE.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLnJvb3RzaWQuY2xvdWQiLCJhIjpbImRpZGNvbW0vdjIiXX0",
     |      "type" : "JsonWebKey2020",
     |      "publicKeyJwk" : {
@@ -138,7 +145,7 @@ object DIDPeerExamples {
     |  ],
     |  "keyAgreement" : [
     |    {
-    |      "id" : "did:peer:2.Ez6LSms555YhFthn1WV8ciDBpZm86hK9tp83WojJUmxPGk1hZ.Vz6MkmdBjMyB4TS5UbbQw54szm8yvMMf1ftGV2sQVYAxaeWhE.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLnJvb3RzaWQuY2xvdWQiLCJhIjpbImRpZGNvbW0vdjIiXX0#6LSms555YhFthn1WV8ciDBpZm86hK9tp83WojJUmxPGk1hZ",
+    |      "id" : "did:peer:2.Ez6LSms555YhFthn1WV8ciDBpZm86hK9tp83WojJUmxPGk1hZ.Vz6MkmdBjMyB4TS5UbbQw54szm8yvMMf1ftGV2sQVYAxaeWhE.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLnJvb3RzaWQuY2xvdWQiLCJhIjpbImRpZGNvbW0vdjIiXX0#key-1",
     |      "controller" : "did:peer:2.Ez6LSms555YhFthn1WV8ciDBpZm86hK9tp83WojJUmxPGk1hZ.Vz6MkmdBjMyB4TS5UbbQw54szm8yvMMf1ftGV2sQVYAxaeWhE.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLnJvb3RzaWQuY2xvdWQiLCJhIjpbImRpZGNvbW0vdjIiXX0",
     |      "type" : "JsonWebKey2020",
     |      "publicKeyJwk" : {
