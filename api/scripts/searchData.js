@@ -1225,6 +1225,7 @@ pages = [{"l":"index.html#","e":false,"i":"","n":"scala-did-docs","t":"scala-did
 {"l":"fmgp/did/method/peer/DIDPeer1.html#numalgo-0","e":false,"i":"","n":"numalgo","t":"numalgo: 1","d":"fmgp.did.method.peer.DIDPeer1","k":"def","x":""},
 {"l":"fmgp/did/method/peer/DIDPeer1.html#specificId-0","e":false,"i":"","n":"specificId","t":"specificId: String","d":"fmgp.did.method.peer.DIDPeer1","k":"def","x":""},
 {"l":"fmgp/did/method/peer/DIDPeer2.html#","e":false,"i":"","n":"DIDPeer2","t":"DIDPeer2(elements: Seq[Element]) extends DIDPeer","d":"fmgp.did.method.peer","k":"class","x":""},
+{"l":"fmgp/did/method/peer/DIDPeer2.html#indexedElements-0","e":false,"i":"","n":"indexedElements","t":"indexedElements: Seq[(Element, Int)]","d":"fmgp.did.method.peer.DIDPeer2","k":"def","x":""},
 {"l":"fmgp/did/method/peer/DIDPeer2.html#numalgo-0","e":false,"i":"","n":"numalgo","t":"numalgo: 2","d":"fmgp.did.method.peer.DIDPeer2","k":"def","x":""},
 {"l":"fmgp/did/method/peer/DIDPeer2.html#specificId-0","e":false,"i":"","n":"specificId","t":"specificId: String","d":"fmgp.did.method.peer.DIDPeer2","k":"def","x":""},
 {"l":"fmgp/did/method/peer/DIDPeer2$.html#","e":false,"i":"","n":"DIDPeer2","t":"DIDPeer2","d":"fmgp.did.method.peer","k":"object","x":""},
