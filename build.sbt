@@ -476,7 +476,7 @@ lazy val didResolverPeer = crossProject(JSPlatform, JVMPlatform)
   )
   .jvmSettings( // See dependencyTree ->  didResolverPeerJVM/Test/dependencyTree
     libraryDependencies += "org.didcommx" % "didcomm" % "0.3.2" % Test,
-    libraryDependencies += "org.didcommx" % "peerdid" % "0.3.0" % Test,
+    libraryDependencies += "org.didcommx" % "peerdid" % "0.4.0" % Test,
     libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.77" % Test,
     libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.77" % Test,
     libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.16-preview.1" % Test,
