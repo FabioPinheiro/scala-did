@@ -100,6 +100,7 @@ object AgentProvider {
       AgentWithShortName("ivan", ivan),
       AgentWithShortName("pat", pat),
       AgentWithShortName("victor", victor),
+      AgentWithShortName("fmgpMediator", fmgpMediator),
       AgentWithShortName("iohkMediatorBeta", iohkMediatorBeta),
       AgentWithShortName("iohkMediatorSitHttp", iohkMediatorSitHttp),
       AgentWithShortName("iohkMediatorSitHttpWs", iohkMediatorSitHttpWs),
@@ -263,6 +264,17 @@ object AgentProvider {
       keyAuthentication("mnMNIGXhYLiIEzk4KjCewN5QTtEHgSd_V5dAvpy1-_M", "uzRMEeJho3oGJUiJWi_YvVwTlUrDpJ4Z2LZcqmseZCM")
     ),
     Seq(DIDPeerServiceEncoded(s = "http://localhost:8080"))
+  )
+
+  val fmgpMediator = DIDPeer2.makeAgent(
+    Seq(
+      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
+      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
+    ),
+    Seq(
+      DIDPeerServiceEncoded(s = "https://mediator.fmgp.app"),
+      DIDPeerServiceEncoded(s = "wss://mediator.fmgp.app/ws")
+    )
   )
 
   val iohkMediatorBeta = DIDPeer2.makeAgent(
