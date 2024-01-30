@@ -71,4 +71,4 @@ addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.5.0") // https://github.com/sb
 
 // Deploy demo - https://github.com/sbt/sbt-assembly/tags
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.1.5")
-addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.2")
+addSbtPlugin("com.github.sbt" % "sbt-gzip" % "2.0.0")
