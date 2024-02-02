@@ -97,7 +97,10 @@ object DIDPeer2 {
   case class ElementService(base64: C1_B64URL) extends Element { def encode = "S" + base64 }
 
   object ElementService {
-    def apply(obj: DIDPeerServiceEncoded): ElementService = new ElementService(Base64.encode(obj.toJson).urlBase64)
+    def apply(obj: DIDPeerServiceEncoded): ElementService =
+      obj match
+        case DIDPeerServiceEncodedNew(base64)           => new ElementService(base64.urlBase64)
+        case obj @ DIDPeerServiceEncodedOld(t, s, r, a) => new ElementService(Base64.encode(obj.toJson).urlBase64)
   }
 
   // case class Element(code: Purposecode, value: String) { def encode = "" + code + value }

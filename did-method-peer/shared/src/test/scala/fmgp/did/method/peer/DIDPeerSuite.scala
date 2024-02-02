@@ -167,9 +167,9 @@ class DIDPeerSuite extends ZSuite {
             assertEquals(s2.`type`, "DIDCommMessaging")
             assertEquals(s3.`type`, "DIDCommMessaging")
             assertEquals(s4.`type`, "SeriveType123")
-            assert(s1.id.endsWith("#didcommmessaging-0"))
-            assert(s2.id.endsWith("#didcommmessaging-1"))
-            assert(s3.id.endsWith("#didcommmessaging-2"))
+            assert(s1.id.endsWith("#service")) // before was "#didcommmessaging-0"
+            assert(s2.id.endsWith("#service-1")) // before was "#didcommmessaging-1"
+            assert(s3.id.endsWith("#service-2")) // before was "#didcommmessaging-2"
             assert(s4.id.endsWith("#serivetype123-3"))
           case Some(services) => fail(s"Must have only two servies instated of ${services.size}")
   }
@@ -204,7 +204,7 @@ class DIDPeerSuite extends ZSuite {
   val ex1Services =
     """[
       |  {
-      |    "id" : "did:test:s1#didcommmessaging-0",
+      |    "id" : "did:test:s1#service",
       |    "type" : "DIDCommMessaging",
       |    "serviceEndpoint" : {
       |      "uri" : "https://did.fmgp.app",
@@ -213,7 +213,7 @@ class DIDPeerSuite extends ZSuite {
       |    }
       |  },
       |  {
-      |    "id" : "did:test:s1#didcommmessaging-1",
+      |    "id" : "did:test:s1#service-1",
       |    "type" : "DIDCommMessaging",
       |    "serviceEndpoint" : {
       |      "uri" : "ws://did.fmgp.app",
@@ -236,7 +236,7 @@ class DIDPeerSuite extends ZSuite {
   val ex2Services =
     """[
       |  {
-      |    "id" : "did:test:s2#didcommmessaging-0",
+      |    "id" : "did:test:s2#service",
       |    "type" : "DIDCommMessaging",
       |    "serviceEndpoint" : {
       |      "uri" : "did:peer:2.SW3sidCI6ImRtIiwicyI6Imh0dHBzOi8vZGlkLmZtZ3AuYXBwIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfSx7InQiOiJkbSIsInMiOiJ3czovL2RpZC5mbWdwLmFwcCIsInIiOltdLCJhIjpbImRpZGNvbW0vdjIiXX1d",
@@ -244,6 +244,10 @@ class DIDPeerSuite extends ZSuite {
       |    }
       |  }
       |]""".stripMargin.replaceAll("\n", "").replaceAll(" ", "")
+
+  val ex3OldEndpoint = "https://did.fmgp.app"
+  val ex3OldStr = """{"t":"dm","s":"https://did.fmgp.app","r":[],"a":["didcomm/v2"]}"""
+  val ex3NewStr = """{"t":"dm","s":{"uri":"https://did.fmgp.app","accept":["didcomm/v2"]}}"""
 
   test("test DIDPeerServiceEncoded abbreviation ex1") {
     @scala.annotation.nowarn("cat=deprecation")
@@ -275,6 +279,17 @@ class DIDPeerSuite extends ZSuite {
       .getDIDService(didSubject = DIDSubject("did:test:s2"), previouslyNumberOfService = 0)
     assertEquals(service.size, 1)
     assertEquals(service.toJson, ex2Services)
+  }
+
+  test("test ElementService with DIDPeerServiceEncodedNew ex3") {
+    val serviceNew = DIDPeerServiceEncodedNew(Base64.encode(ex3NewStr))
+
+    val elementServiceNew = DIDPeer2.ElementService(serviceNew)
+    assertEquals(elementServiceNew.base64, Base64.encode(ex3NewStr).urlBase64)
+
+    val serviceOld = DIDPeerServiceEncodedOld(ex3OldEndpoint)
+    val elementServiceOld = DIDPeer2.ElementService(serviceOld)
+    assertEquals(elementServiceOld.base64, Base64.encode(ex3OldStr).urlBase64)
   }
 
   test("method makeAgent must fill the 'kid' based on index") {

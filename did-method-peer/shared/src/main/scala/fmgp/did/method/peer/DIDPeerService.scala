@@ -68,14 +68,22 @@ case class DIDPeerServiceEncodedNew(base64: Base64) extends DIDPeerServiceEncode
   def readService(json: Json.Obj, didSubject: DIDSubject, index: Int): Either[String, DIDService] = {
     val DIDCommMessaging = DIDService.TYPE_DIDCommMessaging
     def serviceId(typeName: String) = {
-      val serviceName = typeName.toLowerCase().replace(" ", "")
-      s"${didSubject.string}#$serviceName-$index"
+      s"${didSubject.string}#" + {
+        if (typeName.equalsIgnoreCase(DIDCommMessaging)) "service"
+        else typeName.toLowerCase().replace(" ", "")
+      } + { if (index == 0) "" else s"-$index" }
     }
 
-    json.fields.collectFirst { case ("type", value) => value } match
+    json.fields.collectFirst {
+      case ("type", value) => value
+      case ("t", value)    => value // see abbreviation
+    } match
       case None => Left("Field 'type' MUST exist")
       case Some(Json.Str(`DIDCommMessaging`)) =>
-        json.fields.collectFirst { case ("serviceEndpoint", value) => value } match
+        json.fields.collectFirst {
+          case ("serviceEndpoint", value) => value
+          case ("s", value)               => value // see abbreviation
+        } match
           case None => Left("The field 'serviceEndpoint' MUST exist")
           case Some(Json.Str(uri)) => // old format
             Right(
@@ -84,10 +92,16 @@ case class DIDPeerServiceEncodedNew(base64: Base64) extends DIDPeerServiceEncode
                 DIDCommMessagingServiceEndpoint(
                   uri = uri,
                   accept = json.fields
-                    .collectFirst { case ("accept", value) => value }
+                    .collectFirst {
+                      case ("accept", value) => value
+                      case ("a", value)      => value // see abbreviation
+                    }
                     .flatMap { _.as[Set[String]].toOption },
                   routingKeys = json.fields
-                    .collectFirst { case ("routingKeys", value) => value }
+                    .collectFirst {
+                      case ("routingKeys", value) => value
+                      case ("r", value)           => value // see abbreviation
+                    }
                     .flatMap { _.as[Set[String]].toOption },
                 )
               )
@@ -159,7 +173,8 @@ case class DIDPeerServiceEncodedOld(
   def getDIDServiceAux(id: DIDSubject, index: Int): DIDService =
     if (this.t == "dm" || this.t == DIDService.TYPE_DIDCommMessaging)
       DIDServiceDIDCommMessaging(
-        id = s"${id.string}#didcommmessaging-$index",
+        // before the id was s"${id.string}#didcommmessaging-$index"
+        id = if (index == 0) s"${id.string}#service" else s"${id.string}#service-$index",
         DIDCommMessagingServiceEndpoint(
           uri = this.s,
           routingKeys = Some(this.r.toSet.flatten).filterNot(_.isEmpty),
