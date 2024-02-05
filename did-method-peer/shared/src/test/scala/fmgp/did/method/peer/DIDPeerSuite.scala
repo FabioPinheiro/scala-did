@@ -247,7 +247,7 @@ class DIDPeerSuite extends ZSuite {
 
   val ex3OldEndpoint = "https://did.fmgp.app"
   val ex3OldStr = """{"t":"dm","s":"https://did.fmgp.app","r":[],"a":["didcomm/v2"]}"""
-  val ex3NewStr = """{"t":"dm","s":{"uri":"https://did.fmgp.app","accept":["didcomm/v2"]}}"""
+  val ex3NewStr = """{"t":"dm","s":{"uri":"https://did.fmgp.app","a":["didcomm/v2"]}}"""
 
   test("test DIDPeerServiceEncoded abbreviation ex1") {
     @scala.annotation.nowarn("cat=deprecation")

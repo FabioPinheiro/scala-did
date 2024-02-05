@@ -34,8 +34,11 @@ sealed trait DIDPeerServiceEncoded {
 }
 
 object DIDPeerServiceEncoded {
-  def apply(s: String): DIDPeerServiceEncoded = new DIDPeerServiceEncodedOld(s = s)
-  def apply(did: DID): DIDPeerServiceEncoded = new DIDPeerServiceEncodedOld(s = did.string)
+  def makeOldFormat(s: String): DIDPeerServiceEncoded = new DIDPeerServiceEncodedOld(s = s)
+  def fromMediator(did: DID): DIDPeerServiceEncoded = fromEndpoint(did.string)
+  def fromEndpoint(endpoint: String): DIDPeerServiceEncoded = new DIDPeerServiceEncodedNew(
+    Base64.encode(s"""{"t":"dm","s":{"uri":"$endpoint","a":["didcomm/v2"]}}""")
+  )
 
   given decoder: JsonDecoder[DIDPeerServiceEncoded] = DIDPeerServiceEncodedNew.decoder.widen
   given encoder: JsonEncoder[DIDPeerServiceEncoded] = new JsonEncoder[DIDPeerServiceEncoded] {

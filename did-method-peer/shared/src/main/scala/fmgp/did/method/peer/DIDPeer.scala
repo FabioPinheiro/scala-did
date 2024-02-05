@@ -111,7 +111,7 @@ object DIDPeer2 {
     *     fmgp.crypto.KeyGenerator.unsafeX25519,
     *     fmgp.crypto.KeyGenerator.unsafeEd25519
     *   ),
-    *   Seq(DIDPeerServiceEncoded("http://localhost:8080"))
+    *   Seq(DIDPeerServiceEncoded.fromEndpoint("http://localhost:8080"))
     * ).did
     * }}}
     */

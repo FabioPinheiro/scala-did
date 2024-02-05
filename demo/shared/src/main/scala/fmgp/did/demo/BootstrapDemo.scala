@@ -14,7 +14,7 @@ object Agent0Mediators { // https://localhost:8080/
 
   val agent = DIDPeer2.makeAgent(
     Seq(keyAgreement, keyAuthentication),
-    Seq(DIDPeerServiceEncoded("https://localhost:8080/"))
+    Seq(DIDPeerServiceEncoded.fromEndpoint("https://localhost:8080/"))
   )
   def agentLayer: ULayer[Agent] = ZLayer.succeed(agent)
   def keyAgreement =
@@ -43,7 +43,7 @@ object Agent1Mediators {
   // "did:peer:2.Ez6LSdeknAoZHfA2QWsvbRbh5UZ1NPHP38NjBDdHrrhACJUgh.Vz6MkeTY54nNujTFzUQH6DuERrqXjwKe1dbKDa7nzFS8GNPq1.SeyJ0IjoiZG0iLCJzIjoiZGlkOnBlZXI6Mi5FejZMU3BvdTYzc0JEQjRGR3BiVk0yM2JFQ2dabmtNSGo2aEdtQTNQZ1FCeVI5ZnM0LlZ6Nk1raE5wSEJDVWdCZ2tDYmlNNHpNanJiZmdHb3d3RXVFY2htemY2SjVXM2F2OEUuU2V5SjBJam9pWkcwaUxDSnpJam9pYUhSMGNITTZMeTlzYjJOaGJHaHZjM1E2T0RBNE1DOGlMQ0p5SWpwYlhTd2lZU0k2V3lKa2FXUmpiMjF0TDNZeUlsMTkiLCJyIjpbXSwiYSI6WyJkaWRjb21tL3YyIl19"
   val agent = DIDPeer2.makeAgent(
     Seq(keyAgreement, keyAuthentication),
-    Seq(DIDPeerServiceEncoded(Agent0Mediators.agent.id))
+    Seq(DIDPeerServiceEncoded.fromMediator(Agent0Mediators.agent.id))
   )
 
   def agentLayer: ULayer[Agent] = ZLayer.succeed(agent)
@@ -71,7 +71,7 @@ object Agent2Mediators {
   // "did:peer:2.Ez2nwUrQ6jGeHa8247VuGp4o4GDeoCEFjb8oLKbxFDTgGyxHbHRq.Vz6MksEtp5uusk11aUuwRHzdwfTxJBUaKaUVVXwFSVsmUkxKF.SeyJ0IjoiZG0iLCJzIjoiZGlkOnBlZXI6Mi5FejZMU2Rla25Bb1pIZkEyUVdzdmJSYmg1VVoxTlBIUDM4TmpCRGRIcnJoQUNKVWdoLlZ6Nk1rZVRZNTRuTnVqVEZ6VVFINkR1RVJycVhqd0tlMWRiS0RhN256RlM4R05QcTEuU2V5SjBJam9pWkcwaUxDSnpJam9pWkdsa09uQmxaWEk2TWk1RmVqWk1VM0J2ZFRZemMwSkVRalJHUjNCaVZrMHlNMkpGUTJkYWJtdE5TR28yYUVkdFFUTlFaMUZDZVZJNVpuTTBMbFo2TmsxcmFFNXdTRUpEVldkQ1oydERZbWxOTkhwTmFuSmlabWRIYjNkM1JYVkZZMmh0ZW1ZMlNqVlhNMkYyT0VVdVUyVjVTakJKYW05cFdrY3dhVXhEU25wSmFtOXBZVWhTTUdOSVRUWk1lVGx6WWpKT2FHSkhhSFpqTTFFMlQwUkJORTFET0dsTVEwcDVTV3B3WWxoVGQybFpVMGsyVjNsS2EyRlhVbXBpTWpGMFRETlplVWxzTVRraUxDSnlJanBiWFN3aVlTSTZXeUprYVdSamIyMXRMM1l5SWwxOSIsInIiOltdLCJhIjpbImRpZGNvbW0vdjIiXX0"
   val agent = DIDPeer2.makeAgent(
     Seq(keyAgreement, keyAuthentication),
-    Seq(DIDPeerServiceEncoded(Agent1Mediators.agent.id))
+    Seq(DIDPeerServiceEncoded.fromMediator(Agent1Mediators.agent.id))
   )
   def agentLayer: ULayer[Agent] = ZLayer.succeed(agent)
   def keyAgreement =

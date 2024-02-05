@@ -16,11 +16,13 @@ import fmgp.did.comm._
 import fmgp.did.comm.protocol.basicmessage2.BasicMessage
 import fmgp.did.framework.TransportWSImp
 
+// TODO REMOVE TapIntoStreamTool
 object TapIntoStreamTool {
 
   val messages = Var[Seq[String]](Seq.empty)
 
-  val namesAndDIDs = Seq( // FIXME
+  val namesAndDIDs: Seq[(String, DIDSubject)] = Seq( // FIXME
+    /*
     ("alice", fmgp.did.AgentProvider.alice.id.asDIDSubject),
     ("bob", fmgp.did.AgentProvider.bob.id.asDIDSubject),
     ("charlie", fmgp.did.AgentProvider.charlie.id.asDIDSubject),
@@ -29,6 +31,7 @@ object TapIntoStreamTool {
     ("exampleBob", fmgp.did.AgentProvider.exampleBob.id.asDIDSubject),
     ("localhost8080Alice", fmgp.did.AgentProvider.localhost8080Alice.id.asDIDSubject),
     ("localhost9000Alice", fmgp.did.AgentProvider.localhost9000Alice.id.asDIDSubject),
+     */
   )
 
   // val ws = WebsocketJSLive.autoReconnect

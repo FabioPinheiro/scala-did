@@ -164,7 +164,7 @@ object AgentManagement {
                 newPeerDID(
                   Some(urlEndpoint.ref.value.trim)
                     .filterNot(_.isEmpty)
-                    .map(endpoint => DIDPeerServiceEncoded(s = endpoint))
+                    .map(endpoint => DIDPeerServiceEncoded.fromEndpoint(endpoint))
                 )
               }
             ),
@@ -173,7 +173,10 @@ object AgentManagement {
           )
         case Some(mediatorDID) =>
           div(
-            button("New DID Peer", onClick --> { (_) => newPeerDID(Some(DIDPeerServiceEncoded(s = mediatorDID.did))) }),
+            button(
+              "New DID Peer",
+              onClick --> { (_) => newPeerDID(Some(DIDPeerServiceEncoded.fromEndpoint(mediatorDID.did))) }
+            ),
             " with the follow endpoint ",
             code(mediatorDID.did)
           )

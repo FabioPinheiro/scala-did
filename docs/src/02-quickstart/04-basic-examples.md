@@ -71,7 +71,7 @@ val alice = DIDPeer2.makeAgent(
       kid = None
     )
   ),
-  Seq(DIDPeerServiceEncoded("https://alice.did.fmgp.app/"))
+  Seq(DIDPeerServiceEncoded.fromEndpoint("https://alice.did.fmgp.app/"))
 )
 
 alice.id.asDIDSubject

@@ -20,8 +20,8 @@ case class MessageStorage(storageItems: Seq[StorageItem] = Seq.empty) {
     if (storageItems.exists(_.plaintext.id == plaintext.id)) this
     else {
       assert(
-        plaintext.from.isEmpty || plaintext.from.contains(from),
-        "When sening a message the MUST be empty or the field 'from' MUST be the same as in the PlaintextMessage"
+        !(plaintext.from.isEmpty || plaintext.from.contains(from)),
+        "When sending a message the field 'from' MUST NOT be empty or MUST be the same as in the PlaintextMessage"
       )
       MessageStorage(
         storageItems = storageItems :+ StorageItem(

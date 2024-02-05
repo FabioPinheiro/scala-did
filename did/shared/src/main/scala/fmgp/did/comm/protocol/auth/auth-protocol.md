@@ -9,13 +9,13 @@ This protocol is used a authenticate and or authorization an user (DID) or opera
 
 ## PIURI
   
-- `https://did.fmgp.app/auth/1.0/request`
+- `https://fmgp.app/auth/1.0/request`
   - **Invitation to authenticate and authorize** 
     - If this is an out-of-band message it MUST me `signed-(plaintext)`
     - If the message is encrypt it MUST be `authcrypt(plaintext)`
   - Ex: can be used to autenticate a WebSocket Secure (WSS)
 
-- `https://did.fmgp.app/auth/1.0/reply`
+- `https://fmgp.app/auth/1.0/reply`
   - **Mediate Reply**
   - for register opetations we can use `signed(plaintext)`; `anoncrypt(sign(plaintext))`; `authcrypt(sign(plaintext))`
   - for unregister operation we can use `authcrypt(plaintext)`, by default this encrypted mode will not be accepted.

@@ -26,7 +26,7 @@ final case class DidcommxPeerdid(
       List(keyAgreement).asJava,
       List(keyAuthentication).asJava,
       serviceEndpoint match {
-        case Some(endpoint) => DIDPeerServiceEncoded(endpoint).toJson
+        case Some(endpoint) => DIDPeerServiceEncoded.fromEndpoint(endpoint).toJson
         case None           => null
       }
     )
