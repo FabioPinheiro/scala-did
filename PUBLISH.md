@@ -51,7 +51,7 @@ Job's ENV notes:
 ### Run ci-release Local
 
 
-`NODE_OPTIONS=--openssl-legacy-provider SONATYPE_USERNAME=??? SONATYPE_PASSWORD=??? PGP_SECRET=??? sbt`
+`SONATYPE_USERNAME=??? SONATYPE_PASSWORD=??? PGP_SECRET=??? sbt`
 
 ### Check that is release
 

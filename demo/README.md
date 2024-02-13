@@ -6,14 +6,12 @@
 
 ```shell
 # Build Frontend
-NODE_OPTIONS=--openssl-legacy-provider sbt 'serviceworker/fullLinkJS';
+sbt 'serviceworker/fullLinkJS';
 npm run build
 ```
 
-```sbt
-NODE_OPTIONS=--openssl-legacy-provider sbt
-serviceworker / fastLinkJS
-~ demoJVM/reStart
+```shell
+sbt '~ demoJVM/reStart'
 ```
 
 Open [chrome://inspect/#devices](chrome://inspect/#devices)
@@ -22,14 +20,15 @@ Open [chrome://inspect/#devices](chrome://inspect/#devices)
 
 ```shell
 # Live reload
-NODE_OPTIONS=--openssl-legacy-provider sbt '~webapp/fastLinkJS' # run on another console
+sbt '~serviceworker/fastLinkJS';
+sbt '~webapp/fastLinkJS' # run on another console
 npm run dev
 ```
 
 ## docker
 
 ```shell
-NODE_OPTIONS=--openssl-legacy-provider sbt assemblyAll
+sbt assemblyAll
 # java -jar jvm/target/scala-3.3.1/scala-did-demo-server.jar
 docker build --tag scala_did_demo .
 docker run --rm -p 8080:8080 --memory="100m" --cpus="1.0" scala_did_demo
@@ -52,18 +51,19 @@ java -jar /home/fabio/workspace/ScalaDID/demo/jvm/target/scala-3.3.1/scala-did-d
 **deploy with flyctl**
 
 ```shell
-NODE_OPTIONS=--openssl-legacy-provider USE_SNAPSHOTS=true sbt assemblyAll
+USE_SNAPSHOTS=true sbt assemblyAll
 flyctl deploy ./demo/
 ```
 
 **deploy by pushing docker image**
 
 ```shell
-NODE_OPTIONS=--openssl-legacy-provider USE_SNAPSHOTS=true sbt assemblyAll
+USE_SNAPSHOTS=true sbt assemblyAll
 docker build --tag scala_did_demo ./demo/
 docker tag scala_did_demo registry.fly.io/scala-did-demo
 # flyctl auth docker
 docker push registry.fly.io/scala-did-demo
+# 2024/02/05 +- 119.3MB
 # 2023/11/15 +- 124.1MB
 # 2023/10/28 +- 118.1MB
 # 2023/10/20 +- 117.3MB
