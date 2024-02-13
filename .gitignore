@@ -28,5 +28,8 @@ docs-build/**
 *.tmp
 ~*
 
+#vite 
+vite/dev-dist/
+
 #lixo
 lixo

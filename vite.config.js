@@ -1,3 +1,4 @@
+import { resolve } from 'path'
 import { defineConfig } from "vite";
 import scalaJSPlugin from "@scala-js/vite-plugin-scalajs";
 import { VitePWA } from 'vite-plugin-pwa'
@@ -12,7 +13,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
     build: {
       outDir: './dist',
       // minify: 'terser', // defualt is 'esbuild'
-      // manifest: true,
+      manifest: true,
       // sourcemap: true,
     },
     preview: {
@@ -29,6 +30,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
           target: 'ws://localhost:8080',
           ws: true,
         },
+        // '/sw.js': 'http://localhost:8080',
       },
     },
     plugins: [
@@ -39,14 +41,15 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
       }),
       VitePWA({
         devOptions: {
-          enabled: true
+          enabled: true,
+          type: "module", //  SyntaxError: Cannot use import statement outside a module
         },
         srcDir: serviceworkerSrc,
-        filename: "sw.js",
+        filename: "sw.js", //@default 'sw.js'
         strategies: "injectManifest",
-        injectRegister: null, //'inline', // https://vite-pwa-org.netlify.app/guide/register-service-worker.html
+        injectRegister: 'inline', //null, 'inline', // https://vite-pwa-org.netlify.app/guide/register-service-worker.html
         injectManifest: {
-          // injectionPoint: null,
+          injectionPoint: "self.__WB_MANIFEST", // null, // 'self__WB_MANIFEST', // undefined
           // additionalManifestEntries: ['robots.txt'],
           maximumFileSizeToCacheInBytes: 18000000,//12000000,
         },

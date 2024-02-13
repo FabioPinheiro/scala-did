@@ -15,6 +15,7 @@ import fmgp.did.DidExample
 import org.scalajs.dom.ServiceWorkerRegistration
 import scala.scalajs.js.JSON
 import fmgp.webapp.AgentManagement
+import org.scalajs.dom.ServiceWorkerRegistrationOptions
 
 object App {
 
@@ -55,9 +56,8 @@ object App {
 
     // Register the service worker
     if (!js.isUndefined(dom.window.navigator.serviceWorker)) {
-      println(s"Registering ServiceWorker")
-      dom.window.navigator.serviceWorker
-        .register("/sw.js")
+      println(s"Registering ServiceWorker (${fmgp.SettingsFromHTML.getModeInfo})")
+      fmgp.SettingsFromHTML.serviceWorkerContainer
         .`then`((resp: ServiceWorkerRegistration) => {
           println(s"ServiceWorker registered successfully : ${JSON.stringify(resp)}")
         })

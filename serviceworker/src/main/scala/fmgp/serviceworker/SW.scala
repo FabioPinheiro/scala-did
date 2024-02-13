@@ -21,22 +21,22 @@ trait ManifestEntry extends js.Object {
 }
 
 object SW {
-  // this is extremely hack thing to do to have "self.__WB_MANIFEST" on the generated code
-  def self__WB_MANIFEST = {
-    js.Dynamic.global
-      .selectDynamic("self")
-      .__WB_MANIFEST
-      .asInstanceOf[js.Array[ManifestEntry]]
-    // Uncaught org.scalajs.linker.runtime.UndefinedBehaviorError: java.lang.ClassCastException: undefined cannot be cast to java.lang.String
-  }.map(e => e.url: RequestInfo)
 
-  // def main(args: Array[String]): Unit = println("main")
-  val version = 16
+  def self__WB_MANIFEST: scala.scalajs.js.Array[String | Request] =
+    val unsafe__WB_MANIFEST = js.Dynamic.global.selectDynamic("self").__WB_MANIFEST
+    if (!js.isUndefined(unsafe__WB_MANIFEST)) {
+      { // this is extremely hack thing to do to have "self.__WB_MANIFEST" on the generated code
+        unsafe__WB_MANIFEST.asInstanceOf[js.Array[ManifestEntry]]
+        // Uncaught org.scalajs.linker.runtime.UndefinedBehaviorError: java.lang.ClassCastException: undefined cannot be cast to java.lang.String
+      }.map(e => e.url: RequestInfo)
+    } else js.Array("/", "/dev-sw.js?dev-sw")
+
+  inline val version = 20
 
   def main() = {
     println(s"--- SW version $version ---")
 
-    println(s"--- SW self__WB_MANIFEST ---")
+    println(s"--- SW self__WB_MANIFEST: --- $self__WB_MANIFEST")
     println(JSON.stringify(self__WB_MANIFEST, null, 1))
 
     ServiceWorkerGlobalScope.self.oninstall = (event: ExtendableEvent) => oninstall(event)
