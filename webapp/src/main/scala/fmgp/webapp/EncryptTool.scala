@@ -21,6 +21,9 @@ import fmgp.did.uniresolver.Uniresolver
 import fmgp.did.comm.protocol.routing2.ForwardMessage
 import fmgp.crypto.error._
 import fmgp.Utils
+import fmgp.ServiceWorkerUtils
+import fmgp.Config
+import fmgp.NotificationsSubscription
 
 object EncryptTool {
 
@@ -401,6 +404,41 @@ object EncryptTool {
             button(
               "FeatureDisclose",
               onClick --> Observer(_ => dataTextVar.set(exFeatureDisclose.toPlaintextMessage.toJsonPretty))
+            ),
+          )
+        },
+        // PubSub (Draft Version)
+        {
+          import MessageTemplate.PubSub._
+          li(
+            button(
+              "RequestToSubscribe",
+              onClick --> Observer(_ => dataTextVar.set(exRequestToSubscribe.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "SetupToSubscribe",
+              onClick --> Observer(_ => dataTextVar.set(exSetupToSubscribe.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "Subscribe (Fake data)",
+              onClick --> Observer(_ => dataTextVar.set(exSubscribe.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "Subscribe",
+              onClick --> Observer(_ =>
+                Unsafe.unsafe { implicit unsafe => // Run side effect
+                  Runtime.default.unsafe.runToFuture(
+                    ServiceWorkerUtils
+                      .subscribeToNotifications(Config.PushNotifications.applicationServerKey)
+                      .map(ps => NotificationsSubscription.unsafeFromPushSubscription(ps))
+                      .map(ns => dataTextVar.set(exSubscribe(ns).toPlaintextMessage.toJsonPretty))
+                  )
+                }
+              )
+            ),
+            button(
+              "Subscription",
+              onClick --> Observer(_ => dataTextVar.set(exSubscription.toPlaintextMessage.toJsonPretty))
             ),
           )
         },

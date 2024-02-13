@@ -12,6 +12,8 @@ import fmgp.did.comm.protocol.trustping2._
 import fmgp.did.comm.protocol.reportproblem2._
 import fmgp.did.comm.protocol.discoverfeatures2._
 import fmgp.util.Base64
+import fmgp.Config
+import fmgp.NotificationsSubscription
 
 object MessageTemplate {
   def mFrom: Option[FROM] = Global.agentVar.now().flatMap(o => FROM.either(o.id.string).toOption)
@@ -240,4 +242,63 @@ object MessageTemplate {
     tag = TAG("6ylC_iAs4JvDQzXeY6MuYQ"),
     iv = IV("ESpmcyGiZpRjc5urDela21TOOTW8Wqd1")
   )
+
+  object PubSub {
+    import fmgp.did.comm.protocol.pubsub.*
+
+    def exRequestToSubscribe = RequestToSubscribe(
+      from = from,
+      to = Set(to),
+      pthid = None,
+      created_time = None,
+      body = RequestToSubscribe.Body()
+    )
+
+    def exSetupToSubscribe = SetupToSubscribe(
+      from = from,
+      to = Set(to),
+      thid = Some(MsgID()),
+      pthid = None,
+      created_time = None,
+      body = SetupToSubscribe.Body(publicKey = Config.PushNotifications.applicationServerKey)
+    )
+
+    def exSubscribe = Subscribe(
+      from = from,
+      to = Set(to),
+      thid = Some(MsgID()),
+      pthid = None,
+      created_time = None,
+      body = Subscribe.Body(
+        endpoint = "endpoint",
+        keyP256DH = "keyP256DH",
+        keyAUTH = "keyAUTH",
+        id = Some("exSubscribeHardCode")
+      )
+    )
+
+    def exSubscribe(ns: NotificationsSubscription) = Subscribe(
+      from = from,
+      to = Set(to),
+      thid = Some(MsgID()),
+      pthid = None,
+      created_time = None,
+      body = Subscribe.Body(
+        endpoint = ns.endpoint,
+        keyP256DH = ns.keys.p256dh,
+        keyAUTH = ns.keys.auth,
+        id = Some("exSubscribe")
+      )
+    )
+
+    def exSubscription = Subscription(
+      from = from,
+      to = Set(to),
+      thid = MsgID(),
+      pthid = None,
+      created_time = None,
+      body = Subscription.Body()
+    )
+
+  }
 }

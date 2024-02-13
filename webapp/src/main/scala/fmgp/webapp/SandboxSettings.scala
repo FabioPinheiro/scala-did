@@ -1,15 +1,21 @@
 package fmgp.webapp
 
 import org.scalajs.dom
+import scala.scalajs.js
 import com.raquo.laminar.api.L._
 
 import fmgp.ServiceWorkerUtils
+import fmgp.SettingsFromHTML
 import fmgp.did._
+import fmgp.Config
+import scala.util.Failure
+import scala.util.Success
 object SandboxSettings {
 
   def apply(): HtmlElement = // rootElement
     div(
-      p("Sandbox Settings"),
+      h1("Sandbox Settings"),
+      p(s"This app run running in ${SettingsFromHTML.getModeInfo}"),
       h2("Protocol handler (only work on desktop browsers)"),
       div(
         button(
@@ -68,9 +74,34 @@ object SandboxSettings {
       div(
         button(
           "Register Service Worker",
-          onClick --> { _ => ServiceWorkerUtils.registerServiceWorker },
+          onClick --> { _ => ServiceWorkerUtils.runRegisterServiceWorker },
         ),
         "Done by default"
+      ),
+      // ### Notifications ###
+      h2("Notifications"),
+      div(
+        p(code(s"Subscribe with Public key '${Config.PushNotifications.applicationServerKey}'")),
+        button(
+          "Subscribe To Notifications",
+          onClick --> { _ =>
+            implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+            ServiceWorkerUtils
+              .runSubscribeToNotifications(Config.PushNotifications.applicationServerKey)
+              .onComplete { // side effect
+                case Failure(exception)        => Console.err.print("Fail Subscribe To Notifications")
+                case Success(pushSubscription) => Global.valuePushSubscriptionVar.set(Some(pushSubscription))
+              }
+          },
+        ),
+        p(
+          code(
+            child.text <-- Global.valuePushSubscriptionVar.signal.map {
+              case None                   => "No PushSubscription"
+              case Some(pushSubscription) => js.JSON.stringify(pushSubscription.toJSON())
+            }
+          )
+        )
       ),
       // ### Transport ###
       div(

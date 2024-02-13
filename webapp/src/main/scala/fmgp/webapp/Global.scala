@@ -129,4 +129,16 @@ object Global {
       job <- ZIO.foreachDiscard(jobs)(e => e)
     } yield () // Utils.runProgram(program.provideSomeLayer(Global.resolverLayer))
 
+  // ### Notifications ###
+  @JSExport
+  val valuePushSubscriptionVar = Var[Option[org.scalajs.dom.PushSubscription]](initial = None)
+
+  // {
+  //   "endpoint":"https://fcm.googleapis.com/fcm/send/d_OCCj-5sA8:APA91bE0x8qcQXj35JdU8zZFFha8ZiBYLlDw10PDxwoiseB9IIB3Owws_xaOkm6cJWa0NwZQcW6hN7HwU_MBAFeLIFOPbBJ4VTajrBARu7zsXPTUHAh-lng9WDyAz5C33u6PHPfpwWnR",
+  //   "expirationTime":null,
+  //   "keys":{
+  //     "p256dh":"BDpHL0b3paDBBdoALWIoBw5OoiQ7tPW3ZxK1BfwcMNYF3cFoBec8QYMZCkBdwX6AW_Up7QI6_BSddm8Byml0KtE",
+  //     "auth":"cStDqeDeHH4Pa9I38t6Zlw"
+  //   }
+  // }
 }
