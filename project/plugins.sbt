@@ -65,7 +65,7 @@ addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.11.1")
 
 // mdoc - https://github.com/scalameta/mdoc/tags
 addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.5.2")
-addSbtPlugin("org.typelevel" % "laika-sbt" % "1.0.0") // https://typelevel.org/Laika/
+addSbtPlugin("org.typelevel" % "laika-sbt" % "1.0.1") // https://typelevel.org/Laika/
 addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.5.0") // https://github.com/sbt/sbt-unidoc
 // addSbtPlugin("org.typelevel" % "sbt-typelevel-site" % "0.6.2") // https://typelevel.org/sbt-typelevel/site.html
 
