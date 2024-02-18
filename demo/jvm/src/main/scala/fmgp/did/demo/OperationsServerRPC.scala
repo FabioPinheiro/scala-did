@@ -23,7 +23,7 @@ object OperationsServerRPC {
             case SignOpInput(agent, msg) =>
               operations
                 .sign(msg)
-                .provideEnvironment(ZEnvironment(agent))
+                .provideEnvironment(ZEnvironment(agent, resolver))
                 .mapBoth(ex => SignOpOutput(Left(ex)), e => SignOpOutput(Right(e)))
                 .merge
             case VerifyOpInput(msg) =>

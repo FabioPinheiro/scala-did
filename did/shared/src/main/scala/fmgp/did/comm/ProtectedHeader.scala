@@ -18,6 +18,7 @@ import fmgp.util.Base64Obj
 // }
 
 case class SignProtectedHeader(
+    // FIXME this should not be option. See https://github.com/decentralized-identity/didcomm-messaging/issues/446
     kid: Option[VerificationMethodReferenced], // option because example in fmgp.did.comm.SignedMessageSuite_Parse
     alg: SigningAlgorithm,
     typ: Option[MediaTypes], // MediaTypes.SIGNED

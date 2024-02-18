@@ -13,6 +13,7 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
+/** didImpJS/testOnly fmgp.crypto.JWMSuiteJS */
 class JWMSuiteJS extends ZSuite {
 
   import scala.scalajs.js
@@ -20,8 +21,8 @@ class JWMSuiteJS extends ZSuite {
   testZ("sign and verify an example") {
     val key: ECPrivateKey = JWKExamples.senderKeySecp256k1.fromJson[ECPrivateKey].toOption.get
     sign(key, DIDCommExamples.plaintextMessageObj).flatMap { jwsObject =>
-      verify(key.toPublicKey, jwsObject).map(e => assert(e))
-        <&> verify(key.toPublicKey, SignedMessageExamples.exampleSignatureES256K_obj).map(e => assert(e))
+      verify(key.toPublicKey, jwsObject).map(e => assert(e)) <&>
+        verify(key.toPublicKey, SignedMessageExamples.exampleSignatureES256K_obj).map(e => assert(e))
     }
   }
 

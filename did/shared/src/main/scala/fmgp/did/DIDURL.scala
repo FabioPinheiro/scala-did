@@ -5,18 +5,25 @@ object DIDURL {
   val pattern = """^did:([^\s:]+):([^/\?\#\s]*)([^\?\#\s]*)(\?[^\#\s:]*)?(\#.*)?$""".r
   // ------------------|--method-|------id-----|----path---|---query----|-fragment
 
-  /** @throws AssertionError if not a valid DIDSubject */
-  inline def parseString(id: String) = id match {
+  def parseString(id: String): Either[String, DIDURL] = id match {
     case pattern(namespace, subject, path, query, fragment) =>
-      DIDURL(
-        namespace,
-        subject,
-        Option(path).getOrElse(""),
-        Option(query).getOrElse(""),
-        Option(fragment).getOrElse("")
+      Right(
+        DIDURL(
+          namespace,
+          subject,
+          Option(path).getOrElse(""),
+          Option(query).getOrElse(""),
+          Option(fragment).getOrElse("")
+        )
       )
-    case _ => throw new java.lang.AssertionError(s"Fail to parse DIDSubjectQ: '$id'")
+    case _ => Left(s"Fail to parse DIDSubjectQ: '$id'")
   }
+
+  /** @throws AssertionError if not a valid DIDSubject */
+  inline def unsafeParseString(id: String): DIDURL = parseString(id) match
+    case Right(value) => value
+    case Left(fail)   => throw new java.lang.AssertionError(fail)
+
 }
 
 /** for https://identity.foundation/didcomm-messaging/spec/#construction */
@@ -38,7 +45,7 @@ case class DIDURL(
 ) { self =>
   def specificId: String = didSyntax + path + query + fragment
   def string = s"did:$namespace:$specificId"
-  def toFROMTO = FROMTO(s"did:$namespace:$specificId$didSyntax$path$query") // no fragment
+  def toFROMTO = FROMTO(s"did:$namespace:$didSyntax$path$query") // no fragment
   def toDID: DID = new {
     val namespace = self.namespace
     val specificId = self.specificId

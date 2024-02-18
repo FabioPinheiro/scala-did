@@ -93,12 +93,15 @@ object UtilsJS {
     }
 
     // TODO make private
-    def toKeyLike: IO[UnknownError.type, (KeyLike, String)] = {
-      val aux = key.toJWK
-      ZIO
-        .fromPromiseJS(importJWK(aux))
-        .map(k => (k.asInstanceOf[KeyLike], aux.alg.get))
-        .orElseFail(UnknownError)
+    def toKeyLike: IO[CryptoFailed, (KeyLike, String, String)] = {
+      key.kid match
+        case None => ZIO.fail(FailToExtractKid(s"Fail to extract kid from ${key.toJson}"))
+        case Some(kid) =>
+          val aux = key.toJWK
+          ZIO
+            .fromPromiseJS(importJWK(aux))
+            .map(k => (k.asInstanceOf[KeyLike], aux.alg.get, kid))
+            .orElseFail(UnknownError)
     }
 
     def verify(jwm: SignedMessage): IO[CryptoFailed, Boolean] =
@@ -113,15 +116,14 @@ object UtilsJS {
   extension (key: PrivateKey) {
     def sign(payload: Array[Byte]): IO[CryptoFailed, SignedMessage] = {
       val data = js.typedarray.Uint8Array.from(payload.toSeq.map(_.toShort).toJSIterable)
-
       key.toKeyLike
-        .flatMap { (thisKey, alg) =>
+        .flatMap { (thisKey, alg, kid) =>
           ZIO
             .fromPromiseJS(
               GeneralSign(data) // We can also use CompactSign
                 .tap(
                   _.addSignature(thisKey.asInstanceOf[KeyLike])
-                    .setProtectedHeader(CompactJWSHeaderParameters(alg))
+                    .setProtectedHeader(CompactJWSHeaderParameters(alg).set("kid", kid))
                 )
                 .sign()
             )

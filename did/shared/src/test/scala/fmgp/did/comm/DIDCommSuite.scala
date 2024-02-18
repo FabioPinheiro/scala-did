@@ -34,7 +34,7 @@ class DIDCommSuite extends FunSuite {
       case Right(obj) =>
         assertEquals(obj.id.did, "did:example:alice")
         assert(obj.authentication.isDefined)
-        assertEquals(obj.getAuthentications.size, 3)
+        assertEquals(obj.allKeysTypeKeyAgreement.size, 3)
         assert(obj.keyAgreement.isDefined)
         assertEquals(obj.keyAgreement.get.size, 3)
     }

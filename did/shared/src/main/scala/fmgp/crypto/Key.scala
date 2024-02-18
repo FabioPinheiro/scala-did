@@ -42,13 +42,16 @@ enum Curve: // TODO make it type safe!
   case `P-384` extends Curve
   case `P-521` extends Curve
   case secp256k1 extends Curve
+  // case Curve25519 extends Curve
+  /** Elliptic-Curve Diffie-Hellman (ECDH) protocol using the x coordinate of the curve Curve25519. */
   case X25519 extends Curve //  used for key exchange
+  /** Edwards Digital Signature Algorithm using a curve which is birationally equivalent to Curve25519. */
   case Ed25519 extends Curve //  used for digital signatures
 
 // sealed trait ECCurve // Elliptic Curve
 type ECCurve = Curve.`P-256`.type | Curve.`P-384`.type | Curve.`P-521`.type | Curve.secp256k1.type
 // sealed trait OKPCurve // Edwards-curve Octet Key Pair
-type OKPCurve = Curve.X25519.type | Curve.Ed25519.type
+type OKPCurve = Curve.X25519.type | Curve.Ed25519.type // | Curve.Curve25519.type
 
 object Curve {
   extension (curve: Curve) {
@@ -124,7 +127,7 @@ sealed abstract class OKP_EC_Key extends JWKObj {
     case Curve.`P-256`   => JWAAlgorithm.ES256 // (deprecated?)
     case Curve.`P-384`   => JWAAlgorithm.ES256 // (deprecated?) // TODO CHECK ES256
     case Curve.`P-521`   => JWAAlgorithm.ES256 // (deprecated?) // TODO CHECK ES256
-    case Curve.X25519    => JWAAlgorithm.EdDSA
+    case Curve.X25519    => JWAAlgorithm.EdDSA // FIXME MUST NOT be used for signing
     case Curve.Ed25519   => JWAAlgorithm.EdDSA
   }
 
@@ -171,6 +174,11 @@ case class ECPrivateKey(kty: KTY.EC.type, crv: Curve, d: String, x: String, y: S
   def toPublicKey: ECPublicKey = ECPublicKey(kty = kty, crv = crv, x = x, y = y, kid = kid)
 }
 
+object OKP_EC_Key {
+  given decoder: JsonDecoder[OKP_EC_Key] = ???
+  given encoder: JsonEncoder[OKP_EC_Key] = ???
+}
+
 object PublicKey {
 
   given decoder: JsonDecoder[PublicKey] = Json.Obj.decoder.mapOrFail { originalAst =>
@@ -197,6 +205,9 @@ object PublicKey {
 }
 
 object PrivateKey {
+  given Conversion[PrivateKey, PublicKey] with
+    def apply(key: PrivateKey) = key.toPublicKey
+
   given decoder: JsonDecoder[PrivateKey] = Json.Obj.decoder.mapOrFail { originalAst =>
     originalAst
       .get(JsonCursor.field("kty"))

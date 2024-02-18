@@ -37,6 +37,23 @@ object Message {
   }
 }
 
+type SignedOrEncryptedMessage = SignedMessage | EncryptedMessage
+object SignedOrEncryptedMessage {
+  given decoder: JsonDecoder[SignedOrEncryptedMessage] =
+    SignedMessage.decoder
+      .widen[SignedOrEncryptedMessage]
+      .orElseAndWarpErrors(EncryptedMessageGeneric.decoder.widen[SignedOrEncryptedMessage])
+
+  given encoder: JsonEncoder[SignedOrEncryptedMessage] = new JsonEncoder[SignedOrEncryptedMessage] {
+    override def unsafeEncode(b: SignedOrEncryptedMessage, indent: Option[Int], out: zio.json.internal.Write): Unit = {
+      b match {
+        case obj: SignedMessage    => SignedMessage.encoder.unsafeEncode(obj, indent, out)
+        case obj: EncryptedMessage => EncryptedMessage.encoder.unsafeEncode(obj, indent, out)
+      }
+    }
+  }
+}
+
 // ############################
 // ##### PlaintextMessage #####
 // ############################
@@ -182,8 +199,12 @@ object SignedMessage {
 case class JWMSignatureObj(
     `protected`: Base64Obj[SignProtectedHeader],
     signature: SignatureJWM,
-    header: Option[JWMHeader] = None
-)
+    // FIXME JWM don't have the `header` in https://datatracker.ietf.org/doc/html/draft-looker-jwm-01
+    // See https://github.com/decentralized-identity/didcomm-messaging/issues/446
+    private val header: Option[JWMHeader] = None
+) {
+  val signerKid: String = `protected`.obj.kid.map(_.value).orElse(header.map(_.kid)).get // FIXME
+}
 object JWMSignatureObj {
   given decoder: JsonDecoder[JWMSignatureObj] = DeriveJsonDecoder.gen[JWMSignatureObj]
   given encoder: JsonEncoder[JWMSignatureObj] = DeriveJsonEncoder.gen[JWMSignatureObj]

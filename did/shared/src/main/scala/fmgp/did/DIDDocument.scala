@@ -1,6 +1,7 @@
 package fmgp.did
 
 import zio.json._
+import fmgp.crypto.PublicKey
 
 /** DIDDocument
   *
@@ -28,13 +29,13 @@ trait DIDDocument extends DID {
 
   def service: NotRequired[Set[DIDService]]
 
-  // methods
+  // Extra methods
   def didSubject = id.toDID
 
-  def keyAgreementAll = keyAgreement.getOrElse(Set.empty).flatMap {
+  private def converteToVerificationMethodReferencedWithKey(vm: VerificationMethod) = vm match {
     case e: VerificationMethodReferenced => // None // verificationMethod is alredy included
-      this.verificationMethod.toSeq
-        .flatMap(_.filter(x => x.id == e.id))
+      this.verificationMethod.toSeq.flatten
+        .find(_.id == e.id)
         .map {
           case v: VerificationMethodReferenced        => ??? // Error?
           case v: VerificationMethodEmbeddedJWK       => VerificationMethodReferencedWithKey(v.id, v.publicKeyJwk)
@@ -44,12 +45,21 @@ trait DIDDocument extends DID {
     case e: VerificationMethodEmbeddedMultibase => ??? // FIXME
   }
 
+  def allKeysTypeKeyAgreement = keyAgreement
+    .getOrElse(Set.empty)
+    .flatMap { vm => converteToVerificationMethodReferencedWithKey(vm) }
+
   val (namespace, specificId) = (id.namespace, id.specificId) // DID.getNamespaceAndSpecificId(id)
 
-  def getAuthentications = authentication.toSeq.flatMap {
+  def allKeysTypeAuthentication: Seq[VerificationMethod] = authentication.toSeq.flatMap {
     case v: VerificationMethod                   => Seq(v)
     case seq: Seq[VerificationMethod] @unchecked => seq
   }
+
+  def authenticationByKid(kid: DIDURL): Option[VerificationMethodReferencedWithKey[PublicKey]] =
+    allKeysTypeAuthentication
+      .find(_.id == kid.string) // FIXME it's possible to have only the fragment
+      .flatMap { vm => converteToVerificationMethodReferencedWithKey(vm) }
 
   private inline def getServices = service.toSeq.flatten
   def getDIDServiceDIDCommMessaging = getServices
