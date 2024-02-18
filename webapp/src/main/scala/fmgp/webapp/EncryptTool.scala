@@ -237,7 +237,7 @@ object EncryptTool {
       callCommand(ctx.owner) // side effect
       ()
     },
-    code("DecryptTool Page"),
+    code("Encrypt/Sign Tool"),
     p(
       overflowWrap.:=("anywhere"),
       "Agent: ",
@@ -562,7 +562,7 @@ object EncryptTool {
             "Got a message",
             button("Copy to clipboard", onClick --> { _ => Global.copyToClipboard((reply: Message).toJson) }),
             button(
-              "Copy to Decryot Tool",
+              "Copy to Decryot/Verify Tool",
               onClick --> { _ => DecryptTool.dataVar.set((reply: Message).toJsonPretty) },
               MyRouter.navigateTo(MyRouter.DecryptPage)
             )

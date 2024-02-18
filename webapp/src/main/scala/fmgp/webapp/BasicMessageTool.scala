@@ -66,7 +66,7 @@ object BasicMessageTool {
           case Right(json) =>
             Seq(
               button(
-                "Copy to Encrypt Tool",
+                "Copy to Encrypt/Sign Tool",
                 onClick --> { _ => EncryptTool.dataTextVar.set(json) },
                 MyRouter.navigateTo(MyRouter.EncryptPage)
               )

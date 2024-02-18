@@ -76,7 +76,7 @@ object TrustPingTool {
             case Left(error) => new CommentNode("")
             case Right(json) =>
               button(
-                "Copy to Encrypt Tool",
+                "Copy to Encrypt/Sign Tool",
                 disabled <-- mTrustPingVar.signal.map(_.isLeft),
                 onClick --> { _ => EncryptTool.dataTextVar.set(json) },
                 MyRouter.navigateTo(MyRouter.EncryptPage)
