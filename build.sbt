@@ -4,8 +4,6 @@ resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 import org.scalajs.linker.interface.{ModuleInitializer, ModuleSplitStyle}
 import scala.sys.process._
 
-val useSNAPSHOTS = sys.env.get("USE_SNAPSHOTS").exists(_ == "true")
-
 inThisBuild(
   Seq(
     scalaVersion := "3.3.1", // Also update docs/publishWebsite.sh and any ref to scala-3.3.1
@@ -142,9 +140,7 @@ lazy val V = new {
   val zio = "2.0.21"
   val zioJson = "0.6.2"
   val zioMunitTest = "0.2.0"
-  val zioHttp =
-    if (!useSNAPSHOTS) "3.0.0-RC3"
-    else "3.0.0-RC3+2-2b46f7a9-SNAPSHOT" // FIX CORS https://github.com/zio/zio-http/pull/2490
+  val zioHttp = "3.0.0-RC3" // FIXES CORS https://github.com/zio/zio-http/pull/2490
   val zioPrelude = "1.0.0-RC21"
 
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time

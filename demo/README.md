@@ -51,14 +51,14 @@ java -jar /home/fabio/workspace/ScalaDID/demo/jvm/target/scala-3.3.1/scala-did-d
 **deploy with flyctl**
 
 ```shell
-USE_SNAPSHOTS=true sbt assemblyAll
+sbt assemblyAll
 flyctl deploy ./demo/
 ```
 
 **deploy by pushing docker image**
 
 ```shell
-USE_SNAPSHOTS=true sbt assemblyAll
+sbt assemblyAll
 docker build --tag scala_did_demo ./demo/
 docker tag scala_did_demo registry.fly.io/scala-did-demo
 # flyctl auth docker
