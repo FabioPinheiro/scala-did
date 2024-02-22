@@ -101,6 +101,7 @@ object AgentProvider {
       AgentWithShortName("pat", pat),
       AgentWithShortName("victor", victor),
       AgentWithShortName("fmgpMediator", fmgpMediator),
+      AgentWithShortName("decentriQubeMediator", decentriQubeMediator),
       AgentWithShortName("iohkOldMediatorBeta", iohkOldMediatorBeta),
       AgentWithShortName("iohkOldMediatorSitHttp", iohkOldMediatorSitHttp),
       AgentWithShortName("iohkMediatorSitHttpWs", iohkMediatorSitHttpWs),
@@ -279,6 +280,17 @@ object AgentProvider {
     Seq(
       DIDPeerServiceEncoded.fromEndpoint("https://mediator.fmgp.app"),
       DIDPeerServiceEncoded.fromEndpoint("wss://mediator.fmgp.app/ws")
+    )
+  )
+
+  val decentriQubeMediator = DIDPeer2.makeAgent(
+    Seq(
+      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
+      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
+    ),
+    Seq(
+      DIDPeerServiceEncoded.fromEndpoint("https://m.fmgp.app"),
+      DIDPeerServiceEncoded.fromEndpoint("wss://m.fmgp.app/ws")
     )
   )
 
