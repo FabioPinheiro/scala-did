@@ -10,7 +10,9 @@ package error {
   case class DidException(fail: DidFail) extends Exception(fail.toString())
 
   @jsonDiscriminator("typeOfDidFail")
-  sealed trait DidFail // extends Exception with Product with Serializable
+  sealed trait DidFail { // extends Exception with Product with Serializable
+    def toText = toString()
+  }
   object DidFail {
     import CryptoFailed.given
     given decoder: JsonDecoder[DidFail] = DeriveJsonDecoder.gen[DidFail]
@@ -37,6 +39,8 @@ package error {
   }
 
   case class FailToGenerateKey(origin: DidFail) extends CryptoFailed
+  case class FailToResolverDIDDocument(origin: DidFail) extends CryptoFailed
+  case class FailToExtractKid(info: String) extends CryptoFailed
 
   case object CryptoNotImplementedError extends CryptoFailed // TODO
   case object UnknownError extends CryptoFailed
@@ -59,6 +63,8 @@ package error {
 
   case object KeyMissingEpkJWEHeader extends CryptoFailed // TODO make it time safe
   case object MissingFromHeader extends CryptoFailed
+  case object WrongSigningDID extends CryptoFailed
+  case object NoSupportedKey extends CryptoFailed
 
   /* EX: Curve of public key does not match curve of private key */
   @jsonDiscriminator("typeOfCurveError")

@@ -10,7 +10,8 @@ import fmgp.crypto._
 /** DID Comm operations */
 trait Operations {
 
-  def sign(msg: PlaintextMessage): ZIO[Agent, CryptoFailed, SignedMessage]
+  // TODO Resolver is need to resolver the seft DID Document
+  def sign(msg: PlaintextMessage): ZIO[Agent & Resolver, CryptoFailed, SignedMessage]
 
   def verify(msg: SignedMessage): ZIO[Resolver, CryptoFailed, Boolean] // SignatureVerificationFailed.type
 
@@ -59,7 +60,7 @@ object Operations {
 
   def sign(
       msg: PlaintextMessage
-  ): ZIO[Operations & Agent, CryptoFailed, SignedMessage] =
+  ): ZIO[Operations & Agent & Resolver, CryptoFailed, SignedMessage] =
     ZIO.serviceWithZIO[Operations](_.sign(msg))
 
   def verify(

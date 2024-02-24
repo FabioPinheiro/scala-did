@@ -31,6 +31,7 @@ import fmgp.did.comm.EncryptedMessageGeneric
 import fmgp.did.comm._
 import fmgp.util._
 import fmgp.crypto.UtilsJVM.toJWK
+import fmgp.crypto.error._
 
 given Conversion[Base64Obj[ProtectedHeader], JWEHeader] with
   def apply(x: Base64Obj[ProtectedHeader]) = {
@@ -132,153 +133,157 @@ object UtilsJVM {
     }
   }
 
-  extension (ecKey: JWKECKey) {
-    def verify(jwm: SignedMessage, alg: JWAAlgorithm): Boolean = {
-      val _key = ecKey.toPublicJWK
-      val verifier = new ECDSAVerifier(_key.toPublicJWK);
-      val header = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(_key.getKeyID()).build()
-      verifier.verify(
-        header,
-        (jwm.base64noSignature).getBytes(StandardCharset.UTF_8),
-        jwm.signatures.head.signature.base64 // FIXME .head
-      )
-    }
+  // extension (ecKey: JWKECKey) {
+  //   def verify(jwm: SignedMessage, alg: JWAAlgorithm): Boolean =
+  //   def sign(payload: Array[Byte], alg: JWAAlgorithm): SignedMessage =
+  // }
 
-    def sign(payload: Array[Byte], alg: JWAAlgorithm): SignedMessage = {
-      require(ecKey.isPrivate(), "EC JWK must include the private key (d)")
+  def ecKeyVerify(ecKey: JWKECKey, jwm: SignedMessage, alg: JWAAlgorithm): Boolean = {
+    val _key = ecKey.toPublicJWK
+    val verifier = new ECDSAVerifier(_key.toPublicJWK);
+    val header = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(_key.getKeyID()).build()
+    verifier.verify(
+      header,
+      (jwm.base64noSignature).getBytes(StandardCharset.UTF_8),
+      jwm.signatures.head.signature.base64 // FIXME .head
+    )
+  }
 
-      val signer: JWSSigner = new ECDSASigner(ecKey) // Create the EC signer
-      val header: JWSHeader = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(ecKey.getKeyID()).build()
-      val payloadObj = new JosePayload(payload)
-      val jwsObject: JWSObject = new JWSObject(header, payloadObj) // Creates the JWS object with payload
+  def ecKeySign(ecKey: JWKECKey, payload: Array[Byte], alg: JWAAlgorithm): SignedMessage = {
+    require(ecKey.isPrivate(), "EC JWK must include the private key (d)")
 
-      jwsObject.sign(signer)
-      jwsObject.serialize().split('.') match {
-        case Array(protectedValue, payload, signature) =>
-          assert(payload == payloadObj.toBase64URL.toString) // redundant check
-          assert(signature == jwsObject.getSignature.toString) // redundant check
-          SignedMessage(
-            payload = Payload.fromBase64url(payload),
-            Seq(
-              JWMSignatureObj(
-                `protected` = Base64(protectedValue).unsafeAsObj[SignProtectedHeader],
-                signature = SignatureJWM(signature),
-                header = None // TODO Some(JWMHeader(kid = ))
-              )
+    val signer: JWSSigner = new ECDSASigner(ecKey) // Create the EC signer
+    val header: JWSHeader = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(ecKey.getKeyID()).build()
+    val payloadObj = new JosePayload(payload)
+    val jwsObject: JWSObject = new JWSObject(header, payloadObj) // Creates the JWS object with payload
+
+    jwsObject.sign(signer)
+    jwsObject.serialize().split('.') match {
+      case Array(protectedValue, payload, signature) =>
+        assert(payload == payloadObj.toBase64URL.toString) // redundant check
+        assert(signature == jwsObject.getSignature.toString) // redundant check
+        SignedMessage(
+          payload = Payload.fromBase64url(payload),
+          Seq(
+            JWMSignatureObj(
+              `protected` = Base64(protectedValue).unsafeAsObj[SignProtectedHeader],
+              signature = SignatureJWM(signature),
+              header = None // TODO Some(JWMHeader(kid = ))
             )
           )
-      }
+        )
     }
   }
 
-  extension (okpKey: OctetKeyPair) {
-    def verify(jwm: SignedMessage, alg: JWAAlgorithm): Boolean = {
-      val _key = okpKey.toPublicJWK
-      val verifier = new Ed25519Verifier(_key.toPublicJWK);
-      val header = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(_key.getKeyID()).build()
-      verifier.verify(
-        header,
-        (jwm.base64noSignature).getBytes(StandardCharset.UTF_8),
-        jwm.signatures.head.signature.base64 // FIXME .head
-      )
-    }
+  // extension (okpKey: OctetKeyPair) {
+  //   def verify(jwm: SignedMessage, alg: JWAAlgorithm): Boolean
+  //   def signWithEd25519(payload: Array[Byte], alg: JWAAlgorithm): SignedMessage
+  // }
 
-    def signWithEd25519(payload: Array[Byte], alg: JWAAlgorithm): SignedMessage = {
-      require(okpKey.isPrivate(), "EC JWK must include the private key (d)")
+  def okpKeyVerifyWithEd25519(okpKey: OctetKeyPair, jwm: SignedMessage, alg: JWAAlgorithm): Boolean = {
+    val _key = okpKey.toPublicJWK
+    val verifier = new Ed25519Verifier(_key.toPublicJWK);
+    val header = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(_key.getKeyID()).build()
+    verifier.verify(
+      header,
+      (jwm.base64noSignature).getBytes(StandardCharset.UTF_8),
+      jwm.signatures.head.signature.base64 // FIXME .head
+    )
+  }
 
-      val signer: JWSSigner = new Ed25519Signer(okpKey) // Create the OKP signer
-      val header: JWSHeader = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(okpKey.getKeyID()).build()
-      val payloadObj = new JosePayload(payload)
+  def okpKeySignWithEd25519(okpKey: OctetKeyPair, payload: Array[Byte], alg: JWAAlgorithm): SignedMessage = {
+    require(okpKey.isPrivate(), "EC JWK must include the private key (d)")
+    assert(
+      okpKey.getCurve().getName() == JWKCurve.Ed25519.getName(),
+      "This method can only be call with Curve.Ed25519"
+    ) // TODO make it safe
 
-      val jwsObject: JWSObject = new JWSObject(header, payloadObj) // Creates the JWS object with payload
+    val signer: JWSSigner = new Ed25519Signer(okpKey) // Create the OKP signer
+    val header: JWSHeader = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(okpKey.getKeyID()).build()
+    val payloadObj = new JosePayload(payload)
 
-      jwsObject.sign(signer)
-      jwsObject.serialize().split('.') match {
-        case Array(protectedValue, payload, signature) =>
-          assert(payload == payloadObj.toBase64URL.toString) // redundant check
-          assert(signature == jwsObject.getSignature.toString) // redundant check
-          SignedMessage(
-            payload = Payload.fromBase64url(payload),
-            Seq(
-              JWMSignatureObj(
-                `protected` = Base64(protectedValue).unsafeAsObj[SignProtectedHeader],
-                signature = SignatureJWM(signature),
-                header = None // TODO Some(JWMHeader(kid = ))
-              )
+    val jwsObject: JWSObject = new JWSObject(header, payloadObj) // Creates the JWS object with payload
+
+    jwsObject.sign(signer)
+    jwsObject.serialize().split('.') match {
+      case Array(protectedValue, payload, signature) =>
+        assert(payload == payloadObj.toBase64URL.toString) // redundant check
+        assert(signature == jwsObject.getSignature.toString) // redundant check
+        SignedMessage(
+          payload = Payload.fromBase64url(payload),
+          Seq(
+            JWMSignatureObj(
+              `protected` = Base64(protectedValue).unsafeAsObj[SignProtectedHeader],
+              signature = SignatureJWM(signature),
+              header = None // TODO REMOVE
             )
           )
-      }
+        )
     }
   }
 
-  extension (key: OKP_EC_Key) {
+  extension (key: OKP_EC_Key)
     def toJWK: JWKECKey | OctetKeyPair = {
       key match {
         case ec: ECKey   => ec.toJWK
-        case okp: OKPKey => okp.toJWK
+        case okp: OKPKey => okpKey2JWK(okp)
       }
     }
+  extension (okp: OKPKey) def toJWK: OctetKeyPair = okpKey2JWK(okp)
+  extension (ec: ECKey) def toJWK: JWKECKey = ecKey2JWK(ec)
+
+  def ecKey2JWK(ec: ECKey): JWKECKey = {
+    val x = Base64.fromBase64url(ec.x)
+    val y = Base64.fromBase64url(ec.y)
+    val builder = ec.getCurve match {
+      case c: Curve.`P-256`.type   => JWKECKey.Builder(c.toJWKCurve, x, y)
+      case c: Curve.`P-384`.type   => JWKECKey.Builder(c.toJWKCurve, x, y)
+      case c: Curve.`P-521`.type   => JWKECKey.Builder(c.toJWKCurve, x, y)
+      case c: Curve.secp256k1.type => JWKECKey.Builder(c.toJWKCurve, x, y)
+    }
+    ec.kid.foreach(builder.keyID)
+    ec match { // for private key
+      case _: PublicKey  => // ok (just the public key)
+      case k: PrivateKey => builder.d(Base64.fromBase64url(k.d))
+    }
+    builder.build()
   }
 
-  // TODO extension (ec: ECPublicKey) def toJWK: JWKECKey = ???
-  // TODO extension (ec: ECPrivateKey) def toJWK: JWKECKey = ???
-  // TODO extension (okp: OKPPublicKey) def toJWK: OctetKeyPair = ???
-  // TODO extension (okp: OKPPrivateKey) def toJWK: OctetKeyPair = ???
-  extension (ec: ECKey) {
-    def toJWK: JWKECKey = {
-
-      val builder = ec.getCurve match {
-        case c: Curve.`P-256`.type =>
-          JWKECKey.Builder(c.toJWKCurve, Base64.fromBase64url(ec.x), Base64.fromBase64url(ec.y))
-        case c: Curve.`P-384`.type =>
-          JWKECKey.Builder(c.toJWKCurve, Base64.fromBase64url(ec.x), Base64.fromBase64url(ec.y))
-        case c: Curve.`P-521`.type =>
-          JWKECKey.Builder(c.toJWKCurve, Base64.fromBase64url(ec.x), Base64.fromBase64url(ec.y))
-        case c: Curve.secp256k1.type =>
-          JWKECKey.Builder(c.toJWKCurve, Base64.fromBase64url(ec.x), Base64.fromBase64url(ec.y))
-      }
-      ec.kid.foreach(builder.keyID)
-      ec match { // for private key
-        case _: PublicKey  => // ok (just the public key)
-        case k: PrivateKey => builder.d(Base64.fromBase64url(k.d))
-      }
-      builder.build()
+  def okpKey2JWK(okp: OKPKey): OctetKeyPair = {
+    val builder = okp.getCurve match {
+      case c: Curve.Ed25519.type => OctetKeyPair.Builder(c.toJWKCurve, Base64.fromBase64url(okp.x))
+      case c: Curve.X25519.type  => OctetKeyPair.Builder(c.toJWKCurve, Base64.fromBase64url(okp.x))
     }
+    okp.kid.foreach(builder.keyID)
+    okp match { // for private key
+      case _: PublicKey  => // ok (just the public key)
+      case k: PrivateKey => builder.d(Base64.fromBase64url(k.d))
+    }
+    builder.build()
   }
-  extension (okp: OKPKey) {
-    def toJWK: OctetKeyPair = {
-      val builder = okp.getCurve match {
-        case c: Curve.Ed25519.type => OctetKeyPair.Builder(c.toJWKCurve, Base64.fromBase64url(okp.x))
-        case c: Curve.X25519.type  => OctetKeyPair.Builder(c.toJWKCurve, Base64.fromBase64url(okp.x))
+
+  extension (key: PublicKey) {
+    def verify(jwm: SignedMessage) =
+      key.toJWK match {
+        case ecKey: JWKECKey =>
+          Right(ecKeyVerify(ecKey, jwm, key.jwaAlgorithmtoSign))
+        case okpKey: OctetKeyPair if key.crv == Curve.Ed25519 =>
+          Right(okpKeyVerifyWithEd25519(okpKey, jwm, key.jwaAlgorithmtoSign))
+        case okpKey: OctetKeyPair => // TODO other curves are not suported ATM
+          Left(UnsupportedCurve(obtained = key.crv, supported = Set(Curve.Ed25519))) // NotImplementedError()
       }
-      okp.kid.foreach(builder.keyID)
-      okp match { // for private key
-        case _: PublicKey  => // ok (just the public key)
-        case k: PrivateKey => builder.d(Base64.fromBase64url(k.d))
-      }
-      builder.build()
-    }
+
   }
 
   extension (key: PrivateKey) {
-    def verify(jwm: SignedMessage): Future[Boolean] = Future.successful(
-      key.toJWK match {
-        case ecKey: JWKECKey      => ecKey.verify(jwm, key.jwaAlgorithmtoSign)
-        case okpKey: OctetKeyPair => okpKey.verify(jwm, key.jwaAlgorithmtoSign)
-      }
-    )
-
-  }
-
-  extension (key: OKP_EC_Key) {
-    def sign(payload: Array[Byte]): Future[SignedMessage] =
-      key.toJWK match {
+    def sign(payload: Array[Byte]) =
+      key.toPublicKey.toJWK match {
         case ecKey: JWKECKey =>
-          Future.successful(ecKey.sign(payload, key.jwaAlgorithmtoSign))
+          Right(ecKeySign(ecKey, payload, key.jwaAlgorithmtoSign))
         case okpKey: OctetKeyPair if key.crv == Curve.Ed25519 =>
-          Future.successful(okpKey.signWithEd25519(payload, key.jwaAlgorithmtoSign))
-        case okpKey: OctetKeyPair =>
-          Future.failed(NotImplementedError()) // TODO other curves are not suported ATM
+          Right(okpKeySignWithEd25519(okpKey, payload, key.jwaAlgorithmtoSign))
+        case okpKey: OctetKeyPair => // TODO other curves are not suported ATM
+          Left(UnsupportedCurve(obtained = key.crv, supported = Set(Curve.Ed25519))) // NotImplementedError()
       }
 
   }

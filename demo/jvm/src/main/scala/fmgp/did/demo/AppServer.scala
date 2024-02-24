@@ -18,8 +18,8 @@ import fmgp.did.comm.protocol._
 import fmgp.did.method.peer.DidPeerResolver
 import fmgp.did.method.hardcode.HardcodeResolver
 import fmgp.did.uniresolver.Uniresolver
-import fmgp.util._
 import fmgp.did.framework.Operator
+import fmgp.util._
 
 // import zio.http.endpoint.RoutesMiddleware
 
@@ -50,7 +50,8 @@ object AppServer extends ZIOAppDefault {
     // http://localhost:8080/oob?_oob=eyJ0eXBlIjoiaHR0cHM6Ly9kaWRjb21tLm9yZy9vdXQtb2YtYmFuZC8yLjAvaW52aXRhdGlvbiIsImlkIjoiNTk5ZjM2MzgtYjU2My00OTM3LTk0ODctZGZlNTUwOTlkOTAwIiwiZnJvbSI6ImRpZDpleGFtcGxlOnZlcmlmaWVyIiwiYm9keSI6eyJnb2FsX2NvZGUiOiJzdHJlYW1saW5lZC12cCIsImFjY2VwdCI6WyJkaWRjb21tL3YyIl19fQ
   ).toHttpApp @@ (Middleware.requestLogging(loggedRequestHeaders = Set(Header.Host, Header.Origin)) ++ Middleware.debug)
 
-  def appOther = Routes(
+  def appOther = appOtherRoutes.logErrorAndRespond.toHttpApp
+  def appOtherRoutes: Routes[Resolver, Throwable] = Routes( // TODO outes[Resolver, DidException]
     Method.GET / "oob" -> handler { (req: Request) =>
       for {
         _ <- ZIO.log("oob")
@@ -65,11 +66,9 @@ object AppServer extends ZIOAppDefault {
     Method.POST / "ops" -> handler { (req: Request) =>
       req.body.asString
         .tap(e => ZIO.log("ops"))
-        .tap(e => ZIO.logTrace(s"ops: $e"))
-        .flatMap(e => OperationsServerRPC.ops(e))
+        .flatMap(e => OperationsServerRPC.ops(e).tapErrorCause(cause => ZIO.logErrorCause(cause)))
         .map(e => Response.text(e))
     },
-
     // ### MAKE KEYS ###
     Method.POST / "makeKey" -> handler { (req: Request) =>
       req.body.asString
@@ -100,7 +99,7 @@ object AppServer extends ZIOAppDefault {
         case Left(error)  => ZIO.succeed(Response.text(error.error).copy(status = Status.BadRequest)).debug
         case Right(value) => ZIO.succeed(Response.text("DID:" + value)).debug
     },
-  ).sandbox.toHttpApp
+  )
 
   def appWebsite = Routes(
     // Method.GET / trailing -> handler { // html.Html.fromDomElement()

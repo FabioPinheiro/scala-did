@@ -18,10 +18,11 @@ import fmgp.crypto.error._
 
 import fmgp.did.AgentProvider
 import fmgp.Utils
+
 object DecryptTool {
   val dataVar: Var[String] = Var(initial = "")
-  val encryptedMessageVar: Signal[Either[String, EncryptedMessage]] =
-    dataVar.signal.map(_.fromJson[EncryptedMessage])
+  val messageVar: Signal[Either[String, SignedOrEncryptedMessage]] =
+    dataVar.signal.map(_.fromJson[SignedOrEncryptedMessage](SignedOrEncryptedMessage.decoder))
   val decryptDataVar: Var[Option[Array[Byte]]] = Var(initial = None)
   val decryptMessageVar: Var[Option[Either[DidFail, Message]]] = Var(initial = None)
 
@@ -29,16 +30,25 @@ object DecryptTool {
     Signal
       .combine(
         Global.agentVar,
-        encryptedMessageVar
+        messageVar
       )
       .map {
+        case (_, Right(sMsg: SignedMessage)) =>
+          val program = OperationsClientRPC
+            .verify2PlaintextMessage(sMsg)
+            .flatMap { plaintext =>
+              ZIO.succeed(decryptDataVar.set(Some(sMsg.payload.content.getBytes))) *> // side effect!
+                ZIO.succeed(decryptMessageVar.set(Some(Right(plaintext)))) *> // side effect!
+                ZIO.succeed(Global.messageRecive(sMsg, plaintext)) // side effect!
+            }
+          Utils.runProgram(program.provideSomeLayer(Global.resolverLayer))
         case (None, _) =>
           decryptDataVar.set(None) // side effect!
           decryptMessageVar.set(None) // side effect!
         case (Some(agent), Left(error)) =>
           decryptDataVar.set(None) // side effect!
-          decryptMessageVar.set(Some(Left(FailToParse("Fail to parse Encrypted Message: " + error)))) // side effect!
-        case (Some(agent), Right(msg)) =>
+          decryptMessageVar.set(Some(Left(FailToParse("Fail to parse Message: " + error)))) // side effect!
+        case (Some(agent), Right(msg: EncryptedMessage)) =>
           val program =
             OperationsClientRPC
               .decryptRaw(msg)
@@ -71,64 +81,99 @@ object DecryptTool {
       job(ctx.owner)
       ()
     },
-    code("DecryptTool Page"),
+    code("Decrypt/Verify Tool"),
     p(
       overflowWrap.:=("anywhere"),
       "Agent: ",
       " ",
-      code(child.text <-- Global.agentVar.signal.map(_.map(_.id.string).getOrElse("NO AGENT IS SELECTED!")))
+      code(
+        child.text <-- Global.agentVar.signal
+          .map(_.map(_.id.string).getOrElse("NO AGENT IS SELECTED! (It can still verify sign message)"))
+      )
     ),
-    p("Encrypted Message Data:"),
+    p("Message Data:"),
     textArea(
       rows := 20,
       cols := 80,
       autoFocus(true),
-      placeholder("<EncryptedMessage>"),
+      placeholder("<SignedMessage or EncryptedMessage>"),
       value <-- dataVar,
       inContext { thisNode => onInput.map(_ => thisNode.ref.value) --> dataVar }
     ),
-    p("Encrypted Message Protected Header (parsed):"),
+    p("Message Protected Header (parsed):"),
     div(
-      children <-- encryptedMessageVar.map { mMsg =>
+      children <-- messageVar.map { mMsg =>
         mMsg.toSeq
           .flatMap {
-            _.`protected`.obj match
-              case header @ AnonProtectedHeader(epk, apv, typ, enc, alg) =>
-                Seq(
-                  p("Anoncrypt:"),
-                  pre(code(header.toJsonPretty)),
-                )
-              case header @ AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) =>
-                Seq(
-                  p(
-                    "Authcrypt from: ",
-                    code(
-                      a(skid.did.string, MyRouter.navigateTo(MyRouter.ResolverPage(skid.did.string))),
-                      "#",
-                      skid.fragment
+            case sMsg: SignedMessage =>
+              sMsg.signatures.flatMap { e =>
+                e.`protected`.obj.kid match
+                  case None => Seq(pre(code("'kid' is missing from Protected Header!"))) // TODO REMOVE case
+                  case Some(vmr) =>
+                    Seq(
+                      pre(
+                        code(
+                          a(vmr.did.string, MyRouter.navigateTo(MyRouter.ResolverPage(vmr.did.string))),
+                          "#",
+                          vmr.fragment,
+                          ";"
+                        )
+                      ),
+                      pre(code(e.`protected`.obj.toJson)),
                     )
-                  ),
-                  pre(code(header.toJsonPretty))
-                )
+              }
+            case eMsg: EncryptedMessage =>
+              eMsg.`protected`.obj match
+                case header @ AnonProtectedHeader(epk, apv, typ, enc, alg) =>
+                  Seq(
+                    p("Anoncrypt:"),
+                    pre(code(header.toJsonPretty)),
+                  )
+                case header @ AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) =>
+                  Seq(
+                    p(
+                      "Authcrypt from: ",
+                      code(
+                        a(skid.did.string, MyRouter.navigateTo(MyRouter.ResolverPage(skid.did.string))),
+                        "#",
+                        skid.fragment
+                      )
+                    ),
+                    pre(code(header.toJsonPretty))
+                  )
           }
       },
     ),
     p("Recipients kid:"),
     ul(
-      children <-- encryptedMessageVar.map { mMsg =>
-        mMsg.toSeq
-          .flatMap(_.recipients.toSeq.map(_.header.kid))
-          .map(kid =>
-            li(code(a(kid.did.string, MyRouter.navigateTo(MyRouter.ResolverPage(kid.did.string))), "#", kid.fragment))
-          )
-      },
+      children <-- messageVar.map(_.toSeq).map {
+        case sMsg: SignedMessage =>
+          sMsg.payloadAsPlaintextMessage match
+            case Left(error) => Seq(li(code(error.toText)))
+            case Right(pMsg) =>
+              pMsg.to.toSeq.flatten.map { to =>
+                li(code(a(to.value, MyRouter.navigateTo(MyRouter.ResolverPage(to.value)))))
+              }
+        case eMsg: EncryptedMessage =>
+          eMsg.recipients.toSeq
+            .map(_.header.kid)
+            .map(kid =>
+              li(
+                code(
+                  a(kid.did.string, MyRouter.navigateTo(MyRouter.ResolverPage(kid.did.string))),
+                  "#",
+                  kid.fragment
+                )
+              )
+            )
+      }
     ),
-    p("Raw Data (as UTF8) after decrypting:"),
+    p("Raw Data (as UTF8) after decrypting/verifying:"),
     pre(code(child.text <-- decryptDataVar.signal.map {
       case None        => "<none>"
       case Some(bytes) => String(bytes)
     })),
-    p("Message after decrypting:"),
+    p("Message after decrypting/verifying:"),
     pre(code(child.text <-- decryptMessageVar.signal.map {
       case None                => "<none>"
       case Some(Left(didFail)) => didFail.toString

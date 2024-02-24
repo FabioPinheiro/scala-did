@@ -63,15 +63,21 @@ docker build --tag scala_did_demo ./demo/
 docker tag scala_did_demo registry.fly.io/scala-did-demo
 # flyctl auth docker
 docker push registry.fly.io/scala-did-demo
-# 2024/02/05 +- 119.3MB
-# 2023/11/15 +- 124.1MB
-# 2023/10/28 +- 118.1MB
-# 2023/10/20 +- 117.3MB
-# 2023/09/24 +- 115.1MB
 # +- 52MB
 flyctl image update -a scala-did-demo
 flyctl deploy ./demo/ -i registry.fly.io/scala-did-demo
 ```
+
+## History of deployments
+
+Size of the last docker layer:
+- 2024/02/18 +- 121.2MB
+- 2024/02/13 +- 120.8MB
+- 2024/02/05 +- 119.3MB
+- 2023/11/15 +- 124.1MB
+- 2023/10/28 +- 118.1MB
+- 2023/10/20 +- 117.3MB
+- 2023/09/24 +- 115.1MB
 
 ## Others
 

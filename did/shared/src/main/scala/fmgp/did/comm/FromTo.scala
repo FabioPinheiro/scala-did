@@ -59,7 +59,7 @@ object FROMTO {
     inline def value: String = id
     inline def asTO = TO.unsafe_apply(id)
     inline def asFROM = FROM.unsafe_apply(id)
-    inline def toDID = DIDURL.parseString(id).toDID
+    inline def toDID = DIDURL.unsafeParseString(id).toDID
     inline def toDIDSubject: DIDSubject = DIDSubject(toDID.did)
 
   private[did] inline def unsafe_apply(s: String): FROMTO = s
@@ -70,7 +70,7 @@ object FROMTO {
     else Left(FailToParse(s"MUST be DID URL with no fragment '$s'"))
   def fromForcedDIDURL(s: DIDURL) = s.toFROMTO // REMOVE
   /** FIXME REMOVE method @throws AssertionError if not a valid DIDSubject */
-  def force(s: String) = fromForcedDIDURL(DIDURL.parseString(s))
+  def force(s: String) = fromForcedDIDURL(DIDURL.unsafeParseString(s))
 
   given decoder: JsonDecoder[FROMTO] = JsonDecoder.string.mapOrFail(s => FROMTO.either(s).left.map(_.error))
   given encoder: JsonEncoder[FROMTO] = JsonEncoder.string.contramap(e => e.value)
@@ -92,7 +92,7 @@ object FROM {
     inline def didSyntax: String = FromTo.unsafe_parse(id).didSyntax
     inline def path: String = FromTo.unsafe_parse(id).path
     inline def query: String = FromTo.unsafe_parse(id).query
-    inline def toDID = DIDURL.parseString(id).toDID
+    inline def toDID = DIDURL.unsafeParseString(id).toDID
     inline def toDIDSubject: DIDSubject = DIDSubject(toDID.did)
     inline def asDIDURL = DIDURL(namespace = id.namespace, didSyntax = id.didSyntax, path = id.path, query = id.query)
     inline def asTO = TO.unsafe_apply(id)
@@ -128,7 +128,7 @@ object TO {
     inline def didSyntax: String = FromTo.unsafe_parse(id).didSyntax
     inline def path: String = FromTo.unsafe_parse(id).path
     inline def query: String = FromTo.unsafe_parse(id).query
-    inline def toDID = DIDURL.parseString(id).toDID
+    inline def toDID = DIDURL.unsafeParseString(id).toDID
     inline def toDIDSubject: DIDSubject = DIDSubject(toDID.did)
     inline def asDIDURL = DIDURL(namespace = id.namespace, didSyntax = id.didSyntax, path = id.path, query = id.query)
     inline def asFROM = FROM.unsafe_apply(id)
