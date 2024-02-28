@@ -1,8 +1,10 @@
 package fmgp.did
 
 import zio._
+import zio.json.*
 import fmgp.crypto._
 import fmgp.did.Agent
+import fmgp.did.comm.*
 import fmgp.did.method.peer.DIDPeer2
 import fmgp.did.method.peer.DIDPeerServiceEncoded
 import fmgp.did.method.peer.DIDPeer
@@ -37,16 +39,29 @@ case class AgentProvider(agents: Seq[AgentWithShortName], identities: Seq[DIDWit
 
 object AgentProvider {
 
-  case class AgentWithShortName(name: String, value: Agent) extends Agent {
+  given decoder: JsonDecoder[AgentProvider] = DeriveJsonDecoder.gen[AgentProvider]
+  given encoder: JsonEncoder[AgentProvider] = DeriveJsonEncoder.gen[AgentProvider]
+
+  case class AgentWithShortName(name: String, value: AgentSimple) extends Agent {
     override def id = value.id
     override def keyStore = value.keyStore
 
     def toDIDWithShortName = DIDWithShortName(name, value.id)
   }
 
-  case class DIDWithShortName(name: String, value: DID) extends DID {
+  object AgentWithShortName {
+    given decoder: JsonDecoder[AgentWithShortName] = DeriveJsonDecoder.gen[AgentWithShortName]
+    given encoder: JsonEncoder[AgentWithShortName] = DeriveJsonEncoder.gen[AgentWithShortName]
+  }
+
+  case class DIDWithShortName(name: String, value: DIDSubject) extends DID {
     override def namespace: String = value.namespace
     override def specificId: String = value.specificId
+  }
+
+  object DIDWithShortName {
+    given decoder: JsonDecoder[DIDWithShortName] = DeriveJsonDecoder.gen[DIDWithShortName]
+    given encoder: JsonEncoder[DIDWithShortName] = DeriveJsonEncoder.gen[DIDWithShortName]
   }
 
   /** https://mermaid.live/edit#pako:eNpVkMFqwzAMhl_F6Ny-gA-FbVmht8LKLnEPaqwsooltFDswSt-9cpvDdpD8S__3G-MbdNETWPgRTIM5NS4Y8zZyR2a73Zkj5lbLuZAkLiTnar_Hy9NscKG_82HB0NamOM9zWfGPAWXk132fC7VaCpCGZy8xpRUz1XxCe8Fw_b_65i5HaV-HpvUp3POa3OOFYxWePWxgIplQlYVbXTrIA03kwKr01GMZswMX7opiyfHrN3RgsxTaQEkeMzWM-hsT2B7Hme4PPpxgwQ

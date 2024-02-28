@@ -22,6 +22,14 @@ import fmgp.did.AgentProvider.AgentWithShortName
 
 object AgentManagement {
 
+  val providerTextVar: Var[String] = Var(initial =
+    AgentProvider( // AgentProvider.provider
+      Seq(AgentWithShortName("alice", AgentProvider.alice)),
+      Seq(AgentProvider.DIDWithShortName("exampleAlice", AgentProvider.exampleAlice.id))
+    ).toJsonPretty
+  )
+  def maybeAgentProviderSignal = providerTextVar.signal.map(_.fromJson[AgentProvider])
+
   def nameVar = Global.agentVar.signal.map {
     case None        => "none"
     case Some(agent) => agent.id
@@ -110,6 +118,12 @@ object AgentManagement {
   }
 
   val rootElement = div(
+    onMountCallback { ctx =>
+      Global.agentProvider.signal
+        .map(provider => providerTextVar.set(provider.toJsonPretty))
+        .observe(ctx.owner) // side effect
+      ()
+    },
     code("Agent Management"),
     h2("All Agents and Identities"),
     table(
@@ -311,7 +325,30 @@ object AgentManagement {
     div(
       h2("KeyStore:"),
       child <-- keyStoreVar.map(keyStore => pre(code(keyStore.keys.toJsonPretty)))
-    )
+    ),
+    div(
+      h2("Edit Agents"),
+      div(
+        button(
+          "Reset default AgentProvider",
+          onClick --> { _ => Global.agentProvider.set(AgentProvider.provider) }
+        ),
+        child <-- maybeAgentProviderSignal.map {
+          case Left(error) => pre(code(s"Can't import AgentProvider because: $error"))
+          case Right(newProvider) =>
+            button("Import AgentProvider", onClick --> { _ => Global.agentProvider.set(newProvider) })
+        }
+      ),
+      div(
+        textArea(
+          rows := 40,
+          cols := 80,
+          autoFocus(true),
+          value <-- providerTextVar,
+          inContext { thisNode => onInput.map(_ => thisNode.ref.value) --> providerTextVar }
+        ),
+      ),
+    ),
   )
   def apply(): HtmlElement = rootElement
 }

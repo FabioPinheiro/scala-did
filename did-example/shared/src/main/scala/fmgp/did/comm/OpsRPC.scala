@@ -27,6 +27,7 @@ case class AgentSimple(didSubject: DIDSubject, keyStore: KeyStore) extends Agent
 object AgentSimple {
   given JsonDecoder[AgentSimple] = DeriveJsonDecoder.gen[AgentSimple]
   given JsonEncoder[AgentSimple] = DeriveJsonEncoder.gen[AgentSimple]
+  given Conversion[Agent, AgentSimple] = a => AgentSimple(a.id, a.keyStore)
 }
 
 case class SignOpInput(agent: AgentSimple, msg: PlaintextMessage) extends OpsInputRPC
