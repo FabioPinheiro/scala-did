@@ -72,8 +72,7 @@ node4 -> node0;
 <section id="members-list">
  <h2 class="h500">Members list</h2>
  <div class="documentableFilter">
-  <div class="filtersContainer"></div>
-  <input class="filterableInput" placeholder="Filter by any phrase" data-test-id="filterBarInput" type="search"><button class="clearButton label-only-button" data-test-id="filterBarClearButton">Clear all</button>
+  <div class="filtersContainer"></div><input class="filterableInput" placeholder="Filter by any phrase" data-test-id="filterBarInput" type="search"><button class="clearButton label-only-button" data-test-id="filterBarClearButton">Clear all</button>
  </div>
  <div class="membersList expand">
   <div class="tabs">
@@ -94,7 +93,7 @@ node4 -> node0;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="AgentExecutar.html#acceptTransport-686" t="n" class="documentableName ">acceptTransport</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">transport</span>: <a href="../framework.html#TransportDIDComm-0" t="t">TransportDIDComm</a>[<span data-unresolved-link="" t="t">Any</span>]): <span data-unresolved-link="" t="t">URIO</span>[<a href="https://doc.did.fmgp.app/api/fmgp/did/comm/Operations.html" t="t">Operations</a><span t="k"> &amp; </span><a href="https://doc.did.fmgp.app/api/fmgp/did/Resolver.html" t="t">Resolver</a>, <a href="https://www.scala-lang.org/api/2.13.10/scala/Unit.html" t="t">Unit</a>]
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="AgentExecutar.html#acceptTransport-686" t="n" class="documentableName ">acceptTransport</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">transport</span>: <a href="../framework.html#TransportDIDComm-0" t="t">TransportDIDComm</a>[<span data-unresolved-link="" t="t">Any</span>]): <span data-unresolved-link="" t="t">URIO</span>[<a href="https://doc.did.fmgp.app/api/fmgp/did/comm/Operations.html" t="t">Operations</a><span t="k"> &amp; </span><a href="https://doc.did.fmgp.app/api/fmgp/did/Resolver.html" t="t">Resolver</a>, <a href="https://www.scala-lang.org/api/2.13.12/scala/Unit.html" t="t">Unit</a>]
            </div>
           </div>
          </div>
@@ -104,11 +103,11 @@ node4 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Accept a transport where messages can be received.</p> 
+             <p>Accept a transport where messages can be received.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Accept a transport where messages can be received.</p> 
+              <p>Accept a transport where messages can be received.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -122,7 +121,7 @@ node4 -> node0;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="AgentExecutar.html#receiveMsg-ef4" t="n" class="documentableName ">receiveMsg</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">msg</span>: <a href="https://doc.did.fmgp.app/api/fmgp/did/comm/SignedMessage.html" t="t">SignedMessage</a><span t="k"> | </span><a href="https://doc.did.fmgp.app/api/fmgp/did/comm/EncryptedMessage.html" t="t">EncryptedMessage</a>, <span t="k"></span><span data-unresolved-link="" t="n">transport</span>: <a href="../framework.html#TransportDIDComm-0" t="t">TransportDIDComm</a>[<span data-unresolved-link="" t="t">Any</span>]): <span data-unresolved-link="" t="t">URIO</span>[<a href="https://doc.did.fmgp.app/api/fmgp/did/comm/Operations.html" t="t">Operations</a><span t="k"> &amp; </span><a href="https://doc.did.fmgp.app/api/fmgp/did/Resolver.html" t="t">Resolver</a>, <a href="https://www.scala-lang.org/api/2.13.10/scala/Unit.html" t="t">Unit</a>]
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="AgentExecutar.html#receiveMsg-ef4" t="n" class="documentableName ">receiveMsg</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">msg</span>: <a href="https://doc.did.fmgp.app/api/fmgp/did/comm/SignedMessage.html" t="t">SignedMessage</a><span t="k"> | </span><a href="https://doc.did.fmgp.app/api/fmgp/did/comm/EncryptedMessage.html" t="t">EncryptedMessage</a>, <span t="k"></span><span data-unresolved-link="" t="n">transport</span>: <a href="../framework.html#TransportDIDComm-0" t="t">TransportDIDComm</a>[<span data-unresolved-link="" t="t">Any</span>]): <span data-unresolved-link="" t="t">URIO</span>[<a href="https://doc.did.fmgp.app/api/fmgp/did/comm/Operations.html" t="t">Operations</a><span t="k"> &amp; </span><a href="https://doc.did.fmgp.app/api/fmgp/did/Resolver.html" t="t">Resolver</a>, <a href="https://www.scala-lang.org/api/2.13.12/scala/Unit.html" t="t">Unit</a>]
            </div>
           </div>
          </div>
@@ -132,12 +131,12 @@ node4 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>receive a Message and a transport where that message was recived.</p> 
+             <p>receive a Message and a transport where that message was recived.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>receive a Message and a transport where that message was recived.</p> 
-              <p>We intend to deprecate this API in favor of acceptTransport</p> 
+              <p>receive a Message and a transport where that message was recived.</p>
+              <p>We intend to deprecate this API in favor of acceptTransport</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -162,4 +161,4 @@ node4 -> node0;
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Abstract-methods">Abstract methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><a href="https://github.com/lampepfl/dotty"><button class="icon-button gh"></button></a><a href="https://twitter.com/scala_lang"><button class="icon-button twitter"></button></a><a href="https://discord.com/invite/scala"><button class="icon-button discord"></button></a><a href="https://gitter.im/scala/scala"><button class="icon-button gitter"></button></a><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Abstract-methods">Abstract methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

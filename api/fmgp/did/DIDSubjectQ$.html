@@ -23,7 +23,7 @@
      <button type="button" class="label-only-button" onclick="zoomOut()">Reset zoom</button><button type="button" class="label-only-button" onclick="hideGraph()">Hide graph</button><button type="button" class="label-only-button" onclick="showGraph()">Show graph</button>
      <svg id="graph"></svg>
      <script type="text/dot" id="dot"> digraph g {
- node0 [id=node0, label="<span style=\"color: #FFFFFF;\">object <a href=\"https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html\" t=\"n\">DIDSubjectQ</a>.type</span>", class="object vertex"];
+ node0 [id=node0, label="<span style=\"color: #FFFFFF;\">object <a href=\"https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html\" t=\"n\">DIDSubjectQ</a></span>", class="object vertex"];
 node1 [id=node1, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Object</span></span>", class="class vertex"];
 node2 [id=node2, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Any</span></span>", class="class vertex"];
 node3 [id=node3, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Matchable</span></span>", class="trait vertex"];
@@ -61,7 +61,7 @@ node3 -> node2;
     <div class="mono-small-block supertypes">
      <span></span>
      <div>
-      <a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html" t="n">DIDSubjectQ</a>.type
+      <a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html" t="n">DIDSubjectQ</a>.<span t="k">type</span>
      </div>
     </div>
    </dd>
@@ -71,8 +71,7 @@ node3 -> node2;
 <section id="members-list">
  <h2 class="h500">Members list</h2>
  <div class="documentableFilter">
-  <div class="filtersContainer"></div>
-  <input class="filterableInput" placeholder="Filter by any phrase" data-test-id="filterBarInput" type="search"><button class="clearButton label-only-button" data-test-id="filterBarClearButton">Clear all</button>
+  <div class="filtersContainer"></div><input class="filterableInput" placeholder="Filter by any phrase" data-test-id="filterBarInput" type="search"><button class="clearButton label-only-button" data-test-id="filterBarClearButton">Clear all</button>
  </div>
  <div class="membersList expand">
   <div class="tabs">
@@ -93,7 +92,7 @@ node3 -> node2;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#apply(s:String):DIDSubjectQ" t="n" class="documentableName ">apply</a>(<span t="k"></span><span t="k"></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#s:String" t="n">s</a>: <a href="https://www.scala-lang.org/api/2.13.10/scala/Predef$.html#String" t="t">String</a>): <a href="https://doc.did.fmgp.app/api/fmgp/did.html#DIDSubjectQ" t="t">DIDSubjectQ</a>
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#apply(s:String):DIDSubjectQ" t="n" class="documentableName ">apply</a>(<span t="k"></span><span t="k"></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#s:String" t="n">s</a>: <a href="https://www.scala-lang.org/api/2.13.12/scala/Predef$.html#String" t="t">String</a>): <a href="https://doc.did.fmgp.app/api/fmgp/did.html#DIDSubjectQ" t="t">DIDSubjectQ</a>
            </div>
           </div>
          </div>
@@ -103,11 +102,11 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>unsave TODO rename to maybe instead of apply</p> 
+             <p>unsave TODO rename to maybe instead of apply</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>unsave TODO rename to maybe instead of apply</p> 
+              <p>unsave TODO rename to maybe instead of apply</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -117,8 +116,8 @@ node3 -> node2;
               <dd class="body-medium">
                <div>
                 <div>
-                 <span data-unresolved-link="" title="Problem linking AssertionError: No DRI found for query">AssertionError</span> 
-                 <p>if not a valid DIDSubjectQ</p> 
+                 <span data-unresolved-link="" title="Problem linking AssertionError: No DRI found for query">AssertionError</span>
+                 <p>if not a valid DIDSubjectQ</p>
                 </div>
                </div>
               </dd>
@@ -132,7 +131,7 @@ node3 -> node2;
          <div class="documentableElement-expander">
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#either(s:String):Either[FailToParse,DIDSubjectQ]" t="n" class="documentableName ">either</a>(<span t="k"></span><span t="k"></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#s:String" t="n">s</a>: <a href="https://www.scala-lang.org/api/2.13.10/scala/Predef$.html#String" t="t">String</a>): <a href="https://www.scala-lang.org/api/2.13.10/scala/util/Either.html" t="t">Either</a>[<a href="https://doc.did.fmgp.app/api/fmgp/crypto/error/FailToParse.html" t="t">FailToParse</a>, <a href="https://doc.did.fmgp.app/api/fmgp/did.html#DIDSubjectQ" t="t">DIDSubjectQ</a>]
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#either(s:String):Either[FailToParse,DIDSubjectQ]" t="n" class="documentableName ">either</a>(<span t="k"></span><span t="k"></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#s:String" t="n">s</a>: <a href="https://www.scala-lang.org/api/2.13.12/scala/Predef$.html#String" t="t">String</a>): <a href="https://www.scala-lang.org/api/2.13.12/scala/util/Either.html" t="t">Either</a>[<a href="https://doc.did.fmgp.app/api/fmgp/crypto/error/FailToParse.html" t="t">FailToParse</a>, <a href="https://doc.did.fmgp.app/api/fmgp/did.html#DIDSubjectQ" t="t">DIDSubjectQ</a>]
            </div>
           </div>
          </div>
@@ -142,7 +141,7 @@ node3 -> node2;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#parseString(id:String):Tuple3[String,String,String]" t="n" class="documentableName ">parseString</a>(<span t="k"></span><span t="k"></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#id:String" t="n">id</a>: <a href="https://www.scala-lang.org/api/2.13.10/scala/Predef$.html#String" t="t">String</a>): (<a href="https://www.scala-lang.org/api/2.13.10/scala/Predef$.html#String" t="t">String</a>, <a href="https://www.scala-lang.org/api/2.13.10/scala/Predef$.html#String" t="t">String</a>, <span data-unresolved-link="" t="t">String</span>)
+            <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#parseString(id:String):Tuple3[String,String,String]" t="n" class="documentableName ">parseString</a>(<span t="k"></span><span t="k"></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#id:String" t="n">id</a>: <a href="https://www.scala-lang.org/api/2.13.12/scala/Predef$.html#String" t="t">String</a>): (<a href="https://www.scala-lang.org/api/2.13.12/scala/Predef$.html#String" t="t">String</a>, <a href="https://www.scala-lang.org/api/2.13.12/scala/Predef$.html#String" t="t">String</a>, <span data-unresolved-link="" t="t">String</span>)
            </div>
           </div>
          </div>
@@ -161,8 +160,8 @@ node3 -> node2;
               <dd class="body-medium">
                <div>
                 <div>
-                 <span data-unresolved-link="" title="Problem linking AssertionError: No DRI found for query">AssertionError</span> 
-                 <p>if not a valid DIDSubjectQ</p> 
+                 <span data-unresolved-link="" title="Problem linking AssertionError: No DRI found for query">AssertionError</span>
+                 <p>if not a valid DIDSubjectQ</p>
                 </div>
                </div>
               </dd>
@@ -185,7 +184,7 @@ node3 -> node2;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">val </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#pattern:Regex" t="n" class="documentableName ">pattern</a>: <a href="https://www.scala-lang.org/api/2.13.10/scala/util/matching/Regex.html" t="t">Regex</a>
+            <span class="modifiers"></span><span class="kind"><span t="k">val </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#pattern:Regex" t="n" class="documentableName ">pattern</a>: <a href="https://www.scala-lang.org/api/2.13.12/scala/util/matching/Regex.html" t="t">Regex</a>
            </div>
           </div>
          </div>
@@ -195,11 +194,11 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>https://www.regextester.com/15</p> 
+             <p>https://www.regextester.com/15</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p><a href="https://www.regextester.com/15">https://www.regextester.com/15</a></p> 
+              <p><a href="https://www.regextester.com/15">https://www.regextester.com/15</a></p>
               <div class="snippet mono-small-block">
                <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>MATCH:
 </span><span line-number="2" class=""><span class="tooltip-container"></span>did:m:s?q
@@ -214,7 +213,7 @@ node3 -> node2;
 </span><span line-number="11" class=""><span class="tooltip-container"></span>did:m:s/p?q#f
 </span></code></pre>
                <div class="buttons"></div>
-              </div> 
+              </div>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -271,12 +270,12 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>This SHOULD NOT BE an implicit conversion</p> 
+             <p>This SHOULD NOT BE an implicit conversion</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>This SHOULD NOT BE an implicit conversion</p> 
-              <p>FIXME DIDSubjectQ (DID with Query) is should probably not be a DID!</p> 
+              <p>This SHOULD NOT BE an implicit conversion</p>
+              <p>FIXME DIDSubjectQ (DID with Query) is should probably not be a DID!</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -324,7 +323,7 @@ node3 -> node2;
           <div class="documentableElement-expander">
            <div class="header monospace mono-medium">
             <div class="signature">
-             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#inline_namespace(id:DIDSubjectQ):String" t="n" class="documentableName ">inline_namespace</a>: <a href="https://www.scala-lang.org/api/2.13.10/scala/Predef$.html#String" t="t">String</a>
+             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#inline_namespace(id:DIDSubjectQ):String" t="n" class="documentableName ">inline_namespace</a>: <a href="https://www.scala-lang.org/api/2.13.12/scala/Predef$.html#String" t="t">String</a>
             </div>
            </div>
           </div>
@@ -333,7 +332,7 @@ node3 -> node2;
           <div class="documentableElement-expander">
            <div class="header monospace mono-medium">
             <div class="signature">
-             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#query(id:DIDSubjectQ):String" t="n" class="documentableName ">query</a>: <a href="https://www.scala-lang.org/api/2.13.10/scala/Predef$.html#String" t="t">String</a>
+             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#query(id:DIDSubjectQ):String" t="n" class="documentableName ">query</a>: <a href="https://www.scala-lang.org/api/2.13.12/scala/Predef$.html#String" t="t">String</a>
             </div>
            </div>
           </div>
@@ -342,7 +341,7 @@ node3 -> node2;
           <div class="documentableElement-expander">
            <div class="header monospace mono-medium">
             <div class="signature">
-             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#sameSubject(id:DIDSubjectQ)(that:DIDSubject):Boolean" t="n" class="documentableName ">sameSubject</a>(<span t="k"></span><span t="k"></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#that:DIDSubject" t="n">that</a>: <a href="https://doc.did.fmgp.app/api/fmgp/did.html#DIDSubject" t="t">DIDSubject</a>): <a href="https://www.scala-lang.org/api/2.13.10/scala/Boolean.html" t="t">Boolean</a>
+             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#sameSubject(id:DIDSubjectQ)(that:DIDSubject):Boolean" t="n" class="documentableName ">sameSubject</a>(<span t="k"></span><span t="k"></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#that:DIDSubject" t="n">that</a>: <a href="https://doc.did.fmgp.app/api/fmgp/did.html#DIDSubject" t="t">DIDSubject</a>): <a href="https://www.scala-lang.org/api/2.13.12/scala/Boolean.html" t="t">Boolean</a>
             </div>
            </div>
           </div>
@@ -351,7 +350,7 @@ node3 -> node2;
           <div class="documentableElement-expander">
            <div class="header monospace mono-medium">
             <div class="signature">
-             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#sameSubjectQ(id:DIDSubjectQ)(that:DIDSubjectQ):Boolean" t="n" class="documentableName ">sameSubjectQ</a>(<span t="k"></span><span t="k"></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#that:DIDSubjectQ" t="n">that</a>: <a href="https://doc.did.fmgp.app/api/fmgp/did.html#DIDSubjectQ" t="t">DIDSubjectQ</a>): <a href="https://www.scala-lang.org/api/2.13.10/scala/Boolean.html" t="t">Boolean</a>
+             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#sameSubjectQ(id:DIDSubjectQ)(that:DIDSubjectQ):Boolean" t="n" class="documentableName ">sameSubjectQ</a>(<span t="k"></span><span t="k"></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#that:DIDSubjectQ" t="n">that</a>: <a href="https://doc.did.fmgp.app/api/fmgp/did.html#DIDSubjectQ" t="t">DIDSubjectQ</a>): <a href="https://www.scala-lang.org/api/2.13.12/scala/Boolean.html" t="t">Boolean</a>
             </div>
            </div>
           </div>
@@ -360,7 +359,7 @@ node3 -> node2;
           <div class="documentableElement-expander">
            <div class="header monospace mono-medium">
             <div class="signature">
-             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#subject(id:DIDSubjectQ):String" t="n" class="documentableName ">subject</a>: <a href="https://www.scala-lang.org/api/2.13.10/scala/Predef$.html#String" t="t">String</a>
+             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/DIDSubjectQ$.html#subject(id:DIDSubjectQ):String" t="n" class="documentableName ">subject</a>: <a href="https://www.scala-lang.org/api/2.13.12/scala/Predef$.html#String" t="t">String</a>
             </div>
            </div>
           </div>
@@ -382,4 +381,4 @@ node3 -> node2;
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Concrete-methods">Concrete methods</a></li><li><a href="#Concrete-fields">Concrete fields</a></li></ul></li><li><a href="#Givens">Givens</a><ul><li><a href="#Givens">Givens</a></li></ul></li><li><a href="#Extensions">Extensions</a><ul><li><a href="#Extensions">Extensions</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><a href="https://github.com/lampepfl/dotty"><button class="icon-button gh"></button></a><a href="https://twitter.com/scala_lang"><button class="icon-button twitter"></button></a><a href="https://discord.com/invite/scala"><button class="icon-button discord"></button></a><a href="https://gitter.im/scala/scala"><button class="icon-button gitter"></button></a><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Concrete-methods">Concrete methods</a></li><li><a href="#Concrete-fields">Concrete fields</a></li></ul></li><li><a href="#Givens">Givens</a><ul><li><a href="#Givens">Givens</a></li></ul></li><li><a href="#Extensions">Extensions</a><ul><li><a href="#Extensions">Extensions</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

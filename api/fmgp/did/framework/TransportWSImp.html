@@ -10,13 +10,13 @@
 </div>
 <div class="main-signature mono-small-block">
  <div class="signature">
-  <span class="signature-short"><span class="modifiers"></span><span class="kind"><span t="k">class </span></span><a href="TransportWSImp.html" t="n" class="documentableName ">TransportWSImp</a>[<span t="k"></span><span data-unresolved-link="" t="t">MSG</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">outboundBuf</span>: <span data-unresolved-link="" t="t">Queue</span>[<span data-unresolved-link="" t="t">MSG</span>], <span t="k"></span><span data-unresolved-link="" t="n">inboundBuf</span>: <span data-unresolved-link="" t="t">Hub</span>[<span data-unresolved-link="" t="t">MSG</span>], <span t="k">val </span><span data-unresolved-link="" t="n">ws</span>: <a href="Websocket.html" t="t">Websocket</a>[<a href="https://www.scala-lang.org/api/2.13.10/scala.html#Throwable" t="t">Throwable</a>])<span t="k"> extends </span><a href="TransportWS.html" t="t">TransportWS</a>[<span data-unresolved-link="" t="t">Any</span>, <span t="t">MSG</span>]</span><span class="signature-long"></span>
+  <span class="signature-short"><span class="modifiers"></span><span class="kind"><span t="k">class </span></span><a href="TransportWSImp.html" t="n" class="documentableName ">TransportWSImp</a>[<span t="k"></span><span data-unresolved-link="" t="t">MSG</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">outboundBuf</span>: <span data-unresolved-link="" t="t">Queue</span>[<span data-unresolved-link="" t="t">MSG</span>], <span t="k"></span><span data-unresolved-link="" t="n">inboundBuf</span>: <span data-unresolved-link="" t="t">Hub</span>[<span data-unresolved-link="" t="t">MSG</span>], <span t="k">val </span><span data-unresolved-link="" t="n">ws</span>: <a href="Websocket.html" t="t">Websocket</a>[<a href="https://www.scala-lang.org/api/2.13.12/scala.html#Throwable" t="t">Throwable</a>])<span t="k"> extends </span><a href="TransportWS.html" t="t">TransportWS</a>[<span data-unresolved-link="" t="t">Any</span>, <span t="t">MSG</span>]</span><span class="signature-long"></span>
  </div>
 </div>
 <div class="cover">
  <div class="doc">
-  <p>this API is still a WIP</p> 
-  <p>The Auto reconnect feature was remove.</p> 
+  <p>this API is still a WIP</p>
+  <p>The Auto reconnect feature was remove.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
@@ -40,7 +40,7 @@ node1 [id=node1, label="<span style=\"color: #FFFFFF;\">class <span data-unresol
 node2 [id=node2, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Any</span></span>", class="class vertex"];
 node3 [id=node3, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Matchable</span></span>", class="trait vertex"];
 node4 [id=node4, label="<span style=\"color: #FFFFFF;\">trait <a href=\"TransportWS.html\" t=\"n\">TransportWS</a>[<span data-unresolved-link=\"\" t=\"t\">Any</span>, <span t=\"t\">MSG</span>]</span>", class="trait vertex"];
-node5 [id=node5, label="<span style=\"color: #FFFFFF;\">trait <a href=\"Transport.html\" t=\"n\">Transport</a>[<span t=\"t\">R</span>, <span t=\"t\">M</span>, <span t=\"t\">M</span>]</span>", class="trait vertex"];
+node5 [id=node5, label="<span style=\"color: #FFFFFF;\">trait <a href=\"Transport.html\" t=\"n\">Transport</a>[<span data-unresolved-link=\"\" t=\"t\">Any</span>, <span t=\"t\">MSG</span>, <span t=\"t\">MSG</span>]</span>", class="trait vertex"];
 
 
  node0 -> node1;
@@ -84,8 +84,7 @@ node5 -> node1;
 <section id="members-list">
  <h2 class="h500">Members list</h2>
  <div class="documentableFilter">
-  <div class="filtersContainer"></div>
-  <input class="filterableInput" placeholder="Filter by any phrase" data-test-id="filterBarInput" type="search"><button class="clearButton label-only-button" data-test-id="filterBarClearButton">Clear all</button>
+  <div class="filtersContainer"></div><input class="filterableInput" placeholder="Filter by any phrase" data-test-id="filterBarInput" type="search"><button class="clearButton label-only-button" data-test-id="filterBarClearButton">Clear all</button>
  </div>
  <div class="membersList expand">
   <div class="tabs">
@@ -116,11 +115,11 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Reciving from the other side. Income Messages</p> 
+             <p>Reciving from the other side. Income Messages</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Reciving from the other side. Income Messages</p> 
+              <p>Reciving from the other side. Income Messages</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -143,7 +142,7 @@ node5 -> node1;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">override </span></span><span class="kind"><span t="k">def </span></span><a href="TransportWSImp.html#outbound-0" t="n" class="documentableName ">outbound</a>: <span data-unresolved-link="" t="t">ZSink</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="Transport$.html#OutErr-0" t="t">OutErr</a>, <span t="t">MSG</span>, <span data-unresolved-link="" t="t">Nothing</span>, <a href="https://www.scala-lang.org/api/2.13.10/scala/Unit.html" t="t">Unit</a>]
+            <span class="modifiers"><span t="k">override </span></span><span class="kind"><span t="k">def </span></span><a href="TransportWSImp.html#outbound-0" t="n" class="documentableName ">outbound</a>: <span data-unresolved-link="" t="t">ZSink</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="Transport$.html#OutErr-0" t="t">OutErr</a>, <span t="t">MSG</span>, <span data-unresolved-link="" t="t">Nothing</span>, <a href="https://www.scala-lang.org/api/2.13.12/scala/Unit.html" t="t">Unit</a>]
            </div>
           </div>
          </div>
@@ -153,11 +152,11 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Send to the other side. Out going Messages</p> 
+             <p>Send to the other side. Out going Messages</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Send to the other side. Out going Messages</p> 
+              <p>Send to the other side. Out going Messages</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -190,11 +189,11 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Describe properties about the Flow (direction) of data for this transport</p> 
+             <p>Describe properties about the Flow (direction) of data for this transport</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Describe properties about the Flow (direction) of data for this transport</p> 
+              <p>Describe properties about the Flow (direction) of data for this transport</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -218,11 +217,11 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Describe properties about the Type connection in this transport</p> 
+             <p>Describe properties about the Type connection in this transport</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Describe properties about the Type connection in this transport</p> 
+              <p>Describe properties about the Type connection in this transport</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -282,7 +281,7 @@ node5 -> node1;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="TransportWSImp.html#provide-fffff013" t="n" class="documentableName ">provide</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">env</span>: <span data-unresolved-link="" t="t">ZEnvironment</span>[<span data-unresolved-link="" t="t">Any</span>]): <a href="Transport.html" t="t">Transport</a>[<span data-unresolved-link="" t="t">Any</span>, <span t="t">IN</span>, <span t="t">OUT</span>]
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="TransportWSImp.html#provide-fffff013" t="n" class="documentableName ">provide</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">env</span>: <span data-unresolved-link="" t="t">ZEnvironment</span>[<span data-unresolved-link="" t="t">Any</span>]): <a href="Transport.html" t="t">Transport</a>[<span data-unresolved-link="" t="t">Any</span>, <span t="t">MSG</span>, <span t="t">MSG</span>]
            </div>
           </div>
          </div>
@@ -312,7 +311,7 @@ node5 -> node1;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="TransportWSImp.html#send-63f" t="n" class="documentableName ">send</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">message</span>: <span t="t">MSG</span>): <span data-unresolved-link="" t="t">ZIO</span>[<span t="t">R</span>, <span data-unresolved-link="" t="t">Nothing</span>, <a href="https://www.scala-lang.org/api/2.13.10/scala/Unit.html" t="t">Unit</a>]
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="TransportWSImp.html#send-63f" t="n" class="documentableName ">send</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">message</span>: <span t="t">MSG</span>): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <span data-unresolved-link="" t="t">Nothing</span>, <a href="https://www.scala-lang.org/api/2.13.12/scala/Unit.html" t="t">Unit</a>]
            </div>
           </div>
          </div>
@@ -349,7 +348,7 @@ node5 -> node1;
          <div class="documentableElement-expander">
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">val </span></span><a href="TransportWSImp.html#ws-0" t="n" class="documentableName ">ws</a>: <a href="Websocket.html" t="t">Websocket</a>[<a href="https://www.scala-lang.org/api/2.13.10/scala.html#Throwable" t="t">Throwable</a>]
+            <span class="modifiers"></span><span class="kind"><span t="k">val </span></span><a href="TransportWSImp.html#ws-0" t="n" class="documentableName ">ws</a>: <a href="Websocket.html" t="t">Websocket</a>[<a href="https://www.scala-lang.org/api/2.13.12/scala.html#Throwable" t="t">Throwable</a>]
            </div>
           </div>
          </div>
@@ -361,4 +360,4 @@ node5 -> node1;
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Concrete-methods">Concrete methods</a></li><li><a href="#Inherited-methods">Inherited methods</a></li><li><a href="#Concrete-fields">Concrete fields</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><a href="https://github.com/lampepfl/dotty"><button class="icon-button gh"></button></a><a href="https://twitter.com/scala_lang"><button class="icon-button twitter"></button></a><a href="https://discord.com/invite/scala"><button class="icon-button discord"></button></a><a href="https://gitter.im/scala/scala"><button class="icon-button gitter"></button></a><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Concrete-methods">Concrete methods</a></li><li><a href="#Inherited-methods">Inherited methods</a></li><li><a href="#Concrete-fields">Concrete fields</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

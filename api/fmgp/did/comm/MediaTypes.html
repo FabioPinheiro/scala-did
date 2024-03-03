@@ -10,13 +10,13 @@
 </div>
 <div class="main-signature mono-small-block">
  <div class="signature">
-  <span class="modifiers"></span><span class="kind"><span t="k">enum </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/comm/MediaTypes.html" t="n" class="documentableName ">MediaTypes</a>(<span t="k"></span><span t="k">val </span><a href="https://doc.did.fmgp.app/api/fmgp/did/comm/MediaTypes.html#subType:String" t="n">subType</a>: <a href="https://www.scala-lang.org/api/2.13.10/scala/Predef$.html#String" t="t">String</a>)
+  <span class="modifiers"></span><span class="kind"><span t="k">enum </span></span><a href="https://doc.did.fmgp.app/api/fmgp/did/comm/MediaTypes.html" t="n" class="documentableName ">MediaTypes</a>(<span t="k"></span><span t="k">val </span><a href="https://doc.did.fmgp.app/api/fmgp/did/comm/MediaTypes.html#subType:String" t="n">subType</a>: <a href="https://www.scala-lang.org/api/2.13.12/scala/Predef$.html#String" t="t">String</a>)
  </div>
 </div>
 <div class="cover">
  <div class="doc">
-  <p>IANA Media Types</p> 
-  <p><a href="https://identity.foundation/didcomm-messaging/spec/#iana-media-types">https://identity.foundation/didcomm-messaging/spec/#iana-media-types</a></p> 
+  <p>IANA Media Types</p>
+  <p><a href="https://identity.foundation/didcomm-messaging/spec/#iana-media-types">https://identity.foundation/didcomm-messaging/spec/#iana-media-types</a></p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
@@ -40,9 +40,9 @@ node1 [id=node1, label="<span style=\"color: #FFFFFF;\">class <span data-unresol
 node2 [id=node2, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Any</span></span>", class="class vertex"];
 node3 [id=node3, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Matchable</span></span>", class="trait vertex"];
 node4 [id=node4, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Enum</span></span>", class="trait vertex"];
-node5 [id=node5, label="<span style=\"color: #FFFFFF;\">trait <a href=\"https://www.scala-lang.org/api/2.13.10/scala/Product.html\" t=\"n\">Product</a></span>", class="trait vertex"];
-node6 [id=node6, label="<span style=\"color: #FFFFFF;\">trait <a href=\"https://www.scala-lang.org/api/2.13.10/scala/Equals.html\" t=\"n\">Equals</a></span>", class="trait vertex"];
-node7 [id=node7, label="<span style=\"color: #FFFFFF;\">class <a href=\"https://www.scala-lang.org/api/2.13.10/scala.html#Serializable\" t=\"n\">Serializable</a></span>", class="class vertex"];
+node5 [id=node5, label="<span style=\"color: #FFFFFF;\">trait <a href=\"https://www.scala-lang.org/api/2.13.12/scala/Product.html\" t=\"n\">Product</a></span>", class="trait vertex"];
+node6 [id=node6, label="<span style=\"color: #FFFFFF;\">trait <a href=\"https://www.scala-lang.org/api/2.13.12/scala/Equals.html\" t=\"n\">Equals</a></span>", class="trait vertex"];
+node7 [id=node7, label="<span style=\"color: #FFFFFF;\">class <a href=\"https://www.scala-lang.org/api/2.13.12/scala.html#Serializable\" t=\"n\">Serializable</a></span>", class="class vertex"];
 
 
  node0 -> node1;
@@ -74,10 +74,10 @@ node7 -> node2;
       trait <span data-unresolved-link="" t="n">Serializable</span>
      </div>
      <div>
-      trait <a href="https://www.scala-lang.org/api/2.13.10/scala/Product.html" t="n">Product</a>
+      trait <a href="https://www.scala-lang.org/api/2.13.12/scala/Product.html" t="n">Product</a>
      </div>
      <div>
-      trait <a href="https://www.scala-lang.org/api/2.13.10/scala/Equals.html" t="n">Equals</a>
+      trait <a href="https://www.scala-lang.org/api/2.13.12/scala/Equals.html" t="n">Equals</a>
      </div>
      <div>
       class <span data-unresolved-link="" t="n">Object</span>
@@ -96,8 +96,7 @@ node7 -> node2;
 <section id="members-list">
  <h2 class="h500">Members list</h2>
  <div class="documentableFilter">
-  <div class="filtersContainer"></div>
-  <input class="filterableInput" placeholder="Filter by any phrase" data-test-id="filterBarInput" type="search"><button class="clearButton label-only-button" data-test-id="filterBarClearButton">Clear all</button>
+  <div class="filtersContainer"></div><input class="filterableInput" placeholder="Filter by any phrase" data-test-id="filterBarInput" type="search"><button class="clearButton label-only-button" data-test-id="filterBarClearButton">Clear all</button>
  </div>
  <div class="membersList expand">
   <div class="tabs">
@@ -128,11 +127,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Guarantees confidentiality and integrity without revealing the identity of the sender.</p> 
+             <p>Guarantees confidentiality and integrity without revealing the identity of the sender.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Guarantees confidentiality and integrity without revealing the identity of the sender.</p> 
+              <p>Guarantees confidentiality and integrity without revealing the identity of the sender.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -156,11 +155,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A specialized combination that hides the skid header in the authcrypt envelope, so the hop immediately sourceward of a mediator cannot discover an identifier for the sender. See Protecting the Sender Identity.</p> 
+             <p>A specialized combination that hides the skid header in the authcrypt envelope, so the hop immediately sourceward of a mediator cannot discover an identifier for the sender. See Protecting the Sender Identity.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A specialized combination that hides the skid header in the authcrypt envelope, so the hop immediately sourceward of a mediator cannot discover an identifier for the sender. See Protecting the Sender Identity.</p> 
+              <p>A specialized combination that hides the skid header in the authcrypt envelope, so the hop immediately sourceward of a mediator cannot discover an identifier for the sender. See Protecting the Sender Identity.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -184,11 +183,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Guarantees confidentiality, integrity, and non-repudiation – but prevents an observer of the outer envelope from accessing the signature. Relative to authcrypt(plaintext), this increases guarantees to the recipient, since non-repudiation is strong than simple authentication. However, it also forces the sender to talk “on the record” and is thus not assumed to be desirable by default.</p> 
+             <p>Guarantees confidentiality, integrity, and non-repudiation – but prevents an observer of the outer envelope from accessing the signature. Relative to authcrypt(plaintext), this increases guarantees to the recipient, since non-repudiation is strong than simple authentication. However, it also forces the sender to talk “on the record” and is thus not assumed to be desirable by default.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Guarantees confidentiality, integrity, and non-repudiation – but prevents an observer of the outer envelope from accessing the signature. Relative to authcrypt(plaintext), this increases guarantees to the recipient, since non-repudiation is strong than simple authentication. However, it also forces the sender to talk “on the record” and is thus not assumed to be desirable by default.</p> 
+              <p>Guarantees confidentiality, integrity, and non-repudiation – but prevents an observer of the outer envelope from accessing the signature. Relative to authcrypt(plaintext), this increases guarantees to the recipient, since non-repudiation is strong than simple authentication. However, it also forces the sender to talk “on the record” and is thus not assumed to be desirable by default.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -212,11 +211,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Guarantees confidentiality and integrity. Also proves the identity of the sender – but in a way that only the recipient can verify. This is the default wrapping choice, and SHOULD be used unless a different goal is clearly identified. By design, this combination and all other combinations that use encryption in their outermost layer share an identical IANA media type, because only the recipient should care about the difference.</p> 
+             <p>Guarantees confidentiality and integrity. Also proves the identity of the sender – but in a way that only the recipient can verify. This is the default wrapping choice, and SHOULD be used unless a different goal is clearly identified. By design, this combination and all other combinations that use encryption in their outermost layer share an identical IANA media type, because only the recipient should care about the difference.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Guarantees confidentiality and integrity. Also proves the identity of the sender – but in a way that only the recipient can verify. This is the default wrapping choice, and SHOULD be used unless a different goal is clearly identified. By design, this combination and all other combinations that use encryption in their outermost layer share an identical IANA media type, because only the recipient should care about the difference.</p> 
+              <p>Guarantees confidentiality and integrity. Also proves the identity of the sender – but in a way that only the recipient can verify. This is the default wrapping choice, and SHOULD be used unless a different goal is clearly identified. By design, this combination and all other combinations that use encryption in their outermost layer share an identical IANA media type, because only the recipient should care about the difference.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -240,11 +239,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Adds no useful guarantees over the previous choice, and is slightly more expensive, so this wrapping combination SHOULD NOT be emitted by conforming implementations. However, implementations MAY accept it. If they choose to do so, they MUST emit an error if the signer of the plaintext is different from the sender identified by the authcrypt layer.</p> 
+             <p>Adds no useful guarantees over the previous choice, and is slightly more expensive, so this wrapping combination SHOULD NOT be emitted by conforming implementations. However, implementations MAY accept it. If they choose to do so, they MUST emit an error if the signer of the plaintext is different from the sender identified by the authcrypt layer.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Adds no useful guarantees over the previous choice, and is slightly more expensive, so this wrapping combination SHOULD NOT be emitted by conforming implementations. However, implementations MAY accept it. If they choose to do so, they MUST emit an error if the signer of the plaintext is different from the sender identified by the authcrypt layer.</p> 
+              <p>Adds no useful guarantees over the previous choice, and is slightly more expensive, so this wrapping combination SHOULD NOT be emitted by conforming implementations. However, implementations MAY accept it. If they choose to do so, they MUST emit an error if the signer of the plaintext is different from the sender identified by the authcrypt layer.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -268,11 +267,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>ENCRYPTED is a generic just to be used by the <a href="https://doc.did.fmgp.app/api/fmgp/did/comm/MediaTypes$.html#decoder:JsonDecoder[MediaTypes]">MediaTypes.decoder</a></p> 
+             <p>ENCRYPTED is a generic just to be used by the <a href="https://doc.did.fmgp.app/api/fmgp/did/comm/MediaTypes$.html#decoder:JsonDecoder[MediaTypes]">MediaTypes.decoder</a></p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>ENCRYPTED is a generic just to be used by the <a href="https://doc.did.fmgp.app/api/fmgp/did/comm/MediaTypes$.html#decoder:JsonDecoder[MediaTypes]">MediaTypes.decoder</a></p> 
+              <p>ENCRYPTED is a generic just to be used by the <a href="https://doc.did.fmgp.app/api/fmgp/did/comm/MediaTypes$.html#decoder:JsonDecoder[MediaTypes]">MediaTypes.decoder</a></p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -296,11 +295,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Used as the building block of higher-level protocols, but rarely transmitted directly, since it lacks security guarantees.</p> 
+             <p>Used as the building block of higher-level protocols, but rarely transmitted directly, since it lacks security guarantees.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Used as the building block of higher-level protocols, but rarely transmitted directly, since it lacks security guarantees.</p> 
+              <p>Used as the building block of higher-level protocols, but rarely transmitted directly, since it lacks security guarantees.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -324,11 +323,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Adds non-repudiation to a plaintext message; whoever receives a message wrapped in this way can prove its origin to any external party.</p> 
+             <p>Adds non-repudiation to a plaintext message; whoever receives a message wrapped in this way can prove its origin to any external party.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Adds non-repudiation to a plaintext message; whoever receives a message wrapped in this way can prove its origin to any external party.</p> 
+              <p>Adds non-repudiation to a plaintext message; whoever receives a message wrapped in this way can prove its origin to any external party.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -344,4 +343,4 @@ node7 -> node2;
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Enum-entries">Enum entries</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><a href="https://github.com/lampepfl/dotty"><button class="icon-button gh"></button></a><a href="https://twitter.com/scala_lang"><button class="icon-button twitter"></button></a><a href="https://discord.com/invite/scala"><button class="icon-button discord"></button></a><a href="https://gitter.im/scala/scala"><button class="icon-button gitter"></button></a><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Enum-entries">Enum entries</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
