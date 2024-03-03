@@ -301,4 +301,48 @@ object MessageTemplate {
     )
 
   }
+
+  object ProveControl {
+    import fmgp.did.comm.protocol.provecontrol.*
+
+    def exRequestVerification = RequestVerification(
+      from = from,
+      to = to,
+      verificationType = VerificationType.Email,
+      subject = "fabio@fmgp.app",
+    )
+
+    def exVerificationChallenge = VerificationChallenge(
+      from = from,
+      to = to,
+      thid = Some(MsgID()),
+      verificationType = VerificationType.Email,
+      subject = "fabio@fmgp.app",
+      secret = "SecureRandomNumber",
+    )
+
+    def exProve = Prove(
+      to = to,
+      from = from,
+      thid = MsgID(),
+      verificationType = VerificationType.Email,
+      subject = "fabio@fmgp.app",
+      proof = VerificationChallenge.calculateProof(
+        verifier = from.toDID,
+        hoder = to.toDID,
+        verificationType = VerificationType.Email,
+        subject = "fabio@fmgp.app",
+        secret = "SecureRandomNumber",
+      )
+    )
+
+    def exConfirmVerification = ConfirmVerification(
+      to = to,
+      from = from,
+      thid = MsgID(),
+      verificationType = VerificationType.Email,
+      subject = "fabio@fmgp.app",
+      attachments = Seq(),
+    )
+  }
 }

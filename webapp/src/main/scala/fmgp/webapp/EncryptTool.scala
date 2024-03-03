@@ -442,6 +442,28 @@ object EncryptTool {
             ),
           )
         },
+        // ProveControl (Draft Version)
+        {
+          import MessageTemplate.ProveControl._
+          li(
+            button(
+              "RequestVerification",
+              onClick --> Observer(_ => dataTextVar.set(exRequestVerification.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "VerificationChallenge",
+              onClick --> Observer(_ => dataTextVar.set(exVerificationChallenge.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "Prove",
+              onClick --> Observer(_ => dataTextVar.set(exProve.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "ConfirmVerification",
+              onClick --> Observer(_ => dataTextVar.set(exConfirmVerification.toPlaintextMessage.toJsonPretty))
+            ),
+          )
+        },
       ),
     ),
     textArea(
