@@ -12,7 +12,7 @@ class ProveControlSuite extends FunSuite {
   val msgRequestVerificationExample =
     """{
       |  "id" : "MsgID-1",
-      |  "type" : "https://fmgp.app/provecontrol/0.1/requestverification",
+      |  "type" : "https://fmgp.app/provecontrol/1/requestverification",
       |  "to" : [ "did:example:bob" ],
       |  "from" : "did:example:alice",
       |  "body" : {
@@ -41,7 +41,7 @@ class ProveControlSuite extends FunSuite {
   val msgVerificationChallengeExample =
     """{
       |  "id" : "MsgID-1",
-      |  "type" : "https://fmgp.app/provecontrol/0.1/verificationchallenge",
+      |  "type" : "https://fmgp.app/provecontrol/1/verificationchallenge",
       |  "to" : [ "did:example:bob" ],
       |  "from" : "did:example:alice",
       |  "body" : {
@@ -77,7 +77,7 @@ class ProveControlSuite extends FunSuite {
   val msgProveExample =
     """{
       |  "id" : "MsgID-1",
-      |  "type" : "https://fmgp.app/provecontrol/0.1/prove",
+      |  "type" : "https://fmgp.app/provecontrol/1/prove",
       |  "to" : [ "did:example:bob" ],
       |  "from" : "did:example:alice",
       |  "thid": "MsgID-2",
@@ -112,7 +112,7 @@ class ProveControlSuite extends FunSuite {
   val msgConfirmVerificationExample =
     """{
       |  "id" : "MsgID-1",
-      |  "type" : "https://fmgp.app/provecontrol/0.1/confirmverification",
+      |  "type" : "https://fmgp.app/provecontrol/1/confirmverification",
       |  "to" : [ "did:example:bob" ],
       |  "from" : "did:example:alice",
       |  "thid": "MsgID-2",

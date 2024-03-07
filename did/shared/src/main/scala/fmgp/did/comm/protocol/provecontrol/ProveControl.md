@@ -62,11 +62,11 @@ Should be calculated according to the following:
 ```scala
 def calculateProof(
     verifier: DIDSubject, // TO in Prove == FROM in VerificationChallenge
-    hoder: DIDSubject, // FROM in Prove == TO in VerificationChallenge
+    user: DIDSubject, // FROM in Prove == TO in VerificationChallenge
     verificationType: VerificationType,
     subject: String,
-    secret: String,
-) = SHA256.digestToHex(s"$verifier|$hoder|$verificationType|$subject|$secret")
+    secret: String, 
+) = SHA256.digestToHex(s"$verifier|$user|$verificationType|$subject|$secret")
 ```
 
 

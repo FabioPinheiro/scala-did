@@ -115,7 +115,7 @@ case class VerificationChallenge(
 
   def calculateProof = VerificationChallenge.calculateProof(
     verifier = from.toDID,
-    hoder = to.toDID,
+    user = to.toDID,
     verificationType = verificationType,
     subject = subject,
     secret = secret,
@@ -202,11 +202,11 @@ object Prove {
 
   def calculateProof(
       verifier: DIDSubject, // TO in Prove == FROM in VerificationChallenge
-      hoder: DIDSubject, // FROM in Prove == TO in VerificationChallenge
+      user: DIDSubject, // FROM in Prove == TO in VerificationChallenge
       verificationType: VerificationType,
       subject: String,
       secret: String,
-  ) = SHA256.digestToHex(s"$verifier|$hoder|$verificationType|$subject|$secret")
+  ) = SHA256.digestToHex(s"$verifier|$user|$verificationType|$subject|$secret")
 
   protected final case class Body(verificationType: VerificationType, subject: String, proof: String) {
 
