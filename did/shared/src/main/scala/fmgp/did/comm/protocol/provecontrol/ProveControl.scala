@@ -53,7 +53,7 @@ case class RequestVerification(
 }
 
 object RequestVerification {
-  def piuri = PIURI("https://fmgp.app/provecontrol/0.1/requestverification")
+  def piuri = PIURI("https://fmgp.app/provecontrol/1/requestverification")
 
   protected final case class Body(verificationType: VerificationType, subject: String) {
 
@@ -133,7 +133,7 @@ case class VerificationChallenge(
 
 /** This message MUST be send using the transport in 'verificationType' */
 object VerificationChallenge {
-  def piuri = PIURI("https://fmgp.app/provecontrol/0.1/verificationchallenge")
+  def piuri = PIURI("https://fmgp.app/provecontrol/1/verificationchallenge")
 
   export Prove.calculateProof
 
@@ -198,7 +198,7 @@ case class Prove(
 }
 
 object Prove {
-  def piuri = PIURI("https://fmgp.app/provecontrol/0.1/prove")
+  def piuri = PIURI("https://fmgp.app/provecontrol/1/prove")
 
   def calculateProof(
       verifier: DIDSubject, // TO in Prove == FROM in VerificationChallenge
@@ -273,7 +273,7 @@ case class ConfirmVerification(
 }
 
 object ConfirmVerification {
-  def piuri = PIURI("https://fmgp.app/provecontrol/0.1/confirmverification")
+  def piuri = PIURI("https://fmgp.app/provecontrol/1/confirmverification")
 
   protected final case class Body(verificationType: VerificationType, subject: String) {
 
