@@ -329,7 +329,7 @@ object MessageTemplate {
       subject = "fabio@fmgp.app",
       proof = VerificationChallenge.calculateProof(
         verifier = from.toDID,
-        hoder = to.toDID,
+        user = to.toDID,
         verificationType = VerificationType.Email,
         subject = "fabio@fmgp.app",
         secret = "SecureRandomNumber",
