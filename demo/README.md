@@ -42,17 +42,17 @@ java -jar /home/fabio/workspace/ScalaDID/demo/jvm/target/scala-3.3.3/scala-did-d
 
 ## FLY.IO
 
-- `flyctl auth login`
-- `flyctl open /demo`
-- `flyctl status -a scala-did-demo`
-- `flyctl image show -a scala-did-demo`
-- `flyctl logs -c demo/fly.toml`
+- `fly auth login`
+- `fly open /demo`
+- `fly status -a scala-did-demo`
+- `fly image show -a scala-did-demo`
+- `fly logs -c demo/fly.toml`
 
-**deploy with flyctl**
+**deploy with fly**
 
 ```shell
 sbt assemblyAll
-flyctl deploy ./demo/
+fly deploy ./demo/
 ```
 
 **deploy by pushing docker image**
@@ -61,11 +61,10 @@ flyctl deploy ./demo/
 sbt assemblyAll
 docker build --tag scala_did_demo ./demo/
 docker tag scala_did_demo registry.fly.io/scala-did-demo
-# flyctl auth docker
+# fly auth docker
 docker push registry.fly.io/scala-did-demo
-# +- 52MB
-flyctl image update -a scala-did-demo
-flyctl deploy ./demo/ -i registry.fly.io/scala-did-demo
+fly image update -a scala-did-demo
+fly deploy -a scala-did-demo --image registry.fly.io/scala-did-demo:latest --ha=false
 ```
 
 ## History of deployments
