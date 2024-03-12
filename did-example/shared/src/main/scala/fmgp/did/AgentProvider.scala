@@ -116,9 +116,10 @@ object AgentProvider {
       AgentWithShortName("pat", pat),
       AgentWithShortName("victor", victor),
       AgentWithShortName("fmgpMediator", fmgpMediator),
-      AgentWithShortName("decentriQubeMediator", decentriQubeMediator),
+      /*
       AgentWithShortName("iohkOldMediatorBeta", iohkOldMediatorBeta),
       AgentWithShortName("iohkOldMediatorSitHttp", iohkOldMediatorSitHttp),
+       */
       AgentWithShortName("iohkMediatorSitHttpWs", iohkMediatorSitHttpWs),
       AgentWithShortName("exampleAlice", exampleAlice),
       AgentWithShortName("exampleBob", exampleBob),
@@ -132,10 +133,12 @@ object AgentProvider {
       AgentWithShortName("localhost8080AliceWs", localhost8080AliceWs),
       AgentWithShortName("localhost8080AliceHttp&Ws", localhost8080AliceHttpWs),
       AgentWithShortName("localhost9000Alice", localhost9000Alice),
+      /*
       AgentWithShortName("oldLocalhost8080Alice", oldLocalhost8080Alice),
       AgentWithShortName("oldLocalhost8080AliceWs", oldLocalhost8080AliceWs),
       AgentWithShortName("oldLocalhost8080AliceHttp&Ws", oldLocalhost8080AliceHttpWs),
       AgentWithShortName("oldLocalhost9000Alice", oldLocalhost9000Alice),
+       */
     ),
     Seq(
       DIDWithShortName(
@@ -149,6 +152,7 @@ object AgentProvider {
           .toOption
           .get
       ),
+      /*
       DIDWithShortName(
         "blocktrust_DEPRECATED",
         DIDPeer
@@ -160,6 +164,7 @@ object AgentProvider {
           .toOption
           .get
       ),
+       */
       DIDWithShortName(
         "blocktrust",
         DIDPeer
@@ -175,8 +180,22 @@ object AgentProvider {
         "aliceWithMultiService",
         DIDPeer.fromDID(DIDSubject(aliceWithMultiService).toDID).toOption.get
       ),
+      DIDWithShortName("DecentriQube_Mediator", decentriQubeMediatorDID),
+      DIDWithShortName("DecentriQube_Verifier", decentriQubeVerifierDID),
+      DIDWithShortName("DecentriQube_Register", decentriQubeRegisterDID),
     )
   )
+
+  val decentriQubeMediator =
+    "did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjp7InVyaSI6Imh0dHBzOi8vbS5mbWdwLmFwcCIsImEiOlsiZGlkY29tbS92MiJdfX0.SeyJ0IjoiZG0iLCJzIjp7InVyaSI6IndzczovL20uZm1ncC5hcHAvd3MiLCJhIjpbImRpZGNvbW0vdjIiXX19"
+  val decentriQubeVerifier =
+    "did:peer:2.Ez6LShJTpyEhR986PyBgo7E1j44n1fwgpst3vbNUEh7jdn1Yx.Vz6MkuDVDb1dVpNzUqGsHy41r3fnnAUJTaVcfva8sZxb7yJJV.SeyJ0IjoiZG0iLCJzIjp7InVyaSI6Imh0dHBzOi8vdmVyaWZpZXIuZGVjZW50cmlxdWJlLmNvbSIsImEiOlsiZGlkY29tbS92MiJdfX0.SeyJ0IjoiZG0iLCJzIjp7InVyaSI6IndzczovL3ZlcmlmaWVyLmRlY2VudHJpcXViZS5jb20vd3MiLCJhIjpbImRpZGNvbW0vdjIiXX19"
+  val decentriQubeRegister =
+    "did:peer:2.Ez6LSfyM9dRiumBJbmH4zMd4uAjmpiWdB7xvm5cAkoPvg4PGq.Vz6MkjNcmVzRGLrCmeji9exN6e32doNGrz1Np3owF8GvRvnZY.SeyJ0IjoiZG0iLCJzIjp7InVyaSI6Imh0dHBzOi8vcmVnaXN0ZXIuZGVjZW50cmlxdWJlLmNvbSIsImEiOlsiZGlkY29tbS92MiJdfX0.SeyJ0IjoiZG0iLCJzIjp7InVyaSI6IndzczovL3JlZ2lzdGVyLmRlY2VudHJpcXViZS5jb20vd3MiLCJhIjpbImRpZGNvbW0vdjIiXX19"
+
+  val decentriQubeMediatorDID = DIDPeer.fromDID(DIDSubject(decentriQubeMediator).toDID).toOption.get
+  val decentriQubeVerifierDID = DIDPeer.fromDID(DIDSubject(decentriQubeVerifier).toDID).toOption.get
+  val decentriQubeRegisterDID = DIDPeer.fromDID(DIDSubject(decentriQubeRegister).toDID).toOption.get
 
   private def aliceURL = s"https://alice.did.fmgp.app/"
   private def aliceWsURL = s"wss://alice.did.fmgp.app/ws"
@@ -298,17 +317,7 @@ object AgentProvider {
     )
   )
 
-  val decentriQubeMediator = DIDPeer2.makeAgent(
-    Seq(
-      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
-      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
-    ),
-    Seq(
-      DIDPeerServiceEncoded.fromEndpoint("https://m.fmgp.app"),
-      DIDPeerServiceEncoded.fromEndpoint("wss://m.fmgp.app/ws")
-    )
-  )
-
+  /*
   val iohkOldMediatorBeta = DIDPeer2.makeAgent(
     Seq(
       keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
@@ -324,6 +333,7 @@ object AgentProvider {
     ),
     Seq(DIDPeerServiceEncoded.makeOldFormat(s = "https://sit-prism-mediator.atalaprism.io"))
   )
+   */
   val iohkMediatorSitHttpWs = DIDPeer2.makeAgent(
     Seq(
       keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
@@ -375,6 +385,7 @@ object AgentProvider {
 
   }
 
+  /*
   val oldLocalhost8080Alice = DIDPeer2.makeAgent(
     Seq(
       keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
@@ -408,6 +419,7 @@ object AgentProvider {
     ),
     Seq(DIDPeerServiceEncoded.makeOldFormat(s = "http://localhost:9000"))
   )
+   */
 
   val localhost8080Alice = DIDPeer2.makeAgent(
     Seq(
