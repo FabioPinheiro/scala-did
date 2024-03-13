@@ -102,7 +102,7 @@ case class VerificationChallenge(
     subject: String,
     secret: String, // MUST NOT be shared
 ) {
-  def `type` = RequestVerification.piuri
+  def `type` = VerificationChallenge.piuri
   def toPlaintextMessage: PlaintextMessage =
     PlaintextMessageClass(
       `type` = `type`,

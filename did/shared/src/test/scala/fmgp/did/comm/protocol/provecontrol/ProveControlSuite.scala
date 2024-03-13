@@ -25,15 +25,15 @@ class ProveControlSuite extends FunSuite {
     val fMsg = msgRequestVerificationExample
       .fromJson[PlaintextMessage]
       .getOrElse(fail("FAIL to parse PlaintextMessage"))
-      .toRequestVerification
 
-    (fMsg) match {
+    (fMsg.toRequestVerification) match {
       case Right(msg) =>
         assertEquals(msg.id, MsgID("MsgID-1"))
         assertEquals(msg.to, TO("did:example:bob"))
         assertEquals(msg.from, FROM("did:example:alice"))
         assertEquals(msg.verificationType, VerificationType.Email)
         assertEquals(msg.subject, "fabio@fmgp.app")
+        assertEquals(fMsg.`type`, msg.`type`)
       case Left(error) => fail(s"fMsg MUST be Right but is ${Left(error)}")
     }
   }
@@ -55,9 +55,8 @@ class ProveControlSuite extends FunSuite {
     val fMsg = msgVerificationChallengeExample
       .fromJson[PlaintextMessage]
       .getOrElse(fail("FAIL to parse PlaintextMessage"))
-      .toVerificationChallenge
 
-    (fMsg) match {
+    (fMsg.toVerificationChallenge) match {
       case Right(msg) =>
         assertEquals(msg.id, MsgID("MsgID-1"))
         assertEquals(msg.to, TO("did:example:bob"))
@@ -70,6 +69,7 @@ class ProveControlSuite extends FunSuite {
           SHA256.digestToHex("did:example:alice|did:example:bob|Email|fabio@fmgp.app|secret123"),
           "a9edac6918a7e8e78a1a3479b3a4120806b60fb2d95012a9a27820aa1ea282d5"
         )
+        assertEquals(fMsg.`type`, msg.`type`)
       case Left(error) => fail(s"fMsg MUST be Right but is ${Left(error)}")
     }
   }
@@ -92,9 +92,8 @@ class ProveControlSuite extends FunSuite {
     val fMsg = msgProveExample
       .fromJson[PlaintextMessage]
       .getOrElse(fail("FAIL to parse PlaintextMessage"))
-      .toProve
 
-    (fMsg) match {
+    (fMsg.toProve) match {
       case Right(msg) =>
         assertEquals(msg.id, MsgID("MsgID-1"))
         assertEquals(msg.to, TO("did:example:bob"))
@@ -104,6 +103,7 @@ class ProveControlSuite extends FunSuite {
         assertEquals(msg.subject, "fabio@fmgp.app")
         assertEquals(msg.proof, "hash(id|thid|from|to|verificationType|subject|secret123)")
         assertEquals(msg.proof, "hash(id|thid|from|to|verificationType|subject|secret123)")
+        assertEquals(fMsg.`type`, msg.`type`)
       case Left(error) => fail(s"fMsg MUST be Right but is ${Left(error)}")
     }
 
@@ -127,9 +127,8 @@ class ProveControlSuite extends FunSuite {
     val fMsg = msgConfirmVerificationExample
       .fromJson[PlaintextMessage]
       .getOrElse(fail("FAIL to parse PlaintextMessage"))
-      .toConfirmVerification
 
-    (fMsg) match {
+    (fMsg.toConfirmVerification) match {
       case Right(msg) =>
         assertEquals(msg.id, MsgID("MsgID-1"))
         assertEquals(msg.to, TO("did:example:bob"))
@@ -137,6 +136,7 @@ class ProveControlSuite extends FunSuite {
         assertEquals(msg.thid, MsgID("MsgID-2"))
         assertEquals(msg.verificationType, VerificationType.Email)
         assertEquals(msg.subject, "fabio@fmgp.app")
+        assertEquals(fMsg.`type`, msg.`type`)
       // TODO msg.attachments
       case Left(error) => fail(s"fMsg MUST be Right but is ${Left(error)}")
     }
