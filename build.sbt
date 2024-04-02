@@ -416,7 +416,7 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
     // https://bitbucket.org/connect2id/nimbus-jose-jwt/branches/compare/release-9.35%0Drelease-9.32
 
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
-    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.12.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
+    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.13.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
     libraryDependencies += "com.google.protobuf" % "protobuf-java" % "3.25.3",
   )
