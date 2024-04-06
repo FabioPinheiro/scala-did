@@ -410,8 +410,8 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
   .settings(name := "did-imp")
   .settings(libraryDependencies += D.zioMunitTest.value)
   .jvmSettings( // Add JVM-specific settings here
-    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.77", // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
-    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.77", // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
+    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.78", // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
+    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.78", // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
     libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.37.3", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt
     // https://bitbucket.org/connect2id/nimbus-jose-jwt/branches/compare/release-9.35%0Drelease-9.32
 
@@ -475,8 +475,8 @@ lazy val didResolverPeer = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "org.didcommx" % "peerdid" % "0.5.0" % Test,
     resolvers += "jitpack" at "https://jitpack.io", // For java-multibase
     libraryDependencies += "com.github.multiformats" % "java-multibase" % "1.1.1" % Test, // FIX CVE-2020-15250 in peerdid
-    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.77" % Test,
-    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.77" % Test,
+    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.78" % Test,
+    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.78" % Test,
     libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.16-preview.1" % Test,
   )
   .jsConfigure(scalaJSLibConfigure)
