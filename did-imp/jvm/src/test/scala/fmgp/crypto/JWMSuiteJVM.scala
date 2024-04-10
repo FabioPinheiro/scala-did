@@ -18,7 +18,7 @@ import fmgp.util.Base64
 /** didImpJVM/testOnly fmgp.crypto.JWMSuiteJVM */
 class JWMSuiteJVM extends FunSuite {
 
-  override val munitTimeout = Duration(1, "s")
+  // override val munitTimeout = Duration(1, "s")
 
   test("sign and verify plaintextMessage with Curve SECP256K1") {
     val ecJWK: JWKECKey = JWKECKey // TODO use senderSecp256k1 parsed with
