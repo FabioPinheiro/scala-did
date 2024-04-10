@@ -116,11 +116,8 @@ object AgentProvider {
       AgentWithShortName("pat", pat),
       AgentWithShortName("victor", victor),
       AgentWithShortName("fmgpMediator", fmgpMediator),
-      /*
-      AgentWithShortName("iohkOldMediatorBeta", iohkOldMediatorBeta),
-      AgentWithShortName("iohkOldMediatorSitHttp", iohkOldMediatorSitHttp),
-       */
       AgentWithShortName("iohkMediatorSitHttpWs", iohkMediatorSitHttpWs),
+      AgentWithShortName("iohkMediatorSandboxHttpWs", iohkMediatorSandboxHttpWs),
       AgentWithShortName("exampleAlice", exampleAlice),
       AgentWithShortName("exampleBob", exampleBob),
       AgentWithShortName("exampleSicpaAlice", exampleSicpaAlice),
@@ -317,23 +314,19 @@ object AgentProvider {
     )
   )
 
-  /*
-  val iohkOldMediatorBeta = DIDPeer2.makeAgent(
+  /** did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjp7InVyaSI6Imh0dHBzOi8vc2FuZGJveC1tZWRpYXRvci5hdGFsYXByaXNtLmlvIiwiYSI6WyJkaWRjb21tL3YyIl19fQ.SeyJ0IjoiZG0iLCJzIjp7InVyaSI6IndzczovL3NhbmRib3gtbWVkaWF0b3IuYXRhbGFwcmlzbS5pby93cyIsImEiOlsiZGlkY29tbS92MiJdfX0
+    */
+  val iohkMediatorSandboxHttpWs = DIDPeer2.makeAgent(
     Seq(
       keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
       keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
     ),
-    Seq(DIDPeerServiceEncoded.makeOldFormat(s = "https://beta-mediator.atalaprism.io"))
+    Seq(
+      DIDPeerServiceEncoded.fromEndpoint("https://sandbox-mediator.atalaprism.io"),
+      DIDPeerServiceEncoded.fromEndpoint("wss://sandbox-mediator.atalaprism.io/ws")
+    )
   )
 
-  val iohkOldMediatorSitHttp = DIDPeer2.makeAgent(
-    Seq(
-      keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
-      keyAuthentication("INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug", "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA")
-    ),
-    Seq(DIDPeerServiceEncoded.makeOldFormat(s = "https://sit-prism-mediator.atalaprism.io"))
-  )
-   */
   val iohkMediatorSitHttpWs = DIDPeer2.makeAgent(
     Seq(
       keyAgreement("Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c", "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"),
