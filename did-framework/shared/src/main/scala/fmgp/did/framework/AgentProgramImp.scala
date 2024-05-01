@@ -8,11 +8,11 @@ import fmgp.did._
 import fmgp.did.comm._
 import fmgp.did.comm.protocol._
 
-class AgentExecutarImp(
+class AgentProgramImp(
     agent: Agent,
     transportManager: Ref[TransportManager],
     protocolHandler: ProtocolExecuter[Resolver & Agent & Operations, DidFail],
-) extends AgentExecutar {
+) extends AgentProgram {
   val scope = Scope.global // TODO do not use global
   val indentityLayer = ZLayer.succeed(agent)
   override def subject: DIDSubject = agent.id.asDIDSubject
@@ -65,7 +65,7 @@ class AgentExecutarImp(
         } else {
           for {
 
-            pMsg <- AgentExecutarImp.decrypt(msg)
+            pMsg <- AgentProgramImp.decrypt(msg)
             _ <- pMsg.from match
               case None       => ZIO.unit
               case Some(from) => transportManager.update { _.link(from.asFROMTO, transport) }
@@ -111,18 +111,18 @@ class AgentExecutarImp(
   } yield ()
 }
 
-object AgentExecutarImp {
+object AgentProgramImp {
 
   type Services = Resolver & Agent & Operations
 
   def make[S >: Resolver & Operations](
       agent: Agent,
       protocolHandler: ProtocolExecuter[Resolver & Agent & Operations, DidFail]
-  ): ZIO[TransportFactory, Nothing, AgentExecutar] =
+  ): ZIO[TransportFactory, Nothing, AgentProgram] =
     for {
       transportManager <- TransportManager.make
-      agentExecutar = new AgentExecutarImp(agent, transportManager, protocolHandler)
-    } yield agentExecutar
+      agentProgram = new AgentProgramImp(agent, transportManager, protocolHandler)
+    } yield agentProgram
 
   // TODO move into the class
   val basicProtocolHandlerLayer: ULayer[ProtocolExecuter[Services, DidFail]] =

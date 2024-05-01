@@ -7,7 +7,7 @@ import fmgp.crypto.error._
 import fmgp.did._
 import fmgp.did.comm._
 
-trait AgentExecutar {
+trait AgentProgram {
   def subject: DIDSubject
 
   /** receive a Message and a transport where that message was recived.
