@@ -15,23 +15,62 @@ import zio.json.ast.Json
 //   def byte_count: NotRequired[String]
 // }
 
+/** @param id
+  *   but recommended. Identifies attached content within the scope of a given message, so it can be referenced. For
+  *   example, in a message documenting items for sale on an auction website, there might be a field named front_view
+  *   that contains the value #attachment1; this would reference an attachment to the message with id equal to
+  *   attachment1. If omitted, then there is no way to refer to the attachment later in the thread, in error messages,
+  *   and so forth. Because the id of an attachment is used to compose URIs, this value should be brief and MUST consist
+  *   entirely of unreserved URI characters – meaning that it is not necessary to percent encode the value to
+  *   incorporate it in a URI.
+  * @param description
+  *   human-readable description of the content
+  * @param filename
+  *   hint about the name that might be used if this attachment is persisted as a file. It need not be unique. If this
+  *   field is present and media_type is not, the extension on the filename may be used to infer a MIME type.
+  * @param media_type
+  *   describes the media type of the attached content
+  * @param format
+  *   further describes the format of the attachment if the media_type is not sufficient
+  * @param lastmod_time
+  *   hint about when the content in this attachment was last modified
+  * @param data
+  *   JSON object that gives access to the actual content of the attachment. This MUST contain at least one of the
+  *   following subfields, and enough of them to allow access to the data
+  * @param byte_count
+  *   mostly relevant when content is included by reference instead of by value. Lets the receiver guess how expensive
+  *   it will be, in time, bandwidth, and storage, to fully fetch the attachment
+  */
 case class Attachment(
     id: NotRequired[String] = None,
-    /** A human-readable description of the content. */
     description: NotRequired[String] = None,
     filename: NotRequired[String] = None,
     media_type: NotRequired[String] = None,
     format: NotRequired[String] = None,
     lastmod_time: NotRequired[String] = None,
     data: AttachmentData,
-    /** Mostly relevant when content is included by reference instead of by value. Lets the receiver guess how expensive
-      * it will be, in time, bandwidth, and storage, to fully fetch the attachment.
-      */
     byte_count: NotRequired[String] = None,
-)
+) {
+
+  def getAsMessage: Either[String, Message] = data match
+    case AttachmentDataJWS(jws, links) =>
+      Left(s"Message from Attachment only support type Base64 or Json (instead of JWT)")
+    case AttachmentDataLinks(links, hash) =>
+      Left(s"Message from Attachment only support type Base64 or Json (instead of Links)")
+    case AttachmentDataBase64(base64) => base64.decodeToString.fromJson[Message]
+    case AttachmentDataJson(json)     => json.as[Message]
+    case AttachmentDataAny(jws, hash, links, base64, json) =>
+      Left(s"Has attachments of unknown type") // TODO shound we still try?
+
+}
+
 object Attachment {
   given decoder: JsonDecoder[Attachment] = DeriveJsonDecoder.gen[Attachment]
   given encoder: JsonEncoder[Attachment] = DeriveJsonEncoder.gen[Attachment]
+  def fromMessage(msg: SignedMessage): Attachment = Attachment(
+    media_type = Some(MediaTypes.SIGNED.typ),
+    data = AttachmentDataJson(msg.toJsonObj),
+  )
 }
 
 //** https://www.rfc-editor.org/rfc/rfc7515#appendix-F */
