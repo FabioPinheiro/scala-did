@@ -50,7 +50,7 @@ object MediateRequest {
   def piuri = PIURI("https://didcomm.org/coordinate-mediation/3.0/mediate-request")
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, MediateRequest] =
-    if (msg.`type` != piuri) Left(s"No able to create MediateDeny from a Message of type '${msg.`type`}'")
+    if (msg.`type` != piuri) Left(s"No able to create MediateRequest from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
