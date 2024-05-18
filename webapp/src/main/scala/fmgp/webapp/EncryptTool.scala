@@ -464,6 +464,54 @@ object EncryptTool {
             ),
           )
         },
+        // ChatriqubeRegistry (Draft Version)
+        {
+          import MessageTemplate.ChatriqubeRegistry._
+          li(
+            button(
+              "Enroll",
+              onClick --> Observer(_ => dataTextVar.set(exEnroll.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "Account",
+              onClick --> Observer(_ => dataTextVar.set(exAccount.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "SetId",
+              onClick --> Observer(_ => dataTextVar.set(exSetId.toPlaintextMessage.toJsonPretty))
+            ),
+          )
+        },
+        // ChatriqubeDiscovery (Draft Version)
+        {
+          import MessageTemplate.ChatriqubeDiscovery._
+          li(
+            button(
+              "AskIntroduction",
+              onClick --> Observer(_ => dataTextVar.set(exAskIntroduction.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "IntroductionStatus",
+              onClick --> Observer(_ => dataTextVar.set(exIntroductionStatus.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "ForwardRequest",
+              onClick --> Observer(_ => dataTextVar.set(exForwardRequest.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "Request",
+              onClick --> Observer(_ => dataTextVar.set(exRequest.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "Answer",
+              onClick --> Observer(_ => dataTextVar.set(exAnswer.toPlaintextMessage.toJsonPretty))
+            ),
+            button(
+              "Handshake",
+              onClick --> Observer(_ => dataTextVar.set(exHandshake.toPlaintextMessage.toJsonPretty))
+            ),
+          )
+        }
       ),
     ),
     textArea(

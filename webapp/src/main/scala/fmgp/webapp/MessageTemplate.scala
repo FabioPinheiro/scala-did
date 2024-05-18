@@ -243,6 +243,21 @@ object MessageTemplate {
     iv = IV("ESpmcyGiZpRjc5urDela21TOOTW8Wqd1")
   )
 
+  val exampleSignatureEdDSA_obj = SignedMessage(
+    Payload.fromBase64url(
+      "eyJpZCI6IjEyMzQ1Njc4OTAiLCJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXBsYWluK2pzb24iLCJ0eXBlIjoiaHR0cDovL2V4YW1wbGUuY29tL3Byb3RvY29scy9sZXRzX2RvX2x1bmNoLzEuMC9wcm9wb3NhbCIsImZyb20iOiJkaWQ6ZXhhbXBsZTphbGljZSIsInRvIjpbImRpZDpleGFtcGxlOmJvYiJdLCJjcmVhdGVkX3RpbWUiOjE1MTYyNjkwMjIsImV4cGlyZXNfdGltZSI6MTUxNjM4NTkzMSwiYm9keSI6eyJtZXNzYWdlc3BlY2lmaWNhdHRyaWJ1dGUiOiJhbmQgaXRzIHZhbHVlIn19"
+    ),
+    Seq(
+      JWMSignatureObj(
+        `protected` = Base64("eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRWREU0EifQ")
+          .unsafeAsObj[SignProtectedHeader],
+        signature =
+          SignatureJWM("FW33NnvOHV0Ted9-F7GZbkia-vYAfBKtH4oBxbrttWAhBZ6UFJMxcGjL3lwOl4YohI3kyyd08LHPWNMgP2EVCQ"),
+        header = Some(JWMHeader("did:example:alice#key-1")),
+      )
+    )
+  )
+
   object PubSub {
     import fmgp.did.comm.protocol.pubsub.*
 
@@ -343,6 +358,74 @@ object MessageTemplate {
       verificationType = VerificationType.Email,
       subject = "fabio@fmgp.app",
       attachments = Seq(),
+    )
+  }
+
+  object ChatriqubeRegistry {
+    import fmgp.did.comm.protocol.chatriqube.SubjectType
+    import fmgp.did.comm.protocol.chatriqube.registry.*
+
+    def exEnroll = Enroll(
+      from = from,
+      to = to,
+    )
+    def exAccount = Account(
+      thid = MsgID(),
+      from = from,
+      to = to,
+      ids = Seq((SubjectType.Email, "test@fmgp.app"))
+    )
+    def exSetId = SetId(
+      from = from,
+      to = to,
+      subjectType = SubjectType.Email,
+      subject = "test@fmgp.app",
+      proof = "TODO"
+    )
+  }
+
+  object ChatriqubeDiscovery {
+    import fmgp.did.comm.protocol.chatriqube.SubjectType
+    import fmgp.did.comm.protocol.chatriqube.discovery.*
+
+    def exAskIntroduction = AskIntroduction(
+      from = from,
+      to = to,
+      request = exampleSignatureEdDSA_obj,
+    )
+
+    def exIntroductionStatus = IntroductionStatus(
+      thid = MsgID(),
+      from = from,
+      to = to,
+      forwardRequestSent = true,
+    )
+
+    def exForwardRequest = ForwardRequest(
+      thid = MsgID(),
+      from = from,
+      to = to,
+      request = exampleSignatureEdDSA_obj,
+    )
+
+    def exRequest = Request(
+      from = from,
+      to = None, // Option
+      subjectType = SubjectType.Email,
+      subject = "test@fmgp.app",
+    )
+    def exAnswer = Answer(
+      thid = MsgID(),
+      pthid = Some(MsgID()),
+      from = from,
+      to = to,
+      subjectType = SubjectType.Email,
+      subject = "test@fmgp.app",
+    )
+    def exHandshake = Handshake(
+      thid = MsgID(),
+      from = from,
+      to = to,
     )
   }
 }
