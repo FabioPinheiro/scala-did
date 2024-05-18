@@ -275,7 +275,7 @@ case class ConfirmVerification(
 object ConfirmVerification {
   def piuri = PIURI("https://fmgp.app/provecontrol/1/confirmverification")
 
-  protected final case class Body(verificationType: VerificationType, subject: String) {
+  protected final case class Body(verificationType: VerificationType, subject: String) { // TODO jwt
 
     /** toJSON_RFC7159 MUST not fail! */
     def toJSON_RFC7159: JSON_RFC7159 = this.toJsonAST.flatMap(_.as[JSON_RFC7159]).getOrElse(JSON_RFC7159())

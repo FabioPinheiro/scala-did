@@ -1,19 +1,8 @@
 # WEBAPP module
 
-## build and run app (open chrome)
+## build and run
 
-`sbt>` `serviceworker / fastLinkJS`
-`sbt>` `webapp / Compile / fastOptJS / webpack`
-
-open `file:///home/fabio/workspace/ScalaDID/webapp/index-fastopt.html#/`
-
-google-chrome-stable --disable-web-security --user-data-dir="/tmp/chrome_tmp" --new-window file:///home/fabio/workspace/ScalaDID/webapp/index-fastopt.html#/
-
-When developing in a recompile-test iteration you can sbt to monitor source files and re-run.
-```sbt
-serviceworker / fastLinkJS
-~ webapp / Compile / fastOptJS / webpack
-```
+[See info about who to buind and run in demo](./../demo/README.md)
 
 ## TODO LIST:
 
