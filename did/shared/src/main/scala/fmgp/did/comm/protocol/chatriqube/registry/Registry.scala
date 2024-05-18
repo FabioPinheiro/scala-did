@@ -122,7 +122,8 @@ final case class SetId(
     from: FROM,
     to: TO,
     subjectType: SubjectType,
-    subject: String
+    subject: String,
+    proof: String,
 ) { // FIXME add proof
   def piuri = SetId.piuri
   def toPlaintextMessage: PlaintextMessage =
@@ -131,7 +132,7 @@ final case class SetId(
       `type` = piuri,
       to = Some(Set(to)),
       from = Some(from),
-      body = Some(SetId.Body(subjectType = subjectType, subject = subject, proof = "TODO").toJSON_RFC7159)
+      body = Some(SetId.Body(subjectType = subjectType, subject = subject, proof = proof).toJSON_RFC7159)
     )
 }
 
@@ -167,7 +168,8 @@ object SetId {
                         from = from,
                         to = firstTo,
                         subjectType = body.subjectType,
-                        subject = body.subject
+                        subject = body.subject,
+                        proof = body.proof,
                       )
                     )
               }

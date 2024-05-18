@@ -76,4 +76,4 @@ sequenceDiagram
   - body:
     - subjectType - (Email | Domain | Discord | Tel)
     - subject
-  - attachment proof
+    - proof
