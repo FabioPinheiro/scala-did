@@ -7,6 +7,7 @@
 ## PIURI
 
 - `https://decentriqube.com/discovery/1/ask_introduction`
+- `https://decentriqube.com/discovery/1/introduction_status`
 - `https://decentriqube.com/discovery/1/forward_request`
 - `https://decentriqube.com/discovery/1/request`
 - `https://decentriqube.com/discovery/1/answer`
@@ -22,30 +23,13 @@ flowchart TD
   R[Registry]
   A -->|ask_introduction| R
   R -->|forward_request| B
+  R -->|introduction_status| A
   A -->|request| B
   B -->|answer| A
   A -->|handshake| B
 ```
 
 #### Example of Sequence Diagram
-
-```mermaid
-sequenceDiagram
-  participant UserA
-  participant Registry
-  
-  rect rgb(0, 100, 0)
-    UserA ->>+ Registry: enroll
-    Registry-->>-UserA: account | ProblemReport
-  end
-
-  rect rgb(0, 100, 0)
-    Note over UserA,Registry: Assume now the UserA is enrolled
-    UserA ->>+ Registry: set_id
-    Registry-->>-UserA: account | ProblemReport
-  end
-
-```
 
 ```mermaid
 sequenceDiagram
@@ -59,7 +43,8 @@ sequenceDiagram
 
   rect rgb(0, 100, 0)
     UserA ->>+ Registry: ask_introduction (with 'request' from UserA)
-    Registry -->>- UserB: (*) forward_request (with 'request')
+    Registry -->> UserB: (*) forward_request (with 'request')
+    Registry -->>- UserA: introduction_status
     UserB' -->>+ UserA': (**) answer
     UserA' -->>- UserB': handshake
   end
@@ -75,6 +60,7 @@ flowchart TD
   B[User B]
   R[Registry]
   A -->|ask_introduction| R
+  R -->|introduction_status| A
   R -->|forward_request| B
 ```
 
@@ -83,6 +69,13 @@ flowchart TD
   - to (registry)
   - attachment:
     - (signed `https://decentriqube.com/discovery/1/request`)
+
+- `introduction_status`
+  - from (registry)
+  - to (to the one ask_introduction)
+  - thid
+  - body:
+    - forwardRequestSent: Boolean
 
 - `forward_request`
   - from
