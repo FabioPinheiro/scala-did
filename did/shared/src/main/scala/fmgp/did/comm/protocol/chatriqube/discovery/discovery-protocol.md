@@ -75,7 +75,7 @@ flowchart TD
   - to (to the one ask_introduction)
   - thid
   - body:
-    - forwardRequestSent: Boolean
+    - forward_request_sent: Boolean
 
 - `forward_request`
   - from
@@ -97,7 +97,7 @@ flowchart TD
 - `request` (singed message)
   - from (new DID)
   - body:
-    - `subjectType` - (Email | Domain | Discord | Tel)
+    - `subject_type` - (Email | Domain | Discord | Tel)
     - `subject`
 
 - `answer` (introduction request)

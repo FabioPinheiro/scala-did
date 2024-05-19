@@ -16,7 +16,7 @@ class ProveControlSuite extends FunSuite {
       |  "to" : [ "did:example:bob" ],
       |  "from" : "did:example:alice",
       |  "body" : {
-      |    "verificationType" : "Email",
+      |    "verification_type" : "Email",
       |    "subject" : "fabio@fmgp.app"
       |  }
       |}""".stripMargin
@@ -45,7 +45,7 @@ class ProveControlSuite extends FunSuite {
       |  "to" : [ "did:example:bob" ],
       |  "from" : "did:example:alice",
       |  "body" : {
-      |    "verificationType" : "Email",
+      |    "verification_type" : "Email",
       |    "subject" : "fabio@fmgp.app",
       |    "secret" : "secret123"
       |  }
@@ -82,7 +82,7 @@ class ProveControlSuite extends FunSuite {
       |  "from" : "did:example:alice",
       |  "thid": "MsgID-2",
       |  "body" : {
-      |    "verificationType" : "Email",
+      |    "verification_type" : "Email",
       |    "subject" : "fabio@fmgp.app",
       |    "proof" : "hash(id|thid|from|to|verificationType|subject|secret123)"
       |  }
@@ -117,7 +117,7 @@ class ProveControlSuite extends FunSuite {
       |  "from" : "did:example:alice",
       |  "thid": "MsgID-2",
       |  "body" : {
-      |    "verificationType" : "Email",
+      |    "verification_type" : "Email",
       |    "subject" : "fabio@fmgp.app",
       |    "challenge" : "challenge123"
       |  }

@@ -373,7 +373,7 @@ object MessageTemplate {
       thid = MsgID(),
       from = from,
       to = to,
-      ids = Seq((SubjectType.Email, "test@fmgp.app"))
+      ids = Seq(Account.IdentityEntry(SubjectType.Email, "test@fmgp.app"))
     )
     def exSetId = SetId(
       from = from,

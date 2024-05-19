@@ -108,6 +108,7 @@ final case class IntroductionStatus(
 object IntroductionStatus {
   def piuri = PIURI("https://decentriqube.com/discovery/1/introduction_status")
 
+  @jsonMemberNames(SnakeCase)
   protected final case class Body(forwardRequestSent: Boolean) {
 
     /** toJSON_RFC7159 MUST not fail! */
@@ -275,6 +276,7 @@ final case class Request(
 object Request {
   def piuri = PIURI("https://decentriqube.com/discovery/1/request")
 
+  @jsonMemberNames(SnakeCase)
   protected final case class Body(subjectType: SubjectType, subject: String) {
 
     /** toJSON_RFC7159 MUST not fail! */
@@ -350,6 +352,7 @@ final case class Answer(
 object Answer {
   def piuri = PIURI("https://decentriqube.com/discovery/1/answer")
 
+  @jsonMemberNames(SnakeCase)
   protected final case class Body(subjectType: SubjectType, subject: String) {
 
     /** toJSON_RFC7159 MUST not fail! */

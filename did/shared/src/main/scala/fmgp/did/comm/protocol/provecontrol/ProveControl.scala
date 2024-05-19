@@ -55,6 +55,7 @@ case class RequestVerification(
 object RequestVerification {
   def piuri = PIURI("https://fmgp.app/provecontrol/1/requestverification")
 
+  @jsonMemberNames(SnakeCase)
   protected final case class Body(verificationType: VerificationType, subject: String) {
 
     /** toJSON_RFC7159 MUST not fail! */
@@ -137,6 +138,7 @@ object VerificationChallenge {
 
   export Prove.calculateProof
 
+  @jsonMemberNames(SnakeCase)
   protected final case class Body(verificationType: VerificationType, subject: String, secret: String) {
 
     /** toJSON_RFC7159 MUST not fail! */
@@ -208,6 +210,7 @@ object Prove {
       secret: String,
   ) = SHA256.digestToHex(s"$verifier|$user|$verificationType|$subject|$secret")
 
+  @jsonMemberNames(SnakeCase)
   protected final case class Body(verificationType: VerificationType, subject: String, proof: String) {
 
     /** toJSON_RFC7159 MUST not fail! */
@@ -275,6 +278,7 @@ case class ConfirmVerification(
 object ConfirmVerification {
   def piuri = PIURI("https://fmgp.app/provecontrol/1/confirmverification")
 
+  @jsonMemberNames(SnakeCase)
   protected final case class Body(verificationType: VerificationType, subject: String) { // TODO jwt
 
     /** toJSON_RFC7159 MUST not fail! */
