@@ -6,7 +6,7 @@ This protocol is used a proof control of external identities.
 - **Verifier** - The Verifier is a well-known DID that is trusted and the provides a verification service. It will challenge the User to prove the control over other identity. It then issues a statement (VC) as the User was control over that external identity.
 - **User** - The User is another DID that they have other identities (like an email) and wants to prove control over it.
 
-## Type verificationType:
+## Type verification_type:
   - Email (read)
     > User proof is able to read email on a specific email address. By receiving an email that contains an encrypted message for the User, which the user can create the message `prove` to send directly Verifier. <span style="color:red">Note: it can be a shared email</span>
   - Domain
@@ -30,27 +30,27 @@ This protocol is used a proof control of external identities.
   > This message is a request from the User to Verifier. To start the verification process over some specific subject (liek an email address, a domain, etc)
   - `to`
   - `from`
-  - `verificationType`
+  - `verification_type`
   - `subject`
 - fmgp.app/provecontrol/1/verificationchallenge
-  > This is encrypted message from the Verifier to the User. That challenge the User according to the `verificationType`.
+  > This is encrypted message from the Verifier to the User. That challenge the User according to the `verification_type`.
   - `to`
   - `from`
-  - `verificationType`
+  - `verification_type`
   - `subject`
   - `secret` (only the 'to' can see, because the message is encrypted)
 - fmgp.app/provecontrol/1/prove
   > This message is from the User to the Verifier.
   - `to`
   - `from`
-  - `verificationType`
+  - `verification_type`
   - `subject`
   - `proof`
 - fmgp.app/provecontrol/1/confirmverification
-  > This is a sign message from the Verifier to the User. It works like a VC verifiable credential. It's a statement from the Verifier that confirms that the User proofed the `verificationType` about the subject to him. The user can use this statement (VC) to show other DIDs that trust this Verifier.
+  > This is a sign message from the Verifier to the User. It works like a VC verifiable credential. It's a statement from the Verifier that confirms that the User proofed the `verification_type` about the subject to him. The user can use this statement (VC) to show other DIDs that trust this Verifier.
   - `to`
   - `from`
-  - `verificationType`
+  - `verification_type`
   - `subject`
 
 ## Calculate Proof

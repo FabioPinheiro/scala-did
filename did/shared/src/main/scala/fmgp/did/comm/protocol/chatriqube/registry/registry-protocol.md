@@ -68,12 +68,14 @@ sequenceDiagram
   - to
   - thid
   - body:
-    - ids: Seq[(SubjectType, String)]
+    - ids[]: (array of IdentityEntry)
+      - type: SubjectType
+      - subject: String
 
 - `set_id` (edit maybe?) how to remove?
   - from
   - to
   - body:
-    - subjectType - (Email | Domain | Discord | Tel)
+    - subject_type - (Email | Domain | Discord | Tel)
     - subject
     - proof

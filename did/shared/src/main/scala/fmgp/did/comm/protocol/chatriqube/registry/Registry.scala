@@ -58,7 +58,7 @@ final case class Account(
     thid: MsgID,
     from: FROM,
     to: TO,
-    ids: Seq[(SubjectType, String)]
+    ids: Seq[Account.IdentityEntry]
 ) {
   def piuri = Account.piuri
   def toPlaintextMessage: PlaintextMessage =
@@ -74,7 +74,17 @@ final case class Account(
 object Account {
   def piuri = PIURI("https://decentriqube.com/registry/1/account")
 
-  protected final case class Body(ids: Seq[(SubjectType, String)]) {
+  @jsonMemberNames(SnakeCase)
+  case class IdentityEntry(
+      subjectType: SubjectType,
+      subject: String
+  )
+  object IdentityEntry {
+    given decoder: JsonDecoder[IdentityEntry] = DeriveJsonDecoder.gen[IdentityEntry]
+    given encoder: JsonEncoder[IdentityEntry] = DeriveJsonEncoder.gen[IdentityEntry]
+  }
+
+  protected final case class Body(ids: Seq[IdentityEntry]) {
 
     /** toJSON_RFC7159 MUST not fail! */
     def toJSON_RFC7159: JSON_RFC7159 = this.toJsonAST.flatMap(_.as[JSON_RFC7159]).getOrElse(JSON_RFC7159())
@@ -139,6 +149,7 @@ final case class SetId(
 object SetId {
   def piuri = PIURI("https://decentriqube.com/registry/1/set_id")
 
+  @jsonMemberNames(SnakeCase)
   protected final case class Body(subjectType: SubjectType, subject: String, proof: String) {
 
     /** toJSON_RFC7159 MUST not fail! */
