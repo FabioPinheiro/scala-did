@@ -59,7 +59,8 @@ fly deploy ./demo/
 
 ```shell
 sbt assemblyAll
-docker build --tag scala_did_demo ./demo/
+#docker build --tag scala_did_demo ./demo/
+docker buildx build --platform linux/amd64 --tag scala_did_demo ./demo/
 docker tag scala_did_demo registry.fly.io/scala-did-demo
 # fly auth docker
 docker push registry.fly.io/scala-did-demo
@@ -70,6 +71,7 @@ fly deploy -a scala-did-demo --image registry.fly.io/scala-did-demo:latest --ha=
 ## History of deployments
 
 Size of the last docker layer:
+- 2024/02/19 +- 121.9MB (arm64 & Java 21)
 - 2024/02/18 +- 121.2MB
 - 2024/02/13 +- 120.8MB
 - 2024/02/05 +- 119.3MB

@@ -149,6 +149,9 @@ lazy val V = new {
   val logbackClassic = "1.2.10"
   val scalaLogging = "3.9.4"
 
+  val bouncycastle = "1.78.1"
+  val nimbusJoseJwt = "9.39.1"
+
   val laika = "1.0.0"
 
   val laminar = "16.0.0"
@@ -193,6 +196,16 @@ lazy val D = new {
 
   // Test DID comm
   // val didcomm = Def.setting("org.didcommx" % "didcomm" % "0.3.1")
+
+  // Cryto
+  // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt
+  // https://bitbucket.org/connect2id/nimbus-jose-jwt/branches/compare/release-9.35%0Drelease-9.32
+  val bouncycastle_bcprov = // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
+    Def.setting("org.bouncycastle" % "bcprov-jdk18on" % "1.78.1")
+  val bouncycastle_bcpkix = // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
+    Def.setting("org.bouncycastle" % "bcpkix-jdk18on" % "1.78.1")
+
+  val nimbusJoseJwt = Def.setting("com.nimbusds" % "nimbus-jose-jwt" % V.nimbusJoseJwt)
 
   // For munit https://scalameta.org/munit/docs/getting-started.html#scalajs-setup
   val munit = Def.setting("org.scalameta" %%% "munit" % V.munit % Test)
@@ -410,10 +423,9 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
   .settings(name := "did-imp")
   .settings(libraryDependencies += D.zioMunitTest.value)
   .jvmSettings( // Add JVM-specific settings here
-    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.77", // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
-    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.77", // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
-    libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.39.1", // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt
-    // https://bitbucket.org/connect2id/nimbus-jose-jwt/branches/compare/release-9.35%0Drelease-9.32
+    libraryDependencies += D.bouncycastle_bcprov.value,
+    libraryDependencies += D.bouncycastle_bcpkix.value,
+    libraryDependencies += D.nimbusJoseJwt.value,
 
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
     libraryDependencies += "com.google.crypto.tink" % "tink" % "1.13.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
@@ -477,7 +489,8 @@ lazy val didResolverPeer = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "com.github.multiformats" % "java-multibase" % "1.1.1" % Test, // FIX CVE-2020-15250 in peerdid
     libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.77" % Test,
     libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.77" % Test,
-    libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.16-preview.1" % Test,
+    libraryDependencies += D.nimbusJoseJwt.value % Test,
+    // libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.16-preview.1" % Test,
   )
   .jsConfigure(scalaJSLibConfigure)
   .dependsOn(did, multiformats)
@@ -595,9 +608,10 @@ lazy val demo = crossProject(JSPlatform, JVMPlatform)
 
 val webjarsPattern = "(META-INF/resources/webjars/.*)".r
 ThisBuild / assemblyMergeStrategy := {
-  case "META-INF/versions/9/module-info.class" => MergeStrategy.first
-  case "META-INF/io.netty.versions.properties" => MergeStrategy.first
-  case webjarsPattern(file)                    => MergeStrategy.discard
+  case "META-INF/versions/9/module-info.class"    => MergeStrategy.first
+  case "META-INF/io.netty.versions.properties"    => MergeStrategy.first
+  case "META-INF/versions/9/OSGI-INF/MANIFEST.MF" => MergeStrategy.first
+  case webjarsPattern(file)                       => MergeStrategy.discard
 //   case PathList("javax", "servlet", xs @ _*)         => MergeStrategy.first
 //   case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
 //   case "application.conf"                            => MergeStrategy.concat
