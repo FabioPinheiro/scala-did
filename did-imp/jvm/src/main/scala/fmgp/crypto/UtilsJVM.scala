@@ -139,14 +139,29 @@ object UtilsJVM {
   // }
 
   def ecKeyVerify(ecKey: JWKECKey, jwm: SignedMessage, alg: JWAAlgorithm): Boolean = {
+    val maybeKeyID = Option(ecKey.getKeyID())
     val _key = ecKey.toPublicJWK
-    val verifier = new ECDSAVerifier(_key.toPublicJWK);
-    val header = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(_key.getKeyID()).build()
-    verifier.verify(
-      header,
-      (jwm.base64noSignature).getBytes(StandardCharset.UTF_8),
-      jwm.signatures.head.signature.base64 // FIXME .head
-    )
+    val verifier = new ECDSAVerifier(_key.toPublicJWK)
+    val signatureObjs: Seq[JWMSignatureObj] = maybeKeyID match
+      case None => jwm.signatures // Try all signatures
+      case Some(keyId) =>
+        jwm.signatures
+          .filter(_.`protected`.obj.kid match {
+            case None                                      => true // Try all signatures that does not specify the key
+            case Some(VerificationMethodReferenced(value)) => keyId == value // Try this signature
+          })
+    signatureObjs.exists { obj =>
+      val header = {
+        val h = new JWSHeader.Builder(obj.`protected`.obj.alg.toJWSAlgorithm)
+        maybeKeyID.foreach(h.keyID(_))
+        h.build()
+      }
+      verifier.verify(
+        header,
+        (jwm.base64noSignature).getBytes(StandardCharset.UTF_8),
+        obj.signature.base64
+      )
+    }
   }
 
   def ecKeySign(ecKey: JWKECKey, payload: Array[Byte], alg: JWAAlgorithm): SignedMessage = {
@@ -181,14 +196,31 @@ object UtilsJVM {
   // }
 
   def okpKeyVerifyWithEd25519(okpKey: OctetKeyPair, jwm: SignedMessage, alg: JWAAlgorithm): Boolean = {
+    val maybeKeyID = Option(okpKey.getKeyID())
     val _key = okpKey.toPublicJWK
-    val verifier = new Ed25519Verifier(_key.toPublicJWK);
-    val header = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(_key.getKeyID()).build()
-    verifier.verify(
-      header,
-      (jwm.base64noSignature).getBytes(StandardCharset.UTF_8),
-      jwm.signatures.head.signature.base64 // FIXME .head
-    )
+    val verifier = new Ed25519Verifier(_key.toPublicJWK)
+
+    val signatureObjs: Seq[JWMSignatureObj] = maybeKeyID match
+      case None => jwm.signatures // Try all signatures
+      case Some(keyId) =>
+        jwm.signatures
+          .filter(_.`protected`.obj.kid match {
+            case None                                      => true // Try all signatures that does not specify the key
+            case Some(VerificationMethodReferenced(value)) => keyId == value // Try this signature
+          })
+
+    signatureObjs.exists { obj =>
+      val header = {
+        val h = new JWSHeader.Builder(obj.`protected`.obj.alg.toJWSAlgorithm)
+        maybeKeyID.foreach(h.keyID(_))
+        h.build()
+      }
+      verifier.verify(
+        header,
+        (jwm.base64noSignature).getBytes(StandardCharset.UTF_8),
+        obj.signature.base64
+      )
+    }
   }
 
   def okpKeySignWithEd25519(okpKey: OctetKeyPair, payload: Array[Byte], alg: JWAAlgorithm): SignedMessage = {

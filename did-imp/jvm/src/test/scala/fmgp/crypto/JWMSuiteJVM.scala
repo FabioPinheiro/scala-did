@@ -72,4 +72,43 @@ class JWMSuiteJVM extends FunSuite {
     assertEquals(okpKeyVerifyWithEd25519(ecPublicJWK, jwsObject, JWAAlgorithm.EdDSA), false)
   }
 
+  test("sign and verify plaintextMessage with Curve P_256") {
+    val ecJWK: JWKECKey = JWKECKey
+      .Builder(
+        JWKCurve.P_256,
+        Base64.fromBase64url("2syLh57B-dGpa0F8p1JrO6JU7UUSF6j7qL-vfk1eOoY"),
+        Base64.fromBase64url("BgsGtI7UPsObMRjdElxLOrgAO9JggNMjOcfzEPox18w")
+      )
+      .keyID("did:example:alice#key-3")
+      .d(Base64.fromBase64url("7TCIdt1rhThFtWcEiLnk_COEjh1ZfQhM4bW2wz-dp4A"))
+      .build()
+
+    val jwsObject = ecKeySign(ecJWK, DIDCommExamples.plaintextMessageObj.toJson.getBytes, JWAAlgorithm.ES256)
+
+    val ecPublicJWK: JWKECKey = ecJWK.toPublicJWK()
+    assert(ecKeyVerify(ecPublicJWK, jwsObject, JWAAlgorithm.ES256))
+    assert(ecKeyVerify(ecPublicJWK, SignedMessageExamples.exampleSignatureES256_obj, JWAAlgorithm.ES256))
+  }
+
+  test("sign and fail verify if 'kid' of the key do not match") {
+    def ecJWK(kid: String) = JWKECKey
+      .Builder(
+        JWKCurve.P_256,
+        Base64.fromBase64url("2syLh57B-dGpa0F8p1JrO6JU7UUSF6j7qL-vfk1eOoY"),
+        Base64.fromBase64url("BgsGtI7UPsObMRjdElxLOrgAO9JggNMjOcfzEPox18w")
+      )
+      .keyID(kid)
+      .d(Base64.fromBase64url("7TCIdt1rhThFtWcEiLnk_COEjh1ZfQhM4bW2wz-dp4A"))
+      .build()
+
+    val jwsObject = ecKeySign(
+      ecJWK("did:example:alice#key-3"),
+      DIDCommExamples.plaintextMessageObj.toJson.getBytes,
+      JWAAlgorithm.ES256
+    )
+
+    val ecPublicJWK: JWKECKey = ecJWK("did:example:alice#key-fail").toPublicJWK()
+    assert(!ecKeyVerify(ecPublicJWK, jwsObject, JWAAlgorithm.ES256))
+  }
+
 }
