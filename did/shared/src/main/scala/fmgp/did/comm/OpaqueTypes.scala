@@ -95,6 +95,7 @@ object Payload:
     /** decode the base64url to a string */
     def content: String = data.decodeToString
     def base64url: String = data.urlBase64
+    def base64: Base64 = data
   given decoder: JsonDecoder[Payload] = Base64.decoder
   given encoder: JsonEncoder[Payload] = Base64.encoder
 
@@ -108,3 +109,49 @@ object SignatureJWM:
 
   given decoder: JsonDecoder[SignatureJWM] = JsonDecoder.string.map(SignatureJWM(_))
   given encoder: JsonEncoder[SignatureJWM] = JsonEncoder.string.contramap[SignatureJWM](_.value)
+
+opaque type ProtectedHeaderJWT = Base64
+object ProtectedHeaderJWT {
+  def fromBase64url(data: String): Payload = Base64.fromBase64url(data)
+  extension (header: ProtectedHeaderJWT)
+    /** decode the base64url to a string */
+    def content: String = header.decodeToString
+    def base64url: String = header.urlBase64
+    def base64: Base64 = header
+}
+
+opaque type SignatureJWT = Base64
+object SignatureJWT {
+  def fromBase64url(data: String): Payload = Base64.fromBase64url(data)
+  extension (signature: SignatureJWT)
+    /** decode the base64url to a string */
+    def content: String = signature.decodeToString
+    def base64url: String = signature.urlBase64
+    def base64: Base64 = signature
+
+}
+
+opaque type JWT = (ProtectedHeaderJWT, Payload, SignatureJWT)
+object JWT {
+
+  def apply(protectedHeader: ProtectedHeaderJWT, payload: Payload, signature: SignatureJWT): JWT =
+    (protectedHeader, payload, signature)
+
+  def fromStrings(protectedHeader: String, payload: String, signature: String): JWT =
+    apply(
+      ProtectedHeaderJWT.fromBase64url(protectedHeader),
+      Payload.fromBase64url(payload),
+      SignatureJWT.fromBase64url(signature)
+    )
+
+  def unsafeFromEncodedJWT(str: String): JWT = str.split('.') match {
+    case Array(protectedHeader: String, payload: String, signature: String) =>
+      fromStrings(protectedHeader, payload, signature)
+  }
+  extension (jwt: JWT)
+    inline def protectedHeader: ProtectedHeaderJWT = jwt._1
+    inline def payload: Payload = jwt._2
+    inline def signature: SignatureJWT = jwt._3
+    def base64JWTFormatWithNoSignature = jwt.protectedHeader.urlBase64 + "." + jwt.payload.urlBase64
+    // def base64: Base64 = Base64.fromBase64url(jwt.value)
+}
