@@ -240,7 +240,7 @@ inThisBuild(
           // NO NEED ATM "-Ykind-projector"
         ) ++
         // Because DeriveJson(Decoder/Encoder).gen[DidFail] exceeded maximal number of successive inlines (default is 32)
-        Seq("-Xmax-inlines", "42")
+        Seq("-Xmax-inlines", "43")
 
       // ### commonSettings ###
       // Compile / doc / sources := Nil,

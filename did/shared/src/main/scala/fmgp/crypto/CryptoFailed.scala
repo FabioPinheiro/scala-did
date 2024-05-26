@@ -65,6 +65,7 @@ package error {
   case object MissingFromHeader extends CryptoFailed
   case object WrongSigningDID extends CryptoFailed
   case object NoSupportedKey extends CryptoFailed
+  case object WrongAlgorithmForKey extends CryptoFailed
 
   /* EX: Curve of public key does not match curve of private key */
   @jsonDiscriminator("typeOfCurveError")
