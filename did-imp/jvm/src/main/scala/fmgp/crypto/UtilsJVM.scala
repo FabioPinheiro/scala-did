@@ -151,6 +151,7 @@ object UtilsJVM {
             case Some(VerificationMethodReferenced(value)) => keyId == value // Try this signature
           })
     signatureObjs.exists { obj =>
+      val base64noSignature = obj.`protected`.base64url + "." + jwm.payload.base64url
       val header = {
         val h = new JWSHeader.Builder(obj.`protected`.obj.alg.toJWSAlgorithm)
         maybeKeyID.foreach(h.keyID(_))
@@ -158,12 +159,13 @@ object UtilsJVM {
       }
       verifier.verify(
         header,
-        (jwm.base64noSignature).getBytes(StandardCharset.UTF_8),
+        (base64noSignature).getBytes(StandardCharset.UTF_8),
         obj.signature.base64
       )
     }
   }
 
+  // TODO return ZIO
   def ecKeyVerifyJWT(ecKey: JWKECKey, jwt: JWT): Boolean = {
     for {
       headerJson <- jwt.protectedHeader.content.fromJson[ast.Json.Obj]
@@ -206,6 +208,7 @@ object UtilsJVM {
     )
   }
 
+  // TODO return ZIO
   def ecKeySignJWT(ecKey: JWKECKey, payload: Array[Byte], alg: JWAAlgorithm): JWT = {
     require(ecKey.isPrivate(), "EC JWK must include the private key (d)")
 
@@ -251,6 +254,7 @@ object UtilsJVM {
           })
 
     signatureObjs.exists { obj =>
+      val base64noSignature = obj.`protected`.base64url + "." + jwm.payload.base64url
       val header = {
         val h = new JWSHeader.Builder(obj.`protected`.obj.alg.toJWSAlgorithm)
         maybeKeyID.foreach(h.keyID(_))
@@ -258,12 +262,13 @@ object UtilsJVM {
       }
       verifier.verify(
         header,
-        (jwm.base64noSignature).getBytes(StandardCharset.UTF_8),
+        (base64noSignature).getBytes(StandardCharset.UTF_8),
         obj.signature.base64
       )
     }
   }
 
+  // TODO return ZIO
   def okpKeyVerifyJWTWithEd25519(okpKey: OctetKeyPair, jwt: JWT): Boolean = {
 
     assert(
@@ -298,7 +303,6 @@ object UtilsJVM {
   }.getOrElse(false)
 
   def okpKeySignJWMWithEd25519(okpKey: OctetKeyPair, payload: Array[Byte], alg: JWAAlgorithm): SignedMessage = {
-
     val jwt = okpKeySignJWTWithEd25519(okpKey, payload, alg)
 
     SignedMessage(
@@ -313,6 +317,7 @@ object UtilsJVM {
     )
   }
 
+  // TODO return ZIO
   def okpKeySignJWTWithEd25519(okpKey: OctetKeyPair, payload: Array[Byte], alg: JWAAlgorithm): JWT = {
     require(okpKey.isPrivate(), "OKP JWK must include the private key (d)")
     assert(

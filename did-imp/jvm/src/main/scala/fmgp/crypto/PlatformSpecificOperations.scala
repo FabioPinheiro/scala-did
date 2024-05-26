@@ -12,7 +12,36 @@ import fmgp.crypto.error._
 
 object PlatformSpecificOperations {
 
-  def sign(key: PrivateKey, payload: Array[Byte]): IO[CurveError, SignedMessage] =
+  // ###########
+  // ### JWT ###
+  // ###########
+
+  def signJWT(
+      key: PrivateKey,
+      payload: Array[Byte],
+      alg: JWAAlgorithm
+  ): IO[CryptoFailed, JWT] = key match {
+    case okp: OKPPrivateKey => ZIO.succeed(UtilsJVM.okpKeySignJWTWithEd25519(okpKey2JWK(okp), payload, alg))
+    case ec: ECPrivateKey   => ZIO.succeed(UtilsJVM.ecKeySignJWT(ec.toJWK, payload, alg))
+  }
+
+  def verifyJWT(
+      key: PublicKey,
+      jwt: JWT
+  ): IO[CryptoFailed, Boolean] = key match {
+    case okp: OKPPublicKey => ZIO.succeed(UtilsJVM.okpKeyVerifyJWTWithEd25519(okpKey2JWK(okp), jwt))
+    case ec: ECPublicKey   => ZIO.succeed(UtilsJVM.ecKeyVerifyJWT(ec.toJWK, jwt))
+  }
+
+  // #####################
+  // ### SignedMessage ###
+  // #####################
+
+  def sign(
+      key: PrivateKey,
+      payload: Array[Byte],
+      // alg: JWAAlgorithm
+  ): IO[CurveError, SignedMessage] =
     key match {
       case okp @ OKPPrivateKey(kty, Curve.Ed25519, d, x, kid) =>
         ZIO.succeed(okpKeySignJWMWithEd25519(okpKey2JWK(okp), payload, key.jwaAlgorithmtoSign))
