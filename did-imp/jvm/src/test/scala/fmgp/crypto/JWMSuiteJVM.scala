@@ -31,11 +31,11 @@ class JWMSuiteJVM extends FunSuite {
       .d(Base64.fromBase64url("N3Hm1LXA210YVGGsXw_GklMwcLu_bMgnzDese6YQIyA"))
       .build()
 
-    val jwsObject = ecKeySign(ecJWK, DIDCommExamples.plaintextMessageObj.toJson.getBytes, JWAAlgorithm.ES256K)
+    val jwsObject = ecKeySignJWM(ecJWK, DIDCommExamples.plaintextMessageObj.toJson.getBytes, JWAAlgorithm.ES256K)
 
     val ecPublicJWK: JWKECKey = ecJWK.toPublicJWK()
-    assert(ecKeyVerify(ecPublicJWK, jwsObject, JWAAlgorithm.ES256K))
-    assert(ecKeyVerify(ecPublicJWK, SignedMessageExamples.exampleSignatureES256K_obj, JWAAlgorithm.ES256K))
+    assert(ecKeyVerifyJWM(ecPublicJWK, jwsObject, JWAAlgorithm.ES256K))
+    assert(ecKeyVerifyJWM(ecPublicJWK, SignedMessageExamples.exampleSignatureES256K_obj, JWAAlgorithm.ES256K))
   }
 
   test("sign and verify plaintextMessage with Curve Ed25519") {
@@ -49,10 +49,10 @@ class JWMSuiteJVM extends FunSuite {
     val okpJWK: OctetKeyPair = okp.toJWK
 
     val jwsObject =
-      okpKeySignWithEd25519(okpJWK, DIDCommExamples.plaintextMessageObj.toJson.getBytes, JWAAlgorithm.EdDSA)
+      okpKeySignJWMWithEd25519(okpJWK, DIDCommExamples.plaintextMessageObj.toJson.getBytes, JWAAlgorithm.EdDSA)
 
     val ecPublicJWK: OctetKeyPair = okpJWK.toPublicJWK()
-    assertEquals((okpKeyVerifyWithEd25519(ecPublicJWK, jwsObject, JWAAlgorithm.EdDSA)), true)
+    assertEquals((okpKeyVerifyJWMWithEd25519(ecPublicJWK, jwsObject, JWAAlgorithm.EdDSA)), true)
   }
 
   test("sign and verify plaintextMessage with Curve X25519 (saying is a Curve Ed25519) MUST Fail") {
@@ -66,10 +66,49 @@ class JWMSuiteJVM extends FunSuite {
     val okpJWK: OctetKeyPair = okp.toJWK
 
     val jwsObject =
-      okpKeySignWithEd25519(okpJWK, DIDCommExamples.plaintextMessageObj.toJson.getBytes, JWAAlgorithm.EdDSA)
+      okpKeySignJWMWithEd25519(okpJWK, DIDCommExamples.plaintextMessageObj.toJson.getBytes, JWAAlgorithm.EdDSA)
 
     val ecPublicJWK: OctetKeyPair = okpJWK.toPublicJWK()
-    assertEquals(okpKeyVerifyWithEd25519(ecPublicJWK, jwsObject, JWAAlgorithm.EdDSA), false)
+    assertEquals(okpKeyVerifyJWMWithEd25519(ecPublicJWK, jwsObject, JWAAlgorithm.EdDSA), false)
+  }
+
+  test("sign and verify plaintextMessage with Curve P_256") {
+    val ecJWK: JWKECKey = JWKECKey
+      .Builder(
+        JWKCurve.P_256,
+        Base64.fromBase64url("2syLh57B-dGpa0F8p1JrO6JU7UUSF6j7qL-vfk1eOoY"),
+        Base64.fromBase64url("BgsGtI7UPsObMRjdElxLOrgAO9JggNMjOcfzEPox18w")
+      )
+      .keyID("did:example:alice#key-3")
+      .d(Base64.fromBase64url("7TCIdt1rhThFtWcEiLnk_COEjh1ZfQhM4bW2wz-dp4A"))
+      .build()
+
+    val jwsObject = ecKeySignJWM(ecJWK, DIDCommExamples.plaintextMessageObj.toJson.getBytes, JWAAlgorithm.ES256)
+
+    val ecPublicJWK: JWKECKey = ecJWK.toPublicJWK()
+    assert(ecKeyVerifyJWM(ecPublicJWK, jwsObject, JWAAlgorithm.ES256))
+    assert(ecKeyVerifyJWM(ecPublicJWK, SignedMessageExamples.exampleSignatureES256_obj, JWAAlgorithm.ES256))
+  }
+
+  test("sign and fail verify if 'kid' of the key do not match") {
+    def ecJWK(kid: String) = JWKECKey
+      .Builder(
+        JWKCurve.P_256,
+        Base64.fromBase64url("2syLh57B-dGpa0F8p1JrO6JU7UUSF6j7qL-vfk1eOoY"),
+        Base64.fromBase64url("BgsGtI7UPsObMRjdElxLOrgAO9JggNMjOcfzEPox18w")
+      )
+      .keyID(kid)
+      .d(Base64.fromBase64url("7TCIdt1rhThFtWcEiLnk_COEjh1ZfQhM4bW2wz-dp4A"))
+      .build()
+
+    val jwsObject = ecKeySignJWM(
+      ecJWK("did:example:alice#key-3"),
+      DIDCommExamples.plaintextMessageObj.toJson.getBytes,
+      JWAAlgorithm.ES256
+    )
+
+    val ecPublicJWK: JWKECKey = ecJWK("did:example:alice#key-fail").toPublicJWK()
+    assert(!ecKeyVerifyJWM(ecPublicJWK, jwsObject, JWAAlgorithm.ES256))
   }
 
 }

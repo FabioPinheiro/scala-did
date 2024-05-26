@@ -14,7 +14,6 @@ import zio.json._
 import fmgp.crypto.error._
 import fmgp.did._
 import fmgp.did.comm._
-import fmgp.did.comm.Payload.base64url
 import fmgp.did.comm.protocol.basicmessage2.BasicMessage
 import fmgp.did.comm.protocol.oobinvitation.*
 import fmgp.did.method.peer.DIDPeer._

@@ -87,24 +87,3 @@ object MsgID:
   extension (messageID: MsgID) def value: String = messageID
   given decoder: JsonDecoder[MsgID] = JsonDecoder.string.map(MsgID(_))
   given encoder: JsonEncoder[MsgID] = JsonEncoder.string.contramap[MsgID](_.value)
-
-opaque type Payload = Base64
-object Payload:
-  def fromBase64url(data: String): Payload = Base64.fromBase64url(data)
-  extension (data: Payload)
-    /** decode the base64url to a string */
-    def content: String = data.decodeToString
-    def base64url: String = data.urlBase64
-  given decoder: JsonDecoder[Payload] = Base64.decoder
-  given encoder: JsonEncoder[Payload] = Base64.encoder
-
-/** JWM_SIGNATURE is a Base64 url encode */
-opaque type SignatureJWM = String
-object SignatureJWM:
-  def apply(value: String): SignatureJWM = value
-  extension (signature: SignatureJWM)
-    def value: String = signature
-    def base64: Base64 = Base64.fromBase64url(signature.value)
-
-  given decoder: JsonDecoder[SignatureJWM] = JsonDecoder.string.map(SignatureJWM(_))
-  given encoder: JsonEncoder[SignatureJWM] = JsonEncoder.string.contramap[SignatureJWM](_.value)

@@ -162,7 +162,7 @@ lazy val V = new {
 /** NPM Dependencies */
 lazy val NPM = new { // When update the dependencies also update in package.json
   val sha256 = "js-sha256" -> "0.9.0"
-  val jose = "jose" -> "4.14.6"
+  val jose = "jose" -> "5.3.0"
 }
 
 /** Dependencies */
@@ -240,7 +240,7 @@ inThisBuild(
           // NO NEED ATM "-Ykind-projector"
         ) ++
         // Because DeriveJson(Decoder/Encoder).gen[DidFail] exceeded maximal number of successive inlines (default is 32)
-        Seq("-Xmax-inlines", "42")
+        Seq("-Xmax-inlines", "43")
 
       // ### commonSettings ###
       // Compile / doc / sources := Nil,
@@ -439,15 +439,21 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
     stMinimize := Selection.All,
     stMinimizeKeep ++= List(
       "jose.mod.^",
-      "jose.mod.generateKeyPair",
       "jose.mod.importJWK",
-      // "mod.jwtDecrypt",
+      // "jose.mod.jwtDecrypt",
       "jose.mod.jwtVerify",
+      "jose.mod.generalVerify",
+      "jose.mod.SignJWT",
       "jose.mod.GeneralSign",
-      "jose.TypesMod.JWK",
-      "jose.TypesMod.KeyLike",
-      "jose.TypesMod.CompactJWSHeaderParameters",
+      "jose.typesMod.JWK",
+      "jose.typesMod.KeyLike",
+      "jose.typesMod.CompactJWSHeaderParameters",
+      "jose.typesMod.JWTHeaderParameters",
+      "jose.typesMod.JWTPayload",
+      "jose.typesMod.GeneralJWSInput",
+      "jose.mod.generateKeyPair",
       "jose.KeyGenerateKeyPairMod.GenerateKeyPairResult",
+      "jose.mod.errors.JWSSignatureVerificationFailed",
     ),
   )
   .jsSettings( // Add JS-specific settings here

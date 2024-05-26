@@ -3,10 +3,16 @@ package fmgp.crypto
 import fmgp.typings.jose.mod.importJWK
 // import fmgp.typings.jose.mod.jwtDecrypt
 import fmgp.typings.jose.mod.jwtVerify
+import fmgp.typings.jose.mod.generalVerify
+import fmgp.typings.jose.mod.SignJWT
 import fmgp.typings.jose.mod.GeneralSign
 import fmgp.typings.jose.typesMod.JWK
 import fmgp.typings.jose.typesMod.KeyLike
 import fmgp.typings.jose.typesMod.CompactJWSHeaderParameters
+import fmgp.typings.jose.typesMod.JWTHeaderParameters
+import fmgp.typings.jose.typesMod.JWTPayload
+import fmgp.typings.jose.typesMod.GeneralJWSInput
+import fmgp.typings.jose.mod.errors.JWSSignatureVerificationFailed
 
 import fmgp.did.comm._
 import fmgp.crypto.error._
@@ -16,7 +22,6 @@ import zio._
 import zio.json._
 
 import scala.scalajs.js
-import scala.scalajs.js.JavaScriptException
 import scala.scalajs.js.JSConverters._
 import scala.util.chaining._
 import concurrent.ExecutionContext.Implicits.global
@@ -105,45 +110,137 @@ object UtilsJS {
     }
 
     def verify(jwm: SignedMessage): IO[CryptoFailed, Boolean] =
-      key.toKeyLike.flatMap(thisKey =>
-        ZIO
-          .fromPromiseJS(jwtVerify(jwm.base64, thisKey._1)) // .toFuture
-          .map(_ => true)
-          .catchAll { case JavaScriptException(ex: scala.scalajs.js.TypeError) => ZIO.succeed(false) }
-      )
+      for {
+        jwmAux <- ZIO
+          .from(js.JSON.parse(jwm.toJson).asInstanceOf[GeneralJWSInput])
+          .mapError(_ match {
+            // case ex @ js.JavaScriptException(error: js.Error) =>
+            case js.JavaScriptException(error: js.SyntaxError) =>
+              CryptoFailToParse(s"JWT payload MUST be JSON: ${error.message}")
+            case ex: Throwable => SomeThrowable(ex.getMessage())
+          })
+        ret <- key.toKeyLike.flatMap(thisKey =>
+          ZIO
+            .fromPromiseJS { generalVerify(jwmAux, thisKey._1) }
+            .map(_ => true)
+            .catchAll { case js.JavaScriptException(ex: scala.scalajs.js.TypeError) =>
+              ZIO.succeed(false)
+            // case js.JavaScriptException(ex: JWSSignatureVerificationFailed) => ZIO.succeed(false)
+            }
+        )
+      } yield ret
+
+    def verifyJWT(jwt: JWT): IO[CryptoFailed, Boolean] =
+      for {
+        ret <- key.toKeyLike.flatMap(thisKey =>
+          ZIO
+            .fromPromiseJS(
+              jwtVerify(
+                jwt.base64JWTFormat,
+                thisKey._1,
+                // options: JWTVerifyOptions
+              )
+            )
+            .map(_ => true)
+            .catchAll {
+              case js.JavaScriptException(ex: scala.scalajs.js.TypeError)     => ZIO.succeed(false)
+              case js.JavaScriptException(ex: JWSSignatureVerificationFailed) => ZIO.succeed(false)
+            }
+        )
+      } yield ret
   }
 
   extension (key: PrivateKey) {
-    def sign(payload: Array[Byte]): IO[CryptoFailed, SignedMessage] = {
-      val data = js.typedarray.Uint8Array.from(payload.toSeq.map(_.toShort).toJSIterable)
-      key.toKeyLike
-        .flatMap { (thisKey, alg, kid) =>
-          ZIO
-            .fromPromiseJS(
-              GeneralSign(data) // We can also use CompactSign
-                .tap(
-                  _.addSignature(thisKey.asInstanceOf[KeyLike])
-                    .setProtectedHeader(CompactJWSHeaderParameters(alg).set("kid", kid))
-                )
-                .sign()
-            )
-            // .toFuture
-            .map(generalJWS =>
-              // TODO REMOVE old .split('.') match { case Array(protectedValue, payload, signature) =>
-              SignedMessage(
-                payload = Payload.fromBase64url(generalJWS.payload),
-                generalJWS.signatures.toSeq
-                  .map(v =>
-                    JWMSignatureObj(
-                      `protected` = Base64(v.`protected`.get).unsafeAsObj[SignProtectedHeader],
-                      signature = SignatureJWM(v.signature)
-                    )
+    def sign(payload: Array[Byte]): IO[CryptoFailed, SignedMessage] =
+      for {
+        // _ <- key match {
+        //   case ECPublicKey(_, _, _, _, _) | ECPrivateKey(_, _, _, _, _, _) =>
+        //     alg match
+        //       case JWAAlgorithm.ES256K => ZIO.fail(WrongAlgorithmForKey)
+        //       case JWAAlgorithm.ES256  => ZIO.fail(WrongAlgorithmForKey)
+        //       case JWAAlgorithm.ES384  => ZIO.fail(WrongAlgorithmForKey)
+        //       case JWAAlgorithm.ES512  => ZIO.fail(WrongAlgorithmForKey)
+        //       case JWAAlgorithm.EdDSA  => ZIO.unit
+        //   case OKPPublicKey(_, _, _, _) | OKPPrivateKey(_, _, _, _, _) =>
+        //     alg match
+        //       case JWAAlgorithm.ES256K => ZIO.fail(CryptoNotImplementedError)
+        //       case JWAAlgorithm.ES256  => ZIO.unit
+        //       case JWAAlgorithm.ES384  => ZIO.fail(CryptoNotImplementedError)
+        //       case JWAAlgorithm.ES512  => ZIO.fail(CryptoNotImplementedError)
+        //       case JWAAlgorithm.EdDSA  => ZIO.fail(WrongAlgorithmForKey)
+        // }
+        data <- ZIO.succeed(
+          js.typedarray.Uint8Array.from(payload.toSeq.map(_.toShort).toJSIterable)
+        )
+        ret <- key.toKeyLike
+          .flatMap { (thisKey, alg, kid) =>
+            ZIO
+              .fromPromiseJS(
+                GeneralSign(data) // We can also use CompactSign
+                  .tap(
+                    _.addSignature(thisKey.asInstanceOf[KeyLike])
+                      .setProtectedHeader(CompactJWSHeaderParameters(alg).set("kid", kid))
                   )
+                  .sign()
               )
-            )
-            .orElseFail(UnknownError)
+              // .toFuture
+              .map(generalJWS =>
+                // TODO REMOVE old .split('.') match { case Array(protectedValue, payload, signature) =>
+                SignedMessage(
+                  payload = Payload.fromBase64url(generalJWS.payload),
+                  generalJWS.signatures.toSeq
+                    .map(v =>
+                      JWMSignatureObj(
+                        `protected` = Base64(v.`protected`.get).unsafeAsObj[SignProtectedHeader],
+                        signature = SignatureJWM(v.signature)
+                      )
+                    )
+                )
+              )
+              .orElseFail(UnknownError)
+          }
+      } yield ret
 
+    /** Based on https://github.com/panva/jose/blob/main/docs/classes/jwt_sign.SignJWT.md
+      */
+    def signJWT(payload: Array[Byte], alg: JWAAlgorithm): IO[CryptoFailed, JWT] = {
+      for {
+        _ <- key match {
+          case _: ECPrivateKey =>
+            alg match
+              case JWAAlgorithm.ES256K => ZIO.fail(CryptoNotImplementedError)
+              case JWAAlgorithm.ES256  => ZIO.unit
+              case JWAAlgorithm.ES384  => ZIO.fail(CryptoNotImplementedError)
+              case JWAAlgorithm.ES512  => ZIO.fail(CryptoNotImplementedError)
+              case JWAAlgorithm.EdDSA  => ZIO.fail(WrongAlgorithmForKey)
+          case _: OKPPrivateKey =>
+            alg match
+              case JWAAlgorithm.ES256K => ZIO.fail(WrongAlgorithmForKey)
+              case JWAAlgorithm.ES256  => ZIO.fail(WrongAlgorithmForKey)
+              case JWAAlgorithm.ES384  => ZIO.fail(WrongAlgorithmForKey)
+              case JWAAlgorithm.ES512  => ZIO.fail(WrongAlgorithmForKey)
+              case JWAAlgorithm.EdDSA  => ZIO.unit
         }
+        jwtPayload <- ZIO
+          .from(js.JSON.parse(String(payload)).asInstanceOf[JWTPayload])
+          .mapError(_ match {
+            // case ex @ js.JavaScriptException(error: js.Error) =>
+            case js.JavaScriptException(error: js.SyntaxError) =>
+              CryptoFailToParse(s"JWT payload MUST be JSON: ${error.message}")
+            case ex: Throwable => SomeThrowable(ex.getMessage())
+          })
+        ret <- key.toKeyLike
+          .flatMap { (thisKey, alg, kid) =>
+            ZIO
+              .fromPromiseJS(
+                SignJWT(jwtPayload)
+                  .setProtectedHeader(JWTHeaderParameters(alg).set("kid", kid))
+                  .sign(thisKey.asInstanceOf[KeyLike])
+              )
+              .map { jwtStr => JWT.unsafeFromEncodedJWT(jwtStr) }
+              .orElseFail(UnknownError)
+          }
+      } yield ret
 
     }
   }

@@ -12,6 +12,7 @@ import scala.util.Try
 import scala.util.control.NonFatal
 import concurrent.ExecutionContext.Implicits.global
 
+/** didImpJS/testOnly fmgp.did.comm.SignedMessageSuite */
 class SignedMessageSuite extends FunSuite {
 
   // ### parse ###
