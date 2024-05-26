@@ -34,6 +34,14 @@ class JWTSuiteJVM extends FunSuite {
       DIDCommExamples.plaintextMessageObj.toJson.getBytes,
       JWAAlgorithm.ES256
     )
+    assertEquals(
+      jwtObject.protectedHeader.base64url,
+      "eyJraWQiOiJkaWQ6ZXhhbXBsZTphbGljZSNrZXktMyIsImFsZyI6IkVTMjU2In0"
+    )
+    assertEquals(
+      jwtObject.payload.base64url,
+      "eyJpZCI6IjEyMzQ1Njc4OTAiLCJ0eXBlIjoiPG1lc3NhZ2UtdHlwZS11cmk-IiwidG8iOlsiZGlkOmV4YW1wbGU6Ym9iIl0sImZyb20iOiJkaWQ6ZXhhbXBsZTphbGljZSIsImNyZWF0ZWRfdGltZSI6MTUxNjI2OTAyMiwiZXhwaXJlc190aW1lIjoxNTE2Mzg1OTMxLCJib2R5Ijp7Im1lc3NhZ2VfdHlwZV9zcGVjaWZpY19hdHRyaWJ1dGUiOiJhbmQgaXRzIHZhbHVlIiwiYW5vdGhlcl9hdHRyaWJ1dGUiOiJhbmQgaXRzIHZhbHVlIn0sInR5cCI6ImFwcGxpY2F0aW9uL2RpZGNvbW0tcGxhaW4ranNvbiJ9"
+    )
     assert(ecKeyVerifyJWT(ecJWK.toPublicJWK(), jwtObject))
   }
 

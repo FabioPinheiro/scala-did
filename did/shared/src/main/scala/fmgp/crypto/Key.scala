@@ -139,7 +139,7 @@ sealed abstract class OKP_EC_Key extends JWKObj {
   /** https://identity.foundation/didcomm-messaging/spec/#algorithms */
   def jwaAlgorithmtoSign: JWAAlgorithm = crv match {
     case Curve.secp256k1 => JWAAlgorithm.ES256K
-    case Curve.`P-256`   => JWAAlgorithm.ES256 // (deprecated?)
+    case Curve.`P-256`   => JWAAlgorithm.ES256
     case Curve.`P-384`   => JWAAlgorithm.ES256 // (deprecated?) // TODO CHECK ES256
     case Curve.`P-521`   => JWAAlgorithm.ES256 // (deprecated?) // TODO CHECK ES256
     case Curve.X25519    => JWAAlgorithm.EdDSA // FIXME MUST NOT be used for signing
