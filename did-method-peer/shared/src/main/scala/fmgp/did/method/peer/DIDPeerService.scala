@@ -5,7 +5,6 @@ import zio.json.ast.Json
 import fmgp.did._
 import scala.util.chaining._
 import fmgp.util.Base64
-import fmgp.did.comm.Payload.content
 import zio.json.ast.Json.Obj
 import zio.json.ast.Json.Arr
 import zio.json.ast.Json.Str
