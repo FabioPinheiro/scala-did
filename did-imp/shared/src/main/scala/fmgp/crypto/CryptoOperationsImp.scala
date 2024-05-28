@@ -12,14 +12,14 @@ import fmgp.util.Base64
 import scala.util.chaining._
 
 /** https://identity.foundation/didcomm-messaging/spec/#key-wrapping-algorithms */
-object CryptoOperationsImp extends CryptoOperations with JWTOperations {
+object CryptoOperationsImp extends CryptoOperations {
 
   // ###########
   // ### JWT ###
   // ###########
 
-  override def signJWT(key: PrivateKey, payload: Array[Byte], alg: JWAAlgorithm): IO[CryptoFailed, JWT] =
-    PlatformSpecificOperations.signJWT(key, payload, alg)
+  override def signJWT(key: PrivateKey, payload: Array[Byte]): IO[CryptoFailed, JWT] =
+    PlatformSpecificOperations.signJWT(key, payload)
 
   override def verifyJWT(key: PublicKey, jwt: JWT): IO[CryptoFailed, Boolean] =
     PlatformSpecificOperations.verifyJWT(key, jwt)

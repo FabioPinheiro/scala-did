@@ -203,24 +203,8 @@ object UtilsJS {
 
     /** Based on https://github.com/panva/jose/blob/main/docs/classes/jwt_sign.SignJWT.md
       */
-    def signJWT(payload: Array[Byte], alg: JWAAlgorithm): IO[CryptoFailed, JWT] = {
+    def signJWT(payload: Array[Byte] /*, alg: JWAAlgorithm*/ ): IO[CryptoFailed, JWT] = {
       for {
-        _ <- key match {
-          case _: ECPrivateKey =>
-            alg match
-              case JWAAlgorithm.ES256K => ZIO.fail(CryptoNotImplementedError)
-              case JWAAlgorithm.ES256  => ZIO.unit
-              case JWAAlgorithm.ES384  => ZIO.fail(CryptoNotImplementedError)
-              case JWAAlgorithm.ES512  => ZIO.fail(CryptoNotImplementedError)
-              case JWAAlgorithm.EdDSA  => ZIO.fail(WrongAlgorithmForKey)
-          case _: OKPPrivateKey =>
-            alg match
-              case JWAAlgorithm.ES256K => ZIO.fail(WrongAlgorithmForKey)
-              case JWAAlgorithm.ES256  => ZIO.fail(WrongAlgorithmForKey)
-              case JWAAlgorithm.ES384  => ZIO.fail(WrongAlgorithmForKey)
-              case JWAAlgorithm.ES512  => ZIO.fail(WrongAlgorithmForKey)
-              case JWAAlgorithm.EdDSA  => ZIO.unit
-        }
         jwtPayload <- ZIO
           .from(js.JSON.parse(String(payload)).asInstanceOf[JWTPayload])
           .mapError(_ match {

@@ -53,7 +53,7 @@ class JWTSuite extends ZSuite {
       jwt <- CryptoOperationsImp.signJWT(
         senderKeyP256_1,
         data.getBytes,
-        JWAAlgorithm.ES256
+        // JWAAlgorithm.ES256
       )
       payload = jwt.protectedHeader.toJWTHeader.toOption
       _ = assertEquals(payload.flatMap(_.alg), Some(JWAAlgorithm.ES256))
@@ -85,7 +85,7 @@ class JWTSuite extends ZSuite {
       jwt <- CryptoOperationsImp.signJWT(
         senderKeyP256_1,
         data.getBytes,
-        JWAAlgorithm.ES256
+        // JWAAlgorithm.ES256
       )
       payload = jwt.protectedHeader.toJWTHeader.toOption
       _ = assertEquals(payload.flatMap(_.alg), Some(JWAAlgorithm.ES256))
@@ -104,7 +104,7 @@ class JWTSuite extends ZSuite {
       jwt <- CryptoOperationsImp.signJWT(
         senderKeyP256_1,
         data.getBytes,
-        JWAAlgorithm.ES256
+        // JWAAlgorithm.ES256
       )
       payload = jwt.protectedHeader.toJWTHeader.toOption
       _ = assertEquals(payload.flatMap(_.alg), Some(JWAAlgorithm.ES256))
@@ -122,7 +122,7 @@ class JWTSuite extends ZSuite {
       jwt <- CryptoOperationsImp.signJWT(
         okp,
         data.getBytes,
-        JWAAlgorithm.EdDSA
+        // JWAAlgorithm.EdDSA
       )
       payload = jwt.protectedHeader.toJWTHeader.toOption
       _ = assertEquals(payload.flatMap(_.alg), Some(JWAAlgorithm.EdDSA))

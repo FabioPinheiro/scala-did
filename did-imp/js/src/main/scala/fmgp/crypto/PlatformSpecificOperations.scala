@@ -13,8 +13,12 @@ object PlatformSpecificOperations {
   // ### JWT ###
   // ###########
 
-  def signJWT(key: PrivateKey, payload: Array[Byte], alg: JWAAlgorithm): IO[CryptoFailed, JWT] =
-    key.signJWT(payload = payload, alg = alg)
+  def signJWT(
+      key: PrivateKey,
+      payload: Array[Byte],
+      // alg: JWAAlgorithm
+  ): IO[CryptoFailed, JWT] =
+    key.signJWT(payload = payload)
 
   def verifyJWT(key: PublicKey, jwt: JWT): IO[CryptoFailed, Boolean] =
     key.verifyJWT(jwt)

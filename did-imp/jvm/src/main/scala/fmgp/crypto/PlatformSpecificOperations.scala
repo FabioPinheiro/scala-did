@@ -19,18 +19,18 @@ object PlatformSpecificOperations {
   def signJWT(
       key: PrivateKey,
       payload: Array[Byte],
-      alg: JWAAlgorithm
+      // alg: JWAAlgorithm
   ): IO[CryptoFailed, JWT] = key match {
-    case okp: OKPPrivateKey => ZIO.succeed(UtilsJVM.okpKeySignJWTWithEd25519(okpKey2JWK(okp), payload, alg))
-    case ec: ECPrivateKey   => ZIO.succeed(UtilsJVM.ecKeySignJWT(ec.toJWK, payload, alg))
+    case okp: OKPPrivateKey => ZIO.succeed(UtilsJVM.okpKeySignJWTWithEd25519(okp, payload))
+    case ec: ECPrivateKey   => ZIO.succeed(UtilsJVM.ecKeySignJWT(ec, payload))
   }
 
   def verifyJWT(
       key: PublicKey,
       jwt: JWT
   ): IO[CryptoFailed, Boolean] = key match {
-    case okp: OKPPublicKey => ZIO.succeed(UtilsJVM.okpKeyVerifyJWTWithEd25519(okpKey2JWK(okp), jwt))
-    case ec: ECPublicKey   => ZIO.succeed(UtilsJVM.ecKeyVerifyJWT(ec.toJWK, jwt))
+    case okp: OKPPublicKey => ZIO.succeed(UtilsJVM.okpKeyVerifyJWTWithEd25519(okp, jwt))
+    case ec: ECPublicKey   => ZIO.succeed(UtilsJVM.ecKeyVerifyJWT(ec, jwt))
   }
 
   // #####################

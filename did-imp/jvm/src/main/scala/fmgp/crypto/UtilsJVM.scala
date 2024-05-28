@@ -166,6 +166,9 @@ object UtilsJVM {
   }
 
   // TODO return ZIO
+  def ecKeyVerifyJWT(ecKey: ECKey, jwt: JWT): Boolean =
+    ecKeyVerifyJWT(ecKey.toJWK, jwt)
+
   def ecKeyVerifyJWT(ecKey: JWKECKey, jwt: JWT): Boolean = {
     for {
       headerJson <- jwt.protectedHeader.content.fromJson[ast.Json.Obj]
@@ -209,7 +212,20 @@ object UtilsJVM {
   }
 
   // TODO return ZIO
-  def ecKeySignJWT(ecKey: JWKECKey, payload: Array[Byte], alg: JWAAlgorithm): JWT = {
+  def ecKeySignJWT(
+      ecKey: ECKey,
+      payload: Array[Byte]
+  ): JWT = ecKeySignJWT(
+    ecKey = ecKey.toJWK,
+    payload = payload,
+    alg = ecKey.jwaAlgorithmtoSign
+  )
+
+  def ecKeySignJWT(
+      ecKey: JWKECKey,
+      payload: Array[Byte],
+      alg: JWAAlgorithm
+  ): JWT = {
     require(ecKey.isPrivate(), "EC JWK must include the private key (d)")
 
     val signer: JWSSigner = new ECDSASigner(ecKey) // Create the EC signer
@@ -269,6 +285,9 @@ object UtilsJVM {
   }
 
   // TODO return ZIO
+  def okpKeyVerifyJWTWithEd25519(okpKey: OKPKey, jwt: JWT): Boolean =
+    okpKeyVerifyJWTWithEd25519(okpKey = okpKey.toJWK, jwt)
+
   def okpKeyVerifyJWTWithEd25519(okpKey: OctetKeyPair, jwt: JWT): Boolean = {
 
     assert(
@@ -302,7 +321,11 @@ object UtilsJVM {
     } yield ret
   }.getOrElse(false)
 
-  def okpKeySignJWMWithEd25519(okpKey: OctetKeyPair, payload: Array[Byte], alg: JWAAlgorithm): SignedMessage = {
+  def okpKeySignJWMWithEd25519(
+      okpKey: OctetKeyPair,
+      payload: Array[Byte],
+      alg: JWAAlgorithm
+  ): SignedMessage = {
     val jwt = okpKeySignJWTWithEd25519(okpKey, payload, alg)
 
     SignedMessage(
@@ -318,7 +341,20 @@ object UtilsJVM {
   }
 
   // TODO return ZIO
-  def okpKeySignJWTWithEd25519(okpKey: OctetKeyPair, payload: Array[Byte], alg: JWAAlgorithm): JWT = {
+  def okpKeySignJWTWithEd25519(
+      okpKey: OKPKey,
+      payload: Array[Byte]
+  ): JWT = okpKeySignJWTWithEd25519(
+    okpKey = okpKey.toJWK,
+    payload = payload,
+    alg = okpKey.jwaAlgorithmtoSign
+  )
+
+  def okpKeySignJWTWithEd25519(
+      okpKey: OctetKeyPair,
+      payload: Array[Byte],
+      alg: JWAAlgorithm
+  ): JWT = {
     require(okpKey.isPrivate(), "OKP JWK must include the private key (d)")
     assert(
       okpKey.getCurve().getName() == JWKCurve.Ed25519.getName(),
