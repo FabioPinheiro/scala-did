@@ -271,6 +271,7 @@ case class ConfirmVerification(
       from = Some(from),
       thid = Some(thid),
       body = Some(ConfirmVerification.Body(verificationType, subject).toJSON_RFC7159),
+      attachments = if (attachments.nonEmpty) Some(attachments) else None,
     )
 
 }
