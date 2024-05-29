@@ -58,7 +58,7 @@ object OperationsServerRPC {
           }
         } yield (result.toJson)
         tmp
-          .provideSomeLayer(Operations.layerDefault)
+          .provideSomeLayer(Operations.layerOperations)
       // .provideSomeLayer(
       //   ZLayer.succeed(
       //     MultiResolver(

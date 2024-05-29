@@ -51,7 +51,7 @@ import fmgp.did.method.peer._
     Runtime.default.unsafe
       .run(
         program.provide(
-          Operations.layerDefault ++
+          Operations.layerOperations ++
             Agent0Mediators.agentLayer ++
             DidPeerResolver.layer
         )

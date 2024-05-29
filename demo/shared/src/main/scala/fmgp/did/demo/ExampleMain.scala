@@ -41,7 +41,7 @@ import fmgp.util.Base64
 
   Unsafe.unsafe { implicit unsafe => // Run side effect
     Runtime.default.unsafe
-      .run(program.provide(Operations.layerDefault ++ DidPeerResolver.layer))
+      .run(program.provide(Operations.layerOperations ++ DidPeerResolver.layer))
       .getOrThrowFiberFailure()
   }
 }

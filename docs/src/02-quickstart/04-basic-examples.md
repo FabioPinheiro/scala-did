@@ -120,7 +120,7 @@ val program2 = for {
 ```scala mdoc
 Unsafe.unsafe { implicit unsafe => // Run side effect
   Runtime.default.unsafe
-    .run(program2.provide(Operations.layerDefault ++ DidPeerResolver.layer))
+    .run(program2.provide(Operations.layerOperations ++ DidPeerResolver.layer))
     .getOrThrowFiberFailure()
 }
 ```
