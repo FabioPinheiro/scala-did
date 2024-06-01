@@ -70,8 +70,7 @@ object ECDH_AnonEC extends ECDH_UtilsEC {
 
     cek: SecretKey = {
       import UtilsJVM.unsafe.given
-      val jcaContext: JWEJCAContext = new JWEJCAContext()
-      ContentCryptoProvider.generateCEK(updatedHeader.enc /*getEncryptionMethod*/, jcaContext.getSecureRandom)
+      ContentCryptoProvider.generateCEK(updatedHeader.enc /*getEncryptionMethod*/, CryptoProvider.secureRandom)
     }
     myProvider = new ECDH_AnonCryptoProvider(curve, cek)
 
@@ -149,10 +148,9 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
     updatedHeader = header.buildWithKey(epk = ecKeyEphemeral) // Add the ephemeral public EC key to the header
     updatedAAD = AAD.compute(UtilsJVM.unsafe.given_Conversion_ProtectedHeader_JWEHeader(updatedHeader))
 
-    jcaContext: JWEJCAContext = new JWEJCAContext()
     cek: SecretKey = {
       import UtilsJVM.unsafe.given
-      ContentCryptoProvider.generateCEK(updatedHeader.enc /*getEncryptionMethod*/, jcaContext.getSecureRandom)
+      ContentCryptoProvider.generateCEK(updatedHeader.enc /*getEncryptionMethod*/, CryptoProvider.secureRandom)
     }
     myProvider = new ECDH_AuthCryptoProvider(curve, cek)
 
@@ -164,7 +162,7 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
           sender.toJWK.toECPrivateKey(),
           key.toJWK.toECPublicKey(),
           ephemeralPrivateKey,
-          jcaContext.getKeyEncryptionProvider() // myProvider.getJCAContext().getKeyEncryptionProvider()
+          CryptoProvider.keyEncryptionProvider // jcaContext.getKeyEncryptionProvider() // myProvider.getJCAContext().getKeyEncryptionProvider()
         )
       )
     }
@@ -204,7 +202,7 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
               recipientKey.toECPrivateKey,
               sender.toJWK.toECPublicKey,
               ephemeralKey.toECPublicKey,
-              null /*use_the_defualt_JCA_Provider*/
+              CryptoProvider.keyEncryptionProvider /*use_the_defualt_JCA_Provider*/
             )
           ).toEither match {
             case Left(ex) => Left(SomeThrowable(ex))

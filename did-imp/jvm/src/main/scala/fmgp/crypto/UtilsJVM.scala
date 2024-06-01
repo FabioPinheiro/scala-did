@@ -141,6 +141,7 @@ object UtilsJVM {
   def ecKeyVerify(ecKey: JWKECKey, jwm: SignedMessage, alg: JWAAlgorithm): Boolean = {
     val _key = ecKey.toPublicJWK
     val verifier = new ECDSAVerifier(_key.toPublicJWK);
+    verifier.getJCAContext().setProvider(CryptoProvider.provider)
     val header = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(_key.getKeyID()).build()
     verifier.verify(
       header,
@@ -153,6 +154,7 @@ object UtilsJVM {
     require(ecKey.isPrivate(), "EC JWK must include the private key (d)")
 
     val signer: JWSSigner = new ECDSASigner(ecKey) // Create the EC signer
+    signer.getJCAContext().setProvider(CryptoProvider.provider)
     val header: JWSHeader = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(ecKey.getKeyID()).build()
     val payloadObj = new JosePayload(payload)
     val jwsObject: JWSObject = new JWSObject(header, payloadObj) // Creates the JWS object with payload
@@ -182,7 +184,8 @@ object UtilsJVM {
 
   def okpKeyVerifyWithEd25519(okpKey: OctetKeyPair, jwm: SignedMessage, alg: JWAAlgorithm): Boolean = {
     val _key = okpKey.toPublicJWK
-    val verifier = new Ed25519Verifier(_key.toPublicJWK);
+    val verifier = new Ed25519Verifier(_key.toPublicJWK)
+    verifier.getJCAContext().setProvider(CryptoProvider.provider) // BouncyCastleProviderSingleton.getInstance()
     val header = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(_key.getKeyID()).build()
     verifier.verify(
       header,
@@ -199,6 +202,7 @@ object UtilsJVM {
     ) // TODO make it safe
 
     val signer: JWSSigner = new Ed25519Signer(okpKey) // Create the OKP signer
+    signer.getJCAContext().setProvider(CryptoProvider.provider)
     val header: JWSHeader = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(okpKey.getKeyID()).build()
     val payloadObj = new JosePayload(payload)
 

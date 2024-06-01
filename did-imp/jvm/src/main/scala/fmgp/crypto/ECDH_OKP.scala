@@ -78,8 +78,7 @@ object ECDH_AnonOKP extends ECDH_UtilsOKP {
 
     cek: SecretKey = {
       import UtilsJVM.unsafe.given
-      val jcaContext: JWEJCAContext = new JWEJCAContext()
-      ContentCryptoProvider.generateCEK(updatedHeader.enc /*getEncryptionMethod*/, jcaContext.getSecureRandom)
+      ContentCryptoProvider.generateCEK(updatedHeader.enc /*getEncryptionMethod*/, CryptoProvider.secureRandom)
     }
     myProvider = new ECDH_AnonCryptoProvider(curve, cek)
     ret = myProvider.encryptAUX(updatedHeader, sharedSecrets, clearText, updatedAAD)
@@ -182,8 +181,7 @@ object ECDH_AuthOKP extends ECDH_UtilsOKP {
 
     cek: SecretKey = {
       import UtilsJVM.unsafe.given
-      val jcaContext: JWEJCAContext = new JWEJCAContext()
-      ContentCryptoProvider.generateCEK(updatedHeader.enc /*getEncryptionMethod*/, jcaContext.getSecureRandom)
+      ContentCryptoProvider.generateCEK(updatedHeader.enc /*getEncryptionMethod*/, CryptoProvider.secureRandom)
     }
     myProvider = new ECDH_AuthCryptoProvider(curve, cek)
 
