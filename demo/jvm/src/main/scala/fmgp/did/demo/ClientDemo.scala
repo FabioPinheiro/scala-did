@@ -88,7 +88,7 @@ import fmgp.did.method.peer._
     Runtime.default.unsafe
       .run(
         program.provide(
-          Operations.layerDefault ++
+          Operations.layerOperations ++
             ZLayer.succeed(pat) ++
             DidPeerResolver.layer ++
             (zio.Scope.default ++ zio.http.Client.default >>> MessageDispatcherJVM.layer)

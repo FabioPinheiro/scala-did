@@ -5,12 +5,27 @@ import zio.json.ast.Json
 import zio.json.ast.JsonCursor
 import fmgp.util.{Base64, safeValueOf}
 
-enum JWAAlgorithm:
+/** Header Parameter Values for JWS https://datatracker.ietf.org/doc/html/rfc7518#section-3.1 */
+enum JWAAlgorithm {
+
+  /** ECDSA using secp256k1 and SHA-256 */
   case ES256K extends JWAAlgorithm
+
+  /** ECDSA using P-256 (secp256r1) and SHA-256 */
   case ES256 extends JWAAlgorithm
+
+  /** ECDSA using P-384 (secp384r1) and SHA-384 */
   case ES384 extends JWAAlgorithm // TODO check https://identity.foundation/didcomm-messaging/spec/#algorithms
+
+  /** ECDSA using P-512 (secp512r1) and SHA-512 */
   case ES512 extends JWAAlgorithm // TODO check https://identity.foundation/didcomm-messaging/spec/#algorithms
+
+  /** EdDSA (with crv=Ed25519)
+    * @see
+    *   https://identity.foundation/didcomm-messaging/spec/#algorithms
+    */
   case EdDSA extends JWAAlgorithm
+}
 object JWAAlgorithm {
   given decoder: JsonDecoder[JWAAlgorithm] = JsonDecoder.string.mapOrFail(e => safeValueOf(JWAAlgorithm.valueOf(e)))
   given encoder: JsonEncoder[JWAAlgorithm] = JsonEncoder.string.contramap((e: JWAAlgorithm) => e.toString)
@@ -124,7 +139,7 @@ sealed abstract class OKP_EC_Key extends JWKObj {
   /** https://identity.foundation/didcomm-messaging/spec/#algorithms */
   def jwaAlgorithmtoSign: JWAAlgorithm = crv match {
     case Curve.secp256k1 => JWAAlgorithm.ES256K
-    case Curve.`P-256`   => JWAAlgorithm.ES256 // (deprecated?)
+    case Curve.`P-256`   => JWAAlgorithm.ES256
     case Curve.`P-384`   => JWAAlgorithm.ES256 // (deprecated?) // TODO CHECK ES256
     case Curve.`P-521`   => JWAAlgorithm.ES256 // (deprecated?) // TODO CHECK ES256
     case Curve.X25519    => JWAAlgorithm.EdDSA // FIXME MUST NOT be used for signing

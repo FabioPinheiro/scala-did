@@ -3,6 +3,7 @@ package fmgp.did.comm
 import zio._
 import zio.json._
 import fmgp.util.{Base64, Base64Obj}
+import fmgp.crypto._
 
 object SignedMessageExamples {
 

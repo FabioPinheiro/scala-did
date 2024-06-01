@@ -16,7 +16,7 @@ given hashIV: Hash[IV] = Hash[String].contramap[IV](_.value)
 given hashSeqByte: Hash[Seq[Byte]] = Hash.ListHash[Byte].contramap[Seq[Byte]](_.toList)
 given hashSeqRecipient: Hash[Seq[Recipient]] = Hash.ListHash[Recipient].contramap[Seq[Recipient]](_.toList)
 
-given hashBase64: Hash[Base64] = Hash[Seq[Byte]].contramap[Base64](_.bytes.toSeq)
+given hashBase64: Hash[Base64] = Hash[Seq[Byte]].contramap[Base64](_.bytesVec.toSeq)
 given hashCipherText: Hash[CipherText] = Hash[Base64].contramap[CipherText](_.base64)
 given hashBase64Obj: Hash[Base64Obj[ProtectedHeader]] =
   Hash[Base64].contramap[Base64Obj[ProtectedHeader]](o =>

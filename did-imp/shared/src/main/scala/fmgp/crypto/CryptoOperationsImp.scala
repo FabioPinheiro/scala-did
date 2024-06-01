@@ -14,6 +14,20 @@ import scala.util.chaining._
 /** https://identity.foundation/didcomm-messaging/spec/#key-wrapping-algorithms */
 object CryptoOperationsImp extends CryptoOperations {
 
+  // ###########
+  // ### JWT ###
+  // ###########
+
+  override def signJWT(key: PrivateKey, payload: Array[Byte]): IO[CryptoFailed, JWT] =
+    PlatformSpecificOperations.signJWT(key, payload)
+
+  override def verifyJWT(key: PublicKey, jwt: JWT): IO[CryptoFailed, Boolean] =
+    PlatformSpecificOperations.verifyJWT(key, jwt)
+
+  // #####################
+  // ### SignedMessage ###
+  // #####################
+
   override def sign(key: PrivateKey, payload: Array[Byte]): IO[CryptoFailed, SignedMessage] =
     PlatformSpecificOperations.sign(key, payload)
 

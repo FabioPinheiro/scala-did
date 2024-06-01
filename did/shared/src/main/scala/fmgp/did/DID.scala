@@ -19,6 +19,7 @@ type ServiceEndpoint = Json.Str | Json.Obj | Json.Arr
 type ServiceEndpointNoStr = Json.Obj | Json.Arr
 type Authentication = Option[Set[VerificationMethod]]
 
+/** To use the decoder and encoder: import fmgp.did.SetU.given */
 object SetU {
   given decoder[U](using jsonDecoder: JsonDecoder[U]): JsonDecoder[U | Seq[U]] =
     jsonDecoder

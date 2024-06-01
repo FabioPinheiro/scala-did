@@ -7,8 +7,30 @@ import fmgp.did._
 import fmgp.did.comm._
 import fmgp.crypto.error._
 
-/** methods: sign verify anonEncrypt authEncrypt anonDecrypt authDecrypt */
-trait CryptoOperations {
+/** Raw crypto operations */
+trait CryptoOperations extends CryptoDIDCommOperations with CryptoJWTOperations
+
+/** Raw crypto operations for JWT */
+trait CryptoJWTOperations {
+
+  def signJWT(
+      key: PrivateKey,
+      payload: Array[Byte],
+      // alg: JWAAlgorithm
+  ): IO[CryptoFailed, JWT]
+
+  def verifyJWT(
+      key: PublicKey,
+      jwt: JWT
+  ): IO[CryptoFailed, Boolean]
+
+}
+
+/** Raw crypto operations for DID Comm
+  *
+  * methods: sign verify anonEncrypt authEncrypt anonDecrypt authDecrypt
+  */
+trait CryptoDIDCommOperations {
 
   // ############
   // ### Sign ###

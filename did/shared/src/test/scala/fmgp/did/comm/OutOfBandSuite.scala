@@ -7,7 +7,6 @@ import scala.util.chaining._
 import fmgp.did._
 import java.net.{URI, URL}
 import fmgp.util.Base64
-import fmgp.did.comm.Payload.base64url
 
 /** didJVM/testOnly fmgp.did.comm.OutOfBandSuite */
 class OutOfBandSuite extends FunSuite {

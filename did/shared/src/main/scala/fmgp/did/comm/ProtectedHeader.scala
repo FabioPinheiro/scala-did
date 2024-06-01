@@ -7,6 +7,7 @@ import fmgp.did._
 import fmgp.crypto.PublicKey
 import fmgp.util.{Base64, safeValueOf}
 import fmgp.util.Base64Obj
+import fmgp.crypto.JWAAlgorithm
 
 // class Base64JWEHeader(data: Base64) extends Selectable:
 //   val json = data.decode.fromJson[Json].toOption.get
@@ -20,7 +21,7 @@ import fmgp.util.Base64Obj
 case class SignProtectedHeader(
     // FIXME this should not be option. See https://github.com/decentralized-identity/didcomm-messaging/issues/446
     kid: Option[VerificationMethodReferenced], // option because example in fmgp.did.comm.SignedMessageSuite_Parse
-    alg: SigningAlgorithm,
+    alg: JWAAlgorithm,
     typ: Option[MediaTypes], // MediaTypes.SIGNED
 ) {
   assert(
@@ -154,16 +155,4 @@ enum KWAlgorithm {
 object KWAlgorithm {
   given decoder: JsonDecoder[KWAlgorithm] = JsonDecoder.string.mapOrFail(e => safeValueOf(KWAlgorithm.valueOf(e)))
   given encoder: JsonEncoder[KWAlgorithm] = JsonEncoder.string.contramap((e: KWAlgorithm) => e.toString)
-}
-
-/** Key Signing Algorithms */
-enum SigningAlgorithm {
-  case `EdDSA` extends SigningAlgorithm
-  case `ES256` extends SigningAlgorithm
-  case `ES256K` extends SigningAlgorithm
-}
-object SigningAlgorithm {
-  given decoder: JsonDecoder[SigningAlgorithm] =
-    JsonDecoder.string.mapOrFail(e => safeValueOf(SigningAlgorithm.valueOf(e)))
-  given encoder: JsonEncoder[SigningAlgorithm] = JsonEncoder.string.contramap((e: SigningAlgorithm) => e.toString)
 }

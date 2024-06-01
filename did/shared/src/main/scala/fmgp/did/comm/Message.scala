@@ -174,8 +174,6 @@ case class SignedMessage(
     payload: Payload,
     signatures: Seq[JWMSignatureObj]
 ) extends Message {
-  def base64noSignature = signatures.head.`protected`.base64url + "." + payload.base64url
-  def base64 = base64noSignature + "." + signatures.head.signature.value
 
   /** toJSON MUST not fail! */
   def toJsonObj: Json.Obj = this.toJsonAST.flatMap(_.as[Json.Obj]).getOrElse(Json.Obj())

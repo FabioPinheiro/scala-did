@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@types/qrcode": "^1.5.5",
-    "jose": "^4.14.6",
+    "jose": "^5.3.0",
     "js-sha256": "^0.9.0",
     "material-components-web": "^12.0.0",
     "mermaid": "^9.3.0",

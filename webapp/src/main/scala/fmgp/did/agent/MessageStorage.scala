@@ -20,8 +20,10 @@ case class MessageStorage(storageItems: Seq[StorageItem] = Seq.empty) {
     if (storageItems.exists(_.plaintext.id == plaintext.id)) this
     else {
       assert(
-        !(plaintext.from.isEmpty || plaintext.from.contains(from)),
-        "When sending a message the field 'from' MUST NOT be empty or MUST be the same as in the PlaintextMessage"
+        (plaintext.from.isEmpty || plaintext.from.contains(from)),
+        s"When sending a message the field 'from' MUST NOT be empty (${plaintext.from.isEmpty})" +
+          " or MUST be the same as in the PlaintextMessage" +
+          s" ('${plaintext.from.getOrElse("<From_None>")}' == $from) "
       )
       MessageStorage(
         storageItems = storageItems :+ StorageItem(
@@ -58,6 +60,7 @@ case class MessageStorage(storageItems: Seq[StorageItem] = Seq.empty) {
 object MessageStorage {
   def empty = MessageStorage()
 
+  /*
   val alicePingMediator = (
     """{"ciphertext":"3O0_1eYq4xMFm0KY1whN1YiphWVzqMrIckjxF3O0pJnySnnxIGgBqu6uhHShZGCjuABvXCUt1DfLiaJ94ysmUCx_sv5kjzXqbOZUusTQwRRgsiWK1lZNNmGBG1cgVVs9Ii1UUm6aqGvBQON3tIPMCuLhEq048Ml19x5x6jzo8Wm6JJREo569C7JeXYUlJkU9q173CyUjjZhnW523RHa8_JRYz3NH5cYwDjFmz1NGRL27qLdiye5uCUo6JyFo-zPjtD8-ZgXCyBY1OSrWV1Anh1LZtIoKmIG6MDEKq-pn36HqFp9nzLFzx3ycPCLWO3qEpL1zIkYC8zKOLJk8NN4DGiT-lMcMZMmYW7fWpo5eM_iamJX7tCyV7zAfAnyDW_dnF2Q2sL4xdSBd-GFn7oTeuZQzRJTnNcLrGxsiJAZ0XZ2r-QXdJpCa1vpb2YKf2odnKvBbe5FE6AsYr8T_gQ6kkyQrRQcxSvI8voUcWWLS8UL9DLXrgitFAqEgPCahnCMiGYjnWHA0t770zRSX9DJENiM0p0fp6vN-E5dJID2B7qIbflwzdKd8RxNQ-ud2rJzh-HOQi1E7hSMhPkt99pzjNu7UNnW34U-KkDkgoGshN5nGBrZKG885l2ltLIRhVkjros26ZhbYC57s9TCYWKKe7XMFu6DN6VNlvv-k7THU0Q47JW9vkD8xOvWu0Rwg_WAprwrL-BjxX6i5Hv6begiLGAhAy9hp28vZSMRBK0V86yi00PmQb0CbJ_BBeP3qYRHtkwZCvCK5zjR1gQV5ByDDHjbNC7DryEhwRr82wBf36_Tj0CR7N6A-i5M9XPWns4oI","protected":"eyJlcGsiOnsia3R5IjoiT0tQIiwiY3J2IjoiWDI1NTE5IiwieCI6IkYyTXl5enFBZ3I1Q1ZFU1c0UGd3U21mQTN6Q09NUk5VRXQtQWNZU0RfVGMifSwiYXB2IjoiZG5rREkydXVFem83aTFMNFlDSXg2M01zSnhteEctX1NrejNaM1diWkdtdyIsInNraWQiOiJkaWQ6cGVlcjoyLkV6NkxTZ2h3U0U0Mzd3bkRFMXB0M1g2aFZEVVF6U2pzSHppbnBYM1hGdk1qUkFtN3kuVno2TWtoaDFlNUNFWVlxNkpCVWNUWjZDcDJyYW5DV1JydjdZYXgzTGU0TjU5UjZkZC5TZXlKMElqb2laRzBpTENKeklqb2lhSFIwY0hNNkx5OWhiR2xqWlM1a2FXUXVabTFuY0M1aGNIQXZJaXdpY2lJNlcxMHNJbUVpT2xzaVpHbGtZMjl0YlM5Mk1pSmRmUSM2TFNnaHdTRTQzN3duREUxcHQzWDZoVkRVUXpTanNIemlucFgzWEZ2TWpSQW03eSIsImFwdSI6IlpHbGtPbkJsWlhJNk1pNUZlalpNVTJkb2QxTkZORE0zZDI1RVJURndkRE5ZTm1oV1JGVlJlbE5xYzBoNmFXNXdXRE5ZUm5aTmFsSkJiVGQ1TGxaNk5rMXJhR2d4WlRWRFJWbFpjVFpLUWxWalZGbzJRM0F5Y21GdVExZFNjblkzV1dGNE0weGxORTQxT1ZJMlpHUXVVMlY1U2pCSmFtOXBXa2N3YVV4RFNucEphbTlwWVVoU01HTklUVFpNZVRsb1lrZHNhbHBUTld0aFYxRjFXbTB4Ym1ORE5XaGpTRUYyU1dsM2FXTnBTVFpYTVRCelNXMUZhVTlzYzJsYVIyeHJXVEk1ZEdKVE9USk5hVXBrWmxFak5reFRaMmgzVTBVME16ZDNia1JGTVhCME0xZzJhRlpFVlZGNlUycHpTSHBwYm5CWU0xaEdkazFxVWtGdE4zayIsInR5cCI6ImFwcGxpY2F0aW9uL2RpZGNvbW0tZW5jcnlwdGVkK2pzb24iLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiRUNESC0xUFUrQTI1NktXIn0","recipients":[{"encrypted_key":"F5ExrYtwMcoTKQqmhPv9wj3chydlc6n50GTxrRp_GlK18lU3y0RktjN1lMbXiGrZobedUDssV6C4zcH1DzjcsAstKdeLiPrp","header":{"kid":"did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9zaXQtcHJpc20tbWVkaWF0b3IuYXRhbGFwcmlzbS5pbyIsInIiOltdLCJhIjpbImRpZGNvbW0vdjIiXX0#6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y"}}],"tag":"fjsv7G-9DJud6L9O9GeGImeF5AXxs__m5uJYwxzFpvE","iv":"AlB-V302pW6FOTZ2ItM-SA"}"""
       .fromJson[EncryptedMessage]
@@ -92,15 +95,16 @@ object MessageStorage {
   "typ" : "application/didcomm-plain+json"
 }""".fromJson[PlaintextMessage].getOrElse(???)
   )
+   */
 
   val example = MessageStorage()
-    .messageSend(
-      msg = alicePingMediator._1,
-      from = AgentProvider.alice.id: FROM,
-      plaintext = alicePingMediator._2
-    )
-    .messageRecive(
-      mediatorResponseToAlicePing._1,
-      mediatorResponseToAlicePing._2
-    )
+  // .messageSend(
+  //   msg = alicePingMediator._1,
+  //   from = AgentProvider.alice.id: FROM,
+  //   plaintext = alicePingMediator._2
+  // )
+  // .messageRecive(
+  //   mediatorResponseToAlicePing._1,
+  //   mediatorResponseToAlicePing._2
+  // )
 }

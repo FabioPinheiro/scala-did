@@ -198,7 +198,7 @@ object AppServer extends ZIOAppDefault {
       .provide(
         (Client.default ++ Scope.default) >>>
           OperatorImp.layer ++
-          Operations.layerDefault ++
+          Operations.layerOperations ++
           resolverLayer.project(i => i: Resolver) ++ // DidPeerResolver.layerDidPeerResolver ++
           Server.defaultWithPort(port)
           // Server.defaultWith(

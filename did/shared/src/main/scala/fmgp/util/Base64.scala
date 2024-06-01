@@ -12,8 +12,8 @@ opaque type Base64 = Vector[Byte] //TODO benchmark this
 //opaque type Base64 = Seq[Byte]
 
 object Base64:
-  /** Base64 url encoder RFC4648 */
-  val urlEncoder = ju.Base64.getUrlEncoder
+  /** Base64 url (without padding) encoder RFC4648 */
+  val urlEncoder = ju.Base64.getUrlEncoder.withoutPadding()
 
   /** Base64 url decoder RFC4648 */
   val urlDecoder = ju.Base64.getUrlDecoder
@@ -57,10 +57,14 @@ object Base64:
   inline def encode(data: Vector[Byte]): Base64 = urlEncoder.encode(data.toArray).toVector
 
   extension (bytes: Base64)
-    def bytes: Array[Byte] = bytes.toArray
     def bytesArray: Array[Byte] = bytes.toArray
     def bytesVec: Vector[Byte] = bytes
-    def urlBase64: String = String(bytesArray).filterNot(_ == '=')
+
+    // @deprecated("this method will be removed in favor of urlBase64WithoutPadding", "v0.1.0-M23")
+    /** original String Base64 URL (can or not have padding) */
+    def urlBase64: String = String(bytesArray)
+    def urlBase64WithoutPadding: String = String(bytesArray).filterNot(_ == '=')
+
     def basicBase64: String = String(Base64.basicEncoder.encode(Base64.urlDecoder.decode(bytesArray)))
     def decode: Array[Byte] = Base64.urlDecoder.decode(bytesArray)
     def decodeToVector: Vector[Byte] = Base64.urlDecoder.decode(bytesArray).toVector

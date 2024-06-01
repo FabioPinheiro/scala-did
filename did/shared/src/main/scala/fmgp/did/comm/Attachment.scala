@@ -4,6 +4,7 @@ import fmgp.did._
 import fmgp.util.Base64
 import zio.json._
 import zio.json.ast.Json
+import fmgp.crypto.JWT
 
 // sealed trait Attachment {
 //   def data: NotRequired[String]
@@ -54,11 +55,22 @@ case class Attachment(
 
   def getAsMessage: Either[String, Message] = data match
     case AttachmentDataJWS(jws, links) =>
-      Left(s"Message from Attachment only support type Base64 or Json (instead of JWT)")
+      Left(s"Message from Attachment only support type Base64 or Json (instead of JWS)")
     case AttachmentDataLinks(links, hash) =>
       Left(s"Message from Attachment only support type Base64 or Json (instead of Links)")
     case AttachmentDataBase64(base64) => base64.decodeToString.fromJson[Message]
     case AttachmentDataJson(json)     => json.as[Message]
+    case AttachmentDataAny(jws, hash, links, base64, json) =>
+      Left(s"Has attachments of unknown type") // TODO shound we still try?
+
+  def getAsJWT: Either[String, JWT] = data match
+    case AttachmentDataJWS(jws, links) =>
+      Left(s"JWT from Attachment only support type Base64 (instead of JWS)") // TODO
+    case AttachmentDataLinks(links, hash) =>
+      Left(s"JWT from Attachment only support type Base64 (instead of Links)")
+    case AttachmentDataBase64(base64) => JWT.fromBase64(base64)
+    case AttachmentDataJson(json) =>
+      Left(s"JWT from Attachment only support type Base64 (instead of JSOM)")
     case AttachmentDataAny(jws, hash, links, base64, json) =>
       Left(s"Has attachments of unknown type") // TODO shound we still try?
 
@@ -70,6 +82,10 @@ object Attachment {
   def fromMessage(msg: SignedMessage): Attachment = Attachment(
     media_type = Some(MediaTypes.SIGNED.typ),
     data = AttachmentDataJson(msg.toJsonObj),
+  )
+  def fromJWT(jwt: JWT): Attachment = Attachment(
+    media_type = Some("jwt"),
+    data = AttachmentDataBase64(jwt.base64),
   )
 }
 

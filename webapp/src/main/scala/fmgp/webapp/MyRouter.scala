@@ -5,7 +5,6 @@ import com.raquo.waypoint._
 import org.scalajs.dom
 import upickle.default._
 import fmgp.did.comm.OutOfBand
-import fmgp.did.comm.Payload.base64url
 
 object MyRouter {
   sealed abstract class Page(
