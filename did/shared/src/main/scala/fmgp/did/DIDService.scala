@@ -115,7 +115,7 @@ object DIDServiceDIDCommMessaging {
                 }
                 .flatMap {
                   case head +: rest =>
-                    Right(DIDServiceDIDCommMessaging(id = g.id, firstEndpoint = head, restEndpoints = rest: _*))
+                    Right(DIDServiceDIDCommMessaging(id = g.id, firstEndpoint = head, restEndpoints = rest*))
                   case _ =>
                     Left(
                       s"$DIDCommMessaging the field 'serviceEndpoint' if is json array MUST have at least one object"

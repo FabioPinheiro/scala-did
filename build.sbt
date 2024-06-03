@@ -7,6 +7,7 @@ import scala.sys.process._
 inThisBuild(
   Seq(
     scalaVersion := "3.3.3", // Also update docs/publishWebsite.sh and any ref to scala-3.3.3
+    // scalaVersion := "3.4.2", // Also update docs/publishWebsite.sh and any ref to scala-3.4.2
   )
 )
 // publish config
@@ -228,7 +229,6 @@ inThisBuild(
           "-deprecation", // warn about use of deprecated APIs
           "-unchecked", // warn about unchecked type parameters
           "-feature", // warn about misused language features (Note we are using 'language:implicitConversions')
-          "-Xfatal-warnings",
           // TODO "-Yexplicit-nulls",
           // "-Ysafe-init", // https://dotty.epfl.ch/docs/reference/other-new-features/safe-initialization.html
           "-language:implicitConversions", // we can use with the flag '-feature'
@@ -238,7 +238,9 @@ inThisBuild(
           // "-Xprint-inline",
           // NO NEED ATM "-Xsemanticdb"
           // NO NEED ATM "-Ykind-projector"
-        ) ++
+        ) ++ {
+          if (true) Seq("-Xfatal-warnings") else Seq("-rewrite", "-source", "3.4-migration")
+        } ++
         // Because DeriveJson(Decoder/Encoder).gen[DidFail] exceeded maximal number of successive inlines (default is 32)
         Seq("-Xmax-inlines", "43")
 

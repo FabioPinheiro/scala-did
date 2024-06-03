@@ -74,7 +74,7 @@ object TransportWSImp {
       handler = Handler
         .fromFunctionZIO((channel: Channel[ChannelEvent[WebSocketFrame], ChannelEvent[WebSocketFrame]]) =>
           val socketID = Websocket.nextSocketName
-          ZIO.logAnnotate(Websocket.logAnnotation(socketID), annotationMap: _*) {
+          ZIO.logAnnotate(Websocket.logAnnotation(socketID), annotationMap*) {
             for {
               transport <- make(channel, identifier = socketID)
               ws <- fmgp.did.framework.WebsocketJVMImp

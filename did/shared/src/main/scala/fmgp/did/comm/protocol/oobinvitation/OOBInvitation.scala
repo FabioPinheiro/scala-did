@@ -49,7 +49,7 @@ final case class OOBInvitation(
     )
 
   /** Utils method */
-  def wellKnowGoal = goal.map(OOBInvitation.wellKnowGoal _)
+  def wellKnowGoal = goal.map(OOBInvitation.wellKnowGoal)
 }
 
 object OOBInvitation {

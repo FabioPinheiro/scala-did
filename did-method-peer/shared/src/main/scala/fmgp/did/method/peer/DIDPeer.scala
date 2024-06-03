@@ -166,7 +166,7 @@ object DIDPeer2 {
       k.copy(kid = Some(keyToElement(k).encode.drop(2))) // FIXME .drop(2) 'Sz'
 
   def fromDID(did: DID): Either[String, DIDPeer2] = did.string match {
-    case DIDPeer.regexPeer2(all, str: _*) =>
+    case DIDPeer.regexPeer2(all, str*) =>
       val elements = all
         .drop(1) // drop peer type number
         .split('.')
@@ -204,7 +204,7 @@ object DIDPeer {
   def fromDID(did: DID): Either[String, DIDPeer] = did.string match {
     case regexPeer0(all, z: "z", data) => Right(DIDPeer0(all.drop(1)))
     case regexPeer1(all, z: "z", data) => Right(DIDPeer1(all.drop(1)))
-    case regexPeer2(all, str: _*)      => DIDPeer2.fromDID(did)
+    case regexPeer2(all, str*)      => DIDPeer2.fromDID(did)
     case any if regexPeer.matches(any) => Left(s"Not a did:peer '$any'") // FIXME make Error type
     // FIXME what about case any ??? //TODO add test in DIDPeerSuite
   }

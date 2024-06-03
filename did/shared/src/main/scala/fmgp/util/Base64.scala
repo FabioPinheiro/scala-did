@@ -24,7 +24,7 @@ object Base64:
   /** Base64 basic decoder RFC4648 */
   val basicDecoder = ju.Base64.getDecoder
 
-  given decoder: JsonDecoder[Base64] = JsonDecoder.string.map(Base64.apply _)
+  given decoder: JsonDecoder[Base64] = JsonDecoder.string.map(Base64.apply)
   given encoder: JsonEncoder[Base64] = JsonEncoder.string.contramap[Base64](e => e.urlBase64)
 
   /** @param str

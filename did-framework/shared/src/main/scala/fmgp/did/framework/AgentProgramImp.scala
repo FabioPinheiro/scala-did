@@ -144,7 +144,7 @@ object AgentProgramImp {
             em.`protected`.obj match
               case AnonProtectedHeader(epk, apv, typ, enc, alg)            => ops.anonDecrypt(em)
               case AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) => ops.authDecrypt(em)
-          }.flatMap(decrypt _)
+          }.flatMap(decrypt)
         case sm: SignedMessage =>
           ops.verify(sm).flatMap {
             case false => ZIO.fail(ValidationFailed)

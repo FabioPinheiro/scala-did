@@ -39,7 +39,7 @@ object SetU {
   given encoder[U](using jsonEncoder: JsonEncoder[U]): JsonEncoder[U | Seq[U]] =
     new JsonEncoder[U | Seq[U]] {
       override def unsafeEncode(b: U | Seq[U], indent: Option[Int], out: zio.json.internal.Write): Unit =
-        if (b.isInstanceOf[Seq[_]])
+        if (b.isInstanceOf[Seq[?]])
           JsonEncoder.seq[U].unsafeEncode(b.asInstanceOf[Seq[U]], indent, out)
         else jsonEncoder.unsafeEncode(b.asInstanceOf[U], indent, out)
 

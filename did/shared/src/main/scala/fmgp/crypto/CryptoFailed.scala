@@ -96,7 +96,7 @@ package error {
   case class PointNotOnCurve(error: String) extends CryptoFailed
   case object IncompatibleKeys extends CryptoFailed
   case class MissingDecryptionKey(kid: String*) extends CryptoFailed {
-    def `+`(ex: MissingDecryptionKey) = MissingDecryptionKey((kid ++ ex.kid): _*)
+    def `+`(ex: MissingDecryptionKey) = MissingDecryptionKey((kid ++ ex.kid)*)
   }
   case object SignatureVerificationFailed extends CryptoFailed
   case object MACCheckFailed extends CryptoFailed

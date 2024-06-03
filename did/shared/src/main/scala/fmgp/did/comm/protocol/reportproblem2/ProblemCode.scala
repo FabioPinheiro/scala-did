@@ -25,31 +25,31 @@ object ProblemCode {
   val pattern: Regex = "^([ew])\\.([pm]|[^.]+)\\.((?:[^.\\s]+\\.?)+)$".r
 
   def ErroFail(descriptors: String*) =
-    ProblemCode('e', 'p', descriptors.mkString(".").split("\\."): _*)
+    ProblemCode('e', 'p', descriptors.mkString(".").split("\\.")*)
   def ErroUndo(descriptors: String*) =
-    ProblemCode('e', 'm', descriptors.mkString(".").split("\\."): _*)
+    ProblemCode('e', 'm', descriptors.mkString(".").split("\\.")*)
   def ErroUndoToStep(step: String, descriptors: String*) =
-    ProblemCode('e', step, descriptors.mkString(".").split("\\."): _*)
+    ProblemCode('e', step, descriptors.mkString(".").split("\\.")*)
   def WarnFail(descriptors: String*) =
-    ProblemCode('w', 'p', descriptors.mkString(".").split("\\."): _*)
+    ProblemCode('w', 'p', descriptors.mkString(".").split("\\.")*)
   def WarnUndo(descriptors: String*) =
-    ProblemCode('w', 'm', descriptors.mkString(".").split("\\."): _*)
+    ProblemCode('w', 'm', descriptors.mkString(".").split("\\.")*)
   def WarnUndoToStep(step: String, descriptors: String*) =
-    ProblemCode('w', step, descriptors.mkString(".").split("\\."): _*)
+    ProblemCode('w', step, descriptors.mkString(".").split("\\.")*)
 
   def fromString(codeStr: String): Either[String, ProblemCode] = codeStr match {
     case pattern("e", "p", tmp_descriptors) =>
-      Right(ProblemCode('e', 'p', tmp_descriptors.split("\\."): _*))
+      Right(ProblemCode('e', 'p', tmp_descriptors.split("\\.")*))
     case pattern("e", "m", tmp_descriptors) =>
-      Right(ProblemCode('e', 'm', tmp_descriptors.split("\\."): _*))
+      Right(ProblemCode('e', 'm', tmp_descriptors.split("\\.")*))
     case pattern("e", tmp_scope, tmp_descriptors) =>
-      Right(ProblemCode('e', tmp_scope, tmp_descriptors.split("\\."): _*))
+      Right(ProblemCode('e', tmp_scope, tmp_descriptors.split("\\.")*))
     case pattern("w", "p", tmp_descriptors) =>
-      Right(ProblemCode('w', 'p', tmp_descriptors.split("\\."): _*))
+      Right(ProblemCode('w', 'p', tmp_descriptors.split("\\.")*))
     case pattern("w", "m", tmp_descriptors) =>
-      Right(ProblemCode('w', 'm', tmp_descriptors.split("\\."): _*))
+      Right(ProblemCode('w', 'm', tmp_descriptors.split("\\.")*))
     case pattern("w", tmp_scope, tmp_descriptors) =>
-      Right(ProblemCode('w', tmp_scope, tmp_descriptors.split("\\."): _*))
+      Right(ProblemCode('w', tmp_scope, tmp_descriptors.split("\\.")*))
     case any => Left(s"Not valid ProblemReport's code: '$any'")
   }
 
