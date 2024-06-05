@@ -252,7 +252,7 @@ inThisBuild(
 )
 
 lazy val setupTestConfig: Seq[sbt.Def.SettingsDefinition] = Seq(
-  libraryDependencies += D.munit.value,
+  libraryDependencies ++= Seq(D.munit.value, D.zioMunitTest.value),
 )
 lazy val jsHeader =
   """/* FMGP scala-did examples and tool
@@ -375,11 +375,10 @@ lazy val did = crossProject(JSPlatform, JVMPlatform)
     name := "did",
     libraryDependencies += D.zioJson.value,
     libraryDependencies += D.zio.value, // Just to force a version bump (including scalajsDom)
-    libraryDependencies += D.zioMunitTest.value,
   )
+  .jsConfigure(scalaJSLibConfigure)
   .jsSettings(libraryDependencies += D.scalajsDom.value) // just to really really force a version bump
   .jsSettings(libraryDependencies += D.scalajsJavaSecureRandom.value.cross(CrossVersion.for3Use2_13))
-  .jsConfigure(scalaJSLibConfigure)
   .jsSettings(
     Compile / npmDependencies += NPM.sha256,
     /* say we want to minimize all but keep these very specific things */
@@ -387,6 +386,7 @@ lazy val did = crossProject(JSPlatform, JVMPlatform)
     stMinimizeKeep ++= List(
       "jsSha256.mod.^",
       "jsSha256.mod.sha256",
+      "std.global.TextEncoder",
     ),
   )
   .configure(docConfigure)

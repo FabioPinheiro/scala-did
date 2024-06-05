@@ -12,3 +12,14 @@ object SHA256 {
     .getInstance("SHA-256")
     .digest(data)
 }
+
+import zio.*
+
+object SHA256ZIO {
+
+  def digestToHex(str: String): UIO[String] = digest(str).map(bytes2Hex(_))
+  def digestToHex(data: Array[Byte]): UIO[String] = digest(data).map(bytes2Hex(_))
+
+  def digest(str: String): UIO[Array[Byte]] = ZIO.succeed(SHA256.digest(str))
+  def digest(data: Array[Byte]): UIO[Array[Byte]] = ZIO.succeed(SHA256.digest(data))
+}

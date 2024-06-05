@@ -5,8 +5,9 @@ import zio.json._
 
 import fmgp.util.hex2bytes
 
-// fmgp.crypto.SHASuite
-class SHASuite extends FunSuite {
+// didJS/testOnly fmgp.crypto.SHASuite
+// didJVM/testOnly fmgp.crypto.SHASuite
+class SHASuite extends ZSuite {
 
   val testVectors = Seq(
     (
@@ -54,6 +55,22 @@ class SHASuite extends FunSuite {
       assertEquals(SHA256.digestToHex(input.getBytes()), sha256out)
       assertEquals(SHA256.digest(input).toSeq, hex2bytes(sha256out).toSeq)
       assertEquals(SHA256.digest(input.getBytes()).toSeq, hex2bytes(sha256out).toSeq)
+    }
+  }
+
+  testVectors.foreach { (input, _, sha256out) =>
+    val n = 20
+    testZ(s"SHA-256 ZIO digest '${if (input.size > 20) input.slice(0, n) ++ "..." else input}'") {
+      for {
+        a <- SHA256ZIO.digestToHex(input)
+        _ = assertEquals(a, sha256out)
+        b <- SHA256ZIO.digestToHex(input.getBytes())
+        _ = assertEquals(b, sha256out)
+        c <- SHA256ZIO.digest(input)
+        _ = assertEquals(c.toSeq, hex2bytes(sha256out).toSeq)
+        d <- SHA256ZIO.digest(input.getBytes())
+        _ = assertEquals(d.toSeq, hex2bytes(sha256out).toSeq)
+      } yield ()
     }
   }
 
