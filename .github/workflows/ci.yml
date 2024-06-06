@@ -37,7 +37,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: "18" # or whatever
+          node-version: "22" # or whatever
       - name: Setup Scala.JS
         uses: japgolly/setup-scalajs@v1
       - name: Cache sbt
