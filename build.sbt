@@ -454,7 +454,9 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
       "jose.typesMod.JWTPayload",
       "jose.typesMod.GeneralJWSInput",
       "jose.mod.generateKeyPair",
+      "jose.mod.exportJWK",
       "jose.KeyGenerateKeyPairMod.GenerateKeyPairResult",
+      "jose.KeyGenerateKeyPairMod.GenerateKeyPairOptions",
       "jose.mod.errors.JWSSignatureVerificationFailed",
     ),
   )

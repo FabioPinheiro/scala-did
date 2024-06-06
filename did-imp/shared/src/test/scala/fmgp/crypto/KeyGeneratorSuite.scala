@@ -10,7 +10,7 @@ import zio.json._
   */
 class KeyGeneratorSuite extends ZSuite {
 
-  testZ("makeX25519".tag(fmgp.JsUnsupported)) {
+  testZ("makeX25519") {
     for {
       _ <- ZIO.unit
       key <- KeyGenerator.makeX25519
@@ -19,7 +19,7 @@ class KeyGeneratorSuite extends ZSuite {
     } yield ()
   }
 
-  testZ("makeEd25519".tag(fmgp.JsUnsupported)) {
+  testZ("makeEd25519") {
     for {
       _ <- ZIO.unit
       key <- KeyGenerator.makeEd25519

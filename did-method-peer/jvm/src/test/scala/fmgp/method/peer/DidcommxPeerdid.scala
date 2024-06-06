@@ -16,8 +16,8 @@ import zio.json._
 import fmgp.crypto.OKPPrivateKey
 
 final case class DidcommxPeerdid(
-    jwkForKeyAgreement: OKPKey = KeyGenerator.newEd25519.toOption.get,
-    jwkForKeyAuthentication: OKPKey = KeyGenerator.newX25519.toOption.get,
+    jwkForKeyAgreement: OKPKey, // = KeyGenerator.newEd25519.toOption.get,
+    jwkForKeyAuthentication: OKPKey, // = KeyGenerator.newX25519.toOption.get,
     serviceEndpoint: Option[String] = None
 ) {
 
@@ -85,9 +85,9 @@ final case class DidcommxPeerdid(
 //       println(ccc)
 //     }
 
-@main def mainDidcommxPeerdid() = {
-  val did = DidcommxPeerdid(serviceEndpoint = Some("http://localhost:8080/test"))
-  println(did)
-  println(did.did.string)
-  println(did.getDIDDocument)
-}
+// @main def mainDidcommxPeerdid() = {
+//   val did = DidcommxPeerdid(serviceEndpoint = Some("http://localhost:8080/test"))
+//   println(did)
+//   println(did.did.string)
+//   println(did.getDIDDocument)
+// }

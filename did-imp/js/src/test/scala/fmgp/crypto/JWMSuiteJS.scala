@@ -12,11 +12,39 @@ import scala.scalajs.js.JavaScriptException
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
+import fmgp.crypto.error.FailToGenerateKey
 
 /** didImpJS/testOnly fmgp.crypto.JWMSuiteJS */
 class JWMSuiteJS extends ZSuite {
 
   import scala.scalajs.js
+
+  testZ("Make Key ES256 (P-256)") {
+    for {
+      key <- KeyGenerator.makeKeyEC("ES256")
+      _ = assertEquals(key.crv, Curve.`P-256`)
+    } yield ()
+  }
+
+  testZ("Make Key ES256K (secp256k1)") {
+    for {
+      key <- KeyGenerator.makeKeyEC("ES256K")
+      _ = assertEquals(key.crv, Curve.secp256k1)
+    } yield ()
+  }
+
+  testZ("Make Key EdDSA (Ed25519)") {
+    for {
+      key <- KeyGenerator.makeKeyOKP("EdDSA", "Ed25519")
+      _ = assertEquals(key.crv, Curve.Ed25519)
+    } yield ()
+  }
+  testZ("Make Key EdDSA (X25519)") {
+    for {
+      key <- KeyGenerator.makeKeyOKP("ECDH-ES+A256KW", "X25519")
+      _ = assertEquals(key.crv, Curve.X25519)
+    } yield ()
+  }
 
   testZ("sign and verify an example") {
     val key: ECPrivateKey = JWKExamples.senderKeySecp256k1.fromJson[ECPrivateKey].toOption.get
