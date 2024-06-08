@@ -141,7 +141,7 @@ lazy val V = new {
   val zio = "2.1.2"
   val zioJson = "0.6.2"
   val zioMunitTest = "0.2.0"
-  val zioHttp = "3.0.0-RC6" // FIXES CORS https://github.com/zio/zio-http/pull/2490
+  val zioHttp = "3.0.0-RC8" // FIXES CORS https://github.com/zio/zio-http/pull/2490
   val zioPrelude = "1.0.0-RC21"
 
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time

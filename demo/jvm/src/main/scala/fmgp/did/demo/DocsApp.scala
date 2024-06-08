@@ -8,7 +8,7 @@ object DocsApp {
   // def mdocMarkdown = Routes(
   //   Method.GET / "mdoc" / string("path") -> handler { (path: String, req: Request) => path }
   //     .flatMap(path => Handler.fromResource(s"$path")),
-  // ).sandbox.toHttpApp
+  // ).sandbox
 
   def mdocHTML = Routes(
     // Method.GET / "doc" / string("path") -> handler { (path: String, req: Request) => path }
@@ -130,6 +130,6 @@ object DocsApp {
         }
       } yield http
     },
-  ).sandbox.toHttpApp
+  ).sandbox
 
 }

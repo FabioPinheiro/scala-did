@@ -48,9 +48,9 @@ object AppServer extends ZIOAppDefault {
     Method.GET / "hello" -> handler(Response.text("Hello World! DEMO DID APP")),
     Method.GET / "health" -> handler(Response.ok),
     // http://localhost:8080/oob?_oob=eyJ0eXBlIjoiaHR0cHM6Ly9kaWRjb21tLm9yZy9vdXQtb2YtYmFuZC8yLjAvaW52aXRhdGlvbiIsImlkIjoiNTk5ZjM2MzgtYjU2My00OTM3LTk0ODctZGZlNTUwOTlkOTAwIiwiZnJvbSI6ImRpZDpleGFtcGxlOnZlcmlmaWVyIiwiYm9keSI6eyJnb2FsX2NvZGUiOiJzdHJlYW1saW5lZC12cCIsImFjY2VwdCI6WyJkaWRjb21tL3YyIl19fQ
-  ).toHttpApp @@ (Middleware.requestLogging(loggedRequestHeaders = Set(Header.Host, Header.Origin)) ++ Middleware.debug)
+  ) @@ (Middleware.requestLogging(loggedRequestHeaders = Set(Header.Host, Header.Origin)) ++ Middleware.debug)
 
-  def appOther = appOtherRoutes.logErrorAndRespond.toHttpApp
+  def appOther = appOtherRoutes.logErrorAndRespond
   def appOtherRoutes: Routes[Resolver, Throwable] = Routes( // TODO outes[Resolver, DidException]
     Method.GET / "oob" -> handler { (req: Request) =>
       for {
@@ -147,10 +147,10 @@ object AppServer extends ZIOAppDefault {
         case s                        => Header.ContentType(MediaType.text.plain)
       Handler.fromResource(fullPath).map(_.addHeader(headerContentType))
     }.flatten
-  ).sandbox.toHttpApp
+  ).sandbox
 
-  val app: HttpApp[Operator & Operations & Resolver] = (
-    DIDCommRoutes.app ++ appTest ++ DocsApp.mdocHTML /*++ mdocMarkdown*/ ++ appOther ++ appWebsite // ++ DidPeerUniresolverDriver.resolverPeer
+  val app: Routes[Operator & Operations & Resolver, Nothing] = (
+    DIDCommRoutes.appRoutes ++ appTest ++ DocsApp.mdocHTML /*++ mdocMarkdown*/ ++ appOther ++ appWebsite // ++ DidPeerUniresolverDriver.resolverPeer
   ) @@ (Middleware.cors) // ++ MiddlewareUtils.all)
 
   val resolverLayer = ZLayer.fromZIO(makeResolver)
