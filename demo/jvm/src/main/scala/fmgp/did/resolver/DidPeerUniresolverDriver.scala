@@ -48,6 +48,6 @@ object DidPeerUniresolverDriver {
             )
       } yield (response)
     }
-  ).toHttpApp
+  )
 }
  */
