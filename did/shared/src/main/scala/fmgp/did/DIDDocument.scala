@@ -19,12 +19,49 @@ trait DIDDocument extends DID {
   def id: Required[DIDSubject] // = s"$scheme:$namespace:$specificId"
   def alsoKnownAs: NotRequired[Set[String]]
   def controller: NotRequired[Either[String, Set[String]]]
+
+  /** @see https://www.w3.org/TR/did-core/#verification-methods */
   def verificationMethod: NotRequired[Set[VerificationMethod]]
 
+  /** Keys declared in this section are used to signed JWM.
+    *
+    * The authentication verification relationship is used to specify how the DID subject is expected to be
+    * authenticated, for purposes such as logging into a website or engaging in any sort of challenge-response protocol.
+    * @see
+    *   https://www.w3.org/TR/did-core/#authentication
+    */
   def authentication: NotRequired[SetU[VerificationMethod]]
+
+  /** The assertionMethod verification relationship is used to specify how the DID subject is expected to express
+    * claims, such as for the purposes of issuing a Verifiable Credential [VC-DATA-MODEL].
+    * @see
+    *   https://www.w3.org/TR/did-core/#assertion
+    */
   def assertionMethod: NotRequired[SetU[VerificationMethod]]
+
+  /** Keys declared in this section are used as target keys when encrypting a message.
+    *
+    * The keyAgreement verification relationship is used to specify how an entity can generate encryption material in
+    * order to transmit confidential information intended for the DID subject, such as for the purposes of establishing
+    * a secure communication channel with the recipient.
+    * @see
+    *   https://www.w3.org/TR/did-core/#key-agreement
+    */
   def keyAgreement: NotRequired[Set[VerificationMethod]]
+
+  /** The capabilityInvocation verification relationship is used to specify a verification method that might be used by
+    * the DID subject to invoke a cryptographic capability, such as the authorization to update the DID Document.
+    * @see
+    *   https://www.w3.org/TR/did-core/#capability-invocation
+    */
   def capabilityInvocation: NotRequired[SetU[VerificationMethod]]
+
+  /** The capabilityDelegation verification relationship is used to specify a mechanism that might be used by the DID
+    * subject to delegate a cryptographic capability to another party, such as delegating the authority to access a
+    * specific HTTP API to a subordinate.
+    * @see
+    *   https://www.w3.org/TR/did-core/#capability-delegation
+    */
   def capabilityDelegation: NotRequired[SetU[VerificationMethod]]
 
   def service: NotRequired[Set[DIDService]]
@@ -45,12 +82,13 @@ trait DIDDocument extends DID {
     case e: VerificationMethodEmbeddedMultibase => ??? // FIXME
   }
 
+  /** Keys for Signing Messages */
   def allKeysTypeKeyAgreement = keyAgreement
     .getOrElse(Set.empty)
     .flatMap { vm => converteToVerificationMethodReferencedWithKey(vm) }
 
   val (namespace, specificId) = (id.namespace, id.specificId) // DID.getNamespaceAndSpecificId(id)
-
+  /** Keys for Encrypting Messages */
   def allKeysTypeAuthentication: Seq[VerificationMethod] = authentication.toSeq.flatMap {
     case v: VerificationMethod                   => Seq(v)
     case seq: Seq[VerificationMethod] @unchecked => seq
@@ -64,7 +102,7 @@ trait DIDDocument extends DID {
   private inline def getServices = service.toSeq.flatten
   def getDIDServiceDIDCommMessaging = getServices
     .collect { case e: DIDServiceDIDCommMessaging => e }
-  // FIXME
+  // TODO
   // def getDIDServiceDIDLinkedDomains = getServices
   //   .collect { case e: DIDServiceDIDLinkedDomains => e }
   // def getDIDServiceDecentralizedWebNode = getServices
