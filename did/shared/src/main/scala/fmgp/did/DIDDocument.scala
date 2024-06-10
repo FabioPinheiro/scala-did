@@ -20,8 +20,12 @@ trait DIDDocument extends DID {
   def alsoKnownAs: NotRequired[Set[String]]
   def controller: NotRequired[Either[String, Set[String]]]
 
-  /** @see https://www.w3.org/TR/did-core/#verification-methods */
-  def verificationMethod: NotRequired[Set[VerificationMethod]]
+  /** @see
+    *   https://www.w3.org/TR/did-core/#verification-methods
+    *
+    * The VerificationMethod MUST be embedded (can be a reference to another VerificationMethod)
+    */
+  def verificationMethod: NotRequired[Set[VerificationMethodEmbedded]]
 
   /** Keys declared in this section are used to signed JWM.
     *
@@ -74,7 +78,6 @@ trait DIDDocument extends DID {
       this.verificationMethod.toSeq.flatten
         .find(_.id == e.id)
         .map {
-          case v: VerificationMethodReferenced        => ??? // Error?
           case v: VerificationMethodEmbeddedJWK       => VerificationMethodReferencedWithKey(v.id, v.publicKeyJwk)
           case v: VerificationMethodEmbeddedMultibase => ??? // FIXME
         }
@@ -133,7 +136,7 @@ case class DIDDocumentClass(
     id: Required[DIDSubject],
     alsoKnownAs: NotRequired[Set[String]] = None,
     controller: NotRequired[Either[String, Set[String]]] = None,
-    verificationMethod: NotRequired[Set[VerificationMethod]] = None,
+    verificationMethod: NotRequired[Set[VerificationMethodEmbedded]] = None,
     authentication: NotRequired[SetU[VerificationMethod]] = None,
     assertionMethod: NotRequired[SetU[VerificationMethod]] = None,
     keyAgreement: NotRequired[Set[VerificationMethod]] = None,

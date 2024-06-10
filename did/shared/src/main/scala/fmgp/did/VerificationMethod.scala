@@ -111,7 +111,7 @@ object VerificationMethodEmbeddedMultibase {
 }
 
 object VerificationMethodEmbedded {
-  given decoder: JsonDecoder[VerificationMethod] =
+  given decoder: JsonDecoder[VerificationMethodEmbedded] =
     Json.Obj.decoder.mapOrFail { originalAst =>
       if (originalAst.fields.exists(e => e._1 == "publicKeyJwk"))
         VerificationMethodEmbeddedJWK.decoder.decodeJson(originalAst.toJson)
