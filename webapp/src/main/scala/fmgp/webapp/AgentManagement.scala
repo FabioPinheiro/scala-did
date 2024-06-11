@@ -212,7 +212,7 @@ object AgentManagement {
             def ru = KeylistUpdate(
               from = agent.id,
               to = mediatorDID,
-              updates = Seq((mediatorDID.asFROMTO, mediatorcoordination2.KeylistAction.add))
+              updates = Seq((agent.id.asFROMTO, mediatorcoordination2.KeylistAction.add))
             )
             def rup = recipientUpdate(ru).provideEnvironment(env)
             (mr, mrp, ru, rup)
@@ -225,7 +225,7 @@ object AgentManagement {
             def ru = RecipientUpdate(
               from = agent.id,
               to = mediatorDID,
-              updates = Seq((mediatorDID.asFROMTO, RecipientAction.add))
+              updates = Seq((agent.id.asFROMTO, RecipientAction.add))
             )
             def rup = recipientUpdate(ru).provideEnvironment(env)
             (mr, mrp, ru, rup)
