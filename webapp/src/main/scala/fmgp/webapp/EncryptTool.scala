@@ -55,7 +55,8 @@ object EncryptTool {
       .map { // side effects
         case None => Left(s"Zero responses in this Transport in the time frame of ${Global.transportTimeoutVar.now()}s")
         case Some(output) =>
-          output.fromJson[EncryptedMessage] match
+          import SignedOrEncryptedMessage.given
+          output.fromJson[SignedOrEncryptedMessage] match
             case Left(fail) => Left(s"Fail to parse due to: '$fail'")
             case right      => right
       }
