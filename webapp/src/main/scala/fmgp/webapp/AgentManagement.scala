@@ -57,13 +57,11 @@ object AgentManagement {
     value := "https://sit-prism-mediator.atalaprism.io",
   )
 
-  def newPeerDID(service: Option[DIDPeerServiceEncoded]) = {
+  def newPeerDID(service: Option[DIDPeerServiceEncoded], localKeys: Boolean) = {
     val programe = ZIO
       .collectAllPar(
-        Seq(
-          Client.newKeyX25519,
-          Client.newKeyEd255199
-        )
+        if (localKeys) Seq(Client.newKeyX25519Local, Client.newKeyEd25519Local)
+        else Seq(Client.newKeyX25519Remote, Client.newKeyEd25519Remote)
       )
       .map { case Seq(x25519, ed255199) =>
         val newAgent = DIDPeer2.makeAgent(Seq(x25519, ed255199), service.toSeq)
@@ -71,12 +69,7 @@ object AgentManagement {
         Global.selectAgentDID(newAgent.id)
       }
     // .tap(_ => ZIO.succeed(urlEndpoint.ref.value = "")) // clean up
-
-    Unsafe.unsafe { implicit unsafe => // Run side effect
-      Runtime.default.unsafe.runToFuture(
-        programe.mapError(DidException(_))
-      )
-    }
+    Utils.runProgram(programe)
   }
 
   object V2 {
@@ -169,8 +162,8 @@ object AgentManagement {
     ),
     div(
       b("Create Agent: "),
-      child <-- mediatorDIDVar.signal.map {
-        case None =>
+      child <-- mediatorDIDVar.signal.combineWith(Global.localKeyGeneratorVar.signal).map {
+        case (None, useLocalkeyGenerator) =>
           div(
             button(
               "New DID Peer",
@@ -178,18 +171,21 @@ object AgentManagement {
                 newPeerDID(
                   Some(urlEndpoint.ref.value.trim)
                     .filterNot(_.isEmpty)
-                    .map(endpoint => DIDPeerServiceEncoded.fromEndpoint(endpoint))
+                    .map(endpoint => DIDPeerServiceEncoded.fromEndpoint(endpoint)),
+                  useLocalkeyGenerator
                 )
               }
             ),
             " with the follow endpoint ",
             urlEndpoint
           )
-        case Some(mediatorDID) =>
+        case (Some(mediatorDID), useLocalkeyGenerator) =>
           div(
             button(
               "New DID Peer",
-              onClick --> { (_) => newPeerDID(Some(DIDPeerServiceEncoded.fromEndpoint(mediatorDID.did))) }
+              onClick --> { (_) =>
+                newPeerDID(Some(DIDPeerServiceEncoded.fromEndpoint(mediatorDID.did)), useLocalkeyGenerator)
+              }
             ),
             " with the follow endpoint ",
             code(mediatorDID.did)

@@ -10,6 +10,7 @@ import fmgp.did._
 import fmgp.Config
 import scala.util.Failure
 import scala.util.Success
+
 object SandboxSettings {
 
   def apply(): HtmlElement = // rootElement
@@ -115,6 +116,22 @@ object SandboxSettings {
             value <-- Global.transportTimeoutVar.signal.map(_.toString),
             onInput.mapToValue --> { _.toIntOption.foreach(Global.transportTimeoutVar.set(_)) },
           ),
+        )
+      ),
+      // ### Generate Keys localy ###
+      div(
+        h2("Transport timeout"),
+        p(
+          "Use local KeyGenerator or Generate the keys remotaly",
+          input(
+            `type` := "checkbox",
+            checked <-- Global.localKeyGeneratorVar.signal,
+            onClick.mapToChecked --> Global.localKeyGeneratorVar,
+          ),
+          child <-- Global.localKeyGeneratorVar.signal.map(e =>
+            if (e) "--> Generate Keys Localy (Working only in some browser)"
+            else "--> Generate Keys Remotaly"
+          )
         )
       ),
     )

@@ -14,9 +14,9 @@ object Utils {
 
   def runProgram[E](program: ZIO[Any, E, Unit]) = Unsafe.unsafe { implicit unsafe => // Run side effect
     Runtime.default.unsafe.fork(
-      program.catchAll { case error =>
-        ZIO.succeed(println(error))
-      }
+      program
+        .catchAllCause(cause => ZIO.logErrorCause("runProgram Fail", cause))
+        .catchAllDefect(error => ZIO.logError("runProgram with Defect: " + error.getMessage()))
     )
   }
 

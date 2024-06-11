@@ -20,19 +20,6 @@ object Client {
   val urlHost = window.location.protocol + "//" + window.location.host
   // @scala.scalajs.js.annotation.JSExport var tmp: Any = _
 
-  @scala.scalajs.js.annotation.JSExport
-  def runNewKeyX255199 = Unsafe.unsafe { implicit unsafe => // Run side effect
-    Runtime.default.unsafe.runToFuture(
-      newKeyX25519.map(key => println(key.toJsonPretty)).mapError(DidException(_))
-    ) // .getOrThrowFiberFailure()
-  }
-  @scala.scalajs.js.annotation.JSExport
-  def runNewKeyEd255199 = Unsafe.unsafe { implicit unsafe => // Run side effect
-    Runtime.default.unsafe.runToFuture(
-      newKeyEd255199.map(key => println(key.toJsonPretty)).mapError(DidException(_))
-    ) // .getOrThrowFiberFailure()
-  }
-
   def makeOps(
       data: String,
       url: String = "/ops"
@@ -54,7 +41,11 @@ object Client {
       case Right(key) if key.crv != curve => ZIO.fail(WrongCurve(obtained = key.crv, expected = Set(curve)))
       case Right(key)                     => ZIO.succeed(key)
     )
-  def newKeyX25519: IO[CryptoFailed, OKPPrivateKey] = ZIO
+
+  def newKeyX25519Local: IO[CryptoFailed, OKPPrivateKey] = KeyGenerator.makeX25519
+  def newKeyEd25519Local: IO[CryptoFailed, OKPPrivateKey] = KeyGenerator.makeEd25519
+
+  def newKeyX25519Remote: IO[CryptoFailed, OKPPrivateKey] = ZIO
     .fromPromiseJS(fetch("/makeKey/X25519", new RequestInit { method = HttpMethod.GET }))
     .flatMap(e => ZIO.fromPromiseJS(e.text()))
     .catchAll(ex => ZIO.fail(SomeThrowable(ex)))
@@ -64,7 +55,7 @@ object Client {
         ZIO.fail(WrongCurve(obtained = key.crv, expected = Set(Curve.X25519)))
       case Right(key) => ZIO.succeed(key)
     )
-  def newKeyEd255199: IO[CryptoFailed, OKPPrivateKey] = ZIO
+  def newKeyEd25519Remote: IO[CryptoFailed, OKPPrivateKey] = ZIO
     .fromPromiseJS(fetch("/makeKey/Ed25519", new RequestInit { method = HttpMethod.GET }))
     .flatMap(e => ZIO.fromPromiseJS(e.text()))
     .catchAll(ex => ZIO.fail(SomeThrowable(ex)))

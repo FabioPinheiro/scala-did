@@ -35,6 +35,7 @@ object Global {
 
   // TODO rename to transportTimeFrame
   val transportTimeoutVar = Var[Int](initial = 10)
+  val localKeyGeneratorVar = Var[Boolean](initial = false)
 
   /** Agent in use */
   val agentVar = Var[Option[Agent]](initial = None)
