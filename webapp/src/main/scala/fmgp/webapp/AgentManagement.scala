@@ -326,6 +326,10 @@ object AgentManagement {
       h2("Edit Agents"),
       div(
         button(
+          "Clear AgentProvider",
+          onClick --> { _ => Global.agentProvider.set(AgentProvider(Seq.empty, Seq.empty)) }
+        ),
+        button(
           "Reset default AgentProvider",
           onClick --> { _ => Global.agentProvider.set(AgentProvider.provider) }
         ),
@@ -333,7 +337,41 @@ object AgentManagement {
           case Left(error) => pre(code(s"Can't import AgentProvider because: $error"))
           case Right(newProvider) =>
             button("Import AgentProvider", onClick --> { _ => Global.agentProvider.set(newProvider) })
-        }
+        },
+        child <-- Global.agentProvider.signal.map { agentProvider =>
+          button(
+            "Export",
+            onClick --> { _ =>
+              {
+                val blobParts: js.Iterable[String] = Seq(agentProvider.toJsonPretty).toJSIterable
+                val options = js.Dictionary("type" -> "application/json").asInstanceOf[dom.BlobPropertyBag]
+                val file = dom.Blob(blobParts, options)
+                val url = dom.URL.createObjectURL(file)
+                val tmp = a(href := url, download := "AgentProvider.export.json")
+                tmp.ref.click()
+                dom.URL.revokeObjectURL(url)
+              }
+            }
+          )
+        },
+        div(
+          "Import AgentProvider from file: ",
+          input(
+            `type` := "file",
+            onChange.mapToFiles --> {
+              _.head
+                .text()
+                .`then`(data =>
+                  data.fromJson[AgentProvider] match {
+                    case Left(error)        => println(s"Fail to import file due to: $error") // TODO Error log
+                    case Right(newProvider) => Global.agentProvider.set(newProvider)
+                  }
+                )
+            }
+            // onInput --> { e => println(e.asInstanceOf[org.scalajs.dom.InputEvent].data) }
+            // inContext { thisNode => onInput.map(_ => thisNode.ref.value) --> println("11111") }
+          )
+        )
       ),
       div(
         textArea(
