@@ -5,14 +5,13 @@ import zio.json._
 import fmgp.did._
 import fmgp.did.comm.FROMTO
 import fmgp.crypto._
-import fmgp.crypto.error.DidMethodNotSupported
 
 class DidPeerResolver extends Resolver {
-  override protected def didDocumentOf(did: FROMTO): IO[DidMethodNotSupported, DIDDocument] = did.toDID match {
+  override protected def didDocumentOf(did: FROMTO): IO[UnsupportedMethod, DIDDocument] = did.toDID match {
     case peer: DIDPeer => DidPeerResolver.didDocument(peer)
     case did if DIDPeer.regexPeer.matches(did.string) =>
       DidPeerResolver.didDocument(DIDPeer(did))
-    case did => ZIO.fail(DidMethodNotSupported(did.namespace))
+    case did => ZIO.fail(UnsupportedMethod(did.namespace))
   }
 }
 object DidPeerResolver {

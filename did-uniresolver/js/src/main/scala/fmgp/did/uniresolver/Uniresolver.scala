@@ -19,21 +19,19 @@ object Uniresolver {
 
 case class Uniresolver(uniresolverServer: String) extends Resolver {
 
-  override protected def didDocumentOf(did: FROMTO): IO[DidFail, DIDDocument] = {
+  override protected def didDocumentOf(did: FROMTO): IO[ResolverError, DIDDocument] = {
     // if (!methods.contains(did.toDID.namespace)) ZIO.fail(DidMethodNotSupported(did.toDID.namespace))
     // else
     val url = uniresolverServer + did
-    val program = for {
+    for {
       data <- ZIO
         .fromPromiseJS(fetch(url, new RequestInit { method = HttpMethod.GET }))
         .flatMap(e => ZIO.fromPromiseJS(e.text()))
-        .catchAll(ex => ZIO.fail(SomeThrowable(ex)))
+        .mapError(ex => DIDresolutionFail.fromThrowable(ex))
       didResolutionResult <- data.fromJson[DIDResolutionResult] match
-        case Left(error)  => ZIO.fail(FailToParse(error))
+        case Left(error)  => ZIO.fail(DIDresolutionFail.fromParseError("DIDResolutionResult", error))
         case Right(value) => ZIO.succeed(value.didDocument)
     } yield (didResolutionResult)
-
-    program
   }
 
 }

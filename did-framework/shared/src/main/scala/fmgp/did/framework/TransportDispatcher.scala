@@ -6,6 +6,7 @@ import fmgp.did._
 import fmgp.did.comm._
 import fmgp.crypto.error.DidFail
 import fmgp.did.comm.protocol.routing2.ForwardMessage.makeForwardMessage
+import fmgp.crypto.error.ResolverErrorWarp
 
 trait TransportFactory {
   def openTransport(uri: String): UIO[TransportDIDComm[Any]]
@@ -25,7 +26,7 @@ trait TransportDispatcher extends TransportFactory {
   ): ZIO[Resolver & Agent & Operations, DidFail, Either[String, TransportDIDComm[Any]]] =
     for {
       resolver <- ZIO.service[Resolver]
-      doc <- resolver.didDocument(to)
+      doc <- resolver.didDocument(to).mapError(ResolverErrorWarp(_))
       services = {
         doc.service.toSeq.flatten
           .collect { case service: DIDServiceDIDCommMessaging => service }

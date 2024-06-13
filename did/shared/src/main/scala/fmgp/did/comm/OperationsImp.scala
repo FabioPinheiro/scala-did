@@ -25,7 +25,7 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
         case Some(did)                             => ZIO.fail(WrongSigningDID)
         case None                                  => ZIO.fail(MissingFromHeader)
       resolver <- ZIO.service[Resolver]
-      didDocument <- resolver.didDocument(fromDID).mapError(FailToResolverDIDDocument(_))
+      didDocument <- resolver.didDocument(fromDID).mapError(CryptoFailedWarpResolverError(_))
       privateKeysToSign = {
         val allKeysTypeAuthentication = didDocument.allKeysTypeAuthentication
         agent.keyStore.keys.filter(k =>
@@ -61,7 +61,7 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
           kid = didURL.toFROMTO
           doc <- resolver
             .didDocument(kid)
-            .catchAll(error => ZIO.fail(FailToResolverDIDDocument(error)))
+            .mapError(CryptoFailedWarpResolverError(_))
           key <- doc.authenticationByKid(didURL).map(_.key) match
             case Some(key) => ZIO.succeed(key)
             case None      => ZIO.fail(FailToExtractKid("Fail to extract kid: " + didURL.string))
@@ -75,7 +75,9 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
     // TODO return EncryptionFailed.type on docs
     for {
       resolver <- ZIO.service[Resolver]
-      docs <- ZIO.foreach(msg.to.toSeq.flatten)(resolver.didDocument(_))
+      docs <- ZIO.foreach(msg.to.toSeq.flatten)(
+        resolver.didDocument(_).mapError(ResolverErrorWarp(_))
+      )
       recipientKidsKeys = docs.flatMap(_.allKeysTypeKeyAgreement).map(_.pair)
       ret <- cryptoOperations.anonEncrypt(recipientKidsKeys, msg.toJson.getBytes)
     } yield ret
@@ -89,7 +91,9 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
       fromDID <- msg.from match
         case Some(did) => ZIO.succeed(did)
         case None      => ZIO.fail(MissingFromHeader)
-      docsFROM <- resolver.didDocument(fromDID)
+      docsFROM <- resolver
+        .didDocument(fromDID)
+        .mapError(ResolverErrorWarp(_))
       allKeysTypeKeyAgreement = docsFROM.allKeysTypeKeyAgreement
       secretsFROM = agent.keyStore.keys.toSeq
         .flatMap { key => key.kid.map(kid => VerificationMethodReferencedWithKey(kid, key)) }
@@ -99,7 +103,9 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
         .view
         .mapValues(_.headOption)
         .toMap
-      docsTO <- ZIO.foreach(msg.to.toSeq.flatten)(resolver.didDocument(_))
+      docsTO <- ZIO.foreach(msg.to.toSeq.flatten)(
+        resolver.didDocument(_).mapError(ResolverErrorWarp(_))
+      )
       recipientKeys = docsTO.flatMap(_.allKeysTypeKeyAgreement).groupBy(_.key.crv)
       curve2SenderRecipientKeys = senderKeys
         .map(e => e._1 -> (e._2, recipientKeys.get(e._1).getOrElse(Seq.empty)))
@@ -162,7 +168,9 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
       skid = msg.`protected`.obj match
         case AnonProtectedHeader(epk, apv, typ, enc, alg)            => ??? // FIXME
         case AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) => skid
-      doc <- resolver.didDocument(skid.did.asFROMTO)
+      doc <- resolver
+        .didDocument(skid.did.asFROMTO)
+        .mapError(ResolverErrorWarp(_))
       senderKey = doc.allKeysTypeKeyAgreement.find { e => e.vmr == skid }.get // FIXME get
       data <- cryptoOperations.authDecrypt(senderKey.key, keys, msg)
     } yield data

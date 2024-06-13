@@ -7,7 +7,7 @@ import fmgp.crypto.error._
 
 //TODO move out of the JVM into the
 final case class DynamicResolver(resolver: Resolver) extends Resolver {
-  override protected def didDocumentOf(did: FROMTO): IO[DidFail, DIDDocument] =
+  override protected def didDocumentOf(did: FROMTO): IO[ResolverError, DIDDocument] =
     for {
       docFromResolver <- resolver.didDocument(did)
       // sm <- transportManager.get

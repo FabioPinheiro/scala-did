@@ -22,7 +22,9 @@ class JWTOperationsImp(ops: CryptoJWTOperations) extends JWTOperations {
         case Some(iss)                          => ZIO.fail(WrongSigningDID)
         case None                               => ZIO.fail(MissingFromHeader) // FIXME MissingFromHeader
       resolver <- ZIO.service[Resolver]
-      didDocument <- resolver.didDocument(issDID.asFROM).mapError(FailToResolverDIDDocument(_))
+      didDocument <- resolver
+        .didDocument(issDID.asFROM)
+        .mapError(CryptoFailedWarpResolverError(_))
       privateKeysToSign = {
         val allKeysTypeAuthentication = didDocument.allKeysTypeAuthentication
         agent.keyStore.keys.filter(k =>

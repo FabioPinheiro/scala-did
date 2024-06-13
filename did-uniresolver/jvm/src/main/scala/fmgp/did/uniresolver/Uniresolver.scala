@@ -22,23 +22,20 @@ object Uniresolver {
 
 case class Uniresolver(uniresolverServer: String, client: Client, scope: Scope) extends Resolver {
 
-  override protected def didDocumentOf(did: FROMTO): IO[DidFail, DIDDocument] = {
+  override protected def didDocumentOf(did: FROMTO): IO[ResolverError, DIDDocument] = {
     // if (!methods.contains(did.toDID.namespace)) ZIO.fail(DidMethodNotSupported(did.toDID.namespace))
     // else
-
-    val program = for {
+    for {
       res <- Client
         .request(Request.get(path = uniresolverServer + did))
         .provideEnvironment(ZEnvironment(client) ++ ZEnvironment(scope))
-        .mapError { case _: Throwable => SomeThrowable(did.toDID.namespace) }
+        .mapError(ex => DIDresolutionFail.fromThrowable(ex))
       data <- res.body.asString
-        .mapError { case ex: Throwable => FailToParse(ex.getMessage()) }
+        .mapError(ex => DIDresolutionFail.fromThrowable(ex))
       didResolutionResult <- data.fromJson[DIDResolutionResult] match
-        case Left(error)  => ZIO.fail(FailToParse(error))
+        case Left(error)  => ZIO.fail(DIDresolutionFail.fromParseError("DIDResolutionResult", error))
         case Right(value) => ZIO.succeed(value.didDocument)
     } yield (didResolutionResult)
-
-    program
   }
 
   // val methods = Seq(

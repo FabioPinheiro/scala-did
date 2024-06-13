@@ -3,6 +3,7 @@ package fmgp.crypto
 import zio.json._
 
 import fmgp.did.DIDSubject
+import fmgp.did.ResolverError
 import fmgp.did.comm._
 
 package error {
@@ -21,7 +22,7 @@ package error {
 
   case class FailToParse(error: String) extends DidFail
 
-  case class DidMethodNotSupported(method: String) extends DidFail // rename
+  case class ResolverErrorWarp(error: ResolverError) extends DidFail
   case class DIDSubjectNotSupported(did: DIDSubject) extends DidFail
 
   case class NoAgent(info: String) extends DidFail
@@ -39,7 +40,7 @@ package error {
   }
 
   case class FailToGenerateKey(origin: DidFail) extends CryptoFailed
-  case class FailToResolverDIDDocument(origin: DidFail) extends CryptoFailed
+  case class CryptoFailedWarpResolverError(error: ResolverError) extends CryptoFailed
   case class FailToExtractKid(info: String) extends CryptoFailed
 
   case object CryptoNotImplementedError extends CryptoFailed // TODO
