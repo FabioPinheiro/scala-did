@@ -110,7 +110,9 @@ object EncryptTool {
         case Some(originalTO) =>
           for {
             resolver <- ZIO.service[Resolver]
-            doc <- resolver.didDocument(originalTO)
+            doc <- resolver
+              .didDocument(originalTO)
+              .mapError(ResolverErrorWarp(_))
             mMediatorDid = doc.getDIDServiceDIDCommMessaging.headOption.toSeq
               .flatMap(_.getServiceEndpointNextForward)
               .headOption

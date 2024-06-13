@@ -32,7 +32,9 @@ object Utils {
 
   def curlProgram(msg: EncryptedMessage): ZIO[Resolver, DidFail, Option[String]] = for {
     resolver <- ZIO.service[Resolver]
-    doc <- resolver.didDocument(TO(msg.recipientsSubject.head.string))
+    doc <- resolver
+      .didDocument(TO(msg.recipientsSubject.head.string))
+      .mapError(ResolverErrorWarp(_))
     didCommMessagingServices = doc.getDIDServiceDIDCommMessaging
     mURI = didCommMessagingServices.flatMap(_.endpoints.map(e => e.uri)).headOption
     call <- mURI match
