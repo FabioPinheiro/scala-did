@@ -54,31 +54,31 @@ object DIDWebExamples {
     val keyAgreement = makeKeyAgreement(
       d = "V_iMJa7YL12wLMRpH36DLXZgDUpPIdnt09-a9cZ_fZ4",
       x = "v_Xx37c36tZDkr5aGQ_ZHP1OITa4btKua4UlbFfYR3A",
-    )
+    ).copy(kid = Some(did + "#k1"))
     val keyAuthentication = makeKeyAuthentication(
       d = "sWQsOPOHkRxDuV9gF_cycvS2lA69tgiRv07xRY5etWU",
       x = "Elm1_e264C_dj9C_-iTaqUDYVbjxa8_TJ93GHc6yPyU",
-    )
+    ).copy(kid = Some(did + "#k2"))
 
     val doc = DIDDocumentClass(
       id = DIDSubject(did),
       authentication = Some(
         Seq(
           VerificationMethodEmbeddedJWK(
-            id = did + "#k2",
+            id = keyAuthentication.kid.get, // TODO
             controller = did,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = keyAuthentication.toPublicKey.copy(kid = Some(did + "#k2"))
+            publicKeyJwk = keyAuthentication.toPublicKey
           )
         )
       ),
       keyAgreement = Some(
         Set(
           VerificationMethodEmbeddedJWK(
-            id = did + "#k1",
+            id = keyAgreement.kid.get, // TODO
             controller = did,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = keyAgreement.toPublicKey.copy(kid = Some(did + "#k1"))
+            publicKeyJwk = keyAgreement.toPublicKey
           )
         )
       )
@@ -97,31 +97,31 @@ object DIDWebExamples {
     val keyAgreement = makeKeyAgreement(
       d = "B8WDuCbt6NIjHHtjTssOzSJYNHOVLNZ4ekG5tcpolqU",
       x = "mpv_KLuwOMn6pDfw-Zknbazb1mAPSG-tumisCyqYwQg",
-    )
+    ).copy(kid = Some("#KeyAgreement"))
     val keyAuthentication = makeKeyAuthentication(
       d = "y2c0JdZDyFokxomhZLyFE_NHLRy_1gF0-p2hYSSn2Tg",
       x = "DzKDGu9OxHff_RT-5dH4-fQbX9KTRLx5Xc1PM8LWfUU",
-    )
+    ).copy(kid = Some("#Authentication"))
 
     val doc = DIDDocumentClass(
       id = DIDSubject(did),
       authentication = Some(
         Seq(
           VerificationMethodEmbeddedJWK(
-            id = "#KeyAgreement",
+            id = keyAuthentication.kid.get, // TODO
             controller = did,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = keyAuthentication.toPublicKey.copy(kid = Some("#Authentication"))
+            publicKeyJwk = keyAuthentication.toPublicKey
           )
         )
       ),
       keyAgreement = Some(
         Set(
           VerificationMethodEmbeddedJWK(
-            id = "#KeyAgreement",
+            id = keyAgreement.kid.get, // TODO
             controller = did,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = keyAgreement.toPublicKey.copy(kid = Some("#KeyAgreement"))
+            publicKeyJwk = keyAgreement.toPublicKey
           )
         )
       )
