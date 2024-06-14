@@ -149,8 +149,30 @@ object AppServer extends ZIOAppDefault {
     }.flatten
   ).sandbox
 
+  def didWebs = Routes(
+    Method.GET / ".well-known" / "did.json" -> handler(
+      Response.json(DIDWebExamples.fabioWellKnown.toJsonPretty)
+    ),
+    Method.GET / "fabio" / "did.json" -> handler(
+      Response.json(DIDWebExamples.fabioWithPath.toJsonPretty)
+    ),
+    Method.GET / "clio" / "did.json" -> handler(
+      Response.json(DIDWebExamples.clioDoc.toJsonPretty)
+    ),
+    Method.GET / "thalia" / "did.json" -> handler(
+      Response.json(DIDWebExamples.thaliaDoc.toJsonPretty)
+    ),
+  )
+
   val app: Routes[Operator & Operations & Resolver, Nothing] = (
-    DIDCommRoutes.appRoutes ++ appTest ++ DocsApp.mdocHTML /*++ mdocMarkdown*/ ++ appOther ++ appWebsite // ++ DidPeerUniresolverDriver.resolverPeer
+    DIDCommRoutes.appRoutes ++
+      didWebs ++
+      appTest ++
+      DocsApp.mdocHTML ++
+      /*mdocMarkdown ++*/
+      appOther ++
+      appWebsite
+      // DidPeerUniresolverDriver.resolverPeer
   ) @@ (Middleware.cors) // ++ MiddlewareUtils.all)
 
   val resolverLayer = ZLayer.fromZIO(makeResolver)
