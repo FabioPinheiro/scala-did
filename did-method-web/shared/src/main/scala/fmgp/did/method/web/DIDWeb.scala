@@ -1,17 +1,18 @@
 package fmgp.did.method.web
 
 import zio._
+import zio.json._
 import fmgp.did._
+import fmgp.did.comm.FROMTO
+import fmgp.crypto._
 
 /** DID web
   *
   * @see
   *   https://w3c-ccg.github.io/did-method-web/
   */
-case class DIDWeb(subject: DIDSubject) extends DID {
-  assert(subject.toDID.namespace == "web")
-  def namespace: String = subject.toDID.namespace
-  def specificId: String = subject.toDID.specificId
+case class DIDWeb(specificId: String) extends DID {
+  final def namespace: String = DIDWeb.namespace
 
   def domainName: String = specificId.split(":").head // NOTE split always have head
 
@@ -24,5 +25,6 @@ case class DIDWeb(subject: DIDSubject) extends DID {
 }
 
 object DIDWeb {
-  def applyUnsafe(did: String): DIDWeb = DIDWeb(DIDSubject(did))
+  def namespace: String = "web"
+  def applyUnsafe(did: String): DIDWeb = DIDWeb(DIDSubject(did).specificId)
 }

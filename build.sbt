@@ -517,6 +517,10 @@ lazy val didResolverWeb = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.zioMunitTest.value,
   )
   .jvmSettings(libraryDependencies += D.ziohttp.value)
+  .jvmSettings( // FIXME https://github.com/zio/zio-http/issues/2280#issuecomment-2166894061
+    Test / fork := true,
+    Test / javaOptions := Seq("-Djava.net.preferIPv4Stack=true"),
+  )
   .dependsOn(did)
   .configure(docConfigure)
 
