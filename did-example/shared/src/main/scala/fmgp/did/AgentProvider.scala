@@ -136,6 +136,8 @@ object AgentProvider {
       AgentWithShortName("oldLocalhost8080AliceHttp&Ws", oldLocalhost8080AliceHttpWs),
       AgentWithShortName("oldLocalhost9000Alice", oldLocalhost9000Alice),
        */
+      AgentWithShortName("Web_Clio", DIDWebExamples.clioAgent),
+      AgentWithShortName("Web_Thalia", DIDWebExamples.thaliaAgent),
     ),
     Seq(
       DIDWithShortName(
@@ -180,6 +182,8 @@ object AgentProvider {
       DIDWithShortName("DecentriQube_Mediator", decentriQubeMediatorDID),
       DIDWithShortName("DecentriQube_Verifier", decentriQubeVerifierDID),
       DIDWithShortName("DecentriQube_Register", decentriQubeRegisterDID),
+      DIDWithShortName("Web_Well_Known", DIDWebExamples.fabioWellKnown),
+      DIDWithShortName("Web_Fabio", DIDWebExamples.fabioWithPath),
     )
   )
 
