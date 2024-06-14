@@ -13,13 +13,13 @@ import fmgp.did._
 import fmgp.did.comm._
 import fmgp.did.comm.protocol.basicmessage2.BasicMessage
 import fmgp.did.method.peer.DIDPeer._
-import fmgp.did.method.peer.DidPeerResolver
 import fmgp.did.uniresolver._
 import com.raquo.airstream.ownership._
 import fmgp.crypto.error._
 import fmgp.did.method.peer.DIDPeer
 import fmgp.did.method.hardcode.HardcodeResolver
 import fmgp.webapp.MyRouter.ResolverPage
+import fmgp.Utils
 
 object ResolverTool {
 
@@ -43,7 +43,7 @@ object ResolverTool {
         errorInfo => didDocumentVar.update(_ => Left(errorInfo.toString)),
         doc => didDocumentVar.update(_ => Right(doc))
       ).provide(Global.resolverLayer)
-      Unsafe.unsafe { implicit unsafe => Runtime.default.unsafe.fork(program) } // Run side effect
+      Utils.runProgram(program)
     }
     .observe(owner)
 

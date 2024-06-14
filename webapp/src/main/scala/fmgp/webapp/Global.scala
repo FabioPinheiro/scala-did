@@ -12,6 +12,7 @@ import fmgp.crypto.error._
 import fmgp.did._
 import fmgp.did.comm._
 import fmgp.did.agent.MessageStorage
+import fmgp.did.method.web.DIDWebResolver
 import fmgp.did.method.peer.DidPeerResolver
 import fmgp.did.method.hardcode.HardcodeResolver
 import fmgp.did.uniresolver.Uniresolver
@@ -26,6 +27,7 @@ object Global {
     multiResolver = MultiFallbackResolver(
       HardcodeResolver.default,
       DidPeerResolver.default,
+      DIDWebResolver.default,
       uniresolver,
     )
   } yield multiResolver
