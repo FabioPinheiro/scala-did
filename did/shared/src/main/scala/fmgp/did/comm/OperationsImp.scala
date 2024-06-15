@@ -83,7 +83,7 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
     } yield ret
   }
 
-  def authEncrypt(msg: PlaintextMessage): ZIO[Agent & Resolver, DidFail, EncryptedMessage] = {
+  override def authEncrypt(msg: PlaintextMessage): ZIO[Agent & Resolver, DidFail, EncryptedMessage] = {
     // TODO return EncryptionFailed.type on docs
     for {
       agent <- ZIO.service[Agent]
@@ -130,7 +130,13 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
         //     .map(Some(_))
       }: Seq[ZIO[Any, CryptoFailed, Option[EncryptedMessage]]]
       ret <- ZIO.foreach(msgSeq)(e => e).map(_.flatten)
-    } yield ret.head // FIXME HAED
+      headFixme <- ret match
+        case Seq()         => ZIO.fail(EncryptionFailed) // FIXME HAED
+        case eMsg +: Seq() => ZIO.succeed(eMsg)
+        case eMsg +: others => // TODO Don't discard other messages
+          ZIO.logWarning(s"We are discount other encrypted messages (${others.size})") *>
+            ZIO.succeed(eMsg)
+    } yield headFixme
   }
 
   /** decrypt */
