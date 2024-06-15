@@ -13,8 +13,6 @@ final case class DynamicResolver(resolver: Resolver) extends Resolver {
       // sm <- transportManager.get
       doc = DIDDocumentClass(
         id = docFromResolver.id,
-        alsoKnownAs = docFromResolver.alsoKnownAs,
-        controller = docFromResolver.controller,
         verificationMethod = docFromResolver.verificationMethod,
         authentication = docFromResolver.authentication,
         assertionMethod = docFromResolver.assertionMethod,

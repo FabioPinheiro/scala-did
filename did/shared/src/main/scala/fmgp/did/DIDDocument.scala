@@ -17,8 +17,6 @@ import fmgp.crypto.PublicKey
   */
 trait DIDDocument extends DID {
   def id: Required[DIDSubject] // = s"$scheme:$namespace:$specificId"
-  def alsoKnownAs: NotRequired[Set[String]]
-  def controller: NotRequired[Either[String, Set[String]]]
 
   /** @see
     *   https://www.w3.org/TR/did-core/#verification-methods
@@ -119,8 +117,6 @@ object DIDDocument {
     DIDDocumentClass.encoder.contramap(e =>
       DIDDocumentClass(
         id = e.id,
-        alsoKnownAs = e.alsoKnownAs,
-        controller = e.controller,
         verificationMethod = e.verificationMethod,
         authentication = e.authentication,
         assertionMethod = e.assertionMethod,

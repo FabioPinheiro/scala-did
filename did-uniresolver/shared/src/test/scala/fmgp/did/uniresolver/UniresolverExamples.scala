@@ -76,8 +76,6 @@ object UniresolverExamples {
       "https://w3id.org/did-resolution/v1",
       DIDDocumentClass(
         DIDSubject("did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w"),
-        None,
-        None,
         Some(
           Set(
             VerificationMethodEmbeddedJWK(
