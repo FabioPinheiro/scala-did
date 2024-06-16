@@ -27,11 +27,7 @@ class JWTOperationsImp(ops: CryptoJWTOperations) extends JWTOperations {
         .mapError(CryptoFailedWarpResolverError(_))
       privateKeysToSign = {
         val allKeysTypeAuthentication = didDocument.allKeysTypeAuthentication
-        agent.keyStore.keys.filter(k =>
-          k.kid match
-            case None      => false // no kid ...
-            case Some(kid) => allKeysTypeAuthentication.map(_.id).contains(kid)
-        )
+        agent.keyStore.keys.filter(k => allKeysTypeAuthentication.map(_.id).contains(k.kid))
       }
       signingKey <- privateKeysToSign.toSeq
         .filter {

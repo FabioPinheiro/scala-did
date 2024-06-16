@@ -4,6 +4,7 @@ import zio.json._
 import zio.json.ast.Json
 import zio.json.ast.JsonCursor
 import fmgp.util.{Base64, safeValueOf}
+import fmgp.did.comm.JSON_RFC7159.apply
 
 /** Header Parameter Values for JWS https://datatracker.ietf.org/doc/html/rfc7518#section-3.1 */
 enum JWAAlgorithm {
@@ -107,19 +108,22 @@ object Curve {
   val okpCurveSet = Set(Curve.X25519, Curve.Ed25519)
 }
 
-/** https://tools.ietf.org/id/draft-ietf-jose-json-web-key-00.html */
-sealed trait JWKObj {
-  def kid: Option[String]
+/** https://www.rfc-editor.org/rfc/rfc7638 */
+sealed trait JWKObj extends MaybeKid {
   def kty: KTY
   def alg: JWAAlgorithm
 }
+
+sealed trait MaybeKid { def maybeKid: Option[String] }
+sealed trait WithKid extends MaybeKid { def kid: String; def maybeKid: Option[String] = Some(kid) }
+sealed trait WithoutKid extends MaybeKid { def maybeKid: Option[String] = None }
 
 @jsonDiscriminator("kty")
 // sealed trait OKP_EC_Key {
 sealed abstract class OKP_EC_Key extends JWKObj {
   def kty: KTY // EC.type = KTY.EC
   def crv: Curve
-  def kid: Option[String]
+  // def kid: Option[String]
   def x: String
   def xNumbre = Base64.fromBase64url(x).decodeToBigInt
 
@@ -158,9 +162,11 @@ sealed abstract class OKP_EC_Key extends JWKObj {
 }
 
 sealed abstract class OKPKey extends OKP_EC_Key {
+  override def kty: KTY.OKP.type
   def getCurve: OKPCurve = crv.asOKPCurve
 }
 sealed abstract class ECKey extends OKP_EC_Key {
+  override def kty: KTY.EC.type
   def y: String
   def yNumbre = Base64.fromBase64url(y).decodeToBigInt
   def getCurve: ECCurve = crv.asECCurve
@@ -168,31 +174,57 @@ sealed abstract class ECKey extends OKP_EC_Key {
 }
 
 sealed trait PublicKey extends OKP_EC_Key
-sealed trait PrivateKey extends OKP_EC_Key {
-  def toPublicKey: PublicKey
-  def d: String
+sealed trait PublicKeyWithKid extends PublicKey with WithKid
+sealed trait PublicKeyWithoutKid extends PublicKey with WithoutKid
+sealed trait PrivateKey extends OKP_EC_Key { def toPublicKey: PublicKey; def d: String }
+sealed trait PrivateKeyWithKid extends PrivateKey with WithKid
+sealed trait PrivateKeyWithoutKid extends PrivateKey with WithoutKid
+
+sealed trait OKPPublicKey extends OKPKey with PublicKey
+case class OKPPublicKeyWithKid(kty: KTY.OKP.type, crv: Curve, x: String, kid: String)
+    extends OKPPublicKey
+    with PublicKeyWithKid
+case class OKPPublicKeyWithoutKid(kty: KTY.OKP.type, crv: Curve, x: String)
+    extends OKPPublicKey
+    with PublicKeyWithoutKid
+
+sealed trait OKPPrivateKey extends OKPKey with PrivateKey
+case class OKPPrivateKeyWithKid(kty: KTY.OKP.type, crv: Curve, d: String, x: String, kid: String)
+    extends OKPPrivateKey
+    with PrivateKeyWithKid {
+  def toPublicKey: OKPPublicKeyWithKid = OKPPublicKeyWithKid(kty = kty, crv = crv, x = x, kid = kid)
+}
+case class OKPPrivateKeyWithoutKid(kty: KTY.OKP.type, crv: Curve, d: String, x: String)
+    extends OKPPrivateKey
+    with PrivateKeyWithoutKid {
+  def toPublicKey: OKPPublicKeyWithoutKid = OKPPublicKeyWithoutKid(kty = kty, crv = crv, x = x)
 }
 
-case class OKPPublicKey(kty: KTY.OKP.type, crv: Curve, x: String, kid: Option[String]) extends OKPKey with PublicKey
-case class OKPPrivateKey(kty: KTY.OKP.type, crv: Curve, d: String, x: String, kid: Option[String])
-    extends OKPKey
-    with PrivateKey {
-  def toPublicKey: OKPPublicKey = OKPPublicKey(kty = kty, crv = crv, x = x, kid = kid)
-}
+sealed trait ECPublicKey extends ECKey with PublicKey
 
-case class ECPublicKey(kty: KTY.EC.type, crv: Curve, x: String, y: String, kid: Option[String])
-    extends ECKey
-    with PublicKey
-case class ECPrivateKey(kty: KTY.EC.type, crv: Curve, d: String, x: String, y: String, kid: Option[String])
-    extends ECKey
-    with PrivateKey {
-  def toPublicKey: ECPublicKey = ECPublicKey(kty = kty, crv = crv, x = x, y = y, kid = kid)
-}
+case class ECPublicKeyWithKid(kty: KTY.EC.type, crv: Curve, x: String, y: String, kid: String)
+    extends ECPublicKey
+    with PublicKeyWithKid
+case class ECPublicKeyWithoutKid(kty: KTY.EC.type, crv: Curve, x: String, y: String)
+    extends ECPublicKey
+    with PublicKeyWithoutKid
 
-object OKP_EC_Key {
-  given decoder: JsonDecoder[OKP_EC_Key] = ???
-  given encoder: JsonEncoder[OKP_EC_Key] = ???
+sealed trait ECPrivateKey extends ECKey with PrivateKey
+
+case class ECPrivateKeyWithKid(kty: KTY.EC.type, crv: Curve, d: String, x: String, y: String, kid: String)
+    extends ECPrivateKey
+    with PrivateKeyWithKid {
+  def toPublicKey: ECPublicKeyWithKid = ECPublicKeyWithKid(kty = kty, crv = crv, x = x, y = y, kid = kid)
 }
+case class ECPrivateKeyWithoutKid(kty: KTY.EC.type, crv: Curve, d: String, x: String, y: String)
+    extends ECPrivateKey
+    with PrivateKeyWithoutKid {
+  def toPublicKey: ECPublicKeyWithoutKid = ECPublicKeyWithoutKid(kty = kty, crv = crv, x = x, y = y)
+}
+// object OKP_EC_Key {
+//   given decoder: JsonDecoder[OKP_EC_Key] = ???
+//   given encoder: JsonEncoder[OKP_EC_Key] = ???
+// }
 
 object PublicKey {
 
@@ -244,20 +276,55 @@ object PrivateKey {
   }
 }
 
+object PublicKeyWithKid {
+  given decoder: JsonDecoder[PublicKeyWithKid] = DeriveJsonDecoder.gen[PublicKeyWithKid] // FIXME
+  given encoder: JsonEncoder[PublicKeyWithKid] = DeriveJsonEncoder.gen[PublicKeyWithKid] // FIXME
+}
+object PublicKeyWithoutKid {
+  given decoder: JsonDecoder[PublicKeyWithoutKid] = DeriveJsonDecoder.gen[PublicKeyWithoutKid] // FIXME
+  given encoder: JsonEncoder[PublicKeyWithoutKid] = DeriveJsonEncoder.gen[PublicKeyWithoutKid] // FIXME
+}
+object PrivateKeyWithKid {
+  given decoder: JsonDecoder[PrivateKeyWithKid] = DeriveJsonDecoder.gen[PrivateKeyWithKid] // FIXME
+  given encoder: JsonEncoder[PrivateKeyWithKid] = DeriveJsonEncoder.gen[PrivateKeyWithKid] // FIXME
+}
+object PrivateKeyWithoutKid {
+  given decoder: JsonDecoder[PrivateKeyWithoutKid] = DeriveJsonDecoder.gen[PrivateKeyWithoutKid] // FIXME
+  given encoder: JsonEncoder[PrivateKeyWithoutKid] = DeriveJsonEncoder.gen[PrivateKeyWithoutKid] // FIXME
+}
+
 object ECPublicKey {
-  given decoder: JsonDecoder[ECPublicKey] = DeriveJsonDecoder.gen[ECPublicKey]
-  given encoder: JsonEncoder[ECPublicKey] = DeriveJsonEncoder.gen[ECPublicKey]
+  given decoder: JsonDecoder[ECPublicKey] = DeriveJsonDecoder.gen[ECPublicKey] // FIXME
+  given encoder: JsonEncoder[ECPublicKey] = DeriveJsonEncoder.gen[ECPublicKey] // FIXME
+  def unapply(key: ECPublicKey): Option[(KTY, Curve, String, String, Option[String])] =
+    Some((key.kty, key.crv, key.x, key.y, key.maybeKid))
 }
 object ECPrivateKey {
-  given decoder: JsonDecoder[ECPrivateKey] = DeriveJsonDecoder.gen[ECPrivateKey]
-  given encoder: JsonEncoder[ECPrivateKey] = DeriveJsonEncoder.gen[ECPrivateKey]
+  given decoder: JsonDecoder[ECPrivateKey] = DeriveJsonDecoder.gen[ECPrivateKey] // FIXME
+  given encoder: JsonEncoder[ECPrivateKey] = DeriveJsonEncoder.gen[ECPrivateKey] // FIXME
+  def unapply(key: ECPrivateKey): Option[(KTY, Curve, String, String, String, Option[String])] =
+    Some((key.kty, key.crv, key.d, key.x, key.y, key.maybeKid))
+
 }
 
 object OKPPublicKey {
-  given decoder: JsonDecoder[OKPPublicKey] = DeriveJsonDecoder.gen[OKPPublicKey]
-  given encoder: JsonEncoder[OKPPublicKey] = DeriveJsonEncoder.gen[OKPPublicKey]
+  given decoder: JsonDecoder[OKPPublicKey] = DeriveJsonDecoder.gen[OKPPublicKey] // FIXME
+  given encoder: JsonEncoder[OKPPublicKey] = DeriveJsonEncoder.gen[OKPPublicKey] // FIXME
+  def unapply(key: OKPPublicKey): Option[(KTY, Curve, String, Option[String])] =
+    Some((key.kty, key.crv, key.x, key.maybeKid))
 }
 object OKPPrivateKey {
-  given decoder: JsonDecoder[OKPPrivateKey] = DeriveJsonDecoder.gen[OKPPrivateKey]
-  given encoder: JsonEncoder[OKPPrivateKey] = DeriveJsonEncoder.gen[OKPPrivateKey]
+  given decoder: JsonDecoder[OKPPrivateKey] = DeriveJsonDecoder.gen[OKPPrivateKey] // FIXME
+  given encoder: JsonEncoder[OKPPrivateKey] = DeriveJsonEncoder.gen[OKPPrivateKey] // FIXME
+  def unapply(key: OKPPrivateKey): Option[(KTY, Curve, String, String, Option[String])] =
+    Some((key.kty, key.crv, key.d, key.x, key.maybeKid))
 }
+//TODO
+// object OKPPrivateKeyWithKid {
+//   given decoder: JsonDecoder[OKPPrivateKeyWithKid] = DeriveJsonDecoder.gen[OKPPrivateKeyWithKid]
+//   given encoder: JsonEncoder[OKPPrivateKeyWithKid] = DeriveJsonEncoder.gen[OKPPrivateKeyWithKid]
+// }
+// object OKPPrivateKeyWithoutKid {
+//   given decoder: JsonDecoder[OKPPrivateKeyWithoutKid] = DeriveJsonDecoder.gen[OKPPrivateKeyWithoutKid]
+//   given encoder: JsonEncoder[OKPPrivateKeyWithoutKid] = DeriveJsonEncoder.gen[OKPPrivateKeyWithoutKid]
+// }
