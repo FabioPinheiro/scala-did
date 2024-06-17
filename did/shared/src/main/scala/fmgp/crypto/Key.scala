@@ -69,6 +69,32 @@ type ECCurve = Curve.`P-256`.type | Curve.`P-384`.type | Curve.`P-521`.type | Cu
 // sealed trait OKPCurve // Edwards-curve Octet Key Pair
 type OKPCurve = Curve.X25519.type | Curve.Ed25519.type // | Curve.Curve25519.type
 
+opaque type ECCurveOpaque = Curve.`P-256`.type | Curve.`P-384`.type | Curve.`P-521`.type | Curve.secp256k1.type
+object ECCurveOpaque:
+  def apply(value: Curve.`P-256`.type | Curve.`P-384`.type | Curve.`P-521`.type | Curve.secp256k1.type): ECCurveOpaque =
+    value
+  extension (curveEnum: ECCurveOpaque)
+    def curve: Curve.`P-256`.type | Curve.`P-384`.type | Curve.`P-521`.type | Curve.secp256k1.type = curveEnum
+  given decoder: JsonDecoder[ECCurveOpaque] = JsonDecoder.string.mapOrFail(e =>
+    safeValueOf(Curve.valueOf(e)).flatMap {
+      case o: ECCurve  => Right(o)
+      case o: OKPCurve => Left(s"$o is a OKPCruve but is expecting a ECCruve")
+    }
+  )
+opaque type OKPCurveOpaque = OKPCurve
+object OKPCurveOpaque:
+  def apply(
+      value: OKPCurve
+  ): OKPCurveOpaque =
+    value
+  extension (curveEnum: OKPCurveOpaque) def curve: OKPCurve = curveEnum
+  given decoder: JsonDecoder[OKPCurveOpaque] = JsonDecoder.string.mapOrFail(e =>
+    safeValueOf(Curve.valueOf(e)).flatMap {
+      case o: OKPCurve => Right(o)
+      case o: ECCurve  => Left(s"$o is a ECCruve but is expecting a OKPCruve")
+    }
+  )
+
 object Curve {
   extension (curve: Curve) {
 
@@ -114,9 +140,12 @@ sealed trait JWKObj extends MaybeKid {
   def alg: JWAAlgorithm
 }
 
-sealed trait MaybeKid { def maybeKid: Option[String] }
-sealed trait WithKid extends MaybeKid { def kid: String; def maybeKid: Option[String] = Some(kid) }
-sealed trait WithoutKid extends MaybeKid { def maybeKid: Option[String] = None }
+sealed trait MaybeKid {
+  def maybeKid: Option[String] = this match
+    case o: WithKid => Some(o.kid)
+    case o          => None
+}
+sealed trait WithKid extends MaybeKid { def kid: String; override final def maybeKid: Option[String] = Some(kid) }
 
 @jsonDiscriminator("kty")
 // sealed trait OKP_EC_Key {
@@ -128,6 +157,7 @@ sealed abstract class OKP_EC_Key extends JWKObj {
   def xNumbre = Base64.fromBase64url(x).decodeToBigInt
 
   // TODO // Should I make this type safe? Will add another dimension of types, just to move the error to the parser.
+  // REMOVE. Because this is now type safe
   assert(
     crv match {
       case Curve.secp256k1 => kty == KTY.EC
@@ -163,6 +193,8 @@ sealed abstract class OKP_EC_Key extends JWKObj {
 
 sealed abstract class OKPKey extends OKP_EC_Key {
   override def kty: KTY.OKP.type
+  override def crv: OKPCurve
+
   def getCurve: OKPCurve = crv.asOKPCurve
 }
 sealed abstract class ECKey extends OKP_EC_Key {
@@ -173,158 +205,393 @@ sealed abstract class ECKey extends OKP_EC_Key {
   def isPointOnCurve = getCurve.isPointOnCurve(xNumbre, yNumbre)
 }
 
-sealed trait PublicKey extends OKP_EC_Key
 sealed trait PublicKeyWithKid extends PublicKey with WithKid
-sealed trait PublicKeyWithoutKid extends PublicKey with WithoutKid
-sealed trait PrivateKey extends OKP_EC_Key { def toPublicKey: PublicKey; def d: String }
+sealed trait PublicKey extends OKP_EC_Key
 sealed trait PrivateKeyWithKid extends PrivateKey with WithKid
-sealed trait PrivateKeyWithoutKid extends PrivateKey with WithoutKid
+sealed trait PrivateKey extends OKP_EC_Key { def toPublicKey: PublicKey; def d: String }
 
-sealed trait OKPPublicKey extends OKPKey with PublicKey
-case class OKPPublicKeyWithKid(kty: KTY.OKP.type, crv: Curve, x: String, kid: String)
-    extends OKPPublicKey
+// ##########
+// ## OKP ###
+// ##########
+
+case class OKPPublicKeyWithKid(
+    override val kty: KTY.OKP.type,
+    override val crv: OKPCurve,
+    override val x: String,
+    override val kid: String
+) extends OKPPublicKey(kty = kty, crv = crv, x = x)
     with PublicKeyWithKid
-case class OKPPublicKeyWithoutKid(kty: KTY.OKP.type, crv: Curve, x: String)
-    extends OKPPublicKey
-    with PublicKeyWithoutKid
 
-sealed trait OKPPrivateKey extends OKPKey with PrivateKey
-case class OKPPrivateKeyWithKid(kty: KTY.OKP.type, crv: Curve, d: String, x: String, kid: String)
-    extends OKPPrivateKey
+sealed class OKPPublicKey(
+    override val kty: KTY.OKP.type,
+    override val crv: OKPCurve,
+    override val x: String
+) extends OKPKey
+    with PublicKey
+
+case class OKPPrivateKeyWithKid(
+    override val kty: KTY.OKP.type,
+    override val crv: OKPCurve,
+    override val d: String,
+    override val x: String,
+    override val kid: String
+) extends OKPPrivateKey(kty = kty, crv = crv, d = d, x = x)
     with PrivateKeyWithKid {
-  def toPublicKey: OKPPublicKeyWithKid = OKPPublicKeyWithKid(kty = kty, crv = crv, x = x, kid = kid)
-}
-case class OKPPrivateKeyWithoutKid(kty: KTY.OKP.type, crv: Curve, d: String, x: String)
-    extends OKPPrivateKey
-    with PrivateKeyWithoutKid {
-  def toPublicKey: OKPPublicKeyWithoutKid = OKPPublicKeyWithoutKid(kty = kty, crv = crv, x = x)
+  override def toPublicKey: OKPPublicKeyWithKid = OKPPublicKeyWithKid(kty = kty, crv = crv, x = x, kid = kid)
 }
 
-sealed trait ECPublicKey extends ECKey with PublicKey
+sealed class OKPPrivateKey(
+    override val kty: KTY.OKP.type,
+    override val crv: OKPCurve,
+    override val d: String,
+    override val x: String
+) extends OKPKey
+    with PrivateKey {
 
-case class ECPublicKeyWithKid(kty: KTY.EC.type, crv: Curve, x: String, y: String, kid: String)
-    extends ECPublicKey
+  def toPublicKey: OKPPublicKey = OKPPublicKey(kty = kty, crv = crv, x = x)
+}
+
+// ##########
+// ### EC ###
+// ##########
+
+case class ECPublicKeyWithKid(
+    override val kty: KTY.EC.type,
+    override val crv: ECCurve,
+    override val x: String,
+    override val y: String,
+    override val kid: String
+) extends ECPublicKey(kty = kty, crv = crv, x = x, y = y)
     with PublicKeyWithKid
-case class ECPublicKeyWithoutKid(kty: KTY.EC.type, crv: Curve, x: String, y: String)
-    extends ECPublicKey
-    with PublicKeyWithoutKid
 
-sealed trait ECPrivateKey extends ECKey with PrivateKey
+sealed class ECPublicKey(
+    override val kty: KTY.EC.type,
+    override val crv: ECCurve,
+    override val x: String,
+    override val y: String
+) extends ECKey
+    with PublicKey
 
-case class ECPrivateKeyWithKid(kty: KTY.EC.type, crv: Curve, d: String, x: String, y: String, kid: String)
-    extends ECPrivateKey
+case class ECPrivateKeyWithKid(
+    override val kty: KTY.EC.type,
+    override val crv: ECCurve,
+    override val d: String,
+    override val x: String,
+    override val y: String,
+    override val kid: String
+) extends ECPrivateKey(kty = kty, crv = crv, d = d, x = x, y = y)
     with PrivateKeyWithKid {
-  def toPublicKey: ECPublicKeyWithKid = ECPublicKeyWithKid(kty = kty, crv = crv, x = x, y = y, kid = kid)
+  override def toPublicKey: ECPublicKeyWithKid = ECPublicKeyWithKid(kty = kty, crv = crv, x = x, y = y, kid = kid)
 }
-case class ECPrivateKeyWithoutKid(kty: KTY.EC.type, crv: Curve, d: String, x: String, y: String)
-    extends ECPrivateKey
-    with PrivateKeyWithoutKid {
-  def toPublicKey: ECPublicKeyWithoutKid = ECPublicKeyWithoutKid(kty = kty, crv = crv, x = x, y = y)
+
+sealed class ECPrivateKey(
+    override val kty: KTY.EC.type,
+    override val crv: ECCurve,
+    override val d: String,
+    override val x: String,
+    override val y: String
+) extends ECKey
+    with PrivateKey {
+  override def toPublicKey: ECPublicKey = ECPublicKey(kty = kty, crv = crv, x = x, y = y)
 }
-// object OKP_EC_Key {
-//   given decoder: JsonDecoder[OKP_EC_Key] = ???
-//   given encoder: JsonEncoder[OKP_EC_Key] = ???
-// }
+
+// ###############
+// ###############
+// ###############
+
+object OKP_EC_Key {
+  private val ktyCursor = JsonCursor.field("kty") >>> JsonCursor.isString
+  private val crvCursor = JsonCursor.field("crv") >>> JsonCursor.isString
+  // private val dCursor = JsonCursor.field("d") >>> JsonCursor.isString
+  private val xCursor = JsonCursor.field("x") >>> JsonCursor.isString
+  private val yCursor = JsonCursor.field("y") >>> JsonCursor.isString
+  // private val kidCursor = JsonCursor.field("kid") >>> JsonCursor.isString
+
+  given encoder: JsonEncoder[OKP_EC_Key] =
+    JsonEncoder[Json.Obj].contramap { k =>
+      Json.Obj.apply(
+        Seq(
+          Some(("kty", Json.Str(k.kty.toString))),
+          Some(("crv", Json.Str(k.crv.toString()))),
+          k match { case ecKey: PrivateKey => Some(("d", Json.Str(ecKey.d))); case _ => None },
+          Some(("x", Json.Str(k.x))),
+          k match { case ecKey: ECKey => Some(("y", Json.Str(ecKey.y))); case _ => None },
+          k.maybeKid.map(kid => ("kid", Json.Str(kid)))
+        ).flatten: _*
+      )
+    }
+  given decoder: JsonDecoder[OKP_EC_Key] = JsonDecoder[Json.Obj]
+    .mapOrFail { obj =>
+      for {
+        kty <- obj.get(ktyCursor).flatMap(_.as[KTY])
+        maybeD <- obj.get("d") match
+          case None       => Right(None)
+          case Some(data) => data.as[Json.Str].map(s => Some(s.value))
+        maybeKid <- obj.get("kid") match
+          case None       => Right(None)
+          case Some(data) => data.as[Json.Str].map(s => Some(s.value))
+        x <- obj.get(xCursor).map(_.value)
+        key <- kty match
+          case ktyEC: KTY.EC.type =>
+            for {
+              y <- obj.get(yCursor).map(_.value)
+              crv <- obj.get(crvCursor).flatMap(_.as[ECCurveOpaque])
+              ret = (maybeD, maybeKid) match
+                case (None, None)      => ECPublicKey(kty = ktyEC, crv = crv.curve, x = x, y = y)
+                case (None, Some(kid)) => ECPublicKeyWithKid(kty = ktyEC, crv = crv.curve, x = x, y = y, kid = kid)
+                case (Some(d), None)   => ECPrivateKey(kty = ktyEC, crv = crv.curve, d = d, x = x, y = y)
+                case (Some(d), Some(kid)) =>
+                  ECPrivateKeyWithKid(kty = ktyEC, crv = crv.curve, d = d, x = x, y = y, kid = kid)
+            } yield ret
+          case ktyOKP: KTY.OKP.type =>
+            for {
+              crv <- obj.get(crvCursor).flatMap(_.as[OKPCurveOpaque])
+              ret = (maybeD, maybeKid) match
+                case (None, None)      => OKPPublicKey(kty = ktyOKP, crv = crv.curve, x = x)
+                case (None, Some(kid)) => OKPPublicKeyWithKid(kty = ktyOKP, crv = crv.curve, x = x, kid = kid)
+                case (Some(d), None)   => OKPPrivateKey(kty = ktyOKP, crv = crv.curve, d = d, x = x)
+                case (Some(d), Some(kid)) =>
+                  OKPPrivateKeyWithKid(kty = ktyOKP, crv = crv.curve, d = d, x = x, kid = kid)
+            } yield ret
+      } yield key
+    }
+}
 
 object PublicKey {
-
-  given decoder: JsonDecoder[PublicKey] = Json.Obj.decoder.mapOrFail { originalAst =>
-    originalAst
-      .get(JsonCursor.field("kty"))
-      .flatMap(ast => KTY.decoder.fromJsonAST(ast))
-      .flatMap {
-        case KTY.EC =>
-          // ECPublicKey.decoder.fromJsonAST(originalAst) // FIXME REPORT BUG ? see didJVM/testOnly *.KeySuite (parse Key with no kid)
-          ECPublicKey.decoder.decodeJson(originalAst.toJson)
-        case KTY.OKP =>
-          // OKPPublicKey.decoder.fromJsonAST(originalAst) // FIXME REPORT BUG ? see didJVM/testOnly *.KeySuite (parse Key with no kid)
-          OKPPublicKey.decoder.decodeJson(originalAst.toJson)
-      }
-  }
-
-  given encoder: JsonEncoder[PublicKey] = new JsonEncoder[PublicKey] {
-    override def unsafeEncode(b: PublicKey, indent: Option[Int], out: zio.json.internal.Write): Unit = b match {
-      case obj: OKPPublicKey => OKPPublicKey.encoder.unsafeEncode(obj, indent, out)
-      case obj: ECPublicKey  => ECPublicKey.encoder.unsafeEncode(obj, indent, out)
+  given encoder: JsonEncoder[PublicKey] = JsonEncoder[OKP_EC_Key].narrow
+  // TODO the code 'Right(k.toPublicKey)' // Can be optimized at compile time
+  given decoder: JsonDecoder[PublicKey] = JsonDecoder[OKP_EC_Key]
+    .mapOrFail {
+      case k: OKPPublicKeyWithKid  => Right(k)
+      case k: OKPPublicKey         => Right(k)
+      case k: OKPPrivateKeyWithKid => Right(k.toPublicKey)
+      case k: OKPPrivateKey        => Right(k.toPublicKey)
+      case k: ECPublicKeyWithKid   => Right(k)
+      case k: ECPublicKey          => Right(k)
+      case k: ECPrivateKeyWithKid  => Right(k.toPublicKey)
+      case k: ECPrivateKey         => Right(k.toPublicKey)
     }
-  }
+  // given decoder: JsonDecoder[PublicKey] = Json.Obj.decoder.mapOrFail { originalAst =>
+  //   originalAst
+  //     .get(JsonCursor.field("kty"))
+  //     .flatMap(ast => KTY.decoder.fromJsonAST(ast))
+  //     .flatMap {
+  //       case KTY.EC =>
+  //         // ECPublicKey.decoder.fromJsonAST(originalAst) // FIXME REPORT BUG ? see didJVM/testOnly *.KeySuite (parse Key with no kid)
+  //         ECPublicKey.decoder.decodeJson(originalAst.toJson)
+  //       case KTY.OKP =>
+  //         // OKPPublicKey.decoder.fromJsonAST(originalAst) // FIXME REPORT BUG ? see didJVM/testOnly *.KeySuite (parse Key with no kid)
+  //         OKPPublicKey.decoder.decodeJson(originalAst.toJson)
+  //     }
+  // }
 
-}
+  // given encoder: JsonEncoder[PublicKey] = new JsonEncoder[PublicKey] {
+  //   override def unsafeEncode(b: PublicKey, indent: Option[Int], out: zio.json.internal.Write): Unit = b match {
+  //     case obj: OKPPublicKey => OKPPublicKey.encoder.unsafeEncode(obj, indent, out)
+  //     case obj: ECPublicKey  => ECPublicKey.encoder.unsafeEncode(obj, indent, out)
+  //   }
+  // }
 
-object PrivateKey {
-  given Conversion[PrivateKey, PublicKey] with
-    def apply(key: PrivateKey) = key.toPublicKey
-
-  given decoder: JsonDecoder[PrivateKey] = Json.Obj.decoder.mapOrFail { originalAst =>
-    originalAst
-      .get(JsonCursor.field("kty"))
-      .flatMap { ast => KTY.decoder.fromJsonAST(ast) }
-      .flatMap {
-        case KTY.EC =>
-          // ECPrivateKey.decoder.fromJsonAST(originalAst) // FIXME REPORT BUG ?
-          ECPrivateKey.decoder.decodeJson(originalAst.toJson)
-        case KTY.OKP =>
-          // OKPPrivateKey.decoder.fromJsonAST(originalAst) // FIXME REPORT BUG ?
-          OKPPrivateKey.decoder.decodeJson(originalAst.toJson)
-      }
-  }
-  given encoder: JsonEncoder[PrivateKey] = new JsonEncoder[PrivateKey] {
-    override def unsafeEncode(b: PrivateKey, indent: Option[Int], out: zio.json.internal.Write): Unit = b match {
-      case obj: OKPPrivateKey => OKPPrivateKey.encoder.unsafeEncode(obj, indent, out)
-      case obj: ECPrivateKey  => ECPrivateKey.encoder.unsafeEncode(obj, indent, out)
-    }
-  }
 }
 
 object PublicKeyWithKid {
-  given decoder: JsonDecoder[PublicKeyWithKid] = DeriveJsonDecoder.gen[PublicKeyWithKid] // FIXME
-  given encoder: JsonEncoder[PublicKeyWithKid] = DeriveJsonEncoder.gen[PublicKeyWithKid] // FIXME
+  given encoder: JsonEncoder[PublicKeyWithKid] = JsonEncoder[OKP_EC_Key].narrow
+  // TODO the code 'Right(k.toPublicKey)' // Can be optimized at compile time
+  given decoder: JsonDecoder[PublicKeyWithKid] = JsonDecoder[OKP_EC_Key]
+    .mapOrFail {
+      case k: OKPPublicKeyWithKid  => Right(k)
+      case k: OKPPublicKey         => Left("Expected PublicKeyWithKid but got OKPPublicKey")
+      case k: OKPPrivateKeyWithKid => Right(k.toPublicKey)
+      case k: OKPPrivateKey        => Left("Expected PublicKeyWithKid but got OKPPrivateKey")
+      case k: ECPublicKeyWithKid   => Right(k)
+      case k: ECPublicKey          => Left("Expected PublicKeyWithKid but got ECPublicKey")
+      case k: ECPrivateKeyWithKid  => Right(k.toPublicKey)
+      case k: ECPrivateKey         => Left("Expected PublicKeyWithKid but got ECPrivateKey")
+    }
 }
-object PublicKeyWithoutKid {
-  given decoder: JsonDecoder[PublicKeyWithoutKid] = DeriveJsonDecoder.gen[PublicKeyWithoutKid] // FIXME
-  given encoder: JsonEncoder[PublicKeyWithoutKid] = DeriveJsonEncoder.gen[PublicKeyWithoutKid] // FIXME
+
+object PrivateKey {
+  given encoder: JsonEncoder[PrivateKey] = JsonEncoder[OKP_EC_Key].narrow
+  given decoder: JsonDecoder[PrivateKey] = JsonDecoder[OKP_EC_Key]
+    .mapOrFail {
+      case k: OKPPublicKeyWithKid  => Left("Expected PrivateKey but got OKPPublicKeyWithKid")
+      case k: OKPPublicKey         => Left("Expected PrivateKey but got OKPPublicKey")
+      case k: OKPPrivateKeyWithKid => Right(k)
+      case k: OKPPrivateKey        => Right(k)
+      case k: ECPublicKeyWithKid   => Left("Expected PrivateKey but got ECPublicKeyWithKid")
+      case k: ECPublicKey          => Left("Expected PrivateKey but got ECPublicKey")
+      case k: ECPrivateKeyWithKid  => Right(k)
+      case k: ECPrivateKey         => Right(k)
+    }
+  // given Conversion[PrivateKey, PublicKey] with
+  //   def apply(key: PrivateKey) = key.toPublicKey
 }
+
 object PrivateKeyWithKid {
-  given decoder: JsonDecoder[PrivateKeyWithKid] = DeriveJsonDecoder.gen[PrivateKeyWithKid] // FIXME
-  given encoder: JsonEncoder[PrivateKeyWithKid] = DeriveJsonEncoder.gen[PrivateKeyWithKid] // FIXME
-}
-object PrivateKeyWithoutKid {
-  given decoder: JsonDecoder[PrivateKeyWithoutKid] = DeriveJsonDecoder.gen[PrivateKeyWithoutKid] // FIXME
-  given encoder: JsonEncoder[PrivateKeyWithoutKid] = DeriveJsonEncoder.gen[PrivateKeyWithoutKid] // FIXME
+  given encoder: JsonEncoder[PrivateKeyWithKid] = JsonEncoder[OKP_EC_Key].narrow
+  given decoder: JsonDecoder[PrivateKeyWithKid] = JsonDecoder[OKP_EC_Key]
+    .mapOrFail {
+      case k: OKPPublicKeyWithKid  => Left("Expected PrivateKeyWithKid but got OKPPublicKeyWithKid")
+      case k: OKPPublicKey         => Left("Expected PrivateKeyWithKid but got OKPPublicKey")
+      case k: OKPPrivateKeyWithKid => Right(k)
+      case k: OKPPrivateKey        => Left("Expected PrivateKeyWithKid but got OKPPrivateKey")
+      case k: ECPublicKeyWithKid   => Left("Expected PrivateKeyWithKid but got ECPublicKeyWithKid")
+      case k: ECPublicKey          => Left("Expected PrivateKeyWithKid but got ECPublicKey")
+      case k: ECPrivateKeyWithKid  => Right(k)
+      case k: ECPrivateKey         => Left("Expected PrivateKeyWithKid but got ECPrivateKey")
+    }
 }
 
 object ECPublicKey {
-  given decoder: JsonDecoder[ECPublicKey] = DeriveJsonDecoder.gen[ECPublicKey] // FIXME
-  given encoder: JsonEncoder[ECPublicKey] = DeriveJsonEncoder.gen[ECPublicKey] // FIXME
-  def unapply(key: ECPublicKey): Option[(KTY, Curve, String, String, Option[String])] =
+//   given encoder: JsonEncoder[ECPublicKey] = DeriveJsonEncoder.gen[ECPublicKey] // FIXME
+  def apply(kty: KTY.EC.type, crv: ECCurve, x: String, y: String): ECPublicKey =
+    new ECPublicKey(kty = kty, crv = crv, x = x, y = y)
+  def apply(kty: KTY.EC.type, crv: ECCurve, x: String, y: String, kid: String): ECPublicKeyWithKid =
+    ECPublicKeyWithKid(kty = kty, crv = crv, x = x, y = y, kid = kid)
+  def unapply(key: ECPublicKey): Option[(KTY, ECCurve, String, String, Option[String])] =
     Some((key.kty, key.crv, key.x, key.y, key.maybeKid))
+
+  given encoder: JsonEncoder[ECPublicKey] = JsonEncoder[OKP_EC_Key].narrow
+  // TODO the code 'Right(k.toPublicKey)' // Can be optimized at compile time
+  given decoder: JsonDecoder[ECPublicKey] = JsonDecoder[OKP_EC_Key]
+    .mapOrFail {
+      case k: OKPPublicKeyWithKid  => Left("Expected ECPublicKey but got OKPPublicKeyWithKid")
+      case k: OKPPublicKey         => Left("Expected ECPublicKey but got OKPPublicKey")
+      case k: OKPPrivateKeyWithKid => Left("Expected ECPublicKey but got OKPPrivateKeyWithKid")
+      case k: OKPPrivateKey        => Left("Expected ECPublicKey but got OKPPrivateKey")
+      case k: ECPublicKeyWithKid   => Right(k)
+      case k: ECPublicKey          => Right(k)
+      case k: ECPrivateKeyWithKid  => Right(k.toPublicKey)
+      case k: ECPrivateKey         => Right(k.toPublicKey)
+    }
 }
+
+object ECPublicKeyWithKid {
+  given encoder: JsonEncoder[ECPublicKeyWithKid] = JsonEncoder[OKP_EC_Key].narrow
+  // TODO the code 'Right(k.toPublicKey)' // Can be optimized at compile time
+  given decoder: JsonDecoder[ECPublicKeyWithKid] = JsonDecoder[OKP_EC_Key]
+    .mapOrFail {
+      case k: OKPPublicKeyWithKid  => Left("Expected ECPublicKeyWithKid but got OKPPublicKeyWithKid")
+      case k: OKPPublicKey         => Left("Expected ECPublicKeyWithKid but got OKPPublicKey")
+      case k: OKPPrivateKeyWithKid => Left("Expected ECPublicKeyWithKid but got OKPPrivateKeyWithKid")
+      case k: OKPPrivateKey        => Left("Expected ECPublicKeyWithKid but got OKPPrivateKey")
+      case k: ECPublicKeyWithKid   => Right(k)
+      case k: ECPublicKey          => Left("Expected ECPublicKeyWithKid but got ECPublicKey")
+      case k: ECPrivateKeyWithKid  => Right(k.toPublicKey)
+      case k: ECPrivateKey         => Left("Expected ECPublicKeyWithKid but got ECPrivateKey")
+    }
+}
+
 object ECPrivateKey {
-  given decoder: JsonDecoder[ECPrivateKey] = DeriveJsonDecoder.gen[ECPrivateKey] // FIXME
-  given encoder: JsonEncoder[ECPrivateKey] = DeriveJsonEncoder.gen[ECPrivateKey] // FIXME
-  def unapply(key: ECPrivateKey): Option[(KTY, Curve, String, String, String, Option[String])] =
+  def apply(kty: KTY.EC.type, crv: ECCurve, d: String, x: String, y: String): ECPrivateKey =
+    new ECPrivateKey(kty = kty, crv = crv, d = d, x = x, y = y)
+  def apply(kty: KTY.EC.type, crv: ECCurve, d: String, x: String, y: String, kid: String): ECPrivateKeyWithKid =
+    ECPrivateKeyWithKid(kty = kty, crv = crv, d = d, x = x, y = y, kid = kid)
+  def unapply(key: ECPrivateKey): Option[(KTY, ECCurve, String, String, String, Option[String])] =
     Some((key.kty, key.crv, key.d, key.x, key.y, key.maybeKid))
 
+  given encoder: JsonEncoder[ECPrivateKey] = JsonEncoder[OKP_EC_Key].narrow
+  given decoder: JsonDecoder[ECPrivateKey] = JsonDecoder[OKP_EC_Key]
+    .mapOrFail {
+      case k: OKPPublicKeyWithKid  => Left("Expected ECPrivateKey but got OKPPublicKeyWithKid")
+      case k: OKPPublicKey         => Left("Expected ECPrivateKey but got OKPPublicKey")
+      case k: OKPPrivateKeyWithKid => Left("Expected ECPrivateKey but got OKPPrivateKeyWithKid")
+      case k: OKPPrivateKey        => Left("Expected ECPrivateKey but got OKPPrivateKey")
+      case k: ECPublicKeyWithKid   => Left("Expected ECPrivateKey but got ECPublicKeyWithKid")
+      case k: ECPublicKey          => Left("Expected ECPrivateKey but got ECPublicKey")
+      case k: ECPrivateKeyWithKid  => Right(k)
+      case k: ECPrivateKey         => Right(k)
+    }
+}
+
+object ECPrivateKeyWithKid {
+  given encoder: JsonEncoder[ECPrivateKeyWithKid] = JsonEncoder[OKP_EC_Key].narrow
+  given decoder: JsonDecoder[ECPrivateKeyWithKid] = JsonDecoder[OKP_EC_Key]
+    .mapOrFail {
+      case k: OKPPublicKeyWithKid  => Left("Expected ECPrivateKeyWithKid but got OKPPublicKeyWithKid")
+      case k: OKPPublicKey         => Left("Expected ECPrivateKeyWithKid but got OKPPublicKey")
+      case k: OKPPrivateKeyWithKid => Left("Expected ECPrivateKeyWithKid but got OKPPrivateKeyWithKid")
+      case k: OKPPrivateKey        => Left("Expected ECPrivateKeyWithKid but got OKPPrivateKey")
+      case k: ECPublicKeyWithKid   => Left("Expected ECPrivateKeyWithKid but got ECPublicKeyWithKid")
+      case k: ECPublicKey          => Left("Expected ECPrivateKeyWithKid but got ECPublicKey")
+      case k: ECPrivateKeyWithKid  => Right(k)
+      case k: ECPrivateKey         => Left("Expected ECPrivateKeyWithKid but got ECPrivateKey")
+    }
 }
 
 object OKPPublicKey {
-  given decoder: JsonDecoder[OKPPublicKey] = DeriveJsonDecoder.gen[OKPPublicKey] // FIXME
-  given encoder: JsonEncoder[OKPPublicKey] = DeriveJsonEncoder.gen[OKPPublicKey] // FIXME
-  def unapply(key: OKPPublicKey): Option[(KTY, Curve, String, Option[String])] =
+  def apply(kty: KTY.OKP.type, crv: OKPCurve, x: String): OKPPublicKey =
+    new OKPPublicKey(kty = kty, crv = crv, x = x)
+  def apply(kty: KTY.OKP.type, crv: OKPCurve, x: String, kid: String): OKPPublicKeyWithKid =
+    OKPPublicKeyWithKid(kty = kty, crv = crv, x = x, kid = kid)
+  def unapply(key: OKPPublicKey): Option[(KTY, OKPCurve, String, Option[String])] =
     Some((key.kty, key.crv, key.x, key.maybeKid))
+
+  given encoder: JsonEncoder[OKPPublicKey] = JsonEncoder[OKP_EC_Key].narrow
+  // TODO the code 'Right(k.toPublicKey)' // Can be optimized at compile time
+  given decoder: JsonDecoder[OKPPublicKey] = JsonDecoder[OKP_EC_Key]
+    .mapOrFail {
+      case k: OKPPublicKeyWithKid  => Right(k)
+      case k: OKPPublicKey         => Right(k)
+      case k: OKPPrivateKeyWithKid => Right(k.toPublicKey)
+      case k: OKPPrivateKey        => Right(k.toPublicKey)
+      case k: ECPublicKeyWithKid   => Left("Expected OKPPublicKey but got ECPublicKeyWithKid")
+      case k: ECPublicKey          => Left("Expected OKPPublicKey but got ECPublicKey")
+      case k: ECPrivateKeyWithKid  => Left("Expected OKPPublicKey but got ECPrivateKeyWithKid")
+      case k: ECPrivateKey         => Left("Expected OKPPublicKey but got ECPrivateKey")
+    }
 }
+
+object OKPPublicKeyWithKid {
+  given encoder: JsonEncoder[OKPPublicKeyWithKid] = JsonEncoder[OKP_EC_Key].narrow
+  // TODO the code 'Right(k.toPublicKey)' // Can be optimized at compile time
+  given decoder: JsonDecoder[OKPPublicKeyWithKid] = JsonDecoder[OKP_EC_Key]
+    .mapOrFail {
+      case k: OKPPublicKeyWithKid  => Right(k)
+      case k: OKPPublicKey         => Left("Expected OKPPublicKeyWithKid but got OKPPublicKey")
+      case k: OKPPrivateKeyWithKid => Right(k.toPublicKey)
+      case k: OKPPrivateKey        => Left("Expected OKPPublicKeyWithKid but got OKPPrivateKey")
+      case k: ECPublicKeyWithKid   => Left("Expected OKPPublicKeyWithKid but got ECPublicKeyWithKid")
+      case k: ECPublicKey          => Left("Expected OKPPublicKeyWithKid but got ECPublicKey")
+      case k: ECPrivateKeyWithKid  => Left("Expected OKPPublicKeyWithKid but got ECPrivateKeyWithKid")
+      case k: ECPrivateKey         => Left("Expected OKPPublicKeyWithKid but got ECPrivateKey")
+    }
+}
+
 object OKPPrivateKey {
-  given decoder: JsonDecoder[OKPPrivateKey] = DeriveJsonDecoder.gen[OKPPrivateKey] // FIXME
-  given encoder: JsonEncoder[OKPPrivateKey] = DeriveJsonEncoder.gen[OKPPrivateKey] // FIXME
-  def unapply(key: OKPPrivateKey): Option[(KTY, Curve, String, String, Option[String])] =
+
+  def apply(kty: KTY.OKP.type, crv: OKPCurve, d: String, x: String): OKPPrivateKey =
+    new OKPPrivateKey(kty = kty, crv = crv, d = d, x = x)
+  def apply(kty: KTY.OKP.type, crv: OKPCurve, d: String, x: String, kid: String): OKPPrivateKeyWithKid =
+    OKPPrivateKeyWithKid(kty = kty, crv = crv, d = d, x = x, kid = kid)
+  def unapply(key: OKPPrivateKey): Option[(KTY, OKPCurve, String, String, Option[String])] =
     Some((key.kty, key.crv, key.d, key.x, key.maybeKid))
+
+  given encoder: JsonEncoder[OKPPrivateKey] = JsonEncoder[OKP_EC_Key].narrow
+  given decoder: JsonDecoder[OKPPrivateKey] = JsonDecoder[OKP_EC_Key]
+    .mapOrFail {
+      case k: OKPPublicKeyWithKid  => Left("Expected OKPPrivateKey but got OKPPublicKeyWithKid")
+      case k: OKPPublicKey         => Left("Expected OKPPrivateKey but got OKPPublicKey")
+      case k: OKPPrivateKeyWithKid => Right(k)
+      case k: OKPPrivateKey        => Right(k)
+      case k: ECPublicKeyWithKid   => Left("Expected OKPPrivateKey but got ECPublicKeyWithKid")
+      case k: ECPublicKey          => Left("Expected OKPPrivateKey but got ECPublicKey")
+      case k: ECPrivateKeyWithKid  => Left("Expected OKPPrivateKey but got ECPrivateKeyWithKid")
+      case k: ECPrivateKey         => Left("Expected OKPPrivateKey but got ECPrivateKey")
+    }
 }
-//TODO
-// object OKPPrivateKeyWithKid {
-//   given decoder: JsonDecoder[OKPPrivateKeyWithKid] = DeriveJsonDecoder.gen[OKPPrivateKeyWithKid]
-//   given encoder: JsonEncoder[OKPPrivateKeyWithKid] = DeriveJsonEncoder.gen[OKPPrivateKeyWithKid]
-// }
-// object OKPPrivateKeyWithoutKid {
-//   given decoder: JsonDecoder[OKPPrivateKeyWithoutKid] = DeriveJsonDecoder.gen[OKPPrivateKeyWithoutKid]
-//   given encoder: JsonEncoder[OKPPrivateKeyWithoutKid] = DeriveJsonEncoder.gen[OKPPrivateKeyWithoutKid]
-// }
+
+object OKPPrivateKeyWithKid {
+  given encoder: JsonEncoder[OKPPrivateKeyWithKid] = JsonEncoder[OKP_EC_Key].narrow
+  given decoder: JsonDecoder[OKPPrivateKeyWithKid] = JsonDecoder[OKP_EC_Key]
+    .mapOrFail {
+      case k: OKPPublicKeyWithKid  => Left("Expected OKPPrivateKeyWithKid but got OKPPublicKeyWithKid")
+      case k: OKPPublicKey         => Left("Expected OKPPrivateKeyWithKid but got OKPPublicKey")
+      case k: OKPPrivateKeyWithKid => Right(k)
+      case k: OKPPrivateKey        => Left("Expected OKPPrivateKeyWithKid but got OKPPrivateKey")
+      case k: ECPublicKeyWithKid   => Left("Expected OKPPrivateKeyWithKid but got ECPublicKeyWithKid")
+      case k: ECPublicKey          => Left("Expected OKPPrivateKeyWithKid but got ECPublicKey")
+      case k: ECPrivateKeyWithKid  => Left("Expected OKPPrivateKeyWithKid but got ECPrivateKeyWithKid")
+      case k: ECPrivateKey         => Left("Expected OKPPrivateKeyWithKid but got ECPrivateKey")
+    }
+}

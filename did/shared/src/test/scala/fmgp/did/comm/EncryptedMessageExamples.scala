@@ -69,7 +69,7 @@ object EncryptedMessageExamples {
     // {"epk":{"kty":"OKP","crv":"X25519","x":"JHjsmIRZAaB0zRG_wNXLV2rPggF00hdHbW5rj8g0I24"},"apv":"NcsuAnrRfPK69A-rkZ0L9XWUG4jMvNC3Zg74BPz53PA","typ":"application/didcomm-encrypted+json","enc":"XC20P","alg":"ECDH-ES+A256KW"}
     `protected` = Base64Obj[ProtectedHeader](
       AnonProtectedHeader(
-        epk = OKPPublicKeyWithoutKid(
+        epk = OKPPublicKey(
           kty = KTY.OKP,
           crv = Curve.X25519,
           x = "JHjsmIRZAaB0zRG_wNXLV2rPggF00hdHbW5rj8g0I24",
