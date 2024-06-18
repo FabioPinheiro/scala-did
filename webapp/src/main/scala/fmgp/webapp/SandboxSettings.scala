@@ -6,12 +6,20 @@ import com.raquo.laminar.api.L._
 
 import fmgp.ServiceWorkerUtils
 import fmgp.SettingsFromHTML
-import fmgp.did._
+import fmgp.Utils
 import fmgp.Config
+import fmgp.did._
+import fmgp.crypto._
 import scala.util.Failure
 import scala.util.Success
+import zio._
+import zio.json._
 
 object SandboxSettings {
+  val keyTest: Var[Option[OKPPrivateKey]] = Var(initial = None)
+
+  def newKeyX25519 = Utils.runProgram(Client.newKeyX25519Local.map(k => keyTest.set(Some(k))))
+  def newKeyEd25519 = Utils.runProgram(Client.newKeyEd25519Local.map(k => keyTest.set(Some(k))))
 
   def apply(): HtmlElement = // rootElement
     div(
@@ -90,7 +98,7 @@ object SandboxSettings {
             ServiceWorkerUtils
               .runSubscribeToNotifications(Config.PushNotifications.applicationServerKey)
               .onComplete { // side effect
-                case Failure(exception)        => Console.err.print("Fail Subscribe To Notifications")
+                case Failure(exception)        => scala.Console.err.print("Fail Subscribe To Notifications")
                 case Success(pushSubscription) => Global.valuePushSubscriptionVar.set(Some(pushSubscription))
               }
           },
@@ -120,7 +128,18 @@ object SandboxSettings {
       ),
       // ### Generate Keys localy ###
       div(
-        h2("Transport timeout"),
+        h2("Generate Keys localy"),
+        p(
+          a(
+            href := "https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto",
+            b("[Chrome] "),
+            "From version 113: "
+          ),
+          "this feature is behind the ",
+          b("#enable-experimental-web-platform-features"),
+          " preference (needs to be set to Enabled). " +
+            "To change preferences in Chrome, visit chrome://flags. ",
+        ),
         p(
           "Use local KeyGenerator or Generate the keys remotaly",
           input(
@@ -132,7 +151,10 @@ object SandboxSettings {
             if (e) "--> Generate Keys Localy (Working only in some browser)"
             else "--> Generate Keys Remotaly"
           )
-        )
+        ),
+        button("Generate Keys Localy X25519", onClick --> { (_) => newKeyX25519 }),
+        button("Generate Keys Localy Ed25519", onClick --> { (_) => newKeyEd25519 }),
+        div(children <-- keyTest.signal.map(_.map(e => code(e.toJson)).toSeq)),
       ),
     )
 
