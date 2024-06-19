@@ -153,11 +153,13 @@ object DIDPeer2 {
 
   /** This is the old (undefined) format of kid based on the key's encoded */
   @deprecated("The new format of the kid is based on index")
-  def keyKidAbsolute(key: PrivateKey, did: DIDPeer) = key match
-    case k: OKPPrivateKey =>
-      k.withKid(did.did + "#" + keyToElement(k).encode.drop(2)) // FIXME .drop(2) 'Sz'
-    case k: ECPrivateKey =>
-      k.withKid(did.did + "#" + keyToElement(k).encode.drop(2)) // FIXME .drop(2) 'Sz'
+  def keyKidAbsolute(key: PrivateKey, did: DIDPeer) =
+    key.withKid(did.did + "#" + keyToElement(key).encode.drop(2)) // FIXME .drop(2) 'Sz'
+  // key match
+  //   case k: OKPPrivateKey =>
+  //     k.withKid(did.did + "#" + keyToElement(k).encode.drop(2)) // FIXME .drop(2) 'Sz'
+  //   case k: ECPrivateKey =>
+  //     k.withKid(did.did + "#" + keyToElement(k).encode.drop(2)) // FIXME .drop(2) 'Sz'
 
   def keyKidRelative(key: PrivateKey) = key match
     case k: OKPPrivateKey =>

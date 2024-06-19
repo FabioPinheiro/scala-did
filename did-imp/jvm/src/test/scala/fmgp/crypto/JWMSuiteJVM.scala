@@ -44,7 +44,7 @@ class JWMSuiteJVM extends FunSuite {
       crv = Curve.Ed25519,
       d = "INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug",
       x = "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA",
-      kid = Some("did:example:alice#key-100")
+      kid = "did:example:alice#key-100"
     )
     val okpJWK: OctetKeyPair = okp.toJWK
 
@@ -61,7 +61,7 @@ class JWMSuiteJVM extends FunSuite {
       crv = Curve.Ed25519, // But the d and x is for Curve X25519
       d = "Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c",
       x = "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw",
-      kid = Some("did:example:alice#key-101")
+      kid = "did:example:alice#key-101"
     )
     val okpJWK: OctetKeyPair = okp.toJWK
 

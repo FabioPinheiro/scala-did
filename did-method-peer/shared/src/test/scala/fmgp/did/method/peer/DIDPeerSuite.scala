@@ -114,14 +114,12 @@ class DIDPeerSuite extends ZSuite {
       crv = Curve.X25519,
       d = "9yAs1ddRaUq4d7_HfLw2VSj1oW2kirb2wALmPXrRuZA",
       x = "xfvZlkAnuNpssHOR2As4kUJ8zEPbowOIU5VbhBsYoGo",
-      kid = None // : Option[String]
     )
     val keyAuthentication = OKPPrivateKey(
       kty = KTY.OKP,
       crv = Curve.Ed25519,
       d = "-yjzvLY5dhFEuIsQcebEejbLbl3b8ICR7b2y2_HqFns",
       x = "vfzzx6IIWdBI7J4eEPHuxaXGErhH3QXnRSQd0d_yn0Y",
-      kid = None // : Option[String]
     )
     val obj =
       DIDPeer2(Seq(keyAgreement, keyAuthentication), Seq(DIDPeerServiceEncodedOld("http://localhost:8080")))
@@ -300,24 +298,16 @@ class DIDPeerSuite extends ZSuite {
           crv = Curve.X25519,
           d = "Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c",
           x = "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw",
-          kid = None
         ),
         OKPPrivateKey( // keyAuthentication
           kty = KTY.OKP,
           crv = Curve.Ed25519,
           d = "INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug",
           x = "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA",
-          kid = None
         )
       )
     )
-
     val kidPattern: Regex = "^.*#key-[0-9]+$".r
-
-    alice.keyStore.keys.foreach { key =>
-      key.kid match
-        case None      => fail("kid must be define")
-        case Some(kid) => assert(kidPattern.matches(kid), "'kid' must follow the kid pattern")
-    }
+    alice.keyStore.keys.foreach { key => assert(kidPattern.matches(key.kid), "'kid' must follow the kid pattern") }
   }
 }
