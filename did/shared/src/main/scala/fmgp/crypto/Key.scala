@@ -144,6 +144,8 @@ sealed trait MaybeKid {
   def maybeKid: Option[String] = this match
     case o: WithKid => Some(o.kid)
     case o          => None
+
+  def withKid(kid: String): WithKid
 }
 sealed trait WithKid extends MaybeKid { def kid: String; override final def maybeKid: Option[String] = Some(kid) }
 
@@ -206,9 +208,23 @@ sealed abstract class ECKey extends OKP_EC_Key {
 }
 
 sealed trait PublicKeyWithKid extends PublicKey with WithKid
-sealed trait PublicKey extends OKP_EC_Key
+sealed trait PublicKey extends OKP_EC_Key {
+  final override def withKid(kid: String): PublicKeyWithKid = this match
+    case k: OKPPublicKeyWithKid => k.copy(kid = kid)
+    case k: OKPPublicKey        => OKPPublicKeyWithKid(kty = k.kty, crv = k.crv, x = k.x, kid)
+    case k: ECPublicKeyWithKid  => k.copy(kid = kid)
+    case k: ECPublicKey         => ECPublicKeyWithKid(kty = k.kty, crv = k.crv, x = k.x, y = k.y, kid)
+}
 sealed trait PrivateKeyWithKid extends PrivateKey with WithKid
-sealed trait PrivateKey extends OKP_EC_Key { def toPublicKey: PublicKey; def d: String }
+sealed trait PrivateKey extends OKP_EC_Key {
+  def toPublicKey: PublicKey
+  def d: String
+  final def withKid(kid: String): PrivateKeyWithKid = this match
+    case k: OKPPrivateKeyWithKid => k.copy(kid = kid)
+    case k: OKPPrivateKey        => OKPPrivateKeyWithKid(kty = k.kty, crv = k.crv, d = k.d, x = k.x, kid)
+    case k: ECPrivateKeyWithKid  => k.copy(kid = kid)
+    case k: ECPrivateKey         => ECPrivateKeyWithKid(kty = k.kty, crv = k.crv, d = k.d, x = k.x, y = k.y, kid)
+}
 
 // ##########
 // ## OKP ###
@@ -221,6 +237,7 @@ case class OKPPublicKeyWithKid(
     override val kid: String
 ) extends OKPPublicKey(kty = kty, crv = crv, x = x)
     with PublicKeyWithKid
+    with Product
 
 sealed class OKPPublicKey(
     override val kty: KTY.OKP.type,

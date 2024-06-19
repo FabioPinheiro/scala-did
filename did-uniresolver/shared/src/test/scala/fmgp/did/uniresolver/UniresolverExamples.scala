@@ -87,7 +87,6 @@ object UniresolverExamples {
                 Curve.secp256k1,
                 "WfY7Px6AgH6x-_dgAoRbg8weYRJA36ON-gQiFnETrqw",
                 "IzFx3BUGztK0cyDStiunXbrZYYTtKbOUzx16SUK0sAY",
-                None
               )
             )
           )

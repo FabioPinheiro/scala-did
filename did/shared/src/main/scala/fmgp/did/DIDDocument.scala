@@ -130,8 +130,6 @@ object DIDDocument {
 
 case class DIDDocumentClass(
     id: Required[DIDSubject],
-    alsoKnownAs: NotRequired[Set[String]] = None,
-    controller: NotRequired[Either[String, Set[String]]] = None,
     verificationMethod: NotRequired[Set[VerificationMethodEmbedded]] = None,
     authentication: NotRequired[SetU[VerificationMethod]] = None,
     assertionMethod: NotRequired[SetU[VerificationMethod]] = None,
