@@ -141,6 +141,7 @@ sealed trait JWKObj extends MaybeKid {
 }
 sealed trait MaybeKid {
   def withKid(kid: String): WithKid
+  def withoutKid: WithoutKid
   def maybeKid: Option[String] = this match
     case o: WithKid => Some(o.kid)
     case o          => None
@@ -200,6 +201,8 @@ sealed abstract class OKPKey extends OKP_EC_Key {
 
   def getCurve: OKPCurve = crv.asOKPCurve
 }
+sealed trait OKPKeyWithKid extends OKPKey with WithKid
+sealed trait OKPKeyWithoutKid extends OKPKey with WithoutKid
 sealed abstract class ECKey extends OKP_EC_Key {
   override def kty: KTY.EC.type
   override def crv: ECCurve
@@ -208,9 +211,12 @@ sealed abstract class ECKey extends OKP_EC_Key {
   def getCurve: ECCurve = crv.asECCurve
   def isPointOnCurve = getCurve.isPointOnCurve(xNumbre, yNumbre)
 }
+sealed trait ECKeyWithKid extends ECKey with WithKid
+sealed trait ECKeyWithoutKid extends ECKey with WithoutKid
 
 sealed trait PublicKey extends OKP_EC_Key {
   override def withKid(kid: String): PublicKeyWithKid
+  override def withoutKid: PublicKeyWithoutKid
 }
 sealed trait PublicKeyWithKid extends PublicKey with WithKid
 sealed trait PublicKeyWithoutKid extends OKP_EC_Key with WithoutKid
@@ -218,6 +224,7 @@ sealed trait PrivateKey extends OKP_EC_Key {
   def d: String
   def toPublicKey: PublicKey
   override def withKid(kid: String): PrivateKeyWithKid
+  override def withoutKid: PrivateKeyWithoutKid
 }
 sealed trait PrivateKeyWithKid extends PrivateKey with WithKid
 sealed trait PrivateKeyWithoutKid extends PrivateKey with WithoutKid
@@ -228,29 +235,39 @@ sealed trait PrivateKeyWithoutKid extends PrivateKey with WithoutKid
 
 sealed trait OKPPublicKey extends OKPKey with PublicKey {
   final override def withKid(kid: String): OKPPublicKeyWithKid = this match
-    case k: OKPPublicKeyWithKid              => k.copy(kid = kid)
-    case OKPPublicKeyWithoutKid(kty, crv, x) => OKPPublicKeyWithKid(kty = kty, crv = crv, x = x, kid)
+    case k: OKPPublicKeyWithKid    => k.copy(kid = kid)
+    case k: OKPPublicKeyWithoutKid => OKPPublicKeyWithKid(kty = k.kty, crv = k.crv, x = k.x, kid)
+  final override def withoutKid: OKPPublicKeyWithoutKid = this match
+    case k: OKPPublicKeyWithKid    => OKPPublicKeyWithoutKid(kty = k.kty, crv = k.crv, x = k.x)
+    case k: OKPPublicKeyWithoutKid => k
 }
 sealed trait OKPPrivateKey extends OKPKey with PrivateKey {
   override def toPublicKey: OKPPublicKey
   final override def withKid(kid: String): OKPPrivateKeyWithKid = this match
-    case k: OKPPrivateKeyWithKid                 => k.copy(kid = kid)
-    case OKPPrivateKeyWithoutKid(kty, crv, d, x) => OKPPrivateKeyWithKid(kty = kty, crv = crv, d = d, x = x, kid)
+    case k: OKPPrivateKeyWithKid    => k.copy(kid = kid)
+    case k: OKPPrivateKeyWithoutKid => OKPPrivateKeyWithKid(kty = k.kty, crv = k.crv, d = k.d, x = k.x, kid)
+  final override def withoutKid: OKPPrivateKeyWithoutKid = this match
+    case k: OKPPrivateKeyWithKid    => OKPPrivateKeyWithoutKid(kty = k.kty, crv = k.crv, d = k.d, x = k.x)
+    case k: OKPPrivateKeyWithoutKid => k
 }
 
 case class OKPPublicKeyWithKid(kty: KTY.OKP.type, crv: OKPCurve, x: String, kid: String)
     extends OKPPublicKey
+    with OKPKeyWithKid
     with PublicKeyWithKid
 case class OKPPublicKeyWithoutKid(kty: KTY.OKP.type, crv: OKPCurve, x: String)
     extends OKPPublicKey
+    with OKPKeyWithoutKid
     with PublicKeyWithoutKid {}
 case class OKPPrivateKeyWithKid(kty: KTY.OKP.type, crv: OKPCurve, d: String, x: String, kid: String)
     extends OKPPrivateKey
+    with OKPKeyWithKid
     with PrivateKeyWithKid {
   override def toPublicKey: OKPPublicKeyWithKid = OKPPublicKeyWithKid(kty = kty, crv = crv, x = x, kid = kid)
 }
 case class OKPPrivateKeyWithoutKid(kty: KTY.OKP.type, crv: OKPCurve, d: String, x: String)
     extends OKPPrivateKey
+    with OKPKeyWithoutKid
     with PrivateKeyWithoutKid {
   override def toPublicKey: OKPPublicKeyWithoutKid = OKPPublicKeyWithoutKid(kty = kty, crv = crv, x = x)
 }
@@ -261,33 +278,43 @@ case class OKPPrivateKeyWithoutKid(kty: KTY.OKP.type, crv: OKPCurve, d: String, 
 
 sealed trait ECPublicKey extends ECKey with PublicKey {
   final override def withKid(kid: String): ECPublicKeyWithKid = this match
-    case k: ECPublicKeyWithKid                 => k.copy(kid = kid)
-    case ECPublicKeyWithoutKid(kty, crv, x, y) => ECPublicKeyWithKid(kty = kty, crv = crv, x = x, y = y, kid)
+    case k: ECPublicKeyWithKid    => k.copy(kid = kid)
+    case k: ECPublicKeyWithoutKid => ECPublicKeyWithKid(kty = k.kty, crv = k.crv, x = k.x, y = k.y, kid)
+  final override def withoutKid: ECPublicKeyWithoutKid = this match
+    case k: ECPublicKeyWithKid    => ECPublicKeyWithoutKid(kty = k.kty, crv = k.crv, x = k.x, y = k.y)
+    case k: ECPublicKeyWithoutKid => k
+
 }
 sealed trait ECPrivateKey extends ECKey with PrivateKey {
   override def toPublicKey: ECPublicKey
   final override def withKid(kid: String): ECPrivateKeyWithKid = this match
-    case k: ECPrivateKeyWithKid => k.copy(kid = kid)
-    case ECPrivateKeyWithoutKid(kty, crv, d, x, y) =>
-      ECPrivateKeyWithKid(kty = kty, crv = crv, d = d, x = x, y = y, kid)
+    case k: ECPrivateKeyWithKid    => k.copy(kid = kid)
+    case k: ECPrivateKeyWithoutKid => ECPrivateKeyWithKid(kty = k.kty, crv = k.crv, d = k.d, x = k.x, y = k.y, kid)
+  final override def withoutKid: ECPrivateKeyWithoutKid = this match
+    case k: ECPrivateKeyWithKid    => ECPrivateKeyWithoutKid(kty = k.kty, crv = k.crv, d = k.d, x = k.x, y = k.y)
+    case k: ECPrivateKeyWithoutKid => k
 }
 
 case class ECPublicKeyWithKid(kty: KTY.EC.type, crv: ECCurve, x: String, y: String, kid: String)
     extends ECPublicKey
+    with ECKeyWithKid
     with PublicKeyWithKid
 
 case class ECPublicKeyWithoutKid(kty: KTY.EC.type, crv: ECCurve, x: String, y: String)
     extends ECPublicKey
+    with ECKeyWithoutKid
     with PublicKeyWithoutKid
 
 case class ECPrivateKeyWithKid(kty: KTY.EC.type, crv: ECCurve, d: String, x: String, y: String, kid: String)
     extends ECPrivateKey
+    with ECKeyWithKid
     with PrivateKeyWithKid {
   override def toPublicKey: ECPublicKeyWithKid = ECPublicKeyWithKid(kty = kty, crv = crv, x = x, y = y, kid = kid)
 }
 
 case class ECPrivateKeyWithoutKid(kty: KTY.EC.type, crv: ECCurve, d: String, x: String, y: String)
     extends ECPrivateKey
+    with ECKeyWithoutKid
     with PrivateKeyWithoutKid {
   override def toPublicKey: ECPublicKeyWithoutKid = ECPublicKeyWithoutKid(kty = kty, crv = crv, x = x, y = y)
 }

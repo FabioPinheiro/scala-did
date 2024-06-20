@@ -43,22 +43,19 @@ object PlatformSpecificOperations {
       // alg: JWAAlgorithm
   ): IO[CurveError, SignedMessage] =
     key match {
-      case okp @ OKPPrivateKey(kty, Curve.Ed25519, d, x, kid) =>
-        ZIO.succeed(okpKeySignJWMWithEd25519(okpKey2JWK(okp), payload, key.jwaAlgorithmtoSign))
-      case okp @ OKPPrivateKey(kty, Curve.X25519, d, x, kid) =>
-        ZIO.fail(UnsupportedCurve(obtained = okp.crv, supported = Set(Curve.Ed25519)))
-      case okp: OKPPrivateKey => ??? // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      case ec: ECPrivateKey =>
-        ZIO.succeed(ecKeySignJWM(ec.toJWK, payload, key.jwaAlgorithmtoSign))
+      case okp: OKPPrivateKey =>
+        okp.crv match
+          case Curve.Ed25519 => ZIO.succeed(okpKeySignJWMWithEd25519(okpKey2JWK(okp), payload, key.jwaAlgorithmtoSign))
+          case Curve.X25519  => ZIO.fail(UnsupportedCurve(obtained = okp.crv, supported = Set(Curve.Ed25519)))
+      case ec: ECPrivateKey => ZIO.succeed(ecKeySignJWM(ec.toJWK, payload, key.jwaAlgorithmtoSign))
     }
 
   def verify(key: PublicKey, jwm: SignedMessage): IO[CurveError, Boolean] =
-    key.match {
-      case okp @ OKPPublicKey(kty, Curve.Ed25519, x, kid) =>
-        ZIO.succeed(okpKeyVerifyJWMWithEd25519(okpKey2JWK(okp), jwm, key.jwaAlgorithmtoSign))
-      case okp @ OKPPublicKey(kty, Curve.X25519, x, kid) =>
-        ZIO.fail(UnsupportedCurve(obtained = okp.crv, supported = Set(Curve.Ed25519)))
-      case okp: OKPPublicKey => ??? // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    key match {
+      case okp: OKPPublicKey =>
+        okp.crv match
+          case Curve.Ed25519 => ZIO.succeed(okpKeyVerifyJWMWithEd25519(okpKey2JWK(okp), jwm, key.jwaAlgorithmtoSign))
+          case Curve.X25519  => ZIO.fail(UnsupportedCurve(obtained = okp.crv, supported = Set(Curve.Ed25519)))
       case ec: ECPublicKey =>
         ZIO.succeed(ecKeyVerifyJWM(ec.toJWK, jwm, key.jwaAlgorithmtoSign))
     }

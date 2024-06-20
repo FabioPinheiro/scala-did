@@ -131,35 +131,29 @@ object DIDPeer2 {
     }
 
   def keyToElement(key: PrivateKey) = key match {
-    // case _: OKPPrivateKey                          =>
-    case key @ OKPPrivateKey(kty, Curve.X25519, d, x, kid) =>
-      DIDPeer2.ElementE(
-        Multibase.encode(
-          Base58BTC,
-          Array(-20.toByte, 1.toByte).map(_.toByte) ++ Base64(key.x).decode // TODO refactoring
-        )
-      )
-    case key @ OKPPrivateKey(kty, Curve.Ed25519, d, x, kid) =>
-      DIDPeer2.ElementV(
-        Multibase.encode(
-          Base58BTC,
-          Array(-19.toByte, 1.toByte).map(_.toByte) ++ Base64(key.x).decode // TODO refactoring
-        )
-      )
-    // case key @ OKPPrivateKey(kty, crv, d, x, kid) => ??? // ERROR!
-    case _: OKPPrivateKey => ???
-    case _: ECPrivateKey  => ??? // TODO
+    case key: OKPPrivateKey =>
+      key.crv match
+        case Curve.X25519 =>
+          DIDPeer2.ElementE(
+            Multibase.encode(
+              Base58BTC,
+              Array(-20.toByte, 1.toByte).map(_.toByte) ++ Base64(key.x).decode // TODO refactoring
+            )
+          )
+        case Curve.Ed25519 =>
+          DIDPeer2.ElementV(
+            Multibase.encode(
+              Base58BTC,
+              Array(-19.toByte, 1.toByte).map(_.toByte) ++ Base64(key.x).decode // TODO refactoring
+            )
+          )
+    case _: ECPrivateKey => ??? // TODO
   }
 
   /** This is the old (undefined) format of kid based on the key's encoded */
   @deprecated("The new format of the kid is based on index")
   def keyKidAbsolute(key: PrivateKey, did: DIDPeer) =
     key.withKid(did.did + "#" + keyToElement(key).encode.drop(2)) // FIXME .drop(2) 'Sz'
-  // key match
-  //   case k: OKPPrivateKey =>
-  //     k.withKid(did.did + "#" + keyToElement(k).encode.drop(2)) // FIXME .drop(2) 'Sz'
-  //   case k: ECPrivateKey =>
-  //     k.withKid(did.did + "#" + keyToElement(k).encode.drop(2)) // FIXME .drop(2) 'Sz'
 
   def keyKidRelative(key: PrivateKey) = key match
     case k: OKPPrivateKey =>
