@@ -12,20 +12,20 @@ object DidExampleSicpaRustAlice {
 
   def aliceKeyX25519NotInSecrets = OKPPublicKey(
     kty = KTY.OKP,
-    kid = Some("did:example:alice#key-x25519-not-in-secrets-1"),
+    kid = "did:example:alice#key-x25519-not-in-secrets-1",
     crv = Curve.X25519,
     x = "avH0O2Y4tqLAq8y9zpianr8ajii5m4F_mICrzNlatXs"
   )
   def aliceKeyX25519 = OKPPrivateKey(
     kty = KTY.OKP,
-    kid = Some("did:example:alice#key-x25519-1"),
+    kid = "did:example:alice#key-x25519-1",
     crv = Curve.X25519,
     d = "r-jK2cO3taR8LQnJB1_ikLBTAnOtShJOsHXRUWT-aZA",
     x = "avH0O2Y4tqLAq8y9zpianr8ajii5m4F_mICrzNlatXs"
   )
   def aliceKeyP256 = ECPrivateKey(
     kty = KTY.EC,
-    kid = Some("did:example:alice#key-p256-1"),
+    kid = "did:example:alice#key-p256-1",
     crv = Curve.`P-256`,
     d = "sB0bYtpaXyp-h17dDpMx91N3Du1AdN4z1FUq02GbmLw",
     x = "L0crjMN1g0Ih4sYAJ_nGoHUck2cloltUpUVQDhF2nHE",
@@ -33,7 +33,7 @@ object DidExampleSicpaRustAlice {
   )
   def aliceKeyP521 = ECPrivateKey(
     kty = KTY.EC,
-    kid = Some("did:example:alice#key-p521-1"),
+    kid = "did:example:alice#key-p521-1",
     crv = Curve.`P-521`,
     d = "AQCQKE7rZpxPnX9RgjXxeywrAMp1fJsyFe4cir1gWj-8t8xWaM_E2qBkTTzyjbRBu-JPXHe_auT850iYmE34SkWi",
     x = "AHBEVPRhAv-WHDEvxVM9S0px9WxxwHL641Pemgk9sDdxvli9VpKCBdra5gg_4kupBDhz__AlaBgKOC_15J2Byptz",
@@ -41,20 +41,20 @@ object DidExampleSicpaRustAlice {
   )
   def aliceKey1NotInSecrets = OKPPublicKey(
     kty = KTY.OKP,
-    kid = Some("did:example:alice#key-not-in-secrets-1"),
+    kid = "did:example:alice#key-not-in-secrets-1",
     crv = Curve.Ed25519,
     x = "G-boxFB6vOZBu-wXkm-9Lh79I8nf9Z50cILaOgKKGww",
   )
   def aliceKey1 = OKPPrivateKey(
     kty = KTY.OKP,
-    kid = Some("did:example:alice#key-1"),
+    kid = "did:example:alice#key-1",
     crv = Curve.Ed25519,
     d = "pFRUKkyzx4kHdJtFSnlPA9WzqkDT1HWV0xZ5OYZd2SY",
     x = "G-boxFB6vOZBu-wXkm-9Lh79I8nf9Z50cILaOgKKGww",
   )
   def aliceKey2 = ECPrivateKey(
     kty = KTY.EC,
-    kid = Some("did:example:alice#key-2"),
+    kid = "did:example:alice#key-2",
     crv = Curve.`P-256`,
     d = "7TCIdt1rhThFtWcEiLnk_COEjh1ZfQhM4bW2wz-dp4A",
     x = "2syLh57B-dGpa0F8p1JrO6JU7UUSF6j7qL-vfk1eOoY",
@@ -62,7 +62,7 @@ object DidExampleSicpaRustAlice {
   )
   def aliceKey3 = ECPrivateKey(
     kty = KTY.EC,
-    kid = Some("did:example:alice#key-3"),
+    kid = "did:example:alice#key-3",
     crv = Curve.secp256k1,
     d = "N3Hm1LXA210YVGGsXw_GklMwcLu_bMgnzDese6YQIyA",
     x = "aToW5EaTq5mlAf8C5ECYDSkqsJycrW-e1SQ6_GJcAOk",
@@ -105,53 +105,53 @@ object DidExampleSicpaRustAlice {
       verificationMethod = Some(
         Set(
           VerificationMethodEmbeddedJWK(
-            id = aliceKeyX25519NotInSecrets.kid.get,
-            controller = aliceKeyX25519NotInSecrets.kid.get,
+            id = aliceKeyX25519NotInSecrets.kid,
+            controller = aliceKeyX25519NotInSecrets.kid,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = aliceKeyX25519NotInSecrets.copy(kid = None)
+            publicKeyJwk = aliceKeyX25519NotInSecrets.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
-            id = aliceKeyX25519.kid.get,
-            controller = aliceKeyX25519.kid.get,
+            id = aliceKeyX25519.kid,
+            controller = aliceKeyX25519.kid,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = aliceKeyX25519.toPublicKey.copy(kid = None)
+            publicKeyJwk = aliceKeyX25519.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
-            id = aliceKeyP256.kid.get,
-            controller = aliceKeyP256.kid.get,
+            id = aliceKeyP256.kid,
+            controller = aliceKeyP256.kid,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = aliceKeyP256.toPublicKey.copy(kid = None)
+            publicKeyJwk = aliceKeyP256.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
-            id = aliceKeyP521.kid.get,
-            controller = aliceKeyP521.kid.get,
+            id = aliceKeyP521.kid,
+            controller = aliceKeyP521.kid,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = aliceKeyP521.toPublicKey.copy(kid = None)
+            publicKeyJwk = aliceKeyP521.toPublicKey.withoutKid
           ),
           //
           VerificationMethodEmbeddedJWK(
-            id = aliceKey1NotInSecrets.kid.get,
-            controller = aliceKey1NotInSecrets.kid.get,
+            id = aliceKey1NotInSecrets.kid,
+            controller = aliceKey1NotInSecrets.kid,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = aliceKey1NotInSecrets.copy(kid = None)
+            publicKeyJwk = aliceKey1NotInSecrets.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
-            id = aliceKey1.kid.get,
-            controller = aliceKey1.kid.get,
+            id = aliceKey1.kid,
+            controller = aliceKey1.kid,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = aliceKey1.toPublicKey.copy(kid = None)
+            publicKeyJwk = aliceKey1.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
-            id = aliceKey2.kid.get,
-            controller = aliceKey2.kid.get,
+            id = aliceKey2.kid,
+            controller = aliceKey2.kid,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = aliceKey2.toPublicKey.copy(kid = None)
+            publicKeyJwk = aliceKey2.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
-            id = aliceKey3.kid.get,
-            controller = aliceKey3.kid.get,
+            id = aliceKey3.kid,
+            controller = aliceKey3.kid,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = aliceKey3.toPublicKey.copy(kid = None)
+            publicKeyJwk = aliceKey3.toPublicKey.withoutKid
           ),
         )
       )

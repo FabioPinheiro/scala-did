@@ -212,7 +212,6 @@ object MessageTemplate {
           kty = KTY.OKP,
           crv = Curve.X25519,
           x = "JHjsmIRZAaB0zRG_wNXLV2rPggF00hdHbW5rj8g0I24",
-          kid = None
         ),
         apv = APV("NcsuAnrRfPK69A-rkZ0L9XWUG4jMvNC3Zg74BPz53PA"),
         typ = Some(MediaTypes.ENCRYPTED),

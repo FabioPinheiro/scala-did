@@ -23,7 +23,6 @@ object Agent0Mediators { // https://localhost:8080/
       crv = Curve.X25519,
       d = "b6JxUFsuwKPkOUAvU4FXEYzC7oKhzwNOM1aWyfvHP7k",
       x = "wyJl5uFCb4OXE_KuRePrM92z6aPfk8PXBHIpg1rG528",
-      kid = None
     )
   def keyAuthentication =
     OKPPrivateKey(
@@ -31,7 +30,6 @@ object Agent0Mediators { // https://localhost:8080/
       crv = Curve.Ed25519,
       d = "i6gfpmHFrSHbwAa7gI-bnOL0gMyePZ6Pe1xN-TDPMO4",
       x = "K2-apfExODENs4ZGlZ2xh8DSq4vkCqG3fgS3Ofwslv8",
-      kid = None
     )
 
 }
@@ -53,7 +51,6 @@ object Agent1Mediators {
       crv = Curve.X25519,
       d = "ZwV0ySU6tXxQlAzw8ji79H8bdeve6vGzruG_SYJen5Q",
       x = "HVo4aqtv6pL660P_4yBWQtVZLQrw0kqhzzKPyaI1-EI",
-      kid = None
     )
   def keyAuthentication =
     OKPPrivateKey(
@@ -61,7 +58,6 @@ object Agent1Mediators {
       crv = Curve.Ed25519,
       d = "4OQpka1tpCMhz-oNpeobkmDg2NiD4JIisH5WBB1etMM",
       x = "ABIeuNr5_0rfwXGC2dgCd8Ab8AqfcB3DGrDwk70PJtA",
-      kid = None
     )
 
 }
@@ -80,7 +76,6 @@ object Agent2Mediators {
       crv = Curve.X25519,
       d = "9yAs1ddRaUq4d7_HfLw2VSj1oW2kirb2wALmPXrRuZA",
       x = "xfvZlkAnuNpssHOR2As4kUJ8zEPbowOIU5VbhBsYoGo-EI",
-      kid = None
     )
   def keyAuthentication =
     OKPPrivateKey(
@@ -88,7 +83,6 @@ object Agent2Mediators {
       crv = Curve.Ed25519,
       d = "-yjzvLY5dhFEuIsQcebEejbLbl3b8ICR7b2y2_HqFns",
       x = "vfzzx6IIWdBI7J4eEPHuxaXGErhH3QXnRSQd0d_yn0Y",
-      kid = None
     )
 
 }

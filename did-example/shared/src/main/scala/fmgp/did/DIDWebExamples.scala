@@ -6,9 +6,9 @@ import fmgp.crypto.*
 object DIDWebExamples {
 
   private def makeKeyAgreement(d: String, x: String) =
-    OKPPrivateKey(kty = KTY.OKP, crv = Curve.X25519, d = d, x = x, kid = None)
+    OKPPrivateKey(kty = KTY.OKP, crv = Curve.X25519, d = d, x = x)
   private def makeKeyAuthentication(d: String, x: String) =
-    OKPPrivateKey(kty = KTY.OKP, crv = Curve.Ed25519, d = d, x = x, kid = None)
+    OKPPrivateKey(kty = KTY.OKP, crv = Curve.Ed25519, d = d, x = x)
 
   private def makeFabioDoc(did: String): DIDDocument = {
     DIDDocumentClass(
@@ -23,7 +23,7 @@ object DIDWebExamples {
               kty = KTY.OKP,
               crv = Curve.Ed25519,
               x = "bgxO3hAHDS970HeQLx7-01xoWT6GabkR9whaWP2DqR8",
-              kid = Some(did + "#k2"),
+              kid = did + "#k2",
             )
           )
         )
@@ -38,7 +38,7 @@ object DIDWebExamples {
               kty = KTY.OKP,
               crv = Curve.X25519,
               x = "-w-E7bboOZQn8e5BXLJ-lbVfMPvvxJo0Ajjl1rlm3k4",
-              kid = Some(did + "#k1"),
+              kid = did + "#k1",
             )
           )
         )
@@ -54,18 +54,18 @@ object DIDWebExamples {
     val keyAgreement = makeKeyAgreement(
       d = "V_iMJa7YL12wLMRpH36DLXZgDUpPIdnt09-a9cZ_fZ4",
       x = "v_Xx37c36tZDkr5aGQ_ZHP1OITa4btKua4UlbFfYR3A",
-    ).copy(kid = Some(did + "#k1"))
+    ).withKid(did + "#k1")
     val keyAuthentication = makeKeyAuthentication(
       d = "sWQsOPOHkRxDuV9gF_cycvS2lA69tgiRv07xRY5etWU",
       x = "Elm1_e264C_dj9C_-iTaqUDYVbjxa8_TJ93GHc6yPyU",
-    ).copy(kid = Some(did + "#k2"))
+    ).withKid(did + "#k2")
 
     val doc = DIDDocumentClass(
       id = DIDSubject(did),
       authentication = Some(
         Seq(
           VerificationMethodEmbeddedJWK(
-            id = keyAuthentication.kid.get, // TODO
+            id = keyAuthentication.kid,
             controller = did,
             `type` = "JsonWebKey2020",
             publicKeyJwk = keyAuthentication.toPublicKey
@@ -75,7 +75,7 @@ object DIDWebExamples {
       keyAgreement = Some(
         Set(
           VerificationMethodEmbeddedJWK(
-            id = keyAgreement.kid.get, // TODO
+            id = keyAgreement.kid,
             controller = did,
             `type` = "JsonWebKey2020",
             publicKeyJwk = keyAgreement.toPublicKey
@@ -97,18 +97,18 @@ object DIDWebExamples {
     val keyAgreement = makeKeyAgreement(
       d = "B8WDuCbt6NIjHHtjTssOzSJYNHOVLNZ4ekG5tcpolqU",
       x = "mpv_KLuwOMn6pDfw-Zknbazb1mAPSG-tumisCyqYwQg",
-    ).copy(kid = Some("#KeyAgreement"))
+    ).withKid("#KeyAgreement")
     val keyAuthentication = makeKeyAuthentication(
       d = "y2c0JdZDyFokxomhZLyFE_NHLRy_1gF0-p2hYSSn2Tg",
       x = "DzKDGu9OxHff_RT-5dH4-fQbX9KTRLx5Xc1PM8LWfUU",
-    ).copy(kid = Some("#Authentication"))
+    ).withKid("#Authentication")
 
     val doc = DIDDocumentClass(
       id = DIDSubject(did),
       authentication = Some(
         Seq(
           VerificationMethodEmbeddedJWK(
-            id = keyAuthentication.kid.get, // TODO
+            id = keyAuthentication.kid,
             controller = did,
             `type` = "JsonWebKey2020",
             publicKeyJwk = keyAuthentication.toPublicKey
@@ -118,7 +118,7 @@ object DIDWebExamples {
       keyAgreement = Some(
         Set(
           VerificationMethodEmbeddedJWK(
-            id = keyAgreement.kid.get, // TODO
+            id = keyAgreement.kid,
             controller = did,
             `type` = "JsonWebKey2020",
             publicKeyJwk = keyAgreement.toPublicKey

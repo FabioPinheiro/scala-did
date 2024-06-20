@@ -61,14 +61,12 @@ val alice = DIDPeer2.makeAgent(
       crv = Curve.X25519,
       d = "Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c",
       x = "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw",
-      kid = None
     ),
     OKPPrivateKey( // keyAuthentication
       kty = KTY.OKP,
       crv = Curve.Ed25519,
       d = "INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug",
       x = "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA",
-      kid = None
     )
   ),
   Seq(DIDPeerServiceEncoded.fromEndpoint("https://alice.did.fmgp.app/"))
