@@ -15,7 +15,7 @@ import fmgp.util.Base64
   */
 class JWTSuite extends ZSuite {
 
-  val senderKeyP256_1 = ECPrivateKeyWithKid(
+  val senderKeyP256_1 = ECPrivateKey(
     kty = KTY.EC,
     kid = "did:example:alice#key-2",
     crv = Curve.`P-256`,
@@ -24,7 +24,7 @@ class JWTSuite extends ZSuite {
     y = "BgsGtI7UPsObMRjdElxLOrgAO9JggNMjOcfzEPox18w"
   )
 
-  val senderKeyP256_otherKey = ECPrivateKeyWithKid(
+  val senderKeyP256_otherKey = ECPrivateKey(
     kty = KTY.EC,
     kid = "did:example:alice#key-2", // "did:example:alice#key-p256-1"
     crv = Curve.`P-256`,
@@ -33,7 +33,7 @@ class JWTSuite extends ZSuite {
     y = "SxYgE7CmEJYi7IDhgK5jI4ZiajO8jPRZDldVhqFpYoo"
   )
 
-  val okp = OKPPrivateKeyWithKid(
+  val okp = OKPPrivateKey(
     kty = KTY.OKP,
     crv = Curve.Ed25519,
     d = "pFRUKkyzx4kHdJtFSnlPA9WzqkDT1HWV0xZ5OYZd2SY",

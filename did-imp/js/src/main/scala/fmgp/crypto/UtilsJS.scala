@@ -88,7 +88,7 @@ object UtilsJS {
 
       keyJWK.setCrv(key.crv.toString)
       keyJWK.setAlg(key.alg.toString)
-      key.maybeKid.foreach(id => keyJWK.setKid(id)) // TODO make it Type Safe
+      key.maybeKid.foreach(id => keyJWK.setKid(id))
 
       key match {
         case _: PublicKey  => // ok

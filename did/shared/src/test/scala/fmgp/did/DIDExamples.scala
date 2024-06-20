@@ -130,7 +130,7 @@ object DIDExamples {
     id = "did:example:123#_Qq0UL2Fq651Q0Fjd6TvnYE-faHiOpRlPVQcY_-tA4A",
     controller = "did:example:123",
     `type` = "JsonWebKey2020",
-    publicKeyJwk = OKPPublicKeyWithKid(
+    publicKeyJwk = OKPPublicKey(
       kty = KTY.OKP,
       crv = Curve.Ed25519,
       x = "VCpo2LMLhn6iWku8MKvSLg2ZAoC-nlOyPVQaO3FxVeQ",

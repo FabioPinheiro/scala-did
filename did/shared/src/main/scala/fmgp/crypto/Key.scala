@@ -4,7 +4,6 @@ import zio.json._
 import zio.json.ast.Json
 import zio.json.ast.JsonCursor
 import fmgp.util.{Base64, safeValueOf}
-import fmgp.did.comm.JSON_RFC7159.apply
 
 /** Header Parameter Values for JWS https://datatracker.ietf.org/doc/html/rfc7518#section-3.1 */
 enum JWAAlgorithm {
@@ -159,20 +158,6 @@ sealed trait OKP_EC_Key extends JWKObj {
   // def kid: Option[String]
   def x: String
   def xNumbre = Base64.fromBase64url(x).decodeToBigInt
-
-  // TODO // Should I make this type safe? Will add another dimension of types, just to move the error to the parser.
-  // REMOVE. Because this is now type safe
-  assert(
-    crv match {
-      case Curve.secp256k1 => kty == KTY.EC
-      case Curve.`P-256`   => kty == KTY.EC
-      case Curve.`P-384`   => kty == KTY.EC
-      case Curve.`P-521`   => kty == KTY.EC
-      case Curve.X25519    => kty == KTY.OKP
-      case Curve.Ed25519   => kty == KTY.OKP
-    },
-    s"$crv is not a $kty alg"
-  )
 
   /** https://identity.foundation/didcomm-messaging/spec/#algorithms */
   def jwaAlgorithmtoSign: JWAAlgorithm = crv match {
@@ -407,27 +392,6 @@ object PublicKey {
       case k: ECPrivateKeyWithKid     => Right(k.toPublicKey)
       case k: ECPrivateKeyWithoutKid  => Right(k.toPublicKey)
     }
-  // given decoder: JsonDecoder[PublicKey] = Json.Obj.decoder.mapOrFail { originalAst =>
-  //   originalAst
-  //     .get(JsonCursor.field("kty"))
-  //     .flatMap(ast => KTY.decoder.fromJsonAST(ast))
-  //     .flatMap {
-  //       case KTY.EC =>
-  //         // ECPublicKey.decoder.fromJsonAST(originalAst) // FIXME REPORT BUG ? see didJVM/testOnly *.KeySuite (parse Key with no kid)
-  //         ECPublicKey.decoder.decodeJson(originalAst.toJson)
-  //       case KTY.OKP =>
-  //         // OKPPublicKey.decoder.fromJsonAST(originalAst) // FIXME REPORT BUG ? see didJVM/testOnly *.KeySuite (parse Key with no kid)
-  //         OKPPublicKey.decoder.decodeJson(originalAst.toJson)
-  //     }
-  // }
-
-  // given encoder: JsonEncoder[PublicKey] = new JsonEncoder[PublicKey] {
-  //   override def unsafeEncode(b: PublicKey, indent: Option[Int], out: zio.json.internal.Write): Unit = b match {
-  //     case obj: OKPPublicKey => OKPPublicKey.encoder.unsafeEncode(obj, indent, out)
-  //     case obj: ECPublicKey  => ECPublicKey.encoder.unsafeEncode(obj, indent, out)
-  //   }
-  // }
-
 }
 
 object PublicKeyWithKid {

@@ -35,7 +35,7 @@ object JWKExamples {
     "y":"JAGX94caA21WKreXwYUaOCYTBMrqaX4KWIlsQZTHWCk"
   }""".stripMargin
 
-  val senderKeySecp256k1obj = ECPrivateKeyWithKid(
+  val senderKeySecp256k1obj = ECPrivateKey(
     kty = KTY.EC,
     crv = Curve.secp256k1,
     kid = "did:example:alice#key-3",
