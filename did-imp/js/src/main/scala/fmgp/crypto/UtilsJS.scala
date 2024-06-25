@@ -88,7 +88,7 @@ object UtilsJS {
 
       keyJWK.setCrv(key.crv.toString)
       keyJWK.setAlg(key.alg.toString)
-      key.kid.foreach(id => keyJWK.setKid(id))
+      key.maybeKid.foreach(id => keyJWK.setKid(id))
 
       key match {
         case _: PublicKey  => // ok
@@ -99,14 +99,15 @@ object UtilsJS {
 
     // TODO make private
     def toKeyLike: IO[CryptoFailed, (KeyLike, String, String)] = {
-      key.kid match
-        case None => ZIO.fail(FailToExtractKid(s"Fail to extract kid from ${key.toJson}"))
-        case Some(kid) =>
+      key match
+        case keyWithKid: WithKid =>
           val aux = key.toJWK
           ZIO
             .fromPromiseJS(importJWK(aux))
-            .map(k => (k.asInstanceOf[KeyLike], aux.alg.get, kid))
+            .map(k => (k.asInstanceOf[KeyLike], aux.alg.get, keyWithKid.kid))
             .orElseFail(UnknownError)
+        case keyWithoutKid =>
+          ZIO.fail(FailToExtractKid(s"Fail to extract kid from ${key.toJson}"))
     }
 
     def verify(jwm: SignedMessage): IO[CryptoFailed, Boolean] =

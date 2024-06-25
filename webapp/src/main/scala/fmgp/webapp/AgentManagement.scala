@@ -45,7 +45,7 @@ object AgentManagement {
   val keyStore2Var: Var[KeyStore] = Var(initial = KeyStore(Set.empty))
 
   private val commandObserver = Observer[String] { case str =>
-    str.fromJson[PrivateKey] match
+    str.fromJson[PrivateKeyWithKid] match
       case Left(error)   => dom.window.alert(s"Fail to parse key: $error")
       case Right(newKey) => keyStore2Var.update(ks => ks.copy(ks.keys + newKey))
   }

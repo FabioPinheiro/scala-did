@@ -17,7 +17,7 @@ class JWTSuite extends ZSuite {
 
   val senderKeyP256_1 = ECPrivateKey(
     kty = KTY.EC,
-    kid = Some("did:example:alice#key-2"),
+    kid = "did:example:alice#key-2",
     crv = Curve.`P-256`,
     d = "7TCIdt1rhThFtWcEiLnk_COEjh1ZfQhM4bW2wz-dp4A",
     x = "2syLh57B-dGpa0F8p1JrO6JU7UUSF6j7qL-vfk1eOoY",
@@ -26,7 +26,7 @@ class JWTSuite extends ZSuite {
 
   val senderKeyP256_otherKey = ECPrivateKey(
     kty = KTY.EC,
-    kid = Some("did:example:alice#key-2"), // "did:example:alice#key-p256-1"
+    kid = "did:example:alice#key-2", // "did:example:alice#key-p256-1"
     crv = Curve.`P-256`,
     d = "sB0bYtpaXyp-h17dDpMx91N3Du1AdN4z1FUq02GbmLw",
     x = "L0crjMN1g0Ih4sYAJ_nGoHUck2cloltUpUVQDhF2nHE",
@@ -38,7 +38,7 @@ class JWTSuite extends ZSuite {
     crv = Curve.Ed25519,
     d = "pFRUKkyzx4kHdJtFSnlPA9WzqkDT1HWV0xZ5OYZd2SY",
     x = "G-boxFB6vOZBu-wXkm-9Lh79I8nf9Z50cILaOgKKGww",
-    kid = Some("did:example:alice#key-1"),
+    kid = "did:example:alice#key-1",
   )
 
   val data = """{"a":123}"""
@@ -91,7 +91,7 @@ class JWTSuite extends ZSuite {
       _ = assertEquals(payload.flatMap(_.alg), Some(JWAAlgorithm.ES256))
       _ = assertEquals(payload.flatMap(_.kid), Some("did:example:alice#key-2"))
       // _ = println(jwt.base64JWTFormat)
-      keyWithFailKid = senderKeyP256_1.copy(kid = Some("did:example:alice#key-fail"))
+      keyWithFailKid = senderKeyP256_1.copy(kid = "did:example:alice#key-fail")
       ret <- CryptoOperationsImp.verifyJWT(
         keyWithFailKid.toPublicKey,
         jwt

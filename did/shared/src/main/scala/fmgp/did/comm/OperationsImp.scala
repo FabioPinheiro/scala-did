@@ -28,11 +28,7 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
       didDocument <- resolver.didDocument(fromDID).mapError(CryptoFailedWarpResolverError(_))
       privateKeysToSign = {
         val allKeysTypeAuthentication = didDocument.allKeysTypeAuthentication
-        agent.keyStore.keys.filter(k =>
-          k.kid match
-            case None      => false // no kid ...
-            case Some(kid) => allKeysTypeAuthentication.map(_.id).contains(kid)
-        )
+        agent.keyStore.keys.filter(k => allKeysTypeAuthentication.map(_.id).contains(k.kid))
       }
       signingKey <- privateKeysToSign.toSeq
         .filter {
@@ -96,7 +92,7 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
         .mapError(ResolverErrorWarp(_))
       allKeysTypeKeyAgreement = docsFROM.allKeysTypeKeyAgreement
       secretsFROM = agent.keyStore.keys.toSeq
-        .flatMap { key => key.kid.map(kid => VerificationMethodReferencedWithKey(kid, key)) }
+        .map { key => VerificationMethodReferencedWithKey(key.kid, key) }
         .filter(vmk => allKeysTypeKeyAgreement.exists(_.kid == vmk.kid))
       senderKeys = secretsFROM
         .groupBy(_.key.crv)
@@ -147,12 +143,10 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
       kidsNeeded = msg.recipients.map(_.header.kid)
       // TODO fail if the keys are not keyAgreement
       keys = agent.keyStore.keys.toSeq
-        .flatMap(k =>
-          k.kid.flatMap { kid =>
-            val vmr = (VerificationMethodReferenced(kid))
-            if (kidsNeeded.contains(vmr)) Some(vmr, k) else None
-          }
-        )
+        .flatMap { k =>
+          val vmr = (VerificationMethodReferenced(k.kid))
+          if (kidsNeeded.contains(vmr)) Some(vmr, k) else None
+        }
       data <- cryptoOperations.anonDecrypt(keys, msg)
     } yield data
   }
@@ -164,12 +158,10 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
       kidsNeeded = msg.recipients.map(_.header.kid)
       // TODO fail if the keys are not keyAgreement
       keys = agent.keyStore.keys.toSeq
-        .flatMap(k =>
-          k.kid.flatMap { kid =>
-            val vmr = (VerificationMethodReferenced(kid))
-            if (kidsNeeded.contains(vmr)) Some(vmr, k) else None
-          }
-        )
+        .flatMap { k =>
+          val vmr = (VerificationMethodReferenced(k.kid))
+          if (kidsNeeded.contains(vmr)) Some(vmr, k) else None
+        }
       resolver <- ZIO.service[Resolver]
       skid = msg.`protected`.obj match
         case AnonProtectedHeader(epk, apv, typ, enc, alg)            => ??? // FIXME

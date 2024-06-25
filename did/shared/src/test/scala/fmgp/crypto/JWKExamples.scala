@@ -38,7 +38,7 @@ object JWKExamples {
   val senderKeySecp256k1obj = ECPrivateKey(
     kty = KTY.EC,
     crv = Curve.secp256k1,
-    kid = Some("did:example:alice#key-3"),
+    kid = "did:example:alice#key-3",
     d = "N3Hm1LXA210YVGGsXw_GklMwcLu_bMgnzDese6YQIyA",
     x = "aToW5EaTq5mlAf8C5ECYDSkqsJycrW-e1SQ6_GJcAOk",
     y = "JAGX94caA21WKreXwYUaOCYTBMrqaX4KWIlsQZTHWCk"

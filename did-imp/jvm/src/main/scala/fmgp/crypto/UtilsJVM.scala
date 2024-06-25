@@ -398,7 +398,7 @@ object UtilsJVM {
       case c: Curve.`P-521`.type   => JWKECKey.Builder(c.toJWKCurve, x, y)
       case c: Curve.secp256k1.type => JWKECKey.Builder(c.toJWKCurve, x, y)
     }
-    ec.kid.foreach(builder.keyID)
+    ec.maybeKid.foreach(builder.keyID)
     ec match { // for private key
       case _: PublicKey  => // ok (just the public key)
       case k: PrivateKey => builder.d(Base64.fromBase64url(k.d))
@@ -411,7 +411,7 @@ object UtilsJVM {
       case c: Curve.Ed25519.type => OctetKeyPair.Builder(c.toJWKCurve, Base64.fromBase64url(okp.x))
       case c: Curve.X25519.type  => OctetKeyPair.Builder(c.toJWKCurve, Base64.fromBase64url(okp.x))
     }
-    okp.kid.foreach(builder.keyID)
+    okp.maybeKid.foreach(builder.keyID)
     okp match { // for private key
       case _: PublicKey  => // ok (just the public key)
       case k: PrivateKey => builder.d(Base64.fromBase64url(k.d))

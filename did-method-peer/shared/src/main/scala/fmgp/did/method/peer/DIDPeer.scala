@@ -50,7 +50,6 @@ case class DIDPeer2(elements: Seq[DIDPeer2.Element]) extends DIDPeer {
             kty = KTY.OKP,
             crv = Curve.Ed25519, // TODO PLZ FIX BLACKMAGIC of did:peer! (zero documentation & unexpected logic)
             x = DIDPeer.decodeKey(e.mb.value),
-            kid = None
           )
         )
       }
@@ -65,7 +64,6 @@ case class DIDPeer2(elements: Seq[DIDPeer2.Element]) extends DIDPeer {
             kty = KTY.OKP,
             crv = Curve.X25519, // TODO PLZ FIX BLACKMAGIC of did:peer! (zero documentation & unexpected logic)
             x = DIDPeer.decodeKey(e.mb.value),
-            kid = None
           )
         )
       }.toSet
@@ -124,46 +122,44 @@ object DIDPeer2 {
       override val keyStore: KeyStore = KeyStore(
         keySeq.zipWithIndex.map { case (key, index) =>
           key match
-            case k @ OKPPrivateKey(kty, crv, d, x, Some(kid))   => k
-            case k @ OKPPrivateKey(kty, crv, d, x, None)        => k.copy(kid = Some(id.did + "#key-" + (index + 1)))
-            case k @ ECPrivateKey(kty, crv, d, x, y, Some(kid)) => k
-            case k @ ECPrivateKey(kty, crv, d, x, y, None)      => k.copy(kid = Some(id.did + "#key-" + (index + 1)))
+            case k: OKPPrivateKeyWithKid => k
+            case k: OKPPrivateKey        => k.withKid(id.did + "#key-" + (index + 1))
+            case k: ECPrivateKeyWithKid  => k
+            case k: ECPrivateKey         => k.withKid(id.did + "#key-" + (index + 1))
         }.toSet
       )
     }
 
   def keyToElement(key: PrivateKey) = key match {
-    case key @ OKPPrivateKey(kty, Curve.X25519, d, x, kid) =>
-      DIDPeer2.ElementE(
-        Multibase.encode(
-          Base58BTC,
-          Array(-20.toByte, 1.toByte).map(_.toByte) ++ Base64(key.x).decode // TODO refactoring
-        )
-      )
-    case key @ OKPPrivateKey(kty, Curve.Ed25519, d, x, kid) =>
-      DIDPeer2.ElementV(
-        Multibase.encode(
-          Base58BTC,
-          Array(-19.toByte, 1.toByte).map(_.toByte) ++ Base64(key.x).decode // TODO refactoring
-        )
-      )
-    case key @ OKPPrivateKey(kty, crv, d, x, kid) => ??? // ERROR!
-    case ECPrivateKey(kty, crv, d, x, y, kid)     => ??? // TODO
+    case key: OKPPrivateKey =>
+      key.crv match
+        case Curve.X25519 =>
+          DIDPeer2.ElementE(
+            Multibase.encode(
+              Base58BTC,
+              Array(-20.toByte, 1.toByte).map(_.toByte) ++ Base64(key.x).decode // TODO refactoring
+            )
+          )
+        case Curve.Ed25519 =>
+          DIDPeer2.ElementV(
+            Multibase.encode(
+              Base58BTC,
+              Array(-19.toByte, 1.toByte).map(_.toByte) ++ Base64(key.x).decode // TODO refactoring
+            )
+          )
+    case _: ECPrivateKey => ??? // TODO
   }
 
   /** This is the old (undefined) format of kid based on the key's encoded */
   @deprecated("The new format of the kid is based on index")
-  def keyKidAbsolute(key: PrivateKey, did: DIDPeer) = key match
-    case k @ OKPPrivateKey(kty, crv, d, x, kid) =>
-      k.copy(kid = Some(did.did + "#" + keyToElement(k).encode.drop(2))) // FIXME .drop(2) 'Sz'
-    case k @ ECPrivateKey(kty, crv, d, x, y, kid) =>
-      k.copy(kid = Some(did.did + "#" + keyToElement(k).encode.drop(2))) // FIXME .drop(2) 'Sz'
+  def keyKidAbsolute(key: PrivateKey, did: DIDPeer) =
+    key.withKid(did.did + "#" + keyToElement(key).encode.drop(2)) // FIXME .drop(2) 'Sz'
 
   def keyKidRelative(key: PrivateKey) = key match
-    case k @ OKPPrivateKey(kty, crv, d, x, kid) =>
-      k.copy(kid = Some(keyToElement(k).encode.drop(2))) // FIXME .drop(2) 'Sz'
-    case k @ ECPrivateKey(kty, crv, d, x, y, kid) =>
-      k.copy(kid = Some(keyToElement(k).encode.drop(2))) // FIXME .drop(2) 'Sz'
+    case k: OKPPrivateKey =>
+      k.withKid(keyToElement(k).encode.drop(2)) // FIXME .drop(2) 'Sz'
+    case k: ECPrivateKey =>
+      k.withKid(keyToElement(k).encode.drop(2)) // FIXME .drop(2) 'Sz'
 
   def fromDID(did: DID): Either[String, DIDPeer2] = did.string match {
     case DIDPeer.regexPeer2(all, str*) =>

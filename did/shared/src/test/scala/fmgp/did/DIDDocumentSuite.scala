@@ -35,7 +35,7 @@ class DIDDocumentSuite extends FunSuite {
       id = "did:example:123456789abcdefghi#keys-1",
       controller = "did:example:123456789abcdefghi",
       `type` = "Ed25519VerificationKey2020",
-      publicKeyJwk = OKPPublicKey(kty = KTY.OKP, crv = Curve.X25519, x = "Test", kid = None)
+      publicKeyJwk = OKPPublicKey(kty = KTY.OKP, crv = Curve.X25519, x = "Test")
     )
     val expected = """{
       |  "id" : "did:example:123456789abcdefghi#keys-1",

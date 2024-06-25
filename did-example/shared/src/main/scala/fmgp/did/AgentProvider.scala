@@ -204,9 +204,9 @@ object AgentProvider {
   private def charlieURL = s"https://charlie.did.fmgp.app/"
 
   private def keyAgreement(d: String, x: String) =
-    OKPPrivateKey(kty = KTY.OKP, crv = Curve.X25519, d = d, x = x, kid = None)
+    OKPPrivateKey(kty = KTY.OKP, crv = Curve.X25519, d = d, x = x)
   private def keyAuthentication(d: String, x: String) =
-    OKPPrivateKey(kty = KTY.OKP, crv = Curve.Ed25519, d = d, x = x, kid = None)
+    OKPPrivateKey(kty = KTY.OKP, crv = Curve.Ed25519, d = d, x = x)
 
   // did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd
   val alice = DIDPeer2.makeAgent(

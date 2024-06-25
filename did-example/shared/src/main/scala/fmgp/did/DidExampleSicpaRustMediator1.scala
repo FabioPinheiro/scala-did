@@ -12,14 +12,14 @@ object DidExampleSicpaRustMediator1 {
 
   def mediator1KeyX25519 = OKPPrivateKey(
     kty = KTY.OKP,
-    kid = Some("did:example:mediator1#key-x25519-1"),
+    kid = "did:example:mediator1#key-x25519-1",
     crv = Curve.X25519,
     d = "b9NnuOCB0hm7YGNvaE9DMhwH_wjZA1-gWD6dA0JWdL0",
     x = "GDTrI66K0pFfO54tlCSvfjjNapIs44dzpneBgyx0S3E"
   )
   def mediator1KeyP256 = ECPrivateKey(
     kty = KTY.EC,
-    kid = Some("did:example:mediator1#key-p256-1"),
+    kid = "did:example:mediator1#key-p256-1",
     crv = Curve.`P-256`,
     d = "PgwHnlXxt8pwR6OCTUwwWx-P51BiLkFZyqHzquKddXQ",
     x = "FQVaTOksf-XsCUrt4J1L2UGvtWaDwpboVlqbKBY2AIo",
@@ -27,7 +27,7 @@ object DidExampleSicpaRustMediator1 {
   )
   def mediator1KeyP384 = ECPrivateKey(
     kty = KTY.EC,
-    kid = Some("did:example:mediator1#key-p384-1"),
+    kid = "did:example:mediator1#key-p384-1",
     crv = Curve.`P-384`,
     d = "ajqcWbYA0UDBKfAhkSkeiVjMMt8l-5rcknvEv9t_Os6M8s-HisdywvNCX4CGd_xY",
     x = "MvnE_OwKoTcJVfHyTX-DLSRhhNwlu5LNoQ5UWD9Jmgtdxp_kpjsMuTTBnxg5RF_Y",
@@ -35,7 +35,7 @@ object DidExampleSicpaRustMediator1 {
   )
   def mediator1KeyP521 = ECPrivateKey(
     kty = KTY.EC,
-    kid = Some("did:example:mediator1#key-p521-1"),
+    kid = "did:example:mediator1#key-p521-1",
     crv = Curve.`P-521`,
     d = "AV5ocjvy7PkPgNrSuvCxtG70NMj6iTabvvjSLbsdd8OdI9HlXYlFR7RdBbgLUTruvaIRhjEAE9gNTH6rWUIdfuj6",
     x = "Af9O5THFENlqQbh2Ehipt1Yf4gAd9RCa3QzPktfcgUIFADMc4kAaYVViTaDOuvVS2vMS1KZe0D5kXedSXPQ3QbHi",
@@ -68,28 +68,28 @@ object DidExampleSicpaRustMediator1 {
       verificationMethod = Some(
         Set(
           VerificationMethodEmbeddedJWK(
-            id = mediator1KeyX25519.kid.get,
-            controller = mediator1KeyX25519.kid.get,
+            id = mediator1KeyX25519.kid,
+            controller = mediator1KeyX25519.kid,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = mediator1KeyX25519.toPublicKey.copy(kid = None)
+            publicKeyJwk = mediator1KeyX25519.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
-            id = mediator1KeyP256.kid.get,
-            controller = mediator1KeyP256.kid.get,
+            id = mediator1KeyP256.kid,
+            controller = mediator1KeyP256.kid,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = mediator1KeyP256.toPublicKey.copy(kid = None)
+            publicKeyJwk = mediator1KeyP256.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
-            id = mediator1KeyP384.kid.get,
-            controller = mediator1KeyP384.kid.get,
+            id = mediator1KeyP384.kid,
+            controller = mediator1KeyP384.kid,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = mediator1KeyP384.toPublicKey.copy(kid = None)
+            publicKeyJwk = mediator1KeyP384.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
-            id = mediator1KeyP521.kid.get,
-            controller = mediator1KeyP521.kid.get,
+            id = mediator1KeyP521.kid,
+            controller = mediator1KeyP521.kid,
             `type` = "JsonWebKey2020",
-            publicKeyJwk = mediator1KeyP521.toPublicKey.copy(kid = None)
+            publicKeyJwk = mediator1KeyP521.toPublicKey.withoutKid
           ),
         )
       )

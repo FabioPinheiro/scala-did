@@ -78,7 +78,7 @@ class KeySuite extends FunSuite {
     ret match {
       case Left(error) => fail(error)
       case Right(obj: ECPrivateKey) =>
-        assertEquals(obj.kid, Some("did:example:alice#key-3"))
+        assertEquals(obj.maybeKid, Some("did:example:alice#key-3"))
         assertEquals(obj.kty, KTY.EC)
         assertEquals(obj.crv, Curve.secp256k1)
         assertEquals(obj.d, "N3Hm1LXA210YVGGsXw_GklMwcLu_bMgnzDese6YQIyA")
@@ -98,7 +98,7 @@ class KeySuite extends FunSuite {
     ret match {
       case Left(error) => fail(error)
       case Right(obj: ECPublicKey) =>
-        assertEquals(obj.kid, Some("did:example:alice#key-3"))
+        assertEquals(obj.maybeKid, Some("did:example:alice#key-3"))
         assertEquals(obj.kty, KTY.EC)
         assertEquals(obj.crv, Curve.secp256k1)
         assertEquals(obj.x, "aToW5EaTq5mlAf8C5ECYDSkqsJycrW-e1SQ6_GJcAOk")

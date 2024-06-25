@@ -76,8 +76,6 @@ object UniresolverExamples {
       "https://w3id.org/did-resolution/v1",
       DIDDocumentClass(
         DIDSubject("did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w"),
-        None,
-        None,
         Some(
           Set(
             VerificationMethodEmbeddedJWK(
@@ -89,7 +87,6 @@ object UniresolverExamples {
                 Curve.secp256k1,
                 "WfY7Px6AgH6x-_dgAoRbg8weYRJA36ON-gQiFnETrqw",
                 "IzFx3BUGztK0cyDStiunXbrZYYTtKbOUzx16SUK0sAY",
-                None
               )
             )
           )

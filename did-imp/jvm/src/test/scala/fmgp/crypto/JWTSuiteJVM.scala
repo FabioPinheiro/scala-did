@@ -102,7 +102,7 @@ class JWTSuiteJVM extends FunSuite {
       crv = Curve.Ed25519,
       d = "pFRUKkyzx4kHdJtFSnlPA9WzqkDT1HWV0xZ5OYZd2SY",
       x = "G-boxFB6vOZBu-wXkm-9Lh79I8nf9Z50cILaOgKKGww",
-      kid = Some("did:example:alice#key-1"),
+      kid = "did:example:alice#key-1",
     ).toJWK
 
     val jwtObject = okpKeySignJWTWithEd25519(

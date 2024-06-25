@@ -54,7 +54,6 @@ object KeyGenerator {
       crv = Curve.X25519,
       d = tmp.getD().toString(),
       x = tmp.getX().toString(),
-      kid = None,
     )
   }
 
@@ -65,7 +64,6 @@ object KeyGenerator {
       crv = Curve.Ed25519,
       d = tmp.getD().toString(),
       x = tmp.getX().toString(),
-      kid = None,
     )
   }
 
