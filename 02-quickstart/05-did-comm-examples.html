@@ -135,7 +135,7 @@
   </span><span class="identifier">from</span><span> = </span><span class="type-name">Some</span><span>(</span><span class="type-name">FROM</span><span>(</span><span class="string-literal">&quot;did:example:456&quot;</span><span>)), 
 )
 </span><span class="comment">// message: BasicMessage = BasicMessage(
-//   id = &quot;cf793040-da10-49c0-b8c4-e6d81a3534c0&quot;,
+//   id = &quot;c69e7de0-ef4f-4bc7-990c-714e2a4cd97f&quot;,
 //   to = Set(&quot;did:example:123&quot;),
 //   from = Some(value = &quot;did:example:456&quot;),
 //   lang = None,
@@ -146,7 +146,7 @@
 
 </span><span class="identifier">message</span><span>.</span><span class="identifier">toPlaintextMessage</span><span>.</span><span class="identifier">toJsonPretty</span><span>
 </span><span class="comment">// res0: String = &quot;&quot;&quot;{
-//   &quot;id&quot; : &quot;cf793040-da10-49c0-b8c4-e6d81a3534c0&quot;,
+//   &quot;id&quot; : &quot;c69e7de0-ef4f-4bc7-990c-714e2a4cd97f&quot;,
 //   &quot;type&quot; : &quot;https://didcomm.org/basicmessage/2.0/message&quot;,
 //   &quot;to&quot; : [
 //     &quot;did:example:123&quot;
@@ -154,8 +154,7 @@
 //   &quot;from&quot; : &quot;did:example:456&quot;,
 //   &quot;body&quot; : {
 //     &quot;content&quot; : &quot;Hello, World!&quot;
-//   },
-//   &quot;typ&quot; : &quot;application/didcomm-plain+json&quot;
+//   }
 // }&quot;&quot;&quot;</span></code></pre>
         <p>To receive messages, you can use the following code:</p>
         <pre><code></code></pre>
