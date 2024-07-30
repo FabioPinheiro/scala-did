@@ -7,7 +7,7 @@ import fmgp.did.DIDDocument
 /** didJS/testOnly fmgp.did.comm.DIDCommSuite */
 class DIDCommSuite extends FunSuite {
 
-  test("Example parse plaintextMessage".fail) { // FIXME fail is due to the feature to mitigate limitations on other libraries
+  test("Example parse plaintextMessage") {
     val ret = DIDCommExamples.plaintextMessage.fromJson[PlaintextMessageClass]
     ret match {
       case Left(error) => fail(error)

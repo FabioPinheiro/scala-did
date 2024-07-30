@@ -273,7 +273,6 @@ class EncryptedMessageSuite extends ZSuite {
     sender_order = None,
     sent_count = None,
     received_orders = None,
-    typ = None,
   )
 
   testZ("encrypt with ECDHES_X25519_A256CBCHS512".tag(fmgp.JsUnsupported)) { // FIXME ECDHES_X25519_XC20P

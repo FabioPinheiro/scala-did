@@ -97,8 +97,7 @@ class ActionMenuSuite extends FunSuite {
             |        "disabled" : true
             |      }
             |    ]
-            |  },
-            |  "typ" : "application/didcomm-plain+json"
+            |  }
             |}""".stripMargin
         )
       case Left(error) => fail(s"fMsg MUST be Right but is ${Left(error)}")
@@ -210,8 +209,7 @@ class ActionMenuSuite extends FunSuite {
             |        }
             |      }
             |    ]
-            |  },
-            |  "typ" : "application/didcomm-plain+json"
+            |  }
             |}""".stripMargin
         )
       case Left(error) => fail(s"fMsg MUST be Right but is ${Left(error)}")
@@ -257,8 +255,7 @@ class ActionMenuSuite extends FunSuite {
             |  "body" : {
             |    "name" : "obtain-email-cred",
             |    "params" : {}
-            |  },
-            |  "typ" : "application/didcomm-plain+json"
+            |  }
             |}""".stripMargin
         )
 

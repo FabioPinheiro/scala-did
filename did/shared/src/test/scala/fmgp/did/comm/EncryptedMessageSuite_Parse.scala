@@ -72,7 +72,6 @@ class EncryptedMessageSuite_Parse extends ZSuite {
     sender_order = None,
     sent_count = None,
     received_orders = None,
-    typ = None,
   )
 
 }
