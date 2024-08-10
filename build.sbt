@@ -348,6 +348,7 @@ lazy val root = project
   .in(file("."))
   .settings(publish / skip := true)
   .aggregate(did.js, did.jvm) // publish
+  .aggregate(didCommProtocols.js, didCommProtocols.jvm) // publish
   .aggregate(didFramework.js, didFramework.jvm) // publish
   .aggregate(didImp.js, didImp.jvm) // publish
   .aggregate(multiformats.js, multiformats.jvm) // publish
@@ -391,6 +392,14 @@ lazy val did = crossProject(JSPlatform, JVMPlatform)
   )
   .configure(docConfigure)
 
+lazy val didCommProtocols = crossProject(JSPlatform, JVMPlatform)
+  .in(file("did-comm-protocols"))
+  .configure(publishConfigure)
+  .settings((setupTestConfig): _*)
+  .settings(name := "did-comm-protocols")
+  .dependsOn(did % "compile;test->test")
+  .configure(docConfigure)
+
 lazy val didExperiments = crossProject(JSPlatform, JVMPlatform)
   .in(file("did-experiments"))
   .settings(publish / skip := true)
@@ -411,7 +420,7 @@ lazy val didFramework = crossProject(JSPlatform, JVMPlatform)
     name := "did-framework",
     libraryDependencies += D.zioMunitTest.value,
   )
-  .dependsOn(did % "compile;test->test")
+  .dependsOn(did, didCommProtocols)
   .jvmSettings(libraryDependencies += D.ziohttp.value)
   .jsSettings(libraryDependencies += D.scalajsDom.value)
   .jsConfigure(scalaJSLibConfigure) // Because of didJS now uses NPM libs

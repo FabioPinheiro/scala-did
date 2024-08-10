@@ -84,7 +84,6 @@ Want to see your project here? [Submit a PR]
 - did-rotation: https://identity.foundation/didcomm-messaging/spec/#did-rotation
   - support `from_prior`
   - support `sub` `iss` on JWT https://datatracker.ietf.org/doc/html/rfc7519
-- create module for protocols
 - maybe implement method `did:peer.3` and `did:peer.4`
 - [TODO] method `did:key`
 - maybe implement method `did:jwk` https://github.com/quartzjer/did-jwk
@@ -126,7 +125,9 @@ flowchart BT
     end
     did-resolver-peer --> did
     did-resolver-web --> did
+    did-comm-protocols --> did
     did-framework --> did
+    did-framework --> did-comm-protocols
     did-imp --> did
   end
 
@@ -169,6 +170,6 @@ NOTES:
 - Green boxes is JVM's platform specific.
 - Blue boxes is JavaScript's platform specific.
 - Other boxes are not platform specific.
-- The `did-imp-hw` is a idea how to extend for other implementation. Lika a Hardware/platform specific.
+- The `did-imp-hw` is a idea how to extend for other implementation. Like a hardware/platform specific or with hardware wallet support.
 - `did-resolver-web` & `did-resolver-peer` are implementations of the respective did methods.
 
