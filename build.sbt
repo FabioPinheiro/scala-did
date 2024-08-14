@@ -126,7 +126,7 @@ lazy val docs = project
       ), // or inAnyProject -- inProjects(...)
     }
   )
-  .dependsOn(did.jvm, didImp.jvm, didResolverPeer.jvm)
+  .dependsOn(did.jvm, didCommProtocols.jvm, didImp.jvm, didResolverPeer.jvm)
 
 /** Versions */
 lazy val V = new {
