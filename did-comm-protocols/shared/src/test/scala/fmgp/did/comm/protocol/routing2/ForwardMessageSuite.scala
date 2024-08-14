@@ -6,7 +6,7 @@ import zio.json.ast.Json
 
 import fmgp.did.comm._
 
-/** didJVM/testOnly fmgp.did.comm.protocol.routing2.ForwardMessageSuite
+/** didCommProtocolsJVM/testOnly fmgp.did.comm.protocol.routing2.ForwardMessageSuite
   */
 class ForwardMessageSuite extends FunSuite {
   val id = MsgID()

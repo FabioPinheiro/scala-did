@@ -6,7 +6,7 @@ import zio.json.ast.Json
 
 import fmgp.did.comm._
 
-/** didJVM/testOnly fmgp.did.comm.protocol.actionmenu2.ActionMenuSuite */
+/** didCommProtocolsJVM/testOnly fmgp.did.comm.protocol.actionmenu2.ActionMenuSuite */
 class ActionMenuSuite extends FunSuite {
   val msgMenuExample =
     """{

@@ -6,7 +6,7 @@ import zio.json.ast.Json
 
 import fmgp.did.comm._
 
-/** didJVM/testOnly fmgp.did.comm.protocol.reportproblem2.ReportProblem2Suite */
+/** didCommProtocolsJVM/testOnly fmgp.did.comm.protocol.reportproblem2.ReportProblem2Suite */
 class ReportProblem2Suite extends FunSuite {
   val msgQueriesExample =
     """{

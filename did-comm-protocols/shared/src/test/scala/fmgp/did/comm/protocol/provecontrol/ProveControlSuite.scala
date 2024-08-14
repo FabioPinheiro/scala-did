@@ -7,7 +7,7 @@ import zio.json.ast.Json
 import fmgp.did.comm._
 import fmgp.crypto.SHA256
 
-/** didJVM/testOnly fmgp.did.comm.protocol.provecontrol.ProveControlSuite */
+/** didCommProtocolsJVM/testOnly fmgp.did.comm.protocol.provecontrol.ProveControlSuite */
 class ProveControlSuite extends FunSuite {
   val msgRequestVerificationExample =
     """{

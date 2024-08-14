@@ -75,6 +75,8 @@ lazy val docConfigure: Project => Project =
     apiURL := Some(url(s"https://doc.did.fmgp.app/api/")), // or s"https://javadoc.io/doc/app.fmgp/${name.value}_3"
   )
 
+val MUnitFramework = new TestFramework("munit.Framework")
+
 /** Custom commands:
   *   - doc
   *   - docs/mdoc
@@ -306,13 +308,13 @@ lazy val buildInfoConfigure: Project => Project = _.enablePlugins(BuildInfoPlugi
 
 addCommandAlias(
   "testJVM",
-  ";didJVM/test; didFrameworkJVM/test; didImpJVM/test; " +
+  ";didJVM/test; didCommProtocolsJVM/test; didFrameworkJVM/test; didImpJVM/test; " +
     "didResolverPeerJVM/test; didResolverWebJVM/test; didUniresolverJVM/test; " +
     "multiformatsJVM/test"
 )
 addCommandAlias(
   "testJS",
-  ";didJS/test;  didFrameworkJS/test;  didImpJS/test;  " +
+  ";didJS/test;  didCommProtocolsJS/test;  didFrameworkJS/test;  didImpJS/test;  " +
     "didResolverPeerJS/test;  didResolverWebJS/test;  didUniresolverJS/test;  " +
     "multiformatsJS/test"
 )
@@ -397,6 +399,7 @@ lazy val didCommProtocols = crossProject(JSPlatform, JVMPlatform)
   .configure(publishConfigure)
   .settings((setupTestConfig): _*)
   .settings(name := "did-comm-protocols")
+  .jsConfigure(scalaJSLibConfigure) // Because of didJS now uses NPM libs
   .dependsOn(did % "compile;test->test")
   .configure(docConfigure)
 
@@ -524,6 +527,9 @@ lazy val didResolverWeb = crossProject(JSPlatform, JVMPlatform)
     name := "did-method-web",
     libraryDependencies += D.munit.value,
     libraryDependencies += D.zioMunitTest.value,
+  )
+  .settings(
+    Test / testOptions += Tests.Argument(MUnitFramework, "--exclude-tags=IntregrationTest")
   )
   .jvmSettings(libraryDependencies += D.ziohttp.value)
   .jvmSettings( // FIXME https://github.com/zio/zio-http/issues/2280#issuecomment-2166894061

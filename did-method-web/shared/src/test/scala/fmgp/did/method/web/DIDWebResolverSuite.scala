@@ -8,7 +8,9 @@ import zio._
 
 class DIDWebResolverSuite extends ZSuite {
 
-  testZ("Resolver (.well-known) 'did:web:did.fmgp.app'") {
+  val intregrationTest = new munit.Tag("IntregrationTest")
+
+  testZ("Resolver (.well-known) 'did:web:did.fmgp.app'".tag(intregrationTest)) {
     {
       for {
         resolver <- ZIO.service[Resolver]
@@ -18,7 +20,7 @@ class DIDWebResolverSuite extends ZSuite {
     }.provideLayer(DIDWebResolverSuiteUtils.resolverLayer)
   }
 
-  testZ("Resolver (with path) 'did:web:did.fmgp.app:fabio'") {
+  testZ("Resolver (with path) 'did:web:did.fmgp.app:fabio'".tag(intregrationTest)) {
     {
       for {
         resolver <- ZIO.service[Resolver]

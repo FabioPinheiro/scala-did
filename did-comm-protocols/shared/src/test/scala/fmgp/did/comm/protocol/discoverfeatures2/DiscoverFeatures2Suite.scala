@@ -6,7 +6,7 @@ import zio.json.ast.Json
 
 import fmgp.did.comm._
 
-/** didJVM/testOnly fmgp.did.comm.protocol.discoverfeatures2.DiscoverFeatures2Suite */
+/** didCommProtocolsJVM/testOnly fmgp.did.comm.protocol.discoverfeatures2.DiscoverFeatures2Suite */
 class DiscoverFeatures2Suite extends FunSuite {
   val msgQueriesExample =
     """{

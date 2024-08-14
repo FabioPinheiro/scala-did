@@ -6,7 +6,7 @@ import zio.json.ast.Json
 
 import fmgp.did.comm._
 
-/** didJVM/testOnly fmgp.did.comm.protocol.reportproblem2.ProblemCodeSuite */
+/** didCommProtocolsJVM/testOnly fmgp.did.comm.protocol.reportproblem2.ProblemCodeSuite */
 class ProblemCodeSuite extends FunSuite {
 
   // https://regex101.com/r/B0v1Jo/1

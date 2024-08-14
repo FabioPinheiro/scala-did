@@ -6,7 +6,7 @@ import zio.json.ast.Json
 
 import fmgp.did.comm._
 
-/** didJVM/testOnly fmgp.did.comm.protocol.mediatorcoordination3.MediatorCoordinatio3Suite
+/** didCommProtocolsJVM/testOnly fmgp.did.comm.protocol.mediatorcoordination3.MediatorCoordinatio3Suite
   */
 class MediatorCoordination3Suite extends FunSuite {
 

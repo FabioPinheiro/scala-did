@@ -7,7 +7,7 @@ import zio.json.ast.Json
 import fmgp.did.comm._
 import fmgp.did.comm.protocol.chatriqube._
 
-/** didJVM/testOnly fmgp.did.comm.protocol.chatriqube.discovery.DiscoverySuite */
+/** didCommProtocolsJVM/testOnly fmgp.did.comm.protocol.chatriqube.discovery.DiscoverySuite */
 class DiscoverySuite extends FunSuite {
   val msgRequestWithToExample =
     """{
