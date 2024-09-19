@@ -26,7 +26,7 @@ class TransportDIDCommOverHTTP(
         case _: EncryptedMessage => MediaTypes.ENCRYPTED.pipe(e => Header.ContentType(MediaType(e.mainType, e.subType)))
       for {
         res <- Client
-          .request(
+          .batched( // Shound we use .batched() or .streaming()testAll
             Request
               .post(path = destination, body = Body.fromCharSequence((msg: Message).toJson))
               .setHeaders(Headers(Seq(contentTypeHeader)))

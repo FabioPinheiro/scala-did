@@ -27,7 +27,7 @@ case class Uniresolver(uniresolverServer: String, client: Client, scope: Scope) 
     // else
     for {
       res <- Client
-        .request(Request.get(path = uniresolverServer + did))
+        .batched(Request.get(path = uniresolverServer + did))
         .provideEnvironment(ZEnvironment(client) ++ ZEnvironment(scope))
         .mapError(ex => DIDresolutionFail.fromThrowable(ex))
       data <- res.body.asString

@@ -24,7 +24,7 @@ case class DIDWebResolver(client: Client, scope: Scope) extends Resolver {
       val web = DIDWeb(did.specificId)
       for {
         res <- Client
-          .request(Request.get(path = web.url))
+          .batched(Request.get(path = web.url))
           .provideEnvironment(ZEnvironment(client) ++ ZEnvironment(scope))
           .mapError(ex => DIDresolutionFail.fromThrowable(ex))
         _ = res
