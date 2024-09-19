@@ -27,46 +27,6 @@ class TransportWSImp[MSG](
 
 object TransportWSImp {
 
-  // def open(url: String): ZIO[Operator & Operations & Resolver & (Client & Scope), Throwable, String] = {
-  //   def channel2Transport(
-  //       channel: Channel[ChannelEvent[WebSocketFrame], ChannelEvent[WebSocketFrame]]
-  //   ): ZIO[Operator & (Operations & Resolver), Throwable, TransportDIDCommWS[Any]] = {
-  //     val socketID = Websocket.nextSocketName
-  //     ZIO.logAnnotate(Websocket.logAnnotation(socketID)) {
-  //       for {
-  //         transport <- make(channel, identifier = socketID)
-  //         ws <- WebsocketJVMImp
-  //           .bindings(channel, transport.ws)
-  //           .tapError(e => ZIO.logError(e.getMessage))
-  //           .fork
-  //         op <- ZIO.service[Operator]
-  //         transportWarp = TransportDIDCommWS(transport)
-  //         _ <- op
-  //           .receiveTransport(transportWarp)
-  //           .tapErrorCause(ZIO.logErrorCause(_))
-  //           .mapError(DidException(_))
-  //         _ <- ws.join *> ZIO.log("WebsocketJVM CLOSE")
-  //       } yield transportWarp
-  //     }
-  //   }
-  //   val url = URL.decode("url").getOrElse(???)
-
-  //   for {
-  //     client <- ZIO.service[Client]
-  //     xxx = Handler.fromFunctionZIO(channel2Transport _)
-  //     app = WebSocketApp(handler = xxx, customConfig = None)
-  //     client2 = if (url.isAbsolute) client.url(url) else client.addUrl(url)
-  //     aaa = client2.socket(app)
-  //     response <- createWebSocketAppWithOperator(Seq.empty).connect("FIXME").debug
-  //     data <- response.body.asString
-  //       .tapError(ex => ZIO.logError(s"Fail parse http WS response body: ${ex.getMessage}"))
-  //       .orDie
-  //     _ <- response.status.isError match
-  //       case true  => ZIO.logError(data)
-  //       case false => ZIO.logInfo(data)
-  //   } yield (data)
-  // }
-
   def createWebSocketAppWithOperator(
       annotationMap: Seq[LogAnnotation]
   ): WebSocketApp[Operator & Operations & Resolver] =

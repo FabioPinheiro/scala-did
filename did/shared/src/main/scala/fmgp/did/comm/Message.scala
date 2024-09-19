@@ -190,6 +190,12 @@ case class SignedMessage(
     case sMsg: SignedMessage    => Left(FailDecryptDoubleSign(outsideMsg = this, insideMsg = sMsg))
     case eMsg: EncryptedMessage => Left(FailDecryptSignThenEncrypted(outsideMsg = this, insideMsg = eMsg))
   }
+
+  def publicRecipientsSubject: Set[DIDSubject] = payloadAsMessage match
+    case Left(value)                   => Set.empty
+    case Right(pMsg: PlaintextMessage) => pMsg.to.toSet.flatten.map(_.toDIDSubject)
+    case Right(sMsg: SignedMessage)    => sMsg.publicRecipientsSubject
+    case Right(eMsg: EncryptedMessage) => eMsg.publicRecipientsSubject
 }
 
 object SignedMessage {
@@ -263,8 +269,12 @@ trait EncryptedMessage extends Message {
   def iv: IV
 
   // extra
-  def recipientsSubject = recipients.map(_.recipientSubject).toSet
-  def recipientsKid = recipients.map(_.recipientKid).toSet
+  @deprecatedName("Use publicRecipientsSubject instead")
+  def recipientsSubject = publicRecipientsSubject
+  def publicRecipientsSubject: Set[DIDSubject] = publicRecipientsKid.map(_.did)
+  @deprecatedName("Use publicRecipientsSubject instead")
+  def recipientsKid = publicRecipientsKid
+  def publicRecipientsKid: Set[VerificationMethodReferenced] = recipients.map(_.recipientKid).toSet
 
   def sha256 = SHA256.digestToHex(this.toJson)
   def isAnon = `protected`.obj match

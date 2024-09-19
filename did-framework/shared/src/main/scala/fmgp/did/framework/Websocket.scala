@@ -36,8 +36,9 @@ object Websocket {
   type State = State.Value
   val SOCKET_ID = "SocketID"
 
-  private var socketCounter = 1
+  private var socketCounter = 0
   // TODO use scala.util.Random.nextLong().toString
+  def nextStreamName = "stream:" + this.synchronized { socketCounter += 1; socketCounter }
   def nextSocketName = "socket:" + this.synchronized { socketCounter += 1; socketCounter }
   def logAnnotation(socketID: String = nextSocketName) = LogAnnotation(SOCKET_ID, socketID)
 

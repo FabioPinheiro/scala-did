@@ -22,4 +22,9 @@ trait AgentProgram {
   /** Accept a transport where messages can be received. */
   def acceptTransport(transport: TransportDIDComm[Any]): URIO[Operations & Resolver, Unit]
 
+  def pipeMgs: ZPipeline[Operations & Resolver, String, String, String] = Pipeline.pipelineDIDComm(auxPipelineDIDComm)
+
+  protected def auxPipelineDIDComm
+      : ZPipeline[Operations & Resolver, String, SignedOrEncryptedMessage, SignedOrEncryptedMessage] =
+    ZPipeline.identity
 }

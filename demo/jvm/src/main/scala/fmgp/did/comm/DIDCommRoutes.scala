@@ -19,6 +19,14 @@ import fmgp.util._
 object DIDCommRoutes {
 
   def appRoutes: Routes[Operator & Operations & Resolver, Nothing] = Routes(
+    Method.GET / "pipe" -> handler { (req: Request) =>
+      for {
+        _ <- ZIO.log("Stream Pipe started")
+        operator <- ZIO.service[Operator]
+        ws <- StreamFromWebSocket.zioWebSocketApp(operator.pipeline)
+        ret <- ws.toResponse
+      } yield ret
+    },
     Method.GET / "ws" -> handler { (req: Request) =>
       for {
         annotationMap <- ZIO.logAnnotations.map(_.map(e => LogAnnotation(e._1, e._2)).toSeq)
