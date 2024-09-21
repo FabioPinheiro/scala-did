@@ -86,7 +86,7 @@ val MUnitFramework = new TestFramework("munit.Framework")
   */
 lazy val docs = project
   .in(file("docs"))
-  .settings(skip / publish := true)
+  .settings(skip / publish := false) // Docs should not be publish as a jar but rather as a website
   .enablePlugins(MdocPlugin)
   .settings(
     mdocVariables := Map("VERSION" -> version.value),
