@@ -72,3 +72,16 @@ addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.5.0") // https://github.com/sb
 // Deploy demo - https://github.com/sbt/sbt-assembly/tags
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.2.0")
 addSbtPlugin("com.github.sbt" % "sbt-gzip" % "2.0.0")
+
+// To debug what the job sends to https://github.com/FabioPinheiro/scala-did/security/dependabot
+// See file in .github/workflows/sbt-dependency-submission.yml
+if (sys.env.get("DEPEDABOT").isDefined) {
+  println(s"Adding plugin sbt-github-dependency-submission since env DEPEDABOT is defined.")
+  // The reason for this is that the plugin needs the variable to be defined. We don't want to have that requirement.
+  libraryDependencies += {
+    val dependency = "ch.epfl.scala" % "sbt-github-dependency-submission" % "3.1.0"
+    val sbtV = (pluginCrossBuild / sbtBinaryVersion).value
+    val scalaV = (update / scalaBinaryVersion).value
+    Defaults.sbtPluginExtra(dependency, sbtV, scalaV)
+  }
+} else libraryDependencies ++= Seq[ModuleID]()
