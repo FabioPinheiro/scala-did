@@ -70,7 +70,7 @@ addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.5.0") // https://github.com/sb
 // addSbtPlugin("org.typelevel" % "sbt-typelevel-site" % "0.6.2") // https://typelevel.org/sbt-typelevel/site.html
 
 // Deploy demo - https://github.com/sbt/sbt-assembly/tags
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.2.0")
+addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.3.0")
 addSbtPlugin("com.github.sbt" % "sbt-gzip" % "2.0.0")
 
 // To debug what the job sends to https://github.com/FabioPinheiro/scala-did/security/dependabot
