@@ -9,9 +9,16 @@ The project is license under [**MIT License**](https://github.com/fluency03/scal
 
 **Note: It was copy to make the code in `"com.github.fluency03" % "scala-multibase_2.12" % "0.0.1"` crossProject and some minor change!**
 
+## unsigned-varint
+
+[unsigned-varint](https://github.com/multiformats/unsigned-varint)
+
+This module is a copy the varint from  https://github.com/fluency03/varint (commit `38a29ce75fdb56b5aa6b3eaf46adb4e0d739b0b9`)
+
+The project is license under [**MIT License**](https://github.com/fluency03/scala-multibase/blob/master/LICENSE)
+
 ## TODO - Implemente
 
-- [unsigned-varint](https://github.com/multiformats/unsigned-varint)
 - [multicodec](https://github.com/multiformats/multicodec/blob/master/table.csv)
 - [multihash](https://github.com/multiformats/multihash)
 - [multiaddr](https://github.com/multiformats/multiaddr)
