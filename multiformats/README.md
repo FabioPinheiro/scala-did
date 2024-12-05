@@ -17,8 +17,13 @@ This module is a copy the varint from  https://github.com/fluency03/varint (comm
 
 The project is license under [**MIT License**](https://github.com/fluency03/scala-multibase/blob/master/LICENSE)
 
+## Multicodec
+
+[multicodec](https://github.com/multiformats/multicodec)
+
+[Table from commit 352d05ad430713088e867216152725f581387bc8](https://github.com/multiformats/multicodec/blob/352d05ad430713088e867216152725f581387bc8/table.csv)
+
 ## TODO - Implemente
 
-- [multicodec](https://github.com/multiformats/multicodec/blob/master/table.csv)
 - [multihash](https://github.com/multiformats/multihash)
 - [multiaddr](https://github.com/multiformats/multiaddr)
