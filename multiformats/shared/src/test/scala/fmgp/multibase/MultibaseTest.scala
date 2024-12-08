@@ -2,6 +2,7 @@ package fmgp.multibase
 
 import munit._
 
+/** multiformatsJVM/testOnly fmgp.multibase.MultibaseTest */
 class MultibaseTest extends FunSuite {
 
   test("contains correct code and name mappings for the Base.") {
@@ -142,8 +143,60 @@ class MultibaseTest extends FunSuite {
     TestCase("base64urlpad", "foobar", "UZm9vYmFy")
   )
 
-  test("convert given string to correct encodings for all TestCases.") {
+  test("convert given string to correct encodings for all TestCases") {
     for (TestCase(name, str, expEncoded) <- testCases) {
+      val base = Base.Names(name)
+      val encoded = Multibase.encodeString(base, str)
+      assertEquals(encoded.value, expEncoded)
+      assertEquals(Multibase(expEncoded).decodeToString, str)
+    }
+  }
+
+  test("convert given string to correct encodings for all TestCases from https://w3c-ccg.github.io/multibase") {
+    for (
+      TestCase(name, str, expEncoded) <- Seq(
+        TestCase("base32upper", "Multibase is awesome! \\o/", "BJV2WY5DJMJQXGZJANFZSAYLXMVZW63LFEEQFY3ZP"),
+        TestCase("base58btc", "Multibase is awesome! \\o/", "zYAjKoNbau5KiqmHPmSxYCvn66dA1vLmwbt"),
+        // TestCase("base64urlpad", "Multibase is awesome! \\o/", "MTXVsdGliYXNlIGlzIGF3ZXNvbWUhIFxvLw=="), FIXME
+      )
+    ) {
+      val base = Base.Names(name)
+      val encoded = Multibase.encodeString(base, str)
+      assertEquals(encoded.value, expEncoded)
+      assertEquals(Multibase(expEncoded).decodeToString, str)
+    }
+  }
+
+  test("convert given string to correct encodings for all TestCases from https://hexdocs.pm/multibase/readme.html") {
+    for (
+      TestCase(name, str, expEncoded) <- Seq(
+        TestCase(
+          "base8",
+          "I can be encoded many ways, but I am unique",
+          "71111006154133420142312201453346155731062544100665413347444035660571346260403047256410044440302664403526715134272545"
+        ),
+        TestCase(
+          "base16",
+          "I can be encoded many ways, but I am unique",
+          "f492063616e20626520656e636f646564206d616e7920776179732c20627574204920616d20756e69717565"
+        ),
+        TestCase(
+          "base32hexupper",
+          "I can be encoded many ways, but I am unique",
+          "V94G66OBE41H6A835DPHMUP35CGG6QOBEF4G7EOBPECM20OJLEGG4I831DKG7ARJ9E5QMA"
+        ),
+        TestCase(
+          "base58btc",
+          "I can be encoded many ways, but I am unique",
+          "z6PS9nHyn6kM1ECybTAjN4iAmtekMSSjXbisXp5xTBsmcLsRsYY85Z1Ko1vL"
+        ),
+        TestCase(
+          "base58flickr",
+          "I can be encoded many ways, but I am unique",
+          "Z6or9MhYM6Km1ecYAsaJn4HaLTDKmrrJwAHSwP5XsbSLBkSqSxx85y1jN1Vk"
+        ),
+      )
+    ) {
       val base = Base.Names(name)
       val encoded = Multibase.encodeString(base, str)
       assertEquals(encoded.value, expEncoded)

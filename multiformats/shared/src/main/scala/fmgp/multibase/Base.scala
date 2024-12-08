@@ -1,10 +1,14 @@
 package fmgp.multibase
 
+import fmgp.multiformats.Multicodec
+
 sealed abstract class Base(val name: String, val code: Char, val alphabet: String) {
 
   lazy val alphabetPos: Map[Char, Int] = (for (i <- alphabet.indices) yield alphabet(i) -> i).toMap
 
   def encode(data: Array[Byte]): Multibase = Multibase.encode(this, data)
+  // def encode(data: Multicodec): Multibase = Multibase.encode(this, data.bytes)
+  // def encode(data: MulticodecParts): Multibase = Multibase.encode(this, data.watp.bytes)
 
   def encodeString(data: String): Multibase = Multibase.encodeString(this, data)
 

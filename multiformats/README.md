@@ -1,7 +1,10 @@
-# [Multiformats](https://multiformats.io/)
+# Multiformats
 
+- [Multiformats](https://multiformats.io/)
+- [Multiformats GitHub](https://github.com/multiformats/multiformats)
+- Also see Python implementation of Multiformats - https://github.com/hashberg-io/multiformats
 
-## Muldibase
+## Muldibase - base encodings
 
 This module is a copy the muldibase from  https://github.com/fluency03/scala-multibase/tree/master (commit `b6455700af3f9f7f9748cc86c763bfeef78c16c9`)
 
@@ -17,7 +20,7 @@ This module is a copy the varint from  https://github.com/fluency03/varint (comm
 
 The project is license under [**MIT License**](https://github.com/fluency03/scala-multibase/blob/master/LICENSE)
 
-## Multicodec
+## Multicodec - serialization codes
 
 [multicodec](https://github.com/multiformats/multicodec)
 
@@ -25,5 +28,6 @@ The project is license under [**MIT License**](https://github.com/fluency03/scal
 
 ## TODO - Implemente
 
-- [multihash](https://github.com/multiformats/multihash)
-- [multiaddr](https://github.com/multiformats/multiaddr)
+- [multihash](https://github.com/multiformats/multihash) - cryptographic hashes
+- [multiaddr](https://github.com/multiformats/multiaddr) - network addresses
+- multikey - cryptographic keys and artifacts

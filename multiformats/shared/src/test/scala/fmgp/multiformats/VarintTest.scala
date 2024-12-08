@@ -2,7 +2,8 @@ package fmgp.multiformats
 
 import munit._
 
-class varintTest extends FunSuite {
+/** multiformatsJVM/testOnly fmgp.multiformats.VarintTest */
+class VarintTest extends FunSuite {
 
   // 1 (0x01)        => 00000001 (0x01)
   // 127 (0x7f)      => 01111111 (0x7f)
@@ -12,36 +13,42 @@ class varintTest extends FunSuite {
   // 16384 (0x4000)  => 10000000 10000000 00000001 (0x808001)
 
   test("encode 1 to Varint") {
-    assertEquals(Varint.encodeInt(1).value.toSeq, Array[Byte](0x01).toSeq)
-    assertEquals(Varint.encodeLong(1).value.toSeq, Array[Byte](0x01).toSeq)
+    assertEquals(Varint.encodeInt(1).seq, Seq[Byte](0x01))
+    assertEquals(Varint.encodeLong(1).seq, Seq[Byte](0x01))
   }
   test("encode 127 to Varint") {
-    assertEquals(Varint.encodeInt(127).value.toSeq, Array[Byte](0x7f).toSeq)
-    assertEquals(Varint.encodeLong(127).value.toSeq, Array[Byte](0x7f).toSeq)
+    assertEquals(Varint.encodeInt(127).seq, Seq[Byte](0x7f))
+    assertEquals(Varint.encodeLong(127).seq, Seq[Byte](0x7f))
   }
   test("encode 128 to Varint") {
-    assertEquals(Varint.encodeInt(128).value.toSeq, Array[Byte](0x80.toByte, 0x01).toSeq)
-    assertEquals(Varint.encodeLong(128).value.toSeq, Array[Byte](0x80.toByte, 0x01).toSeq)
+    assertEquals(Varint.encodeInt(128).seq, Seq[Byte](0x80.toByte, 0x01))
+    assertEquals(Varint.encodeLong(128).seq, Seq[Byte](0x80.toByte, 0x01))
   }
   test("encode 255 to Varint") {
-    assertEquals(Varint.encodeInt(255).value.toSeq, Array[Byte](0xff.toByte, 0x01).toSeq)
-    assertEquals(Varint.encodeLong(255).value.toSeq, Array[Byte](0xff.toByte, 0x01).toSeq)
+    assertEquals(Varint.encodeInt(255).seq, Seq[Byte](0xff.toByte, 0x01))
+    assertEquals(Varint.encodeLong(255).seq, Seq[Byte](0xff.toByte, 0x01))
   }
   test("encode 300 to Varint") {
-    assertEquals(Varint.encodeInt(300).value.toSeq, Array[Byte](0xac.toByte, 0x02).toSeq)
-    assertEquals(Varint.encodeLong(300).value.toSeq, Array[Byte](0xac.toByte, 0x02).toSeq)
+    assertEquals(Varint.encodeInt(300).seq, Seq[Byte](0xac.toByte, 0x02))
+    assertEquals(Varint.encodeLong(300).seq, Seq[Byte](0xac.toByte, 0x02))
   }
   test("encode 16384 to Varint") {
-    assertEquals(Varint.encodeInt(16384).value.toSeq, Array[Byte](0x80.toByte, 0x80.toByte, 0x01).toSeq)
-    assertEquals(Varint.encodeLong(16384).value.toSeq, Array[Byte](0x80.toByte, 0x80.toByte, 0x01).toSeq)
+    assertEquals(Varint.encodeInt(16384).seq, Seq[Byte](0x80.toByte, 0x80.toByte, 0x01))
+    assertEquals(Varint.encodeLong(16384).seq, Seq[Byte](0x80.toByte, 0x80.toByte, 0x01))
+  }
+
+  test("encode 200 (Multicodec json) to Varint") {
+    assertEquals(Varint.encodeInt(200).seq, Seq[Byte](0xc8.toByte, 0x01.toByte))
   }
 
   test("encode an Int to Varint and decode it back") {
     val rand = new scala.util.Random
     for (i <- 1 to 100) {
       val num = rand.nextInt
-      val ret = Varint.decodeToInt(Varint.encodeInt(num))._1
-      assertEquals(obtained = ret, expected = num)
+      val encoded = Varint.encodeInt(num)
+      val ret = Varint.decodeToInt(encoded)
+      assertEquals(obtained = ret._1, expected = num)
+      assertEquals(obtained = ret._2, expected = encoded.length)
     }
   }
 
@@ -49,8 +56,10 @@ class varintTest extends FunSuite {
     val rand = new scala.util.Random
     for (i <- 1 to 100) {
       val num = rand.nextLong
-      val ret = Varint.decodeToLong(Varint.encodeLong(num))._1
-      assertEquals(obtained = ret, expected = num)
+      val encoded = Varint.encodeLong(num)
+      val ret = Varint.decodeToLong(encoded)
+      assertEquals(obtained = ret._1, expected = num)
+      assertEquals(obtained = ret._2, expected = encoded.length)
     }
   }
 
@@ -86,6 +95,14 @@ class varintTest extends FunSuite {
     assertEquals(Varint.extractLength(Array(0xff.toByte, 0x0f.toByte), 1), 1)
     assertEquals(Varint.extractLength(Array(0xff.toByte, 0xff.toByte, 0x8f.toByte, 0x8f.toByte, 0x0f.toByte), 0), 5)
     assertEquals(Varint.extractLength(Array(0x80.toByte, 0x80.toByte, 0x8f.toByte, 0x82.toByte, 0x01.toByte), 2), 3)
+
+    assertEquals(
+      Varint.extractLength(
+        Array(0x80.toByte, 0x80.toByte, 0x8f.toByte, 0x82.toByte, 0x01.toByte, 0x8f.toByte, 0x8f.toByte, 0x8f.toByte),
+        0
+      ),
+      5
+    )
   }
 
 }

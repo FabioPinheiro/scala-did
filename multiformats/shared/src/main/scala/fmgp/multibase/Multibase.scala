@@ -31,6 +31,7 @@ object Multibase {
 
   extension (x: Multibase)
     def value: String = x
+    def bytes: Array[Byte] = x.getBytes
 
     def decodeToString: String = new String(x.decode)
     def decodeToHex = x.decode.map("%02X" format _) // .mkString

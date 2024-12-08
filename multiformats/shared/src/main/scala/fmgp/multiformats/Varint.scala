@@ -3,6 +3,7 @@ package fmgp.multiformats
 import scala.annotation.tailrec
 
 opaque type Varint = Array[Byte]
+// opaque type Varint = Seq[Byte] //TODO Maybe is more safe with Seq
 
 /** Implementation of the unsigned-varint specification
   *
@@ -12,9 +13,16 @@ opaque type Varint = Array[Byte]
 object Varint {
   def unsafe(value: Array[Byte]): Varint = value
   extension (varint: Varint)
-    def value: Array[Byte] = varint
+    def bytes: Array[Byte] = varint
+    def seq: Seq[Byte] = varint.toSeq
     def length: Int = varint.length
-    def apply(index: Int): Byte = varint.value(index)
+    def apply(index: Int): Byte = varint.bytes(index)
+
+    /** unsafe FIXME */
+    def decodeInt = Varint.decodeToInt(varint)
+
+    /** unsafe FIXME */
+    def decodeLong = Varint.decodeToLong(varint)
 
   private val MSB = 0x80
   private val LOW_7_BITS = 0x7f
