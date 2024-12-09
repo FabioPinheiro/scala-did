@@ -75,8 +75,9 @@ object UniresolverExamples {
     DIDResolutionResult(
       "https://w3id.org/did-resolution/v1",
       DIDDocumentClass(
-        DIDSubject("did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w"),
-        Some(
+        id = DIDSubject("did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w"),
+        alsoKnownAs = None,
+        verificationMethod = Some(
           Set(
             VerificationMethodEmbeddedJWK(
               "#someKeyId",
@@ -91,12 +92,12 @@ object UniresolverExamples {
             )
           )
         ),
-        Some(List(VerificationMethodReferenced("#someKeyId"))),
-        None,
-        None,
-        None,
-        None,
-        Some(
+        authentication = Some(List(VerificationMethodReferenced("#someKeyId"))),
+        assertionMethod = None,
+        keyAgreement = None,
+        capabilityInvocation = None,
+        capabilityDelegation = None,
+        service = Some(
           Set(
             DIDServiceGeneric("#linkedin", "linkedin", Json.Str("linkedin.com/in/henry-tsai-6b884014")),
             DIDServiceGeneric("#github", "github", Json.Str("github.com/thehenrytsai"))

@@ -19,6 +19,13 @@ trait DIDDocument extends DID {
   def id: Required[DIDSubject] // = s"$scheme:$namespace:$specificId"
 
   /** @see
+    *   https://www.w3.org/TR/did-core/#did-document-properties
+    *
+    * A set of strings that conform to the rules of [RFC3986] for URIs.
+    */
+  def alsoKnownAs: NotRequired[Set[URI]]
+
+  /** @see
     *   https://www.w3.org/TR/did-core/#verification-methods
     *
     * The VerificationMethod MUST be embedded (can be a reference to another VerificationMethod)
@@ -117,6 +124,7 @@ object DIDDocument {
     DIDDocumentClass.encoder.contramap(e =>
       DIDDocumentClass(
         id = e.id,
+        alsoKnownAs = e.alsoKnownAs,
         verificationMethod = e.verificationMethod,
         authentication = e.authentication,
         assertionMethod = e.assertionMethod,
@@ -130,6 +138,7 @@ object DIDDocument {
 
 case class DIDDocumentClass(
     id: Required[DIDSubject],
+    alsoKnownAs: NotRequired[Set[URI]] = None,
     verificationMethod: NotRequired[Set[VerificationMethodEmbedded]] = None,
     authentication: NotRequired[SetU[VerificationMethod]] = None,
     assertionMethod: NotRequired[SetU[VerificationMethod]] = None,
