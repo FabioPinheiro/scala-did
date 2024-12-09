@@ -46,7 +46,7 @@ class VarintTest extends FunSuite {
     for (i <- 1 to 100) {
       val num = rand.nextInt
       val encoded = Varint.encodeInt(num)
-      val ret = Varint.decodeToInt(encoded)
+      val ret = Varint.decodeToInt(encoded).getOrElse(???)
       assertEquals(obtained = ret._1, expected = num)
       assertEquals(obtained = ret._2, expected = encoded.length)
     }
@@ -57,7 +57,7 @@ class VarintTest extends FunSuite {
     for (i <- 1 to 100) {
       val num = rand.nextLong
       val encoded = Varint.encodeLong(num)
-      val ret = Varint.decodeToLong(encoded)
+      val ret = Varint.decodeToLong(encoded).getOrElse(???)
       assertEquals(obtained = ret._1, expected = num)
       assertEquals(obtained = ret._2, expected = encoded.length)
     }
@@ -65,22 +65,22 @@ class VarintTest extends FunSuite {
 
   test("throw exception if the given bytes is not Varint bytes: empty") {
     interceptMessage[java.lang.IllegalArgumentException]("Cannot find the ending Byte") {
-      Varint.decodeToInt(Varint.unsafe(Array.emptyByteArray))
+      Varint(Array.emptyByteArray).unsafeDecodeInt
     }
   }
   test("throw exception if the given bytes is not Varint bytes: 0xff") {
     interceptMessage[java.lang.IllegalArgumentException]("Cannot find the ending Byte") {
-      Varint.decodeToInt(Varint.unsafe(Array(0xff.toByte)))
+      Varint(Array(0xff.toByte)).unsafeDecodeInt
     }
   }
   test("throw exception if the given bytes is not Varint bytes: 0xff 0x8f") {
     interceptMessage[java.lang.IllegalArgumentException]("Cannot find the ending Byte") {
-      Varint.decodeToInt(Varint.unsafe(Array(0xff.toByte, 0x8f.toByte)))
+      Varint(Array(0xff.toByte, 0x8f.toByte)).unsafeDecodeInt
     }
   }
   test("throw exception if the given bytes is not Varint bytes: 0x8f") {
     interceptMessage[java.lang.IllegalArgumentException]("Cannot find the ending Byte") {
-      Varint.decodeToInt(Varint.unsafe(Array(0x8f.toByte)))
+      Varint(Array(0x8f.toByte)).unsafeDecodeInt
     }
   }
 
