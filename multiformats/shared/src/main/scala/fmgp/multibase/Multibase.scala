@@ -24,6 +24,7 @@ object Multibase {
       case Base.Base64URL         => Base64Impl.encode(data, Base.Base64URL)
       case Base.Base64URLPad      => Base64Impl.encode(data, Base.Base64URLPad)
       case _                      => BaseNImpl.encode(base, data)
+      // FIXME Base58BTC ?
     }
   }
 
@@ -64,6 +65,7 @@ object Multibase {
           case Base.Base64URL         => Base64Impl.decode(rest, Base.Base64URL)
           case Base.Base64URLPad      => Base64Impl.decode(rest, Base.Base64URLPad)
           case _                      => BaseNImpl.decode(base, rest)
+          // FIXME Base58BTC ?
         }
     }.dropWhile(b => b == 0)
 

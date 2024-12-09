@@ -6,12 +6,8 @@ case class Multihash(codec: Codec.AllHash, size: Int, hash: Array[Byte]) {
 }
 object Multihash {
 
-  // "SHA-1" ->  0x11, 20
-  // "SHA-256" ->  0x12, 32
-  // "SHA-512" ->  0x13, 64
-  // "SHA-3" ->  0x14, 64
-  // "BLAKE2b" ->  0x40, 64
-  // "BLAKE2s" ->  0x41, 32
+  def apply(codec: Codec.AllHash, hash: Array[Byte]): Multihash = new Multihash(codec, hash.length, hash)
+  // private def apply(codec: Codec.AllHash, size: Int, hash: Array[Byte]) = ??? // FIXME REMOVE method
 
   def unsafeFromBytes(bytes: Array[Byte]): Multihash = {
     val multicodec = Multicodec.unsafeFromBytes(bytes)
