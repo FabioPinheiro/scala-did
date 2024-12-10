@@ -24,9 +24,13 @@ object DidPeerResolver {
     case peer: DIDPeer0 => genesisDocument(peer)
     case peer: DIDPeer1 => genesisDocument(peer)
     case peer: DIDPeer2 => genesisDocument(peer)
+    case peer: DIDPeer3 => genesisDocument(peer)
+    case peer: DIDPeer4 => genesisDocument(peer)
   }
 
   def genesisDocument(did: DIDPeer0): UIO[DIDDocument] = ZIO.succeed(did.document)
   def genesisDocument(did: DIDPeer1): UIO[DIDDocument] = ZIO.succeed(did.document)
   def genesisDocument(did: DIDPeer2): UIO[DIDDocument] = ZIO.succeed(did.document)
+  def genesisDocument(did: DIDPeer3): UIO[DIDDocument] = ZIO.succeed(did.document)
+  def genesisDocument(did: DIDPeer4): UIO[DIDDocument] = ZIO.succeed(did.document)
 }

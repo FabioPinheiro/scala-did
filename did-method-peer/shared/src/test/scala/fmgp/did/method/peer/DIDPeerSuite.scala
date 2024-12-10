@@ -23,6 +23,10 @@ class DIDPeerSuite extends ZSuite {
     assert(!DIDPeer.regexPeer0.matches(d))
     assert(DIDPeer.regexPeer1.matches(d))
     assert(!DIDPeer.regexPeer2.matches(d))
+    // TODO numalgo 3
+    assert(!DIDPeer.regexPeer4.matches(d))
+    assert(!DIDPeer.regexPeer4_LONG.matches(d))
+    assert(!DIDPeer.regexPeer4_SHORT.matches(d))
   }
 
   test("Check regex for peer (method 2)") {
@@ -31,6 +35,10 @@ class DIDPeerSuite extends ZSuite {
     assert(!DIDPeer.regexPeer0.matches(d))
     assert(!DIDPeer.regexPeer1.matches(d))
     assert(DIDPeer.regexPeer2.matches(d))
+    // TODO numalgo 3
+    assert(!DIDPeer.regexPeer4.matches(d))
+    assert(!DIDPeer.regexPeer4_LONG.matches(d))
+    assert(!DIDPeer.regexPeer4_SHORT.matches(d))
   }
 
   test("Check regex for peer (method 2) - aliceWithMultiService") {
@@ -39,6 +47,34 @@ class DIDPeerSuite extends ZSuite {
     assert(!DIDPeer.regexPeer0.matches(d))
     assert(!DIDPeer.regexPeer1.matches(d))
     assert(DIDPeer.regexPeer2.matches(d))
+    // TODO numalgo 3
+    assert(!DIDPeer.regexPeer4.matches(d))
+    assert(!DIDPeer.regexPeer4_LONG.matches(d))
+    assert(!DIDPeer.regexPeer4_SHORT.matches(d))
+  }
+
+  test("Check regex for peer (method 4 long form)") {
+    val d = DIDPeerExamples.didpeer4long.string
+    assert(DIDPeer.regexPeer.matches(d))
+    assert(!DIDPeer.regexPeer0.matches(d))
+    assert(!DIDPeer.regexPeer1.matches(d))
+    assert(!DIDPeer.regexPeer2.matches(d))
+    // TODO numalgo 3
+    assert(DIDPeer.regexPeer4.matches(d))
+    assert(DIDPeer.regexPeer4_LONG.matches(d))
+    assert(!DIDPeer.regexPeer4_SHORT.matches(d))
+  }
+
+  test("Check regex for peer (method 2 short form)") {
+    val d = DIDPeerExamples.didpeer4short.string
+    assert(DIDPeer.regexPeer.matches(d))
+    assert(!DIDPeer.regexPeer0.matches(d))
+    assert(!DIDPeer.regexPeer1.matches(d))
+    assert(!DIDPeer.regexPeer2.matches(d))
+    // TODO numalgo 3
+    assert(DIDPeer.regexPeer4.matches(d))
+    assert(!DIDPeer.regexPeer4_LONG.matches(d))
+    assert(DIDPeer.regexPeer4_SHORT.matches(d))
   }
 
   test("Create DIDPeer apply ex5_peer1") {
@@ -144,8 +180,11 @@ class DIDPeerSuite extends ZSuite {
     val defaultService = "eyJ0IjoiZG0iLCJzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ"
 
     DIDPeer(DIDSubject(testDid(service))) match
-      case DIDPeer0(encnumbasis) => fail("Wrong DIDPeer type")
-      case DIDPeer1(encnumbasis) => fail("Wrong DIDPeer type")
+      case DIDPeer0(encnumbasis)          => fail("Wrong DIDPeer type")
+      case DIDPeer1(encnumbasis)          => fail("Wrong DIDPeer type")
+      case DIDPeer3(encnumbasis)          => fail("Wrong DIDPeer type")
+      case DIDPeer4LongForm(hash, json)   => fail("Wrong DIDPeer type")
+      case DIDPeer4ShortForm(encnumbasis) => fail("Wrong DIDPeer type")
       case obj @ DIDPeer2(elements) =>
         assertEquals(obj.did, testDid(service))
         assertNotEquals(obj.did, testDid(defaultService))

@@ -12,7 +12,7 @@ import fmgp.did.comm.{FROM, FROMTO, TO}
 
 type Required[A] = A
 type NotRequired[A] = Option[A]
-type SetU[A] = A | Seq[A]
+type SetU[A] = A | Seq[A] // TODO https://github.com/FabioPinheiro/scala-did/issues/322
 // type SetMapU[A] = A | Seq[A] | Map[String, A]
 // type ServiceEndpoint = URI | Map[String, URI] | Seq[URI] | Seq[Map[String, URI]] //SetU[URI]
 type ServiceEndpoint = Json.Str | Json.Obj | Json.Arr

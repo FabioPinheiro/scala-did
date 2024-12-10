@@ -6,8 +6,10 @@ import fmgp.util._
 import fmgp.multibase._
 import fmgp.crypto._
 import zio.json._
+import zio.json.ast.Json
 import javax.lang.model.element.Element
 import fmgp.multibase.Base.Base58BTC
+import fmgp.multiformats.*
 
 /** DID Peer
   *
@@ -17,24 +19,25 @@ import fmgp.multibase.Base.Base58BTC
 sealed trait DIDPeer extends DID {
   def namespace: String = "peer"
   def specificId: String
-  def numalgo: 0 | 1 | 2
+  def numalgo: 0 | 1 | 2 | 3 | 4
 
+  // FIXME Its not possible to resolve for numalgo 3 and the short form of 4 Just from the DID https://github.com/FabioPinheiro/scala-did/issues/323
   def document: DIDDocument
 }
 
 case class DIDPeer0(encnumbasis: DIDPeer.Array46_BASE58BTC) extends DIDPeer {
-  def numalgo: 0 = 0
-  def specificId: String = "" + numalgo + encnumbasis
+  override def numalgo: 0 = 0
+  override def specificId: String = "" + numalgo + encnumbasis
   override def document: DIDDocument = ??? // FIXME
 }
 case class DIDPeer1(encnumbasis: DIDPeer.Array46_BASE58BTC) extends DIDPeer {
-  def numalgo: 1 = 1
-  def specificId: String = "" + numalgo + encnumbasis
+  override def numalgo: 1 = 1
+  override def specificId: String = "" + numalgo + encnumbasis
   override def document: DIDDocument = ??? // FIXME
 }
 case class DIDPeer2(elements: Seq[DIDPeer2.Element]) extends DIDPeer {
-  def numalgo: 2 = 2
-  def specificId: String = "" + numalgo + elements.map(_.encode).mkString(".", ".", "")
+  override def numalgo: 2 = 2
+  override def specificId: String = "" + numalgo + elements.map(_.encode).mkString(".", ".", "")
 
   def indexedElements = elements.zipWithIndex
 
@@ -181,6 +184,201 @@ object DIDPeer2 {
 
 }
 
+case class DIDPeer3(encnumbasis: DIDPeer.Array46_BASE58BTC) extends DIDPeer {
+  override def numalgo: 3 = 3
+  override def specificId: String = "" + numalgo + encnumbasis
+
+  // FIXME Its not possible to resolve for numalgo 3 and the short form of 4 Just from the DID https://github.com/FabioPinheiro/scala-did/issues/323
+  override def document: DIDDocument = ???
+}
+
+/** @see
+  *   https://identity.foundation/peer-did-method-spec/#method-4-short-form-and-long-form
+  */
+sealed trait DIDPeer4 extends DIDPeer {
+  override def numalgo: 4 = 4
+
+  def shortPart: Multibase
+}
+
+object DIDPeer4 {
+
+  /**   - 1) Take SHA2-256 digest of the encoded document (encode the bytes as utf-8)
+    *   - 2) Prefix these bytes with the multihash prefix for SHA2-256 and the hash length (varint 0x12 for prefix,
+    *     varint 0x20 for 32 bytes in length)
+    *   - 3) Multibase encode the bytes as base58btc (base58 encode the value and prefix with a z)
+    *   - 4) Consider this value the hash
+    *
+    * @param hash
+    *   digest of the encoded document (encode the bytes as utf-8)
+    */
+  def encodeHash(hash: Array[Byte]): Multibase = Base58BTC.encode(Multihash(Codec.sha2_256, hash).bytes)
+  // def calculateAndEncodeHash(initDoc: Json.Obj): Multibase = encodeHash(calculateHash(initDoc))
+  // def calculateAndEncodeHash(encodeDocument: Multibase): Multibase = encodeHash(calculateHash(encodeDocument))
+  def calculateHash(initDoc: Json.Obj): Array[Byte] = calculateHash(encodeDocument(initDoc))
+  def calculateHash(encodeDocument: Multibase): Array[Byte] = SHA256.digest(encodeDocument.value)
+
+  /**   - 1) JSON stringify the object without whitespace
+    *   - 2) Encode the string as utf-8 bytes
+    *   - 3) Prefix the bytes with the multicodec prefix for json (varint 0x0200)
+    *   - 4) Consider this value the hash
+    *
+    * @param json
+    */
+  def encodeDocument(json: Json.Obj): Multibase = Base58BTC.encode(Multicodec(Codec.json, json.toJson.getBytes).bytes)
+
+  def decodeDocument(multibase: Multibase): Either[String, Json.Obj] = {
+    Multicodec.fromBytes(multibase.decode) match
+      case Left(error) => Left(s"DIDPeer4 fail to decode Document part: $error")
+      case Right(Multicodec(Codec.json, dataBytes)) =>
+        new String(dataBytes, java.nio.charset.StandardCharsets.UTF_8).fromJson[Json.Obj] match
+          case Left(parseError) => Left(s"DIDPeer4 fail to parse Document part as Json: $parseError")
+          case Right(jsonObj)   => Right(jsonObj)
+      case Right(Multicodec(codec, dataBytes)) =>
+        Left(s"DIDPeer4 expected the Document part to be Multicodec of 'json' instade of '$codec'")
+  }
+
+  /** To “contextualize” a document:
+    *   - Take the decoded document
+    *   - Add id at the root of the document and set it to the DID
+    *   - Add alsoKnownAs at the root of the document and set it to a list, if not already present, and append the short
+    *     form of the DID
+    *   - For each verification method (declared in the verificationMethod section or embedded in a verification
+    *     relationship like authentication): - If controller is not set, set controller to the DID
+    */
+  def contextualize(decodedDocument: Json.Obj, did: DID, alsoKnownAs: DID): Either[String, DIDDocument] = {
+
+    /** ifMissingAddControllerToVerificationMethodEmbedded */
+    def withController(obj: Json): Json = {
+      obj match
+        case ref: Json.Str => ref // VerificationMethodReferenced
+        case entry: Json.Obj => // VerificationMethodEmbedded
+          entry.get("controller") match
+            case None    => entry.add("controller", Json.Str(did.string))
+            case Some(_) => entry
+        case any => any // TODO Error!
+    }
+
+    def withAlsoKnownAs(doc: Json.Obj): Json.Obj = {
+      val aux = Json.Str(alsoKnownAs.string)
+      doc.get("alsoKnownAs") match
+        case None                => doc.add("alsoKnownAs", Json.Arr(aux))
+        case Some(arr: Json.Arr) => doc.add("alsoKnownAs", Json.Arr(arr.elements.appended(aux)))
+        case Some(value)         => doc // TODO ERROR
+    }
+
+    val didDocument: Json.Obj = decodedDocument
+      .add("id", Json.Str(did.string))
+      .mapObject(withAlsoKnownAs)
+      .mapObjectEntries {
+        case ("verificationMethod", arr: Json.Arr) => ("verificationMethod", arr.mapArrayValues(withController))
+        case ("authentication", u: Json.Obj)       => ??? // TODO https://github.com/FabioPinheiro/scala-did/issues/322
+        case ("authentication", arr: Json.Arr)     => ("authentication", arr.mapArrayValues(withController))
+        case ("assertionMethod", u: Json.Obj)      => ??? // TODO https://github.com/FabioPinheiro/scala-did/issues/322
+        case ("assertionMethod", arr: Json.Arr)    => ("assertionMethod", arr.mapArrayValues(withController))
+        case ("keyAgreement", arr: Json.Arr)       => ("keyAgreement", arr.mapArrayValues(withController))
+        case ("capabilityInvocation", u: Json.Obj) => ??? // TODO https://github.com/FabioPinheiro/scala-did/issues/322
+        case ("capabilityInvocation", arr: Json.Arr) => ("capabilityInvocation", arr.mapArrayValues(withController))
+        case ("capabilityDelegation", u: Json.Obj) => ??? // TODO https://github.com/FabioPinheiro/scala-did/issues/322
+        case ("capabilityDelegation", arr: Json.Arr) => ("capabilityDelegation", arr.mapArrayValues(withController))
+        case entry                                   => entry
+      }
+    DIDDocument.decoder.fromJsonAST(didDocument)
+  }
+
+  /** @param keySeq
+    *   MUST have relative references
+    * @param initDoc
+    *   that will create the DID
+    * @return
+    *   AgentDIDPeer for the long form of did:peer:4
+    */
+  def makeAgentLongForm(keySeq: Seq[PrivateKeyWithKid], initDoc: Json.Obj): DIDPeer.AgentDIDPeer =
+    new DIDPeer.AgentDIDPeer {
+      override val id: DIDPeer4 = DIDPeer4.fromInitDocument(initDoc)
+      override val keyStore: KeyStore = KeyStore(
+        keySeq.zipWithIndex.map { case (key, index) =>
+          key match {
+            case k: OKPPrivateKeyWithKid if k.kid.startsWith("#") => k.withKid(id.string + k.kid)
+            case k: OKPPrivateKeyWithKid                          => k
+            // case k: OKPPrivateKey        => k.withKid(id.did + "#key-" + (index + 1))
+            case k: ECPrivateKeyWithKid if k.kid.startsWith("#") => k.withKid(id.string + k.kid)
+            case k: ECPrivateKeyWithKid                          => k
+            // case k: ECPrivateKey         => k.withKid(id.did + "#key-" + (index + 1))
+          }
+        }.toSet
+      )
+    }
+
+  /** @param keySeq
+    *   MUST have relative references
+    * @param initDoc
+    *   that will create the DID
+    * @return
+    *   AgentDIDPeer for the short form of did:peer:4
+    */
+  def makeAgentShortForm(keySeq: Seq[PrivateKeyWithKid], initDoc: Json.Obj): DIDPeer.AgentDIDPeer =
+    new DIDPeer.AgentDIDPeer {
+      override val id: DIDPeer4 = DIDPeer4.fromInitDocument(initDoc).toShortForm
+      override val keyStore: KeyStore = KeyStore(
+        keySeq.zipWithIndex.map { case (key, index) =>
+          key match {
+            case k: OKPPrivateKeyWithKid if k.kid.startsWith("#") => k.withKid(id.string + k.kid)
+            case k: OKPPrivateKeyWithKid                          => k
+            // case k: OKPPrivateKey        => k.withKid(id.did + "#key-" + (index + 1))
+            case k: ECPrivateKeyWithKid if k.kid.startsWith("#") => k.withKid(id.string + k.kid)
+            case k: ECPrivateKeyWithKid                          => k
+            // case k: ECPrivateKey         => k.withKid(id.did + "#key-" + (index + 1))
+          }
+        }.toSet
+      )
+    }
+
+  def fromInitDocument(doc: Json.Obj): DIDPeer4LongForm = {
+    val eDoc = encodeDocument(doc)
+    val hash = calculateHash(eDoc)
+    val eHash = encodeHash(hash)
+    DIDPeer4LongForm(eHash, eDoc)
+  }
+
+  def fromDID(did: DID): Either[String, DIDPeer4] = did.string match {
+    case DIDPeer.regexPeer4_LONG(hashMultibase, docMultibase) =>
+      Right(DIDPeer4LongForm(Multibase(hashMultibase), Multibase(docMultibase)))
+    case DIDPeer.regexPeer4_SHORT(hashMultibase) => Right(DIDPeer4ShortForm(Multibase(hashMultibase)))
+    case any                                     => Left(s"Not a did:peer:4 '$any'")
+  }
+
+}
+case class DIDPeer4LongForm(
+    override val shortPart: Multibase, // TODO BASE58BTC
+    longPart: Multibase // TODO BASE58BTC
+) extends DIDPeer4 {
+
+  override def specificId: String = "" + numalgo + shortPart.value + ":" + longPart.value
+  override def document: DIDDocument = {
+    val initDoc = DIDPeer4.decodeDocument(longPart).getOrElse(???) // FIXME
+    DIDPeer4.contextualize(initDoc, this, this.toShortForm).getOrElse(???) // FIXME
+  }
+
+  def toShortForm: DIDPeer4ShortForm = DIDPeer4ShortForm(shortPart)
+
+  def longPartAsJson = Multicodec.fromBytes(longPart.decode) match
+    case Left(value) => Left(value)
+    case Right(Multicodec(Codec.json, dataBytes)) =>
+      println(dataBytes.mkString)
+      dataBytes.mkString("_").fromJson[Json]
+    case Right(Multicodec(codec, dataBytes)) => Left(s"Expected Multicodec to be json instade of $codec")
+
+}
+case class DIDPeer4ShortForm(
+    override val shortPart: Multibase, // TODO BASE58BTC
+) extends DIDPeer4 {
+  override def specificId: String = "" + numalgo + shortPart.value
+
+  // FIXME Its not possible to resolve for numalgo 3 and the short form of 4 Just from the DID https://github.com/FabioPinheiro/scala-did/issues/323
+  override def document: DIDDocument = ???
+}
+
 object DIDPeer {
   type Array46_BASE58BTC = String // TODO  "46*BASE58BTC"
 
@@ -189,11 +387,22 @@ object DIDPeer {
   }
 
   def regexPeer =
-    "^did:peer:(([01](z)([1-9a-km-zA-HJ-NP-Z]{46,47}))|(2((\\.[AEVID](z)([1-9a-km-zA-HJ-NP-Z]{46,47}))+(\\.(S)[0-9a-zA-Z=]*)*)))$".r
+    ("^did:peer:(" +
+      "([01](z)([1-9a-km-zA-HJ-NP-Z]{46,47}))" +
+      "|" +
+      "(2((\\.[AEVID](z)([1-9a-km-zA-HJ-NP-Z]{46,47}))+(\\.(S)[0-9a-zA-Z=]*)*))" +
+      "|" +
+      "(4zQm[" + BASE58_ALPHABET + "]{44}(?::z[" + BASE58_ALPHABET + "]{6,})?)"
+      + ")$").r // TODO for 3
   def regexPeer0 = "^did:peer:(0(z)([1-9a-km-zA-HJ-NP-Z]{46,47}))$".r
   def regexPeer1 = "^did:peer:(1(z)([1-9a-km-zA-HJ-NP-Z]{46,47}))$".r
   // #regexPeer2 = "^did:peer:(2((\\.[AEVID](z)([1-9a-km-zA-HJ-NP-Z]{46,47}))+(\\.(S)[0-9a-zA-Z=]*)*))$".r
   def regexPeer2 = "^did:peer:2((\\.([AEVID])z([1-9a-km-zA-HJ-NP-Z]{46,47}))+(\\.(S)([0-9a-zA-Z=]*))*)$".r
+  // def regexPeer3 = "^did:peer:3.*$".r
+  private def BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+  def regexPeer4 = ("^did:peer:4zQm[" + BASE58_ALPHABET + "]{44}(?::z[" + BASE58_ALPHABET + "]{6,})?$").r
+  def regexPeer4_LONG = ("^did:peer:4(zQm[" + BASE58_ALPHABET + "]{44}):(z[" + BASE58_ALPHABET + "]{6,})$").r
+  def regexPeer4_SHORT = ("^did:peer:4(zQm[" + BASE58_ALPHABET + "]{44})$").r
 
   def apply(didSubject: DIDSubject): DIDPeer = fromDID(didSubject.toDID).toOption.get // FIXME!
 
@@ -201,7 +410,10 @@ object DIDPeer {
     case regexPeer0(all, z: "z", data) => Right(DIDPeer0(all.drop(1)))
     case regexPeer1(all, z: "z", data) => Right(DIDPeer1(all.drop(1)))
     case regexPeer2(all, str*)         => DIDPeer2.fromDID(did)
-    case any if regexPeer.matches(any) => Left(s"Not a did:peer '$any'") // FIXME make Error type
+    // case regexPeer3(all, str*)         => ??? // FIXME
+    case regexPeer4() => DIDPeer4.fromDID(did)
+    // case any if regexPeer.matches(any) => Left(s"Not a did:peer '$any'") // TODO make Error type
+    case any => Left(s"Not a did:peer '$any'")
     // FIXME what about case any ??? //TODO add test in DIDPeerSuite
   }
 
