@@ -110,4 +110,41 @@ class DIDPeer4Suite extends ZSuite {
           case Some(arr) => fail("alsoKnownAs MUST Contain the previous elements plus the other did:peer:4 form")
   }
 
+  test("Make Agent - DIDComm Relay") {
+    //  With well knowed alice's keys
+    """{"verificationMethod":[
+         |{"id":"#Ed25519","type":"JsonWebKey2020","publicKeyJwk":{"kty":"OKP","crv":"Ed25519","x":"MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA"}},
+         |{"id":"#X25519","type":"JsonWebKey2020","publicKeyJwk":{"kty":"OKP","crv":"X25519","x":"Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"}}
+         |],
+         |"authentication":["#Ed25519"],"assertionMethod":["#Ed25519"],"keyAgreement":["#X25519"],"capabilityInvocation":["#Ed25519"],"capabilityDelegation":["#Ed25519"],
+         |"service":[{"id":"#s1","type":"DIDCommMessaging","serviceEndpoint":{"uri":"https://relay.fmgp.app"}},{"id":"#s2","type":"DIDCommMessaging","serviceEndpoint":{"uri":"wss://relay.fmgp.app/ws"}}]
+         |}""".stripMargin
+      .fromJson[ast.Json.Obj]
+      .map(initDoc =>
+        DIDPeer4.makeAgentLongForm(
+          Seq(
+            OKPPrivateKeyWithKid(
+              kty = KTY.OKP,
+              crv = Curve.X25519,
+              d = "Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c",
+              x = "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw",
+              kid = "#X25519"
+            ),
+            OKPPrivateKeyWithKid(
+              kty = KTY.OKP,
+              crv = Curve.Ed25519,
+              d = "INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug",
+              x = "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA",
+              kid = "#Ed25519"
+            )
+          ),
+          initDoc
+        )
+      ) match
+      case Left(error) => fail(s"Unable to create agent: $error")
+      case Right(agent) =>
+        assertEquals(agent.id.document.allKeysTypeKeyAgreement.size, 1)
+        assertEquals(agent.id.document.keyAgreement.size, 1)
+  }
+
 }

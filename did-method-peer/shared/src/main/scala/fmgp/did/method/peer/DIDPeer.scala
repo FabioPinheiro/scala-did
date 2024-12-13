@@ -248,6 +248,21 @@ object DIDPeer4 {
     */
   def contextualize(decodedDocument: Json.Obj, did: DID, alsoKnownAs: DID): Either[String, DIDDocument] = {
 
+    def withAbsoluteRef(did: DIDSubject, obj: Json): Json = {
+      obj match
+        case ref: Json.Str =>
+          ref match
+            case Json.Str(value) if value.startsWith("#") => Json.Str(did.string + value)
+            case str: Json.Str                            => str
+        case entry: Json.Obj => // VerificationMethodEmbedded
+          entry.get("id") match
+            case None                                       => ??? // FIXME
+            case Some(Json.Str(ref)) if ref.startsWith("#") => entry.add("id", Json.Str(did.string + ref))
+            case Some(Json.Str(ref))                        => entry
+            case Some(_)                                    => ??? // FIXME
+        case any => ??? // any // TODO Error!
+    }
+
     /** ifMissingAddControllerToVerificationMethodEmbedded */
     def withController(obj: Json): Json = {
       obj match
@@ -267,20 +282,21 @@ object DIDPeer4 {
         case Some(value)         => doc // TODO ERROR
     }
 
+    inline def fAux(obj: Json) = withAbsoluteRef(did, withController(obj))
     val didDocument: Json.Obj = decodedDocument
       .add("id", Json.Str(did.string))
       .mapObject(withAlsoKnownAs)
       .mapObjectEntries {
-        case ("verificationMethod", arr: Json.Arr) => ("verificationMethod", arr.mapArrayValues(withController))
+        case ("verificationMethod", arr: Json.Arr) => ("verificationMethod", arr.mapArrayValues(fAux(_)))
         case ("authentication", u: Json.Obj)       => ??? // TODO https://github.com/FabioPinheiro/scala-did/issues/322
-        case ("authentication", arr: Json.Arr)     => ("authentication", arr.mapArrayValues(withController))
+        case ("authentication", arr: Json.Arr)     => ("authentication", arr.mapArrayValues(fAux(_)))
         case ("assertionMethod", u: Json.Obj)      => ??? // TODO https://github.com/FabioPinheiro/scala-did/issues/322
-        case ("assertionMethod", arr: Json.Arr)    => ("assertionMethod", arr.mapArrayValues(withController))
-        case ("keyAgreement", arr: Json.Arr)       => ("keyAgreement", arr.mapArrayValues(withController))
+        case ("assertionMethod", arr: Json.Arr)    => ("assertionMethod", arr.mapArrayValues(fAux(_)))
+        case ("keyAgreement", arr: Json.Arr)       => ("keyAgreement", arr.mapArrayValues(fAux(_)))
         case ("capabilityInvocation", u: Json.Obj) => ??? // TODO https://github.com/FabioPinheiro/scala-did/issues/322
-        case ("capabilityInvocation", arr: Json.Arr) => ("capabilityInvocation", arr.mapArrayValues(withController))
+        case ("capabilityInvocation", arr: Json.Arr) => ("capabilityInvocation", arr.mapArrayValues(fAux(_)))
         case ("capabilityDelegation", u: Json.Obj) => ??? // TODO https://github.com/FabioPinheiro/scala-did/issues/322
-        case ("capabilityDelegation", arr: Json.Arr) => ("capabilityDelegation", arr.mapArrayValues(withController))
+        case ("capabilityDelegation", arr: Json.Arr) => ("capabilityDelegation", arr.mapArrayValues(fAux(_)))
         case entry                                   => entry
       }
     DIDDocument.decoder.fromJsonAST(didDocument)
