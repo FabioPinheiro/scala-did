@@ -107,50 +107,50 @@ object DidExampleSicpaRustAlice {
           VerificationMethodEmbeddedJWK(
             id = aliceKeyX25519NotInSecrets.kid,
             controller = aliceKeyX25519NotInSecrets.kid,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = aliceKeyX25519NotInSecrets.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = aliceKeyX25519.kid,
             controller = aliceKeyX25519.kid,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = aliceKeyX25519.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = aliceKeyP256.kid,
             controller = aliceKeyP256.kid,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = aliceKeyP256.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = aliceKeyP521.kid,
             controller = aliceKeyP521.kid,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = aliceKeyP521.toPublicKey.withoutKid
           ),
           //
           VerificationMethodEmbeddedJWK(
             id = aliceKey1NotInSecrets.kid,
             controller = aliceKey1NotInSecrets.kid,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = aliceKey1NotInSecrets.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = aliceKey1.kid,
             controller = aliceKey1.kid,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = aliceKey1.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = aliceKey2.kid,
             controller = aliceKey2.kid,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = aliceKey2.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = aliceKey3.kid,
             controller = aliceKey3.kid,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = aliceKey3.toPublicKey.withoutKid
           ),
         )

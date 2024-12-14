@@ -129,7 +129,7 @@ object DIDExamples {
   val EX13_VerificationMethod_0 = VerificationMethodEmbeddedJWK(
     id = "did:example:123#_Qq0UL2Fq651Q0Fjd6TvnYE-faHiOpRlPVQcY_-tA4A",
     controller = "did:example:123",
-    `type` = "JsonWebKey2020",
+    `type` = VerificationMethodType.JsonWebKey2020,
     publicKeyJwk = OKPPublicKey(
       kty = KTY.OKP,
       crv = Curve.Ed25519,
@@ -141,7 +141,7 @@ object DIDExamples {
   val EX13_VerificationMethod_1 = VerificationMethodEmbeddedMultibase(
     id = "did:example:123456789abcdefghi#keys-1",
     controller = "did:example:pqrstuvwxyz0987654321",
-    `type` = "Ed25519VerificationKey2020",
+    `type` = VerificationMethodType.Ed25519VerificationKey2020,
     publicKeyMultibase = "zH3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV",
   )
 
@@ -187,7 +187,7 @@ object DIDExamples {
         VerificationMethodEmbeddedMultibase(
           id = "did:example:123#zC9ByQ8aJs8vrNXyDhPHHNNMSHPcaSgNpjjsBYpMMjsTdS",
           controller = "did:example:123",
-          `type` = "X25519KeyAgreementKey2019",
+          `type` = VerificationMethodType.X25519KeyAgreementKey2019,
           publicKeyMultibase = "z9hFgmPVfmBZwRvFEyniQDBkz9LmV7gDEqytWyGZLmDXE",
         )
       )

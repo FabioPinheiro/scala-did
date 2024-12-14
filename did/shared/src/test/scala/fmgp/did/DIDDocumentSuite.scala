@@ -34,7 +34,7 @@ class DIDDocumentSuite extends FunSuite {
     val aux: VerificationMethod = VerificationMethodEmbeddedJWK(
       id = "did:example:123456789abcdefghi#keys-1",
       controller = "did:example:123456789abcdefghi",
-      `type` = "Ed25519VerificationKey2020",
+      `type` = VerificationMethodType.Ed25519VerificationKey2020,
       publicKeyJwk = OKPPublicKey(kty = KTY.OKP, crv = Curve.X25519, x = "Test")
     )
     val expected = """{

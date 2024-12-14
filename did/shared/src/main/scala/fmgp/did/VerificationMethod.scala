@@ -17,11 +17,7 @@ type MULTIBASE = String // TODO
   * https://www.w3.org/TR/did-core/#verification-method-properties
   */
 sealed trait VerificationMethod {
-  def id: String // DID URL Syntax.
-//   def controller: String // DID Syntax.
-//   def `type`: String
-//   def publicKeyJwk: String // RFC7517
-//   def publicKeyMultibase: String // MULTIBASE
+  def id: DIDURLSyntax
 }
 
 object VerificationMethod {
@@ -35,6 +31,43 @@ object VerificationMethod {
         case r: VerificationMethodEmbedded   => Right(r)
       }
   }
+}
+
+// enum VerificationMethodType:
+//   case Multikey extends VerificationMethodType
+
+//   /** @see https://www.w3.org/TR/controller-document/#jsonwebkey */
+//   case JsonWebKey extends VerificationMethodType
+//   case JsonWebKey2020 extends VerificationMethodType
+
+//   case EcdsaSecp256k1VerificationKey2019 extends VerificationMethodType
+
+//   /** @see https://www.w3.org/TR/vc-di-eddsa/#ed25519verificationkey2020 */
+//   case Ed25519VerificationKey2020 extends VerificationMethodType
+
+//   /** @see https://www.w3.org/TR/vc-di-eddsa/#ed25519signature2020 */
+//   case Ed25519Signature2020 extends VerificationMethodType
+
+//   case X25519KeyAgreementKey2019 extends VerificationMethodType
+//   case X25519KeyAgreementKey2020 extends VerificationMethodType
+
+// object VerificationMethodType {
+//   given decoder: JsonDecoder[VerificationMethodType] =
+//     JsonDecoder.string.mapOrFail(e => fmgp.util.safeValueOf(VerificationMethodType.valueOf(e)))
+//   given encoder: JsonEncoder[VerificationMethodType] =
+//     JsonEncoder.string.contramap((e: VerificationMethodType) => e.toString)
+// }
+
+type VerificationMethodType = String
+object VerificationMethodType {
+  val Multikey = "Multikey"
+  val JsonWebKey = "JsonWebKey"
+  val JsonWebKey2020 = "JsonWebKey2020"
+  val EcdsaSecp256k1VerificationKey2019 = "EcdsaSecp256k1VerificationKey2019"
+  val Ed25519VerificationKey2020 = "Ed25519VerificationKey2020"
+  val Ed25519Signature2020 = "Ed25519Signature2020"
+  val X25519KeyAgreementKey2019 = "X25519KeyAgreementKey2019"
+  val X25519KeyAgreementKey2020 = "X25519KeyAgreementKey2020"
 }
 
 case class VerificationMethodReferencedWithKey[K <: fmgp.crypto.OKP_EC_Key](kid: String, key: K) {
@@ -61,9 +94,13 @@ object VerificationMethodReferenced {
 }
 
 sealed trait VerificationMethodEmbedded extends VerificationMethod {
-  def id: Required[DIDURLSyntax]
-  def controller: Required[DIDController]
-  def `type`: Required[String]
+  def id: Required[DIDURLSyntax] // "did:example:123456789abcdefghi#keys-1",
+  def controller: Required[DIDController] // "did:example:123456789abcdefghi",
+  def `type`: Required[VerificationMethodType] // "Ed25519VerificationKey2020",
+
+  /** @see https://w3id.org/security#revoked */
+  def expires: NotRequired[DateTimeStamp]
+  def revoked: NotRequired[DateTimeStamp]
 
   // def publicKeyJwk: NotRequired[JSONWebKeyMap]
   // def publicKeyMultibase: NotRequired[MULTIBASE]
@@ -72,15 +109,20 @@ sealed trait VerificationMethodEmbedded extends VerificationMethod {
 }
 
 /** VerificationMethodEmbeddedJWK
+  * @see
+  *   https://www.w3.org/community/reports/credentials/CG-FINAL-lds-jws2020-20220721/#json-web-key-2020
   *
   * @param publicKeyJwk
   *   is a JSON Web Key (JWK) - RFC7517 - https://www.rfc-editor.org/rfc/rfc7517
   */
 case class VerificationMethodEmbeddedJWK(
-    id: Required[DIDURLSyntax], // "did:example:123456789abcdefghi#keys-1",
-    controller: Required[DIDController], // "did:example:123456789abcdefghi",
-    `type`: Required[String], // "Ed25519VerificationKey2020",
-    publicKeyJwk: Required[PublicKey]
+    id: Required[DIDURLSyntax],
+    controller: Required[DIDController],
+    `type`: Required[VerificationMethodType],
+    expires: NotRequired[DateTimeStamp] = None,
+    revoked: NotRequired[DateTimeStamp] = None,
+    publicKeyJwk: Required[PublicKey],
+    secretKeyJwk: NotRequired[PublicKey] = None,
 ) extends VerificationMethodEmbedded {
   def publicKey = Right(publicKeyJwk)
 }
@@ -93,12 +135,20 @@ object VerificationMethodEmbeddedJWK {
 }
 
 /** VerificationMethodEmbeddedMultibase
+  *
+  * TODO RENAME to MultiKey
+  * @see
+  *   https://www.w3.org/TR/vc-data-integrity/#multikey
+  *   https://w3c.github.io/vc-data-integrity/contexts/multikey/v1.jsonld
   */
 case class VerificationMethodEmbeddedMultibase(
-    id: Required[DIDURLSyntax], // "did:example:123456789abcdefghi#keys-1",
-    controller: Required[DIDController], // "did:example:123456789abcdefghi",
-    `type`: Required[String], // "Ed25519VerificationKey2020",
-    publicKeyMultibase: Required[MULTIBASE]
+    id: Required[DIDURLSyntax],
+    controller: Required[DIDController],
+    `type`: Required[VerificationMethodType],
+    expires: NotRequired[DateTimeStamp] = None,
+    revoked: NotRequired[DateTimeStamp] = None,
+    publicKeyMultibase: Required[MULTIBASE],
+    secretKeyMultibase: NotRequired[MULTIBASE] = None,
 ) extends VerificationMethodEmbedded {
   def publicKey = Left(publicKeyMultibase)
 }

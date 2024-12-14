@@ -70,25 +70,25 @@ object DidExampleSicpaRustMediator2 {
           VerificationMethodEmbeddedJWK(
             id = mediator2KeyX25519.kid,
             controller = mediator2KeyX25519.kid,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = mediator2KeyX25519.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = mediator2KeyP256.kid,
             controller = mediator2KeyP256.kid,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = mediator2KeyP256.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = mediator2KeyP384.kid,
             controller = mediator2KeyP384.kid,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = mediator2KeyP384.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = mediator2KeyP521.kid,
             controller = mediator2KeyP521.kid,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = mediator2KeyP521.toPublicKey.withoutKid
           ),
         )

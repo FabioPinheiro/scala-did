@@ -95,6 +95,9 @@ type DIDController = DIDSyntax //FIXME
 /** RFC3986 - https://www.rfc-editor.org/rfc/rfc3986 */
 type URI = String
 
+/** @see https://www.w3.org/TR/xmlschema11-2/#dateTimeStamp */
+type DateTimeStamp = String
+
 trait JSONLD {
   def `@context`: String | Seq[String] // = "https://w3id.org/did/v1" // JSON-LD object
 }

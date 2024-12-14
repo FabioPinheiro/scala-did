@@ -180,19 +180,19 @@ object DidExample {
           VerificationMethodEmbeddedJWK(
             id = "did:example:alice#key-1",
             controller = "did:example:alice#key-1",
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = senderKeyEd25519.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = "did:example:alice#key-2",
             controller = "did:example:alice#key-2",
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = senderKeyP256_1.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = "did:example:alice#key-3",
             controller = "did:example:alice#key-3",
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = senderKeySecp256k1.toPublicKey.withoutKid
           ),
         )
@@ -202,19 +202,19 @@ object DidExample {
           VerificationMethodEmbeddedJWK(
             id = "did:example:alice#key-x25519-1",
             controller = "did:example:alice#key-x25519-1",
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = senderKeyX25519.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = "did:example:alice#key-p256-1",
             controller = "did:example:alice#key-p256-1",
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = senderKeyP256_2.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = "did:example:alice#key-p521-1",
             controller = "did:example:alice#key-p521-1",
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = senderKeyP521.toPublicKey.withoutKid
           ),
         )
@@ -230,55 +230,55 @@ object DidExample {
           VerificationMethodEmbeddedJWK(
             id = "did:example:bob#key-x25519-1",
             controller = "did:example:bob#key-x25519-1",
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = recipientKey1.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = "did:example:bob#key-x25519-2",
             controller = "did:example:bob#key-x25519-2",
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = recipientKey2.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = "did:example:bob#key-x25519-3",
             controller = "did:example:bob#key-x25519-3",
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = recipientKey3.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = "did:example:bob#key-p256-1",
             controller = "did:example:bob#key-p256-1",
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = recipientKey4.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = "did:example:bob#key-p256-2",
             controller = "did:example:bob#key-p256-2",
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = recipientKey5.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = "did:example:bob#key-p384-1",
             controller = "did:example:bob#key-p384-1",
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = recipientKey6.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = "did:example:bob#key-p384-2",
             controller = "did:example:bob#key-p384-2",
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = recipientKey7.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = "did:example:bob#key-p521-1",
             controller = "did:example:bob#key-p521-1",
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = recipientKey8.toPublicKey.withoutKid
           ),
           VerificationMethodEmbeddedJWK(
             id = "did:example:bob#key-p521-2",
             controller = "did:example:bob#key-p521-2",
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = recipientKey9.toPublicKey.withoutKid
           ),
         )

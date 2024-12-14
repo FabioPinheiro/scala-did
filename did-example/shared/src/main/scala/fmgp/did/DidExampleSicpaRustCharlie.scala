@@ -47,7 +47,7 @@ object DidExampleSicpaRustCharlie {
           VerificationMethodEmbeddedJWK(
             id = e.kid,
             controller = e.kid,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = e.toPublicKey.withoutKid
           )
         )

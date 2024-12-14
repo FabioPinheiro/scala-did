@@ -18,7 +18,7 @@ object DIDWebExamples {
           VerificationMethodEmbeddedJWK(
             id = did + "#k2",
             controller = did,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = OKPPublicKey(
               kty = KTY.OKP,
               crv = Curve.Ed25519,
@@ -33,7 +33,7 @@ object DIDWebExamples {
           VerificationMethodEmbeddedJWK(
             id = did + "#k1",
             controller = did,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = OKPPublicKey(
               kty = KTY.OKP,
               crv = Curve.X25519,
@@ -67,7 +67,7 @@ object DIDWebExamples {
           VerificationMethodEmbeddedJWK(
             id = keyAuthentication.kid,
             controller = did,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = keyAuthentication.toPublicKey
           )
         )
@@ -77,7 +77,7 @@ object DIDWebExamples {
           VerificationMethodEmbeddedJWK(
             id = keyAgreement.kid,
             controller = did,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = keyAgreement.toPublicKey
           )
         )
@@ -110,7 +110,7 @@ object DIDWebExamples {
           VerificationMethodEmbeddedJWK(
             id = keyAuthentication.kid,
             controller = did,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = keyAuthentication.toPublicKey
           )
         )
@@ -120,7 +120,7 @@ object DIDWebExamples {
           VerificationMethodEmbeddedJWK(
             id = keyAgreement.kid,
             controller = did,
-            `type` = "JsonWebKey2020",
+            `type` = VerificationMethodType.JsonWebKey2020,
             publicKeyJwk = keyAgreement.toPublicKey
           )
         )

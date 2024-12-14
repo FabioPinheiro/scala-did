@@ -48,7 +48,7 @@ case class DIDPeer2(elements: Seq[DIDPeer2.Element]) extends DIDPeer {
         VerificationMethodEmbeddedJWK(
           id = this.string + "#key-" + (index + 1),
           controller = this.did,
-          `type` = "JsonWebKey2020",
+          `type` = VerificationMethodType.JsonWebKey2020,
           publicKeyJwk = OKPPublicKey(
             kty = KTY.OKP,
             crv = Curve.Ed25519, // TODO PLZ FIX BLACKMAGIC of did:peer! (zero documentation & unexpected logic)
@@ -62,7 +62,7 @@ case class DIDPeer2(elements: Seq[DIDPeer2.Element]) extends DIDPeer {
         VerificationMethodEmbeddedJWK(
           id = this.string + "#key-" + (index + 1),
           controller = this.did,
-          `type` = "JsonWebKey2020",
+          `type` = VerificationMethodType.JsonWebKey2020,
           publicKeyJwk = OKPPublicKey(
             kty = KTY.OKP,
             crv = Curve.X25519, // TODO PLZ FIX BLACKMAGIC of did:peer! (zero documentation & unexpected logic)

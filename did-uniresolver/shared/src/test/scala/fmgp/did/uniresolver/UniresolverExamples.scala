@@ -80,10 +80,10 @@ object UniresolverExamples {
         verificationMethod = Some(
           Set(
             VerificationMethodEmbeddedJWK(
-              "#someKeyId",
-              "did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w",
-              "EcdsaSecp256k1VerificationKey2019",
-              ECPublicKey(
+              id = "#someKeyId",
+              controller = "did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w",
+              `type` = VerificationMethodType.EcdsaSecp256k1VerificationKey2019,
+              publicKeyJwk = ECPublicKey(
                 KTY.EC,
                 Curve.secp256k1,
                 "WfY7Px6AgH6x-_dgAoRbg8weYRJA36ON-gQiFnETrqw",
