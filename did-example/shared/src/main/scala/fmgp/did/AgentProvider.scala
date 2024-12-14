@@ -5,9 +5,10 @@ import zio.json.*
 import fmgp.crypto._
 import fmgp.did.Agent
 import fmgp.did.comm.*
-import fmgp.did.method.peer.DIDPeer2
-import fmgp.did.method.peer.DIDPeerServiceEncoded
 import fmgp.did.method.peer.DIDPeer
+import fmgp.did.method.peer.DIDPeer2
+import fmgp.did.method.peer.DIDPeer4
+import fmgp.did.method.peer.DIDPeerServiceEncoded
 import fmgp.did.method.hardcode.HardcodeResolver
 
 import fmgp.did.AgentProvider._
@@ -79,6 +80,10 @@ object AgentProvider {
   |      Bob
   |    end
   |
+  |    subgraph relay.fmgp.app
+  |      DIDComm_Relay
+  |    end
+  |
   |    Web_Well_Known
   |    Web_Fabio
   |  end
@@ -92,6 +97,7 @@ object AgentProvider {
   |  click Alice "#/resolver/${alice.id.did}" "Link to Alice DID Document"
   |  click AliceWithMultiService "#/resolver/${alice.id.did}" "Link to Alice DID Document with multiple ServiceEndpoints"
   |  click Bob "#/resolver/${bob.id.did}" "Link to Bob DID Document"
+  |  click Bob "#/resolver/${didCommRelay.id.did}" "Link to Bob DID Document"
   |  click localhost8080AliceHttp "#/resolver/${localhost8080AliceHttp.id.did}" "Link to local DID Document with a HTTP ServiceEndpoint"
   |  click localhost8080AliceWs "#/resolver/${localhost8080AliceWs.id.did}" "Link to local DID Document with a WS ServiceEndpoint"
   |  click localhost8080AliceHttp&Ws "#/resolver/${localhost8080AliceHttpWs.id.did}" "Link to local DID Document with both HTTP & WS ServiceEndpoints"
@@ -119,6 +125,7 @@ object AgentProvider {
       AgentWithShortName("localhost8080AliceHttp&Ws", localhost8080AliceHttpWs),
       AgentWithShortName("Web_Clio", DIDWebExamples.clioAgent),
       AgentWithShortName("Web_Thalia", DIDWebExamples.thaliaAgent),
+      AgentWithShortName("DIDCommRelay", didCommRelay),
     ),
     Seq(
       DIDWithShortName(
@@ -294,6 +301,12 @@ object AgentProvider {
     )
   )
 
+  /** Alice (peer2) with the folloing Services:
+    *   - {"t":"dm","s":"https://alice.did.fmgp.app/","r":[],"a":["didcomm/v2"]}
+    *   - {"t":"dm","s":"https://alice.did.fmgp.app/","r":[],"a":["didcomm/v2"]}
+    *   - {"t":"DIDCommMessaging","s":"https://3.server.endpoint","r":[],"a":["didcomm/v2"]}
+    *   - {"t":"SeriveType123","s":"https://new.server.type"}
+    */
   val aliceWithMultiService =
     """did:peer:2
         |.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y
@@ -303,10 +316,40 @@ object AgentProvider {
         |.SeyJ0IjoiRElEQ29tbU1lc3NhZ2luZyIsInMiOiJodHRwczovLzMuc2VydmVyLmVuZHBvaW50IiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ
         |.SeyJ0IjoiU2VyaXZlVHlwZTEyMyIsInMiOiJodHRwczovL25ldy5zZXJ2ZXIudHlwZSJ9
         |""".stripMargin.replaceAll("\n", "")
-  // Services:
-  // {"t":"dm","s":"https://alice.did.fmgp.app/","r":[],"a":["didcomm/v2"]}
-  // {"t":"dm","s":"https://alice.did.fmgp.app/","r":[],"a":["didcomm/v2"]}
-  // {"t":"DIDCommMessaging","s":"https://3.server.endpoint","r":[],"a":["didcomm/v2"]}
-  // {"t":"SeriveType123","s":"https://new.server.type"}
+
+  /** DIDComm relay uses the well knowed alice's keys */
+  val didCommRelay = {
+    """{"verificationMethod":[
+         |{"id":"#Ed25519","type":"JsonWebKey2020","publicKeyJwk":{"kty":"OKP","crv":"Ed25519","x":"MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA"}},
+         |{"id":"#X25519","type":"JsonWebKey2020","publicKeyJwk":{"kty":"OKP","crv":"X25519","x":"Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw"}}
+         |],
+         |"authentication":["#Ed25519"],"assertionMethod":["#Ed25519"],"keyAgreement":["#X25519"],"capabilityInvocation":["#Ed25519"],"capabilityDelegation":["#Ed25519"],
+         |"service":[{"id":"#s1","type":"DIDCommMessaging","serviceEndpoint":{"uri":"https://relay.fmgp.app"}},{"id":"#s2","type":"DIDCommMessaging","serviceEndpoint":{"uri":"wss://relay.fmgp.app/ws"}}]
+         |}""".stripMargin
+      .fromJson[ast.Json.Obj]
+      .map(initDoc =>
+        DIDPeer4.makeAgentLongForm(
+          Seq(
+            OKPPrivateKeyWithKid(
+              kty = KTY.OKP,
+              crv = Curve.X25519,
+              d = "Z6D8LduZgZ6LnrOHPrMTS6uU2u5Btsrk1SGs4fn8M7c",
+              x = "Sr4SkIskjN_VdKTn0zkjYbhGTWArdUNE4j_DmUpnQGw",
+              kid = "#X25519"
+            ),
+            OKPPrivateKeyWithKid(
+              kty = KTY.OKP,
+              crv = Curve.Ed25519,
+              d = "INXCnxFEl0atLIIQYruHzGd5sUivMRyQOzu87qVerug",
+              x = "MBjnXZxkMcoQVVL21hahWAw43RuAG-i64ipbeKKqwoA",
+              kid = "#Ed25519"
+            )
+          ),
+          initDoc
+        )
+      )
+      .toOption
+      .get // TODO would be nice to run at cimpile time
+  }
 
 }
