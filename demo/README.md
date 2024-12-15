@@ -30,7 +30,8 @@ npm run dev
 ```shell
 sbt assemblyAll
 # java -jar jvm/target/scala-3.3.3/scala-did-demo-server.jar
-docker build --tag scala_did_demo .
+docker build --tag scala_did_demo ./demo/
+#docker buildx build --platform linux/amd64,linux/arm64 --tag scala_did_demo ./demo/
 docker run --rm -p 8080:8080 --memory="100m" --cpus="1.0" scala_did_demo
 ```
 
@@ -60,7 +61,7 @@ fly deploy ./demo/
 ```shell
 sbt assemblyAll
 #docker build --tag scala_did_demo ./demo/
-docker buildx build --platform linux/amd64 --tag scala_did_demo ./demo/
+docker buildx build --platform linux/amd64,linux/arm64 --tag scala_did_demo ./demo/
 docker tag scala_did_demo registry.fly.io/scala-did-demo
 # fly auth docker
 docker push registry.fly.io/scala-did-demo
