@@ -159,6 +159,9 @@ object AgentProvider {
       DIDWithShortName("DecentriQube_Register", decentriQubeRegisterDID),
       DIDWithShortName("Web_Well_Known", DIDWebExamples.fabioWellKnown),
       DIDWithShortName("Web_Fabio", DIDWebExamples.fabioWithPath),
+      DIDWithShortName("Indiciotech_Mediator_web", DIDExampleIndiciotech.mediatorWeb),
+      DIDWithShortName("Indiciotech_Mediator_peer2", DIDExampleIndiciotech.mediatorPeer2),
+      DIDWithShortName("Indiciotech_Mediator_peer3", DIDExampleIndiciotech.mediatorPeer3),
     )
   )
 
