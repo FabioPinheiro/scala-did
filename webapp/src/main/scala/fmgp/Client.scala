@@ -39,8 +39,7 @@ object Client {
     .flatMap(_.fromJson[OKPPrivateKey] match
       case Left(error)                    => ZIO.fail(CryptoFailToParse(error))
       case Right(key) if key.crv != curve => ZIO.fail(WrongCurve(obtained = key.crv, expected = Set(curve)))
-      case Right(key)                     => ZIO.succeed(key)
-    )
+      case Right(key)                     => ZIO.succeed(key))
 
   def newKeyX25519Local: IO[CryptoFailed, OKPPrivateKey] = KeyGenerator.makeX25519
   def newKeyEd25519Local: IO[CryptoFailed, OKPPrivateKey] = KeyGenerator.makeEd25519
@@ -53,8 +52,7 @@ object Client {
       case Left(error) => ZIO.fail(CryptoFailToParse(error))
       case Right(key) if key.crv != Curve.X25519 =>
         ZIO.fail(WrongCurve(obtained = key.crv, expected = Set(Curve.X25519)))
-      case Right(key) => ZIO.succeed(key)
-    )
+      case Right(key) => ZIO.succeed(key))
   def newKeyEd25519Remote: IO[CryptoFailed, OKPPrivateKey] = ZIO
     .fromPromiseJS(fetch("/makeKey/Ed25519", new RequestInit { method = HttpMethod.GET }))
     .flatMap(e => ZIO.fromPromiseJS(e.text()))
@@ -63,8 +61,7 @@ object Client {
       case Left(error) => ZIO.fail(CryptoFailToParse(error))
       case Right(key) if key.crv != Curve.Ed25519 =>
         ZIO.fail(WrongCurve(obtained = key.crv, expected = Set(Curve.Ed25519)))
-      case Right(key) => ZIO.succeed(key)
-    )
+      case Right(key) => ZIO.succeed(key))
 
   // def runGetDB: CancelableFuture[Option[MessageDB]] = {
   //   val program: IO[DidFail, Option[MessageDB]] = getDB()
