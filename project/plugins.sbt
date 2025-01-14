@@ -47,7 +47,7 @@ addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.13.1")
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.4") // sbt> dependencyUpdates
 
 // TEST COVERAGE - https://github.com/scoverage/sbt-scoverage
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.2.2") // Needs scala version 3.2.2
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.3.0") // Needs scala version 3.2.2
 
 // PUBLISH
 addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.9.2")
