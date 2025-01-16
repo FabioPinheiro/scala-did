@@ -15,8 +15,7 @@ object KeyGenerator {
       .mapError(ex => FailToGenerateKey(SomeThrowable(ex)))
       .flatMap(_.fromJson[OKPPrivateKey] match
         case Left(strError) => ZIO.fail(FailToGenerateKey(FailToParse(strError)))
-        case Right(value)   => ZIO.succeed(value)
-      )
+        case Right(value)   => ZIO.succeed(value))
 
   def makeEd25519: IO[FailToGenerateKey, OKPPrivateKey] =
     ZIO
@@ -24,8 +23,7 @@ object KeyGenerator {
       .mapError(ex => FailToGenerateKey(SomeThrowable(ex)))
       .flatMap(_.fromJson[OKPPrivateKey] match
         case Left(strError) => ZIO.fail(FailToGenerateKey(FailToParse(strError)))
-        case Right(value)   => ZIO.succeed(value)
-      )
+        case Right(value)   => ZIO.succeed(value))
 
   @deprecated("Use makeX25519 instead", "0.1.0-M25")
   def newX25519: Either[FailToGenerateKey, OKPPrivateKey] = Try {
