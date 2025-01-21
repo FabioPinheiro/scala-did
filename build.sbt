@@ -204,9 +204,9 @@ lazy val D = new {
   // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt
   // https://bitbucket.org/connect2id/nimbus-jose-jwt/branches/compare/release-9.35%0Drelease-9.32
   val bouncycastle_bcprov = // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
-    Def.setting("org.bouncycastle" % "bcprov-jdk18on" % "1.79")
+    Def.setting("org.bouncycastle" % "bcprov-jdk18on" % "1.80")
   val bouncycastle_bcpkix = // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
-    Def.setting("org.bouncycastle" % "bcpkix-jdk18on" % "1.79")
+    Def.setting("org.bouncycastle" % "bcpkix-jdk18on" % "1.80")
 
   val nimbusJoseJwt = Def.setting("com.nimbusds" % "nimbus-jose-jwt" % V.nimbusJoseJwt)
 
