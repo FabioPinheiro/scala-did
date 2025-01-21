@@ -59,8 +59,7 @@ object AppServer extends ZIOAppDefault {
           case Left(error)                                   => Response.text(error).copy(status = Status.BadRequest)
           case Right(OutOfBand(msg: PlaintextMessage, data)) => Response.json(msg.toJsonPretty)
           case Right(OutOfBand(msg: SignedMessage, data))    => Response.json(msg.payload.content)
-          case Right(OutOfBand(msg: EncryptedMessage, data)) => Response.json(msg.toJsonPretty)
-        )
+          case Right(OutOfBand(msg: EncryptedMessage, data)) => Response.json(msg.toJsonPretty))
       } yield (ret)
     },
     Method.POST / "ops" -> handler { (req: Request) =>
