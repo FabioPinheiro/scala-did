@@ -6,7 +6,7 @@ import scala.sys.process._
 
 inThisBuild(
   Seq(
-    scalaVersion := "3.3.3", // Also update docs/publishWebsite.sh and any ref to scala-3.3.3
+    scalaVersion := "3.3.5", // Also update docs/publishWebsite.sh and any ref to scala-3.3.3
     // scalaVersion := "3.4.2", // Also update docs/publishWebsite.sh and any ref to scala-3.4.2
   )
 )
