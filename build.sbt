@@ -121,6 +121,7 @@ lazy val docs = project
         didImp.jvm,
         multiformats.jvm,
         didResolverPeer.jvm,
+        didResolverPrism.jvm,
         didResolverWeb.jvm,
         didUniresolver.jvm,
       ), // or inAnyProject -- inProjects(...)
@@ -309,13 +310,13 @@ lazy val buildInfoConfigure: Project => Project = _.enablePlugins(BuildInfoPlugi
 addCommandAlias(
   "testJVM",
   ";didJVM/test; didCommProtocolsJVM/test; didFrameworkJVM/test; didImpJVM/test; " +
-    "didResolverPeerJVM/test; didResolverWebJVM/test; didUniresolverJVM/test; " +
+    "didResolverPeerJVM/test; didResolverPrismJVM/test; didResolverWebJVM/test; didUniresolverJVM/test; " +
     "multiformatsJVM/test"
 )
 addCommandAlias(
   "testJS",
   ";didJS/test;  didCommProtocolsJS/test;  didFrameworkJS/test;  didImpJS/test;  " +
-    "didResolverPeerJS/test;  didResolverWebJS/test;  didUniresolverJS/test;  " +
+    "didResolverPeerJS/test;  didResolverPrismJS/test;  didResolverWebJS/test;  didUniresolverJS/test;  " +
     "multiformatsJS/test"
 )
 addCommandAlias("testAll", ";testJVM;testJS")
@@ -355,6 +356,7 @@ lazy val root = project
   .aggregate(didImp.js, didImp.jvm) // publish
   .aggregate(multiformats.js, multiformats.jvm) // publish
   .aggregate(didResolverPeer.js, didResolverPeer.jvm) // publish
+  .aggregate(didResolverPrism.js, didResolverPrism.jvm) // publish
   .aggregate(didResolverWeb.js, didResolverWeb.jvm) // publish
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
   .aggregate(docs) // just to aggregate the command clean
@@ -517,6 +519,42 @@ lazy val didResolverPeer = crossProject(JSPlatform, JVMPlatform)
   .jsConfigure(scalaJSLibConfigure)
   .dependsOn(did, multiformats)
   .dependsOn(didImp % "test->test") // To generate keys for tests
+  .configure(docConfigure)
+
+lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
+  .in(file("did-method-prism"))
+  .configure(publishConfigure)
+  .settings(
+    name := "did-method-prism",
+    libraryDependencies += D.munit.value,
+    libraryDependencies += D.zioMunitTest.value,
+  )
+  .jvmSettings(libraryDependencies += D.ziohttp.value)
+  .jvmSettings( // Add JVM-specific settings here
+    libraryDependencies += D.bouncycastle_bcprov.value,
+    libraryDependencies += D.bouncycastle_bcpkix.value,
+    libraryDependencies += D.nimbusJoseJwt.value,
+    // BUT have vulnerabilities in the dependencies: CVE-2023-2976
+    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.16.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
+    // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
+    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.2",
+  )
+  .settings(
+    Compile / PB.targets := Seq(scalapb.gen() -> (Compile / sourceManaged).value / "scalapb"),
+    // Compile / PB.protoSources := Seq(file("did-method-prism/shared/src/main/protobuf")), // to avoid the https://github.com/epfl-lara/smart/blob/master/.sbtopts (line 1)
+    // Compile / PB.protoSources := Seq(baseDirectory.value / "shared/src/main/protobuf"), // /Users/fabio/workspace/scala-did/did-method-prism/jvm/shared/src/main/protobuf
+    Compile / PB.protoSources := Seq(
+      rootPaths.value.apply("BASE").toFile() / "did-method-prism" / "shared/src/main/protobuf"
+    ),
+    // (optional) If you need scalapb/scalapb.proto or anything from google/protobuf/*.proto
+    libraryDependencies ++= Seq(
+      "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion,
+      // The following needed only if you include scalapb/scalapb.proto:
+      "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
+    )
+  )
+  .jsConfigure(scalaJSLibConfigure)
+  .dependsOn(did, multiformats)
   .configure(docConfigure)
 
 //https://w3c-ccg.github.io/did-method-web/
