@@ -67,32 +67,28 @@ enum Curve: // TODO make it type safe!
 type ECCurve = Curve.`P-256`.type | Curve.`P-384`.type | Curve.`P-521`.type | Curve.secp256k1.type
 // sealed trait OKPCurve // Edwards-curve Octet Key Pair
 type OKPCurve = Curve.X25519.type | Curve.Ed25519.type // | Curve.Curve25519.type
+object ECCurve {
+  def valueOf(c: String): Either[String, ECCurve] = Curve.valueOf(c) match
+    case o: ECCurve  => Right(o)
+    case o: OKPCurve => Left(s"$o is a OKPCruve but is expecting a ECCruve")
+}
+object OKPCurve {
+  def valueOf(c: String): Either[String, OKPCurve] = Curve.valueOf(c) match
+    case o: OKPCurve => Right(o)
+    case o: ECCurve  => Left(s"$o is a ECCruve but is expecting a OKPCruve")
+}
 
 opaque type ECCurveOpaque = Curve.`P-256`.type | Curve.`P-384`.type | Curve.`P-521`.type | Curve.secp256k1.type
 object ECCurveOpaque:
-  def apply(value: Curve.`P-256`.type | Curve.`P-384`.type | Curve.`P-521`.type | Curve.secp256k1.type): ECCurveOpaque =
-    value
-  extension (curveEnum: ECCurveOpaque)
-    def curve: Curve.`P-256`.type | Curve.`P-384`.type | Curve.`P-521`.type | Curve.secp256k1.type = curveEnum
-  given decoder: JsonDecoder[ECCurveOpaque] = JsonDecoder.string.mapOrFail(e =>
-    safeValueOf(Curve.valueOf(e)).flatMap {
-      case o: ECCurve  => Right(o)
-      case o: OKPCurve => Left(s"$o is a OKPCruve but is expecting a ECCruve")
-    }
-  )
+  def apply(value: ECCurve): ECCurveOpaque = value
+  extension (curveEnum: ECCurveOpaque) def curve: ECCurve = curveEnum
+  given decoder: JsonDecoder[ECCurveOpaque] = JsonDecoder.string.mapOrFail(ECCurve.valueOf)
+
 opaque type OKPCurveOpaque = OKPCurve
 object OKPCurveOpaque:
-  def apply(
-      value: OKPCurve
-  ): OKPCurveOpaque =
-    value
+  def apply(value: OKPCurve): OKPCurveOpaque = value
   extension (curveEnum: OKPCurveOpaque) def curve: OKPCurve = curveEnum
-  given decoder: JsonDecoder[OKPCurveOpaque] = JsonDecoder.string.mapOrFail(e =>
-    safeValueOf(Curve.valueOf(e)).flatMap {
-      case o: OKPCurve => Right(o)
-      case o: ECCurve  => Left(s"$o is a ECCruve but is expecting a OKPCruve")
-    }
-  )
+  given decoder: JsonDecoder[OKPCurveOpaque] = JsonDecoder.string.mapOrFail(OKPCurve.valueOf)
 
 object Curve {
   extension (curve: Curve) {
@@ -204,7 +200,10 @@ sealed trait PublicKey extends OKP_EC_Key {
   override def withoutKid: PublicKeyWithoutKid
 }
 sealed trait PublicKeyWithKid extends PublicKey with WithKid
-sealed trait PublicKeyWithoutKid extends OKP_EC_Key with WithoutKid
+sealed trait PublicKeyWithoutKid extends OKP_EC_Key with WithoutKid {
+  override def withKid(kid: String): PublicKeyWithKid
+  override def withoutKid: PublicKeyWithoutKid
+}
 sealed trait PrivateKey extends OKP_EC_Key {
   def d: String
   def toPublicKey: PublicKey
