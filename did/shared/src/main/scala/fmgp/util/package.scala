@@ -1,5 +1,6 @@
 package fmgp
 
+import zio.json._
 package object util {
 
   /** Use call valueOf of a enum inside of safeValueOf (and ONLY valueOf!)
@@ -24,4 +25,9 @@ package object util {
   inline def hex2bytes(hex: String): Array[Byte] = {
     hex.replaceAll("[^0-9A-Fa-f]", "").sliding(2, 2).toArray.map(Integer.parseInt(_, 16).toByte)
   }
+
+  given decoderByteArray: JsonDecoder[Array[Byte]] = // use mapOrFail
+    JsonDecoder.string.map(e => hex2bytes(e))
+  given encoderByteArray: JsonEncoder[Array[Byte]] =
+    JsonEncoder.string.contramap((e: Array[Byte]) => bytes2Hex(e))
 }
