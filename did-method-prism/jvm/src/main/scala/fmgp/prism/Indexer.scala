@@ -7,26 +7,30 @@ import zio.stream._
 import zio.json._
 import zio.http._
 
-import fmgp.blockfrost.{API, MetadataContentJson}
+import fmgp.blockfrost._
 
+/** @param apiKey
+  *   blockfrost API key
+  */
+case class IndexerConfig(apiKey: String)
 object Indexer extends ZIOAppDefault {
 
   val PRISM_LABEL_CIP_10 = "21325"
-  val apiKey = "FIXME"
   val PAGE_SIZE = 100
   val WORKDIR_PATH = s"../prism-vdr/mainnet" // "did-method-prism/db_prism"
-  val METADATA_FILENAME = s"$WORKDIR_PATH/cardano-21325"
+  val METADATA_FILENAME = s"$WORKDIR_PATH/cardano-21325-cbor"
   val STATE_FILENAME = s"$WORKDIR_PATH/prism-state.json"
 
-  def metadataFromAPI = ZStream
+  def metadataFromJsonAPI = ZStream
     .paginateChunkZIO(0) { pageNumber =>
       for {
         _ <- ZIO.log(s"pageNumber=$pageNumber; (entries ${pageNumber * PAGE_SIZE}-${(pageNumber + 1) * PAGE_SIZE})")
+        config <- ZIO.service[IndexerConfig]
         response <- Client
           .batched(
             Request
               .get(path = API.metadataContentJson(PRISM_LABEL_CIP_10, page = pageNumber + 1, count = PAGE_SIZE))
-              .addHeaders(Headers(Header.Custom("project_id", apiKey)))
+              .addHeaders(Headers(Header.Custom("project_id", config.apiKey)))
           )
         responseStr <- response.body.asString
         page <- responseStr.fromJson[Seq[MetadataContentJson]] match
@@ -34,34 +38,48 @@ object Indexer extends ZIOAppDefault {
           case Right(value) =>
             ZIO.succeed(
               value.zipWithIndex.map((metadataContent, index) =>
-                CardanoMetadata(pageNumber * PAGE_SIZE + index, metadataContent.tx_hash, metadataContent.json_metadata)
+                CardanoMetadataJson(
+                  pageNumber * PAGE_SIZE + index,
+                  metadataContent.tx_hash,
+                  metadataContent.json_metadata
+                )
               )
             )
       } yield (Chunk.fromIterable(page), if (page.size == PAGE_SIZE) Some(pageNumber + 1) else None)
     }
-    .provideLayer(Client.default ++ Scope.default)
+    .provideSomeLayer(Client.default ++ Scope.default)
 
-  def metadataFromFile(fileName: String = METADATA_FILENAME) =
-    ZStream
-      .fromFileName(name = fileName)
-      .via(ZPipeline.utf8Decode >>> ZPipeline.splitLines)
-      .map { _.fromJson[CardanoMetadata].getOrElse(???) }
+  def metadataFromCBORAPI = ZStream
+    .paginateChunkZIO(0) { pageNumber =>
+      for {
+        _ <- ZIO.log(s"pageNumber=$pageNumber; (entries ${pageNumber * PAGE_SIZE}-${(pageNumber + 1) * PAGE_SIZE})")
+        config <- ZIO.service[IndexerConfig]
+        response <- Client
+          .batched(
+            Request
+              .get(path = API.metadataContentCBOR(PRISM_LABEL_CIP_10, page = pageNumber + 1, count = PAGE_SIZE))
+              .addHeaders(Headers(Header.Custom("project_id", config.apiKey)))
+          )
+        responseStr <- response.body.asString
+        page <- responseStr.fromJson[Seq[MetadataContentCBOR]] match
+          case Left(error) => ZIO.logError(responseStr) *> ZIO.fail(new RuntimeException(s"fail to parse: $error"))
+          case Right(value) =>
+            ZIO.succeed(
+              value.zipWithIndex.map((metadataContent, index) =>
+                CardanoMetadataCBOR(pageNumber * PAGE_SIZE + index, metadataContent.tx_hash, metadataContent.metadata)
+              )
+            )
+      } yield (Chunk.fromIterable(page), if (page.size == PAGE_SIZE) Some(pageNumber + 1) else None)
+    }
+    .provideSomeLayer(Client.default ++ Scope.default)
 
-  def sinkMetadataIntoFile(fileName: String = METADATA_FILENAME) = ZSink
-    .fromFileName(name = fileName, options = Set(WRITE, APPEND, CREATE))
-    .contramapChunks[CardanoMetadata](_.flatMap { cm => (cm.toJson + "\n").getBytes })
-
-  // def sinkStateIntoFile(fileName: String = STATE_FILENAME) = ZSink
-  //   .fromFileName(name = fileName, options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
-  //   .contramapChunks[State](_.flatMap { _.toJsonPretty.getBytes })
-
-  def pipeline = ZPipeline.map[CardanoMetadata, Seq[MaybeOperation[OP]]](CardanoMetadata =>
-    CardanoMetadata.toCardanoPrismEntry match
+  def pipeline = ZPipeline.map[CardanoMetadata, Seq[MaybeOperation[OP]]](cardanoMetadata =>
+    cardanoMetadata.toCardanoPrismEntry match
       case Left(error) =>
         Seq(
           InvalidPrismObject(
-            tx = CardanoMetadata.tx,
-            b = CardanoMetadata.b,
+            tx = cardanoMetadata.tx,
+            b = cardanoMetadata.b,
             reason = error,
           )
         )
@@ -125,10 +143,24 @@ object Indexer extends ZIOAppDefault {
           |""".stripMargin
       )
       stateRef <- Ref.make(State.empty)
-
-      streamAPI = metadataFromAPI
-      _ <- streamAPI.run(sinkMetadataIntoFile())
-      streamMetadata = metadataFromFile()
+      _ <- getArgs.flatMap {
+        _.headOption match
+          case None => ZIO.logWarning("token for blockfrost is missing") *> ZIO.log("Indexing from ofline file")
+          case Some(head) =>
+            val config = ZLayer.succeed(IndexerConfig(apiKey = head))
+            val streamAPI = metadataFromCBORAPI // metadataFromJsonAPI
+            streamAPI
+              .run(
+                ZSink
+                  .fromFileName(name = METADATA_FILENAME, options = Set(WRITE, TRUNCATE_EXISTING, CREATE)) // APPEND
+                  .contramapChunks[CardanoMetadataCBOR](_.flatMap { cm => (cm.toJson + "\n").getBytes })
+              )
+              .provideLayer(config)
+      }
+      streamMetadata = ZStream
+        .fromFileName(name = METADATA_FILENAME)
+        .via(ZPipeline.utf8Decode >>> ZPipeline.splitLines)
+        .map { _.fromJson[CardanoMetadataCBOR].getOrElse(???) }
       _ <- streamMetadata
         .via(pipeline)
         .flatMap(e => ZStream.fromIterable(e))
@@ -138,7 +170,7 @@ object Indexer extends ZIOAppDefault {
             .contramapChunks[MaybeOperation[OP]](_.flatMap { case op => s"${op.toJson}\n".getBytes })
         )
         .via(pipelineState)
-        .run(ZSink.count) // .run(sinkLog)
+        .run(ZSink.count)
         .provideEnvironment(ZEnvironment(stateRef))
       _ <- ZIO.log(s"Finish Indexing")
       // ###############################################

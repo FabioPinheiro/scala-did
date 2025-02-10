@@ -4,11 +4,16 @@ import zio.json._
 
 // case class MetadataLabel(label: String, cip10: Option[String], count: String)
 case class MetadataContentJson(tx_hash: String, json_metadata: ast.Json)
-// case class MetadataContentCbor(tx_hash: String, cbor_metadata: Option[String])
+case class MetadataContentCBOR(tx_hash: String, metadata: String) //, cbor_metadata: Option[String])
 
 object MetadataContentJson {
   given decoder: JsonDecoder[MetadataContentJson] = DeriveJsonDecoder.gen[MetadataContentJson]
   given encoder: JsonEncoder[MetadataContentJson] = DeriveJsonEncoder.gen[MetadataContentJson]
+}
+
+object MetadataContentCBOR {
+  given decoder: JsonDecoder[MetadataContentCBOR] = DeriveJsonDecoder.gen[MetadataContentCBOR]
+  given encoder: JsonEncoder[MetadataContentCBOR] = DeriveJsonEncoder.gen[MetadataContentCBOR]
 }
 
 /** Blockfrost API
@@ -40,9 +45,9 @@ object API {
     * @param count
     *   The number of results displayed on one page. (min: 1 max: 100 default: 100)
     * @return
-    *   MetadataContentCbor
+    *   MetadataContentCBOR
     */
-  def metadataContentCbor(label: String, page: Int, count: Int = 100) =
+  def metadataContentCBOR(label: String, page: Int, count: Int = 100) =
     s"${Network.Mainnet}/metadata/txs/labels/$label/cbor?page=$page&count=$count&order=asc"
 
   // SortedPageRequest

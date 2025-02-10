@@ -1,5 +1,10 @@
 # PRISM VDR Indexer
 
+## DID PRISM
+
+https://github.com/input-output-hk/prism-did-method-spec/blob/main/w3c-spec/PRISM-method.md
+
+## Indexer Architecture
 ```mermaid
 flowchart TD
   Cardano@{ shape: cyl, label: "Cardano Transactions" }

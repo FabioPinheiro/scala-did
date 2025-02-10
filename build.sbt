@@ -150,6 +150,8 @@ lazy val V = new {
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time
   val scalaJavaTime = "2.5.0"
 
+  val bullet = "1.15.0"
+
   val logbackClassic = "1.2.10"
   val scalaLogging = "3.9.4"
 
@@ -203,6 +205,8 @@ lazy val D = new {
   // Needed for ZIO
   val scalaJavaT = Def.setting("io.github.cquiroz" %%% "scala-java-time" % V.scalaJavaTime)
   val scalaJavaTZ = Def.setting("io.github.cquiroz" %%% "scala-java-time-tzdb" % V.scalaJavaTime)
+
+  val bullet = Def.setting("io.bullet" %%% "borer-core" % V.bullet) // CBOR
 
   // Test DID comm
   // val didcomm = Def.setting("org.didcommx" % "didcomm" % "0.3.1")
@@ -532,6 +536,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
   .configure(publishConfigure)
   .settings(
     name := "did-method-prism",
+    libraryDependencies += D.bullet.value,
     libraryDependencies += D.munit.value,
     libraryDependencies += D.zioMunitTest.value,
   )
@@ -564,9 +569,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // stReactEnableTreeShaking := Selection.NoneExcept("@noble/curves"),
     // stFlavour := Flavour.Slinky,
     Compile / npmDependencies ++= Seq(NPM.nobleCurves),
-    // Compile / npmDependencies ++= Seq(NPM.elliptic), // , NPM.ellipticType),
-    // stIgnore += "elliptic",
-    // stIgnore += "bn.js", "@types/bn.js", "brorand", "hash.js", "hmac-drbg", "inherits", "minimalistic-assert",
+    // Compile / npmDependencies ++= Seq(NPM.elliptic, NPM.ellipticType),
     // stMinimize := Selection.All,
     // stMinimizeKeep ++= List(..
   )

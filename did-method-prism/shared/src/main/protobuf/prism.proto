@@ -25,7 +25,7 @@ option (scalapb.options) = {
 
 import "prism-credential-batch.proto";
 import "prism-version.proto";
-import "prism-did.proto";
+import "prism-ssi.proto";
 import "prism-storage.proto";
 
 /**
@@ -82,8 +82,11 @@ message PrismOperation {
 
         // Used to create a public storage entry.
         CreateStorageEntryOperation create_storage_entry = 7;
+        // StorageEventCreateEntry storage_create_entry = 7;
 
         // Used to update a storage entry.
         UpdateStorageEntryOperation update_storage_entry = 8;
+        // StorageEventUpdateEntry storage_update_entry = 8;
+
     };
 }
