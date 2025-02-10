@@ -167,6 +167,12 @@ lazy val V = new {
 lazy val NPM = new { // When update the dependencies also update in package.json
   val sha256 = "js-sha256" -> "0.9.0"
   val jose = "jose" -> "5.3.0"
+
+  // val elliptic = "elliptic" -> "6.6.1"
+  // val ellipticType = "@types/elliptic" -> "6.4.18"
+
+  val nobleCurves = "@noble/curves" -> "1.8.1"
+
 }
 
 /** Dependencies */
@@ -554,6 +560,16 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     )
   )
   .jsConfigure(scalaJSLibConfigure)
+  .jsSettings(
+    // stReactEnableTreeShaking := Selection.NoneExcept("@noble/curves"),
+    // stFlavour := Flavour.Slinky,
+    Compile / npmDependencies ++= Seq(NPM.nobleCurves),
+    // Compile / npmDependencies ++= Seq(NPM.elliptic), // , NPM.ellipticType),
+    // stIgnore += "elliptic",
+    // stIgnore += "bn.js", "@types/bn.js", "brorand", "hash.js", "hmac-drbg", "inherits", "minimalistic-assert",
+    // stMinimize := Selection.All,
+    // stMinimizeKeep ++= List(..
+  )
   .dependsOn(did, multiformats)
   .configure(docConfigure)
 
