@@ -24,7 +24,7 @@ object MetadataContentCBOR {
 object API {
 
   //  ApiResponse[Seq[MetadataLabel]]
-  def metadataLabels = s"${Network.Mainnet}/metadata/txs/labels"
+  def metadataLabels(network: String) = s"$network/metadata/txs/labels"
 
   /** @param label
     *   Metadata label
@@ -35,8 +35,8 @@ object API {
     * @return
     *   MetadataContentJson
     */
-  def metadataContentJson(label: String, page: Int, count: Int = 100) =
-    s"${Network.Mainnet}/metadata/txs/labels/$label?page=$page&count=$count&order=asc"
+  def metadataContentJson(network: String, label: String, page: Int, count: Int = 100) =
+    s"$network/metadata/txs/labels/$label?page=$page&count=$count&order=asc"
 
   /** @param label
     *   Metadata label
@@ -47,8 +47,8 @@ object API {
     * @return
     *   MetadataContentCBOR
     */
-  def metadataContentCBOR(label: String, page: Int, count: Int = 100) =
-    s"${Network.Mainnet}/metadata/txs/labels/$label/cbor?page=$page&count=$count&order=asc"
+  def metadataContentCBOR(network: String, label: String, page: Int, count: Int = 100) =
+    s"$network/metadata/txs/labels/$label/cbor?page=$page&count=$count&order=asc"
 
   // SortedPageRequest
 

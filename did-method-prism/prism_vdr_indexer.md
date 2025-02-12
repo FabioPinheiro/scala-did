@@ -56,15 +56,3 @@ flowchart TD
 
 ```
 
-
-rm cardano-21325
-rm prism-operations
-rm -rf diddoc
-rm -rf opid
-rm -rf ops
-rm -rf ssi
-
-mkdir diddoc
-mkdir opid
-mkdir ops
-mkdir ssi

@@ -12,25 +12,38 @@ import fmgp.blockfrost._
 /** @param apiKey
   *   blockfrost API key
   */
-case class IndexerConfig(apiKey: String)
+case class IndexerConfig(apiKey: Option[String], workdir: String, network: String) {
+  def metadataPath = s"$workdir/cardano-21325-cbor" // .csv
+  def eventsPath = s"$workdir/prism-events" // .csv
+  def statePath = s"$workdir/prism-state.json"
+
+  def opidPath(did: String) = s"$workdir/opid/$did"
+  def opsPath(did: String) = s"$workdir/ops/$did"
+  def ssiPath(did: String) = s"$workdir/ssi/$did"
+  def diddocPath(did: String) = s"$workdir/diddoc/$did"
+}
+
 object Indexer extends ZIOAppDefault {
 
   val PRISM_LABEL_CIP_10 = "21325"
   val PAGE_SIZE = 100
-  val WORKDIR_PATH = s"../prism-vdr/mainnet" // "did-method-prism/db_prism"
-  val METADATA_FILENAME = s"$WORKDIR_PATH/cardano-21325-cbor"
-  val STATE_FILENAME = s"$WORKDIR_PATH/prism-state.json"
 
-  def metadataFromJsonAPI = ZStream
+  def metadataFromJsonAPI(apiKey: String, network: String) = ZStream
     .paginateChunkZIO(0) { pageNumber =>
       for {
         _ <- ZIO.log(s"pageNumber=$pageNumber; (entries ${pageNumber * PAGE_SIZE}-${(pageNumber + 1) * PAGE_SIZE})")
-        config <- ZIO.service[IndexerConfig]
         response <- Client
           .batched(
             Request
-              .get(path = API.metadataContentJson(PRISM_LABEL_CIP_10, page = pageNumber + 1, count = PAGE_SIZE))
-              .addHeaders(Headers(Header.Custom("project_id", config.apiKey)))
+              .get(path =
+                API.metadataContentJson(
+                  network = network,
+                  label = PRISM_LABEL_CIP_10,
+                  page = pageNumber + 1,
+                  count = PAGE_SIZE
+                )
+              )
+              .addHeaders(Headers(Header.Custom("project_id", apiKey)))
           )
         responseStr <- response.body.asString
         page <- responseStr.fromJson[Seq[MetadataContentJson]] match
@@ -49,16 +62,22 @@ object Indexer extends ZIOAppDefault {
     }
     .provideSomeLayer(Client.default ++ Scope.default)
 
-  def metadataFromCBORAPI = ZStream
+  def metadataFromCBORAPI(apiKey: String, network: String) = ZStream
     .paginateChunkZIO(0) { pageNumber =>
       for {
         _ <- ZIO.log(s"pageNumber=$pageNumber; (entries ${pageNumber * PAGE_SIZE}-${(pageNumber + 1) * PAGE_SIZE})")
-        config <- ZIO.service[IndexerConfig]
         response <- Client
           .batched(
             Request
-              .get(path = API.metadataContentCBOR(PRISM_LABEL_CIP_10, page = pageNumber + 1, count = PAGE_SIZE))
-              .addHeaders(Headers(Header.Custom("project_id", config.apiKey)))
+              .get(path =
+                API.metadataContentCBOR(
+                  network = network,
+                  label = PRISM_LABEL_CIP_10,
+                  page = pageNumber + 1,
+                  count = PAGE_SIZE
+                )
+              )
+              .addHeaders(Headers(Header.Custom("project_id", apiKey)))
           )
         responseStr <- response.body.asString
         page <- responseStr.fromJson[Seq[MetadataContentCBOR]] match
@@ -143,22 +162,39 @@ object Indexer extends ZIOAppDefault {
           |""".stripMargin
       )
       stateRef <- Ref.make(State.empty)
-      _ <- getArgs.flatMap {
-        _.headOption match
-          case None => ZIO.logWarning("token for blockfrost is missing") *> ZIO.log("Indexing from ofline file")
-          case Some(head) =>
-            val config = ZLayer.succeed(IndexerConfig(apiKey = head))
-            val streamAPI = metadataFromCBORAPI // metadataFromJsonAPI
-            streamAPI
-              .run(
-                ZSink
-                  .fromFileName(name = METADATA_FILENAME, options = Set(WRITE, TRUNCATE_EXISTING, CREATE)) // APPEND
-                  .contramapChunks[CardanoMetadataCBOR](_.flatMap { cm => (cm.toJson + "\n").getBytes })
+      indexerConfigZLayer <- getArgs
+        .flatMap {
+          _.headOption match
+            case None =>
+              ZIO.succeed(
+                IndexerConfig(
+                  apiKey = None,
+                  network = Network.Preprod,
+                  workdir = "../prism-vdr/preprod"
+                )
+              ) // mainnet
+            case Some(head) =>
+              ZIO.succeed(
+                IndexerConfig(
+                  apiKey = Some(head),
+                  network = Network.Preprod,
+                  workdir = "../prism-vdr/preprod"
+                )
               )
-              .provideLayer(config)
-      }
+        }
+        .map(ZLayer.succeed _)
+      indexerConfig <- ZIO.service[IndexerConfig].provideLayer(indexerConfigZLayer)
+      _ <- indexerConfig.apiKey match
+        case None => ZIO.logWarning("Token for blockfrost is missing") *> ZIO.log("Indexing from ofline file")
+        case Some(apiKey) =>
+          metadataFromCBORAPI(apiKey = apiKey, network = indexerConfig.network) // metadataFromJsonAPI(apiKey)
+            .run(
+              ZSink
+                .fromFileName(name = indexerConfig.metadataPath, options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
+                .contramapChunks[CardanoMetadataCBOR](_.flatMap { cm => (cm.toJson + "\n").getBytes }) // APPEND
+            )
       streamMetadata = ZStream
-        .fromFileName(name = METADATA_FILENAME)
+        .fromFileName(name = indexerConfig.metadataPath)
         .via(ZPipeline.utf8Decode >>> ZPipeline.splitLines)
         .map { _.fromJson[CardanoMetadataCBOR].getOrElse(???) }
       _ <- streamMetadata
@@ -166,7 +202,7 @@ object Indexer extends ZIOAppDefault {
         .flatMap(e => ZStream.fromIterable(e))
         .tapSink(
           ZSink
-            .fromFileName(name = s"$WORKDIR_PATH/prism-operations", options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
+            .fromFileName(name = indexerConfig.eventsPath, options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
             .contramapChunks[MaybeOperation[OP]](_.flatMap { case op => s"${op.toJson}\n".getBytes })
         )
         .via(pipelineState)
@@ -182,24 +218,24 @@ object Indexer extends ZIOAppDefault {
           for {
             _ <- ZStream.fromIterable(opidSeq).run {
               ZSink
-                .fromFileName(name = s"$WORKDIR_PATH/opid/$did", options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
+                .fromFileName(name = indexerConfig.opidPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
                 .contramapChunks[OpId](_.flatMap { case opid => s"${opid.toJson}\n".getBytes })
             }
             ops = state.allOpForDID(did)
             _ <- ZStream.fromIterable(ops).run {
               ZSink
-                .fromFileName(name = s"$WORKDIR_PATH/ops/$did", options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
+                .fromFileName(name = indexerConfig.opsPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
                 .contramapChunks[MySignedPrismOperation[OP]](_.flatMap { spo => s"${spo.toJson}\n".getBytes })
             }
             ssi = SSI.make(did, ops)
             _ <- ZStream.from(ssi).run {
               ZSink
-                .fromFileName(name = s"$WORKDIR_PATH/ssi/$did", options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
+                .fromFileName(name = indexerConfig.ssiPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
                 .contramapChunks[SSI](_.flatMap { case ssi => s"${ssi.toJsonPretty}\n".getBytes })
             }
             _ <- ZStream.from(ssi).run {
               ZSink
-                .fromFileName(name = s"$WORKDIR_PATH/diddoc/$did", options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
+                .fromFileName(name = indexerConfig.diddocPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
                 .contramapChunks[SSI](_.flatMap { case ssi => s"${ssi.didDocument.toJsonPretty}\n".getBytes })
             }
           } yield ()
