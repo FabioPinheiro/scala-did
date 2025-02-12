@@ -29,9 +29,9 @@ case class State(
       case None => None
       case Some(previousOp) =>
         previousOp.operation match
-          case CreateDidOP(publicKeys, services, context)      => Some(previousOp.opHash)
-          case UpdateDidOP(previousOperationHash, id, actions) => ssiFromPreviousOperationHash(previousOp.opHash)
-          case _                                               => None
+          case CreateDidOP(publicKeys, services, context)     => Some(previousOp.opHash)
+          case UpdateDidOP(previousPreviousHash, id, actions) => ssiFromPreviousOperationHash(previousPreviousHash)
+          case _                                              => None
   }
 
   def allOpForDID(did: String): Seq[MySignedPrismOperation[OP]] =
@@ -67,10 +67,11 @@ case class State(
         case UpdateStorageEntryOP(value)    => this
         case CreateDidOP(publicKeys, services, context) =>
           val did = s"did:prism:${op.opHash}"
-          val newSSI2opId = ssi2opId.updatedWith(did)(_ match
-            case None      => Some(Seq(opId))
-            case Some(seq) => Some(seq :+ opId)
-          )
+          val newSSI2opId = ssi2opId.updatedWith(did) {
+            _ match
+              case None      => Some(Seq(opId))
+              case Some(seq) => Some(seq :+ opId)
+          }
           State(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
         case UpdateDidOP(previousOperationHash, id, actions) =>
           ssiFromPreviousOperationHash(previousOperationHash) match

@@ -86,7 +86,7 @@ class CrytoUtilSuite extends FunSuite {
   }
 
   test("Metadata 6418") {
-    val cardanoPrismEntry = ModelsExamples.metadata_6418.getOrElse(???)
+    val cardanoPrismEntry = MainnetExamples.metadata_6418.toCardanoPrismEntry.getOrElse(???)
     val tmp = MaybeOperation.fromProto("tx", -1, cardanoPrismEntry.content)
     val mySignedPrismOperation = tmp.head.asInstanceOf[MySignedPrismOperation[OP]]
 
@@ -112,7 +112,7 @@ class CrytoUtilSuite extends FunSuite {
   }
 
   test("Metadata 6451") {
-    val cardanoPrismEntry = ModelsExamples.metadata_6451.getOrElse(???)
+    val cardanoPrismEntry = MainnetExamples.metadata_6451.toCardanoPrismEntry.getOrElse(???)
     val tmp = MaybeOperation.fromProto("tx", -1, cardanoPrismEntry.content)
     val mySignedPrismOperation = tmp.head.asInstanceOf[MySignedPrismOperation[OP]]
 
@@ -136,7 +136,7 @@ class CrytoUtilSuite extends FunSuite {
   }
 
   test("Metadata 6452") {
-    val cardanoPrismEntry = ModelsExamples.metadata_6452.getOrElse(???)
+    val cardanoPrismEntry = MainnetExamples.metadata_6452.toCardanoPrismEntry.getOrElse(???)
     val tmp = MaybeOperation.fromProto("tx", -1, cardanoPrismEntry.content)
     val mySignedPrismOperation = tmp.head.asInstanceOf[MySignedPrismOperation[OP]]
 
