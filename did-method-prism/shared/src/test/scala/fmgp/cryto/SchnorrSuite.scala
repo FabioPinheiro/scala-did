@@ -1,0 +1,28 @@
+package fmgp.cryto
+
+import munit._
+
+class SchnorrSuite extends FunSuite {
+
+  val b1 =
+    "30450220622b4fdaa18f835856378a58bb04697afab180963a1e38c3a163743f809ba0b4022100a6124d55ab293b83f99be3012e2c0001ab72f13b726532831d43f2739a395b85"
+  val b2 =
+    "3045022100e898f57100ed8aa015ba352d861a9aa1bcf1e3d5a6548badd0665b9f30a4181202206f53548d7d3923d024ae8283aadeb8e602266b19f622f54672d22038781dbb26"
+  val b3 =
+    "304502201354806fbbc6c584f9c60e306beaacd658236c910f0e04471c94e4386b654c9b02210093b0d27058f28500e2f94b0ac74aa62cd2bdb1207725f237c8d77a3c61da4a99"
+  val b4 =
+    "30450220231bda924b6a1d8c786a18ccfacab24f64ef188752504903e24f18ecc77ab9ec02210081d7895109fb1ecc7e47af3153b9971fc65a8b313dcfd8831d67d1a3ce837790"
+  val b5 =
+    "3044022000bb26d7e86077fc87f2c3e36ff54490c3d046d34d91817b9645a029d4b2cd1f02207e7c2011b2044c3f7c0ff55ee684b936d6a4d00bfb9de37d91b49d8cba8e908b"
+  val b6 =
+    "3046022100f9a4684258223a55861b053175ff8f13afb1906d4f740134b7a40e4fe9d48e9c022100bc826bc848c93dd0caada19b599d87bc8e342636ed101f44ac27a0a2020af5ce"
+
+  for (it <- Seq(b1, b2, b3, b4, b5, b6).zipWithIndex) {
+    test(s"schnorrFromDEREncoded b${it._2}") {
+      val hex = it._1
+      val bytes = hex.sliding(2, 2).map(Integer.parseInt(_, 16).toByte).toArray
+      Schnorr.rsValuesFromDEREncoded(bytes = bytes)
+
+    }
+  }
+}
