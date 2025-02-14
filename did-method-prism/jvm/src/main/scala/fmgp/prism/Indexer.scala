@@ -13,9 +13,9 @@ import fmgp.blockfrost._
   *   blockfrost API key
   */
 case class IndexerConfig(apiKey: Option[String], workdir: String, network: String) {
-  def metadataPath = s"$workdir/cardano-21325-cbor" // .csv
-  def eventsPath = s"$workdir/prism-events" // .csv
-  def statePath = s"$workdir/prism-state.json"
+  def rawMetadataPath = s"$workdir/cardano-21325"
+  def eventsPath = s"$workdir/prism-events"
+  // def statePath = s"$workdir/prism-state.json"
 
   def opidPath(did: String) = s"$workdir/opid/$did"
   def opsPath(did: String) = s"$workdir/ops/$did"
@@ -28,8 +28,17 @@ object Indexer extends ZIOAppDefault {
   val PRISM_LABEL_CIP_10 = "21325"
   val PAGE_SIZE = 100
 
-  def metadataFromJsonAPI(apiKey: String, network: String) = ZStream
-    .paginateChunkZIO(0) { pageNumber =>
+  /** Transactions per chunk file
+    *
+    * Maybe 1000 is too small
+    *
+    * (100 megabytes) / ((16 quilobytes) + (96 bytes)) = 6212?
+    */
+  val FILE_CHUNK_SIZE = 1000
+  val FILE_CHUNK_NAME = "chunk"
+
+  def metadataFromJsonAPI(apiKey: String, network: String, pageJump: Int = 0) = ZStream
+    .paginateChunkZIO(pageJump) { pageNumber =>
       for {
         _ <- ZIO.log(s"pageNumber=$pageNumber; (entries ${pageNumber * PAGE_SIZE}-${(pageNumber + 1) * PAGE_SIZE})")
         response <- Client
@@ -62,8 +71,8 @@ object Indexer extends ZIOAppDefault {
     }
     .provideSomeLayer(Client.default ++ Scope.default)
 
-  def metadataFromCBORAPI(apiKey: String, network: String) = ZStream
-    .paginateChunkZIO(0) { pageNumber =>
+  def metadataFromCBORAPI(apiKey: String, network: String, pageJump: Int = 0) = ZStream
+    .paginateChunkZIO(pageJump) { pageNumber =>
       for {
         _ <- ZIO.log(s"pageNumber=$pageNumber; (entries ${pageNumber * PAGE_SIZE}-${(pageNumber + 1) * PAGE_SIZE})")
         response <- Client
@@ -184,27 +193,74 @@ object Indexer extends ZIOAppDefault {
         }
         .map(ZLayer.succeed _)
       indexerConfig <- ZIO.service[IndexerConfig].provideLayer(indexerConfigZLayer)
+
+      chunkFiles = new java.io.File(indexerConfig.rawMetadataPath)
+        .listFiles()
+        .filter(_.getName.startsWith(FILE_CHUNK_NAME))
+        .sorted
+      lastTransactionIndexStored <- chunkFiles.lastOption match
+        case None => ZIO.succeed(None)
+        case Some(lastChunkFilesPath) =>
+          ZStream
+            .fromFile(lastChunkFilesPath)
+            .via(ZPipeline.utf8Decode >>> ZPipeline.splitLines)
+            .takeRight(1) // last line
+            .map { _.fromJson[CardanoMetadataCBOR].getOrElse(???) }
+            .map(_.index)
+            .runCollect
+            .map(_.headOption)
+
+      nextMetadateIndex = lastTransactionIndexStored.map(_ + 1).getOrElse(0)
+      cardinalityOfEntries = nextMetadateIndex + 1
+      nextPageIndex = cardinalityOfEntries / 100
+      _ <- ZIO.log(s"API calls start: nextPageIndex=$nextPageIndex; nextMetadateIndex=$nextMetadateIndex")
+
       _ <- indexerConfig.apiKey match
         case None => ZIO.logWarning("Token for blockfrost is missing") *> ZIO.log("Indexing from ofline file")
         case Some(apiKey) =>
-          metadataFromCBORAPI(apiKey = apiKey, network = indexerConfig.network) // metadataFromJsonAPI(apiKey)
-            .run(
+          metadataFromCBORAPI(
+            apiKey = apiKey,
+            network = indexerConfig.network,
+            pageJump = nextPageIndex,
+          )
+            .filter(_.index >= nextMetadateIndex) // .drop(nextItemIndex + 1)
+            .groupByKey(_.index / FILE_CHUNK_SIZE) { (fileN, stream) =>
+              stream.tapSink {
+                val fileName = f"$FILE_CHUNK_NAME${fileN}%03.0f"
+                ZSink
+                  .fromFileName(
+                    name = indexerConfig.rawMetadataPath + s"/$fileName",
+                    options = Set(WRITE, APPEND, CREATE) // TRUNCATE_EXISTING // TODO maybe use SYNC
+                  )
+                  .contramapChunks[CardanoMetadataCBOR](_.flatMap { cm => (cm.toJson + "\n").getBytes })
+                  // .summarized(ZIO.log(s"ZSink PRISM BLOCKs into $fileName"))((b1, b2) => ())
+                  .mapZIO(bytes => ZIO.log(s"ZSink PRISM Events into $fileName (write $bytes bytes)"))
+              }
+            }
+            .run(ZSink.drain)
+            *> ZIO.log(s"End updating the raw metadata '${indexerConfig.rawMetadataPath}'")
+
+      streamAllChunkFiles = ZStream.fromIterable {
+        chunkFiles.map { fileName =>
+          ZStream
+            .fromFile(fileName)
+            .via(ZPipeline.utf8Decode >>> ZPipeline.splitLines)
+            .map { _.fromJson[CardanoMetadataCBOR].getOrElse(???) }
+            .via(pipeline)
+            .flatMap(e => ZStream.fromIterable(e))
+            .tapSink {
               ZSink
-                .fromFileName(name = indexerConfig.metadataPath, options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
-                .contramapChunks[CardanoMetadataCBOR](_.flatMap { cm => (cm.toJson + "\n").getBytes }) // APPEND
-            )
-      streamMetadata = ZStream
-        .fromFileName(name = indexerConfig.metadataPath)
-        .via(ZPipeline.utf8Decode >>> ZPipeline.splitLines)
-        .map { _.fromJson[CardanoMetadataCBOR].getOrElse(???) }
+                .fromFileName(
+                  name = s"${indexerConfig.eventsPath}/${fileName.getName}",
+                  options = Set(WRITE, TRUNCATE_EXISTING, CREATE)
+                )
+                .contramapChunks[MaybeOperation[OP]](_.flatMap { case op => s"${op.toJson}\n".getBytes })
+            }
+        }
+      }.flatten
+      streamMetadata = streamAllChunkFiles
+
       _ <- streamMetadata
-        .via(pipeline)
-        .flatMap(e => ZStream.fromIterable(e))
-        .tapSink(
-          ZSink
-            .fromFileName(name = indexerConfig.eventsPath, options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
-            .contramapChunks[MaybeOperation[OP]](_.flatMap { case op => s"${op.toJson}\n".getBytes })
-        )
         .via(pipelineState)
         .run(ZSink.count)
         .provideEnvironment(ZEnvironment(stateRef))
