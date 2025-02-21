@@ -83,7 +83,6 @@ final case class SSI(
       .exists(key => SharedCryto.checkECDSASignature(msg = spo.protobuf.toByteArray, sig = spo.signature, pubKey = key))
 
   def didDocument: DIDDocument = {
-
     val authentication = keys
       .filter(_.usage == PrismKeyUsage.AuthenticationKeyUsage)
       .map(k => k.getVerificationMethod(id = s"$did#${k.id}", controller = did))
@@ -117,6 +116,10 @@ final case class SSI(
       service = Some(services).filter(_.nonEmpty),
     )
   }
+
+  // /** https://github.com/decentralized-identity/universal-resolver/ */
+  // def didResolutionResult: DIDResolutionResult = ???
+
 }
 
 object SSI {

@@ -1,6 +1,6 @@
 package fmgp.prism
 
-import java.nio.file.StandardOpenOption.{WRITE, APPEND, CREATE, TRUNCATE_EXISTING}
+import java.nio.file.StandardOpenOption._
 
 import zio._
 import zio.stream._
@@ -143,6 +143,19 @@ object Indexer extends ZIOAppDefault {
       Console.printLine(s"$b - tx:$tx op:$o - $str")
   }
 
+  def findChunkFiles(rawMetadataPath: String) =
+    new java.io.File(rawMetadataPath)
+      .listFiles()
+      .filter(_.getName.startsWith(FILE_CHUNK_NAME))
+      .sorted
+
+  def sinkRawTransactions(filePath: String): ZSink[Any, Throwable, CardanoMetadataCBOR, Nothing, Unit] =
+    ZSink
+      .fromFileName(name = filePath, options = Set(WRITE, APPEND, CREATE, SYNC))
+      .contramapChunks[CardanoMetadataCBOR](_.flatMap { cm => (cm.toJson + "\n").getBytes })
+      .ignoreLeftover // TODO review
+      .mapZIO(bytes => ZIO.log(s"ZSink PRISM Events into $filePath (write $bytes bytes)"))
+
   override val run = {
     for {
       _ <- Console.printLine(
@@ -172,33 +185,21 @@ object Indexer extends ZIOAppDefault {
       )
       stateRef <- Ref.make(State.empty)
       indexerConfigZLayer <- getArgs
+        .map(_.toSeq)
         .flatMap {
-          _.headOption match
-            case None =>
-              ZIO.succeed(
-                IndexerConfig(
-                  apiKey = None,
-                  network = Network.Preprod,
-                  workdir = "../prism-vdr/preprod"
-                )
-              ) // mainnet
-            case Some(head) =>
-              ZIO.succeed(
-                IndexerConfig(
-                  apiKey = Some(head),
-                  network = Network.Preprod,
-                  workdir = "../prism-vdr/preprod"
-                )
-              )
+          case Seq(dataPath: String) =>
+            ZIO.succeed(IndexerConfig(apiKey = None, network = Network.Mainnet, workdir = dataPath))
+          case Seq(dataPath, "mainnet", apikey) =>
+            ZIO.succeed(IndexerConfig(apiKey = Some(apikey), network = Network.Mainnet, workdir = dataPath))
+          case Seq(dataPath, "preprod", apikey) =>
+            ZIO.succeed(IndexerConfig(apiKey = Some(apikey), network = Network.Preprod, workdir = dataPath))
+          case next => ZIO.fail(RuntimeException("Indexer <dataPath> [mainnet|preprod <dataPath>]"))
         }
         .map(ZLayer.succeed _)
       indexerConfig <- ZIO.service[IndexerConfig].provideLayer(indexerConfigZLayer)
 
-      chunkFiles = new java.io.File(indexerConfig.rawMetadataPath)
-        .listFiles()
-        .filter(_.getName.startsWith(FILE_CHUNK_NAME))
-        .sorted
-      lastTransactionIndexStored <- chunkFiles.lastOption match
+      _ <- ZIO.log(s"Check the LastTransactionIndexStored")
+      lastTransactionIndexStored <- findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath).lastOption match
         case None => ZIO.succeed(None)
         case Some(lastChunkFilesPath) =>
           ZStream
@@ -227,21 +228,14 @@ object Indexer extends ZIOAppDefault {
             .groupByKey(_.index / FILE_CHUNK_SIZE) { (fileN, stream) =>
               stream.tapSink {
                 val fileName = f"$FILE_CHUNK_NAME${fileN}%03.0f"
-                ZSink
-                  .fromFileName(
-                    name = indexerConfig.rawMetadataPath + s"/$fileName",
-                    options = Set(WRITE, APPEND, CREATE) // TRUNCATE_EXISTING // TODO maybe use SYNC
-                  )
-                  .contramapChunks[CardanoMetadataCBOR](_.flatMap { cm => (cm.toJson + "\n").getBytes })
-                  // .summarized(ZIO.log(s"ZSink PRISM BLOCKs into $fileName"))((b1, b2) => ())
-                  .mapZIO(bytes => ZIO.log(s"ZSink PRISM Events into $fileName (write $bytes bytes)"))
+                sinkRawTransactions(indexerConfig.rawMetadataPath + s"/$fileName")
               }
             }
             .run(ZSink.drain)
             *> ZIO.log(s"End updating the raw metadata '${indexerConfig.rawMetadataPath}'")
 
       streamAllChunkFiles = ZStream.fromIterable {
-        chunkFiles.map { fileName =>
+        findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath).map { fileName =>
           ZStream
             .fromFile(fileName)
             .via(ZPipeline.utf8Decode >>> ZPipeline.splitLines)
@@ -272,11 +266,7 @@ object Indexer extends ZIOAppDefault {
         .fromIterable(state.ssi2opId)
         .mapZIO { case (did, opidSeq) =>
           for {
-            _ <- ZStream.fromIterable(opidSeq).run {
-              ZSink
-                .fromFileName(name = indexerConfig.opidPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
-                .contramapChunks[OpId](_.flatMap { case opid => s"${opid.toJson}\n".getBytes })
-            }
+            _ <- ZIO.logDebug(s"DID: $did")
             ops = state.allOpForDID(did)
             _ <- ZStream.fromIterable(ops).run {
               ZSink
