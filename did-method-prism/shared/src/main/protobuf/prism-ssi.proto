@@ -68,7 +68,7 @@ enum KeyUsage {
 
 
     // !!!!!!!!!!!!!!!!!!!!!!
-    VDR_KEY = 8; // Create, Update, Remove - VRD entries. This key does not appear in the document.
+    VDR_KEY = 8; // Create, Update, Remove - VDR entries. This key does not appear in the document.
 }
 
 /**
