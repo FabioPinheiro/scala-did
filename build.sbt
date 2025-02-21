@@ -549,6 +549,8 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "com.google.crypto.tink" % "tink" % "1.16.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
     libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.2",
+    assembly / mainClass := Some("fmgp.prism.Indexer"), // TODO Move to a new repo
+    assembly / assemblyJarName := "prism-Indexer.jar", // TODO Move to a new repo
   )
   .settings(
     Compile / PB.targets := Seq(scalapb.gen() -> (Compile / sourceManaged).value / "scalapb"),
