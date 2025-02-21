@@ -72,6 +72,7 @@ fly deploy -a scala-did-demo --image registry.fly.io/scala-did-demo:latest --ha=
 ## History of deployments
 
 Size of the last docker layer:
+- 2024/10/05 +- 118.1MB (big multicodec table)
 - 2024/10/05 +- 117.0MB (arm64 & Java 21)
 - 2024/02/19 +- 121.9MB (arm64 & Java 21)
 - 2024/02/18 +- 121.2MB

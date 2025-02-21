@@ -24,7 +24,7 @@ import zio.json.ast.JsonCursor
   */
 sealed trait DIDService {
   def id: Required[URI]
-  def `type`: Required[SetU[String]]
+  def `type`: Required[SetU[String]] // TODO check SetU in here
   def serviceEndpoint: Required[ServiceEndpoint]
 }
 
