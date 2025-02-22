@@ -35,22 +35,6 @@ object CrytoUtil {
       case Failure(exception)                                             => Left(exception.getMessage())
       case Success(value)                                                 => Right(value)
   }
-  // def unsafeFromByteCoordinatesX(x: Array[Byte], y: Array[Byte]): Either[String, java.security.PublicKey] = {
-  //   val PUBLIC_KEY_COORDINATE_BYTE_SIZE: Int = 32
-  //   def trimLeadingZeroes(arr: Array[Byte], c: String): Array[Byte] = {
-  //     val trimmed = arr.dropWhile(_ == 0.toByte)
-  //     assert(
-  //       trimmed.length <= PUBLIC_KEY_COORDINATE_BYTE_SIZE,
-  //       s"Expected $c coordinate byte length to be less than or equal $PUBLIC_KEY_COORDINATE_BYTE_SIZE, but got ${trimmed.length} bytes"
-  //     )
-  //     trimmed
-  //   }
-  //   val xTrimmed = trimLeadingZeroes(x, "x")
-  //   val yTrimmed = trimLeadingZeroes(y, "y")
-  //   val xInteger = BigInt(1, xTrimmed)
-  //   val yInteger = BigInt(1, yTrimmed)
-  //   unsafeFromBigIntegerCoordinates(xInteger, yInteger)
-  // }
 
   def unsafeFromByteCoordinates(x: Array[Byte], y: Array[Byte]): Either[String, java.security.PublicKey] = {
     val xx = BigInt(1, x)
@@ -62,9 +46,9 @@ object CrytoUtil {
     val ecPublicKeySpec = ECPublicKeySpec(java.security.spec.ECPoint(xx.bigInteger, yy.bigInteger), ecNamedCurveSpec)
 
     Try(keyFactory.generatePublic(ecPublicKeySpec).asInstanceOf[java.security.interfaces.ECPublicKey]) match
-      // case Failure(exception: java.security.spec.InvalidKeySpecException) => Left(exception.getMessage())
-      case Failure(exception) => Left(exception.getMessage())
-      case Success(value)     => Right(value)
+      case Failure(exception: java.security.spec.InvalidKeySpecException) => Left(exception.getMessage())
+      case Failure(exception)                                             => Left(exception.getMessage())
+      case Success(value)                                                 => Right(value)
   }
 
   def unsafeFromBigIntegerCoordinates(x: BigInt, y: BigInt): Either[String, java.security.PublicKey] = {
@@ -76,9 +60,9 @@ object CrytoUtil {
     val params2 = EC5Util.convertSpec(ellipticCurve, params)
     val keySpec = new ECPublicKeySpec(point, params2)
     Try(fact.generatePublic(keySpec)) match
-      // case Failure(exception: java.security.spec.InvalidKeySpecException) => Left(exception.getMessage())
-      case Failure(exception) => Left(exception.getMessage())
-      case Success(value)     => Right(value)
+      case Failure(exception: java.security.spec.InvalidKeySpecException) => Left(exception.getMessage())
+      case Failure(exception)                                             => Left(exception.getMessage())
+      case Success(value)                                                 => Right(value)
   }
   def checkECDSASignature(
       msg: Array[Byte],
@@ -90,7 +74,7 @@ object CrytoUtil {
     ecdsaVerify.update(msg)
     Try(ecdsaVerify.verify(sig)) match
       case Failure(exception: java.security.SignatureException) => Left(exception.getMessage())
-      case Failure(exception)                                   => ???
+      case Failure(exception)                                   => Left(exception.getMessage())
       case Success(value)                                       => Right(value)
   }
 

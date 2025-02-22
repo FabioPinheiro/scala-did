@@ -22,11 +22,7 @@ message CreateStorageEntryOperation {
   oneof data {
     bytes bytes = 2;
 
-
-
-    
     BitstringStatusList bitstring_status_list = 3;
-
 
     // Token Status List https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/:
     // https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/06/
@@ -47,8 +43,6 @@ message UpdateStorageEntryOperation {
   bytes previous_operation_hash = 1; // The hash of the most recent operation that was used to create or update the VDR Entry.
   oneof data {
     bytes bytes = 2; //replace the bytes
-
-
 
     // array[int] =  // update is to filt bytes
     // string ipfs = 3; // Update/replace the data with a link to IPFS. This is static data
@@ -73,6 +67,3 @@ message TokenStatusList {
   uint32 statusSize = 2;
   bytes intStatus = 3;
 }
-
-
-

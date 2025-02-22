@@ -44,15 +44,15 @@ message PrismObject {
  * Represent a block that holds operations.
  */
  message PrismBlock {
-    reserved 1; // Represents the version of the block. Deprecated
-    repeated SignedPrismOperation operations = 2; // A signed operation, necessary to post anything on the blockchain.
+  reserved 1; // Represents the version of the block. Deprecated
+  repeated SignedPrismOperation operations = 2; // A signed operation, necessary to post anything on the blockchain.
   }
   
 // A signed operation, necessary to post anything on the blockchain.
 message SignedPrismOperation {
-    string signed_with = 1; // The key ID used to sign the operation, it must belong to the DID that signs the operation.
-    bytes signature = 2; // The actual signature.
-    PrismOperation operation = 3; // The operation that was signed.
+  string signed_with = 1; // The key ID used to sign the operation, it must belong to the DID that signs the operation.
+  bytes signature = 2; // The actual signature.
+  PrismOperation operation = 3; // The operation that was signed.
 }
 
 
@@ -61,32 +61,32 @@ message PrismOperation {
   // https://github.com/input-output-hk/atala-prism-sdk/blob/master/protosLib/src/main/proto/node_models.proto
   //  reserved 3, 4; // fields used by an extension of the protocol. Not relevant for the DID method
    // The actual operation.
-    oneof operation {
-        // Used to create a public DID.
-        CreateDIDOperation create_did = 1;
+  oneof operation {
+    // Used to create a public DID.
+    CreateDIDOperation create_did = 1;
 
-        // Used to update an existing public DID.
-        UpdateDIDOperation update_did = 2;
+    // Used to update an existing public DID.
+    UpdateDIDOperation update_did = 2;
 
-        // Used to issue a batch of credentials.
-        IssueCredentialBatchOperation issue_credential_batch = 3;
+    // Used to issue a batch of credentials.
+    IssueCredentialBatchOperation issue_credential_batch = 3;
 
-        // Used to revoke a credential batch.
-        RevokeCredentialsOperation revoke_credentials = 4;
+    // Used to revoke a credential batch.
+    RevokeCredentialsOperation revoke_credentials = 4;
 
-        // Used to announce new protocol update
-        ProtocolVersionUpdateOperation protocol_version_update = 5;
+    // Used to announce new protocol update
+    ProtocolVersionUpdateOperation protocol_version_update = 5;
 
-        // Used to deactivate DID
-        DeactivateDIDOperation deactivate_did = 6;
+    // Used to deactivate DID
+    DeactivateDIDOperation deactivate_did = 6;
 
-        // Used to create a public storage entry.
-        CreateStorageEntryOperation create_storage_entry = 7;
-        // StorageEventCreateEntry storage_create_entry = 7;
+    // Used to create a public storage entry.
+    CreateStorageEntryOperation create_storage_entry = 7;
+    // StorageEventCreateEntry storage_create_entry = 7;
 
-        // Used to update a storage entry.
-        UpdateStorageEntryOperation update_storage_entry = 8;
-        // StorageEventUpdateEntry storage_update_entry = 8;
+    // Used to update a storage entry.
+    UpdateStorageEntryOperation update_storage_entry = 8;
+    // StorageEventUpdateEntry storage_update_entry = 8;
 
-    };
+  };
 }
