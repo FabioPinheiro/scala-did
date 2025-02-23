@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+import "scalapb/scalapb.proto";
+option (scalapb.options) = {
+  package_name: "proto.prism"
+  flat_package: true
+  java_conversions: false
+  lenses: false
+  getters: false
+  retain_source_code_info: false
+  no_default_values_in_constructor: true
+  scala3_sources: true
+};
+
+/** StorageEventCreateEntry
+ * To be valid, this operation needs to be signed by an issuing key of the DID:
+ * - 1) The issuing key need to be valid at the Operation momment
+ * - 2) The DID needs not to be Deactivate
+ */
+message CreateStorageEntryOperation {
+  bytes did_prism_hash = 1; // The specificId of the did:prism.
+  oneof data {
+    bytes bytes = 2;
+
+    BitstringStatusList bitstring_status_list = 3;
+
+    // Token Status List https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/:
+    // https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/06/
+
+    // bytes status_list_jwt = 3;
+    // (size of list, size of state) status_list_sdjwt = 4;
+    // string ipfs = 3; // Link to IPFS. This is static data
+    // ??? what about IPNS? https://docs.ipfs.tech/concepts/ipns/ is there a use case for this?
+  }
+}
+
+/** StorageEventUpdateEntry
+ * To be valid, this operation needs to be signed by an issuing key of the DID:
+ * - 1) The issuing key need to be valid at the Operation momment
+ * - 2) The DID needs not to be Deactivate
+ */
+message UpdateStorageEntryOperation {
+  bytes previous_operation_hash = 1; // The hash of the most recent operation that was used to create or update the VDR Entry.
+  oneof data {
+    bytes bytes = 2; //replace the bytes
+
+    // array[int] =  // update is to filt bytes
+    // string ipfs = 3; // Update/replace the data with a link to IPFS. This is static data
+    // ??? what about IPNS? https://docs.ipfs.tech/concepts/ipns/ is there a use case for this?
+  }
+}
+
+/** BitstringStatusList is used for JWT VC ______ LINK!
+ *
+ * This is implementation of https://www.w3.org/TR/vc-bitstring-status-list/#bitstringstatuslist
+ */
+message BitstringStatusList {
+  bytes bytes = 1;
+}
+
+/** TokenStatusList is used for JWT VC ______ LINK!
+ *
+ * This is implementation of https://www.w3.org/TR/vc-bitstring-status-list/#bitstringstatuslist
+ */
+message TokenStatusList {
+  uint32 listSize = 1;
+  uint32 statusSize = 2;
+  bytes intStatus = 3;
+}
