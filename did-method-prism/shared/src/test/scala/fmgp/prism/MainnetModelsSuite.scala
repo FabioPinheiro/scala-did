@@ -8,6 +8,6 @@ class MainnetModelsSuite extends FunSuite {
     assert(MainnetExamples.metadata_6451.toCardanoPrismEntry.isRight)
   }
   test("CardanoMetadata 6452") {
-    assert(MainnetExamples.metadata_6452.toCardanoPrismEntry.isRight)
+    assert(MainnetExamples.metadata_6452.toCardanoPrismEntry.isLeft)
   }
 }

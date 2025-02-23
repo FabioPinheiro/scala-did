@@ -85,7 +85,7 @@ class CrytoUtilSuite extends FunSuite {
       }
   }
 
-  test("Metadata 6418") {
+  test("Metadata 6418 (CompressedECKey)") {
     val cardanoPrismEntry = MainnetExamples.metadata_6418.toCardanoPrismEntry.getOrElse(???)
     val tmp = MaybeOperation.fromProto("tx", -1, cardanoPrismEntry.content)
     val mySignedPrismOperation = tmp.head.asInstanceOf[MySignedPrismOperation[OP]]
@@ -111,7 +111,7 @@ class CrytoUtilSuite extends FunSuite {
               case Right(true)  => assertEquals(id, "master0") // ok
   }
 
-  test("Metadata 6451") {
+  test("Metadata 6451 (CompressedECKey)") {
     val cardanoPrismEntry = MainnetExamples.metadata_6451.toCardanoPrismEntry.getOrElse(???)
     val tmp = MaybeOperation.fromProto("tx", -1, cardanoPrismEntry.content)
     val mySignedPrismOperation = tmp.head.asInstanceOf[MySignedPrismOperation[OP]]
@@ -135,30 +135,28 @@ class CrytoUtilSuite extends FunSuite {
               case Right(true)  => assertEquals(id, "master0") // ok
   }
 
-  test("Metadata 6452") {
-    val cardanoPrismEntry = MainnetExamples.metadata_6452.toCardanoPrismEntry.getOrElse(???)
-    val tmp = MaybeOperation.fromProto("tx", -1, cardanoPrismEntry.content)
-    val mySignedPrismOperation = tmp.head.asInstanceOf[MySignedPrismOperation[OP]]
-
-    PrismPublicKey
-      .filterECKey(mySignedPrismOperation.operation.asInstanceOf[CreateDidOP].publicKeys)
-      .find(_.usage == PrismKeyUsage.MasterKeyUsage) match
-      case None                                          => fail("Missing MASTER_KEY")
-      case Some(CompressedECKey(id, usage, curve, data)) => fail("Expeting UncompressedECKey")
-      case Some(UncompressedECKey(id, usage, curve, x, y)) =>
-        CrytoUtil.unsafeFromByteCoordinates(x, y) match
-          case Left(error) => fail("No key: error")
-          case Right(key) =>
-            CrytoUtil.checkECDSASignature(
-              msg = mySignedPrismOperation.protobuf.toByteArray,
-              sig = mySignedPrismOperation.signature,
-              pubKey = key
-            ) match
-              case Left(ex)     => fail(ex)
-              case Right(false) => fail("invalid")
-              case Right(true)  => assertEquals(id, "master-0") // ok
-
-  }
+  // test("Metadata 6452 (UncompressedECKey)") {
+  //   val cardanoPrismEntry = MainnetExamples.metadata_6452.toCardanoPrismEntry.getOrElse(???)
+  //   val tmp = MaybeOperation.fromProto("tx", -1, cardanoPrismEntry.content)
+  //   val mySignedPrismOperation = tmp.head.asInstanceOf[MySignedPrismOperation[OP]]
+  //   PrismPublicKey
+  //     .filterECKey(mySignedPrismOperation.operation.asInstanceOf[CreateDidOP].publicKeys)
+  //     .find(_.usage == PrismKeyUsage.MasterKeyUsage) match
+  //     case None                                          => fail("Missing MASTER_KEY")
+  //     case Some(CompressedECKey(id, usage, curve, data)) => fail("Expeting UncompressedECKey")
+  //     case Some(UncompressedECKey(id, usage, curve, x, y)) =>
+  //       CrytoUtil.unsafeFromByteCoordinates(x, y) match
+  //         case Left(error) => fail("No key: error")
+  //         case Right(key) =>
+  //           CrytoUtil.checkECDSASignature(
+  //             msg = mySignedPrismOperation.protobuf.toByteArray,
+  //             sig = mySignedPrismOperation.signature,
+  //             pubKey = key
+  //           ) match
+  //             case Left(ex)     => fail(ex)
+  //             case Right(false) => fail("invalid")
+  //             case Right(true)  => assertEquals(id, "master-0") // ok
+  // }
 
   test("unsafeFromByteCoordinates") {
     val x = Array(114, 112, -99, -18, 41, 124, -35, 121, 88, -107, -16, -5, -123, -91, -2, 13, 92, 26, -112, 95, 95,

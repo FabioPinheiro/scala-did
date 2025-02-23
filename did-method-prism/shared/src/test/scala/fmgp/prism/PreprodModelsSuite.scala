@@ -28,7 +28,7 @@ class PreprodModelsSuite extends FunSuite {
     )
 
     val aux2 = aux1.map(_.map(_.asInstanceOf[MySignedPrismOperation[OP]]).map { op =>
-      println(op.opHash)
+      // println(op.opHash)
       // println(op.toJsonPretty)
       op
     })
@@ -40,18 +40,18 @@ class PreprodModelsSuite extends FunSuite {
     val op1 = aux2(1).head.asInstanceOf[MySignedPrismOperation[UpdateDidOP]]
     val op2 = aux2(2).head.asInstanceOf[MySignedPrismOperation[UpdateDidOP]]
 
-    println(s"CreateDidOP ${op0.opHash}")
-    println(s"UpdateDidOP ${op1.opHash} -- ${op1.operation.previousOperationHash}")
-    println(s"CreateDidOP ${op2.opHash} -- ${op2.operation.previousOperationHash}")
+    // println(s"CreateDidOP ${op0.opHash}")
+    // println(s"UpdateDidOP ${op1.opHash} -- ${op1.operation.previousOperationHash}")
+    // println(s"CreateDidOP ${op2.opHash} -- ${op2.operation.previousOperationHash}")
 
     val s0 = State.empty
-    println("State 0")
+    // println("State 0")
     val s1 = s0.addOp(op0)
-    println("State 1")
+    // println("State 1")
     val s2 = s1.addOp(op1)
-    println("State 2")
+    // println("State 2")
     val s3 = s2.addOp(op2)
-    println("State 3")
-    println(s3.toJsonPretty)
+    // println("State 3")
+    // println(s3.toJsonPretty)
   }
 }
