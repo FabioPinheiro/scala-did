@@ -578,6 +578,36 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(did, multiformats)
   .configure(docConfigure)
 
+lazy val didPrismNode = project
+  .in(file("did-method-prism-node"))
+  .settings(publish / skip := true)
+  .settings(
+    name := "prism-node",
+    libraryDependencies += D.munit.value,
+    libraryDependencies += D.zioMunitTest.value,
+  )
+  .settings(
+    Compile / PB.targets := Seq(
+      scalapb.gen() -> (Compile / sourceManaged).value / "scalapb",
+      scalapb.zio_grpc.ZioCodeGenerator -> (Compile / sourceManaged).value / "scalapb",
+    ),
+    // Compile / PB.protoSources := Seq(file("did-method-prism/shared/src/main/protobuf")), // to avoid the https://github.com/epfl-lara/smart/blob/master/.sbtopts (line 1)
+    // Compile / PB.protoSources := Seq(baseDirectory.value / "shared/src/main/protobuf"), // /Users/fabio/workspace/scala-did/did-method-prism/jvm/shared/src/main/protobuf
+    Compile / PB.protoSources := Seq(
+      rootPaths.value.apply("BASE").toFile() / "did-method-prism-node" / "src/main/protobuf"
+    ),
+    // (optional) If you need scalapb/scalapb.proto or anything from google/protobuf/*.proto
+    libraryDependencies ++= Seq(
+      "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion,
+      // The following needed only if you include scalapb/scalapb.proto:
+      "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
+      "com.thesamet.scalapb" %%% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
+    ),
+    assembly / mainClass := Some("fmgp.prism.Node"), // TODO Move to a new repo
+    assembly / assemblyJarName := "prism-node.jar", // TODO Move to a new repo
+  )
+  .dependsOn(didResolverPrism.jvm)
+
 //https://w3c-ccg.github.io/did-method-web/
 lazy val didResolverWeb = crossProject(JSPlatform, JVMPlatform)
   .in(file("did-method-web"))
