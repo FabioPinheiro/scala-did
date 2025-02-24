@@ -87,5 +87,5 @@ if (sys.env.get("DEPEDABOT").isDefined) {
 } else libraryDependencies ++= Seq[ModuleID]()
 
 // ScalaPB for did:prism
-addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.6")
+addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.7")
 libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.17"
