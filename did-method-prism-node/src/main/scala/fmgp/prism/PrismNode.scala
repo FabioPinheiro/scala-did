@@ -1,5 +1,6 @@
 package fmgp.prism
 
+import zio._
 import scalapb.zio_grpc.{ServerMain, ServiceList}
 
 /** Main PrismNode
@@ -9,8 +10,10 @@ import scalapb.zio_grpc.{ServerMain, ServiceList}
   * https://scalapb.github.io/zio-grpc/
   */
 object PrismNode extends ServerMain {
-  def services = ServiceList.add(PrismNodeImpl)
 
   // Default port is 9000
   override def port: Int = 8980
+
+  override def services = ServiceList.addZIO(ZIO.succeed(PrismNodeImpl()))
+
 }
