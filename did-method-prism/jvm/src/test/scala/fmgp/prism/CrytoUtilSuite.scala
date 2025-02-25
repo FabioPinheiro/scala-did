@@ -12,6 +12,12 @@ import fmgp.prism.PrismPublicKey.VoidKey
 import fmgp.prism.PrismPublicKey.UncompressedECKey
 import fmgp.prism.PrismPublicKey.CompressedECKey
 import fmgp.util.hex2bytes
+import java.security.PrivateKey
+import java.security.PublicKey
+import org.bouncycastle.jcajce.provider.asymmetric.util.EC5Util
+import java.security.spec.ECPrivateKeySpec
+import java.security.KeyFactory
+import java.security.spec.ECPublicKeySpec
 
 class CrytoUtilSuite extends FunSuite {
 
@@ -165,6 +171,28 @@ class CrytoUtilSuite extends FunSuite {
       -46, -82, 48, 20, -50, 21, -84, -124, 95).map(_.toByte)
     val key = CrytoUtil.unsafeFromByteCoordinates(x, y)
     assert(key.isRight)
+  }
+
+  test("Generate Key sign and verify") {
+    val (privateKeyParams, publicKeyParams) = CrytoUtil.generateKeyPair
+    val data = Seq.range(1, 100).map(_.toByte).toArray
+
+    val ecParameterSpec = EC5Util.convertToSpec(privateKeyParams.getParameters)
+    val ecPrivateKeySpec = ECPrivateKeySpec(privateKeyParams.getD, ecParameterSpec)
+    val privatekey = KeyFactory.getInstance("EC").generatePrivate(ecPrivateKeySpec)
+
+    val ecPoint = EC5Util.convertPoint(publicKeyParams.getQ)
+    val ecPublicKeySpec = ECPublicKeySpec(ecPoint, ecParameterSpec)
+    val publicKey = KeyFactory.getInstance("EC").generatePublic(ecPublicKeySpec)
+
+    val maybeSig = CrytoUtil.signECDSASignature(msg = data, privatekey)
+    maybeSig match
+      case Left(value) => fail(value)
+      case Right(sig) =>
+        val v = CrytoUtil.checkECDSASignature(msg = data, sig = sig, pubKey = publicKey)
+        v match
+          case Left(value)  => fail(value)
+          case Right(value) => assert(value) //
   }
 
 // Vectors from https://crypto.stackexchange.com/a/21206

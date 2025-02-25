@@ -12,6 +12,13 @@ import java.security.Signature
 import fmgp.prism.PrismPublicKey.VoidKey
 import fmgp.prism.PrismPublicKey.UncompressedECKey
 import fmgp.prism.PrismPublicKey.CompressedECKey
+import org.bouncycastle.crypto.params.ECDomainParameters
+import java.security.SecureRandom
+import org.bouncycastle.crypto.params.ECKeyGenerationParameters
+import org.bouncycastle.crypto.generators.ECKeyPairGenerator
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters
+import org.bouncycastle.crypto.params.ECPublicKeyParameters
+import fmgp.util.bytes2Hex
 
 object CrytoUtil {
   val provider = new org.bouncycastle.jce.provider.BouncyCastleProvider()
@@ -64,18 +71,58 @@ object CrytoUtil {
       case Failure(exception)                                             => Left(exception.getMessage())
       case Success(value)                                                 => Right(value)
   }
+
   def checkECDSASignature(
       msg: Array[Byte],
       sig: Array[Byte],
       pubKey: java.security.PublicKey
   ): Either[String, Boolean] = {
-    val ecdsaVerify = Signature.getInstance("SHA256withECDSA", provider)
-    ecdsaVerify.initVerify(pubKey)
-    ecdsaVerify.update(msg)
-    Try(ecdsaVerify.verify(sig)) match
+    val ecdsa = Signature.getInstance("SHA256withECDSA", provider)
+    ecdsa.initVerify(pubKey)
+    ecdsa.update(msg)
+    Try(ecdsa.verify(sig)) match
       case Failure(exception: java.security.SignatureException) => Left(exception.getMessage())
       case Failure(exception)                                   => Left(exception.getMessage())
       case Success(value)                                       => Right(value)
+  }
+
+  def signECDSASignature(
+      msg: Array[Byte],
+      pivKey: java.security.PrivateKey
+  ): Either[String, Array[Byte]] = {
+    val ecdsa = Signature.getInstance("SHA256withECDSA", provider)
+    ecdsa.initSign(pivKey)
+    ecdsa.update(msg)
+    Try(ecdsa.sign()) match
+      case Failure(exception) => Left(exception.getMessage())
+      case Success(value)     => Right(value)
+  }
+
+  def generateKeyPair = {
+    val params = ECNamedCurveTable getParameterSpec ("secp256k1")
+    // val fact = KeyFactory.getInstance("ECDSA", provider)
+    val domainParams = new ECDomainParameters(params.getCurve, params.getG, params.getN, params.getH, params.getSeed)
+    // val domainParams = new ECDomainParameters(params.getCurve, params.getG, params.getN, params.getH)
+
+    val secureRandom = new SecureRandom()
+    val keyParams = new ECKeyGenerationParameters(domainParams, secureRandom)
+
+    val generator = ECKeyPairGenerator()
+    generator.init(keyParams)
+    val keyPair = generator.generateKeyPair()
+    // val keyPair = generator.GenerateKeyPair();
+    val privateKeyParams = keyPair.getPrivate.asInstanceOf[ECPrivateKeyParameters]
+    val publicKeyParams = keyPair.getPublic.asInstanceOf[ECPublicKeyParameters]
+
+    // Console.WriteLine($"Private key: {ToHex(privateKey.D.ToByteArrayUnsigned())}");
+    // Console.WriteLine($"Public key: {ToHex(publicKey.Q.GetEncoded())}");
+
+    val privateKeyBytes = privateKeyParams.getD.toByteArray
+    val publicKeyBytes = publicKeyParams.getQ.getEncoded(true)
+
+    println(s"Private key: ${bytes2Hex(privateKeyBytes)}");
+    println(s"Public key:  ${bytes2Hex(publicKeyBytes)}");
+    (privateKeyParams, publicKeyParams)
   }
 
 }
