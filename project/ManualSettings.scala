@@ -101,5 +101,4 @@ object ManualSettings {
       )
     )
     .build,
-
 }
