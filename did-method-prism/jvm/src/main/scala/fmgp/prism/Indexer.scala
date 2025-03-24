@@ -1,13 +1,12 @@
 package fmgp.prism
 
-import java.nio.file.StandardOpenOption._
+import fmgp.blockfrost.*
+import zio.*
+import zio.http.*
+import zio.json.*
+import zio.stream.*
 
-import zio._
-import zio.stream._
-import zio.json._
-import zio.http._
-
-import fmgp.blockfrost._
+import java.nio.file.StandardOpenOption.*
 
 /** @param apiKey
   *   blockfrost API key

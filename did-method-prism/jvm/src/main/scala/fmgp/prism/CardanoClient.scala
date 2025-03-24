@@ -68,7 +68,7 @@ object CardanoClient extends ZIOAppDefault {
       backendService: BackendService = new BFBackendService(
         // Constants.BLOCKFROST_PREPROD_URL,
         Constants.BLOCKFROST_PREPROD_URL,
-        "***************************************"
+        "preprod9EGSSMf6oWb81qoi8eW65iWaQuHJ1HwB"
       )
 
       // Define expected Outputs
