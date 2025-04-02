@@ -50,7 +50,7 @@ addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.4") // sbt> dependencyUpd
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.3.1") // Needs scala version 3.2.2
 
 // PUBLISH
-addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.9.2")
+addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.9.3")
 // addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.17")
 // addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.2.1") //https://github.com/sbt/sbt-pgp#sbt-pgp
 
@@ -64,7 +64,7 @@ addSbtPlugin("io.spray" % "sbt-revolver" % "0.10.0")
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.2")
 
 // mdoc - https://github.com/scalameta/mdoc/tags
-addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.6.4")
+addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.6.5")
 addSbtPlugin("org.typelevel" % "laika-sbt" % "1.3.2") // https://typelevel.org/Laika/
 addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.5.0") // https://github.com/sbt/sbt-unidoc
 // addSbtPlugin("org.typelevel" % "sbt-typelevel-site" % "0.6.2") // https://typelevel.org/sbt-typelevel/site.html
@@ -87,5 +87,5 @@ if (sys.env.get("DEPEDABOT").isDefined) {
 } else libraryDependencies ++= Seq[ModuleID]()
 
 // ScalaPB for did:prism
-addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.6")
+addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.7")
 libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.17"

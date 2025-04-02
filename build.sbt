@@ -141,7 +141,7 @@ lazy val V = new {
   // val scalajsLogging = "1.1.2-SNAPSHOT" //"1.1.2"
 
   // https://mvnrepository.com/artifact/dev.zio/zio
-  val zio = "2.1.15"
+  val zio = "2.1.16"
   val zioJson = "0.6.2"
   val zioMunitTest = "0.3.0"
   val zioHttp = "3.0.1" // FIXES CORS https://github.com/zio/zio-http/pull/2490
@@ -150,13 +150,13 @@ lazy val V = new {
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time
   val scalaJavaTime = "2.5.0"
 
-  val bullet = "1.15.0"
+  val bullet = "1.16.0"
 
   val logbackClassic = "1.2.10"
   val scalaLogging = "3.9.4"
 
   val bouncycastle = "1.78.1"
-  val nimbusJoseJwt = "10.0.1"
+  val nimbusJoseJwt = "10.0.2"
 
   val laika = "1.0.0"
 
@@ -454,9 +454,9 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.nimbusJoseJwt.value,
 
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
-    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.16.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
+    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.17.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
-    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.3",
+    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.30.1",
   )
   .jsConfigure(scalaJSLibConfigure)
   .jsSettings(
@@ -546,7 +546,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.bouncycastle_bcpkix.value,
     libraryDependencies += D.nimbusJoseJwt.value,
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
-    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.16.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
+    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.17.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
     libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.2",
     assembly / mainClass := Some("fmgp.prism.Indexer"), // TODO Move to a new repo
