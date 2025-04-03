@@ -192,7 +192,16 @@ object Indexer extends ZIOAppDefault {
             ZIO.succeed(IndexerConfig(apiKey = Some(apikey), network = Network.Mainnet, workdir = dataPath))
           case Seq(dataPath, "preprod", apikey) =>
             ZIO.succeed(IndexerConfig(apiKey = Some(apikey), network = Network.Preprod, workdir = dataPath))
-          case next => ZIO.fail(RuntimeException("Indexer <dataPath> [mainnet|preprod <dataPath>]"))
+          case Seq(dataPath, "preview", apikey) =>
+            ZIO.succeed(IndexerConfig(apiKey = Some(apikey), network = Network.Preview, workdir = dataPath))
+          case Seq(dataPath, "testnet", apikey) =>
+            ZIO.logWarning("Cardano testnet network has been decommissioned.") *>
+              ZIO.succeed(IndexerConfig(apiKey = Some(apikey), network = Network.Testnet, workdir = dataPath))
+          case Seq(dataPath, network, apikey) =>
+            ZIO.fail(RuntimeException(s"The Cardano network '$network' is not recognizing"))
+          case next =>
+            ZIO.logWarning(s"Fail to parse indexerConfig from '${next.mkString(" ")}'") *>
+              ZIO.fail(RuntimeException("Indexer <dataPath> [mainnet|preprod|preview <dataPath>]"))
         }
         .map(ZLayer.succeed _)
       indexerConfig <- ZIO.service[IndexerConfig].provideLayer(indexerConfigZLayer)
