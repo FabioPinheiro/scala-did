@@ -2,6 +2,17 @@ package fmgp.blockfrost
 
 import zio.json._
 
+case class BlockfrostErrorResponse(
+    status_code: Int,
+    error: String,
+    message: String
+) // {"status_code":404,"error":"Not Found","message":"The requested component has not been found."}
+
+object BlockfrostErrorResponse {
+  given decoder: JsonDecoder[BlockfrostErrorResponse] = DeriveJsonDecoder.gen[BlockfrostErrorResponse]
+  given encoder: JsonEncoder[BlockfrostErrorResponse] = DeriveJsonEncoder.gen[BlockfrostErrorResponse]
+}
+
 // case class MetadataLabel(label: String, cip10: Option[String], count: String)
 case class MetadataContentJson(tx_hash: String, json_metadata: ast.Json)
 case class MetadataContentCBOR(tx_hash: String, metadata: String) //, cbor_metadata: Option[String])
@@ -9,11 +20,16 @@ case class MetadataContentCBOR(tx_hash: String, metadata: String) //, cbor_metad
 object MetadataContentJson {
   given decoder: JsonDecoder[MetadataContentJson] = DeriveJsonDecoder.gen[MetadataContentJson]
   given encoder: JsonEncoder[MetadataContentJson] = DeriveJsonEncoder.gen[MetadataContentJson]
+  given decoderSeqOrError: JsonDecoder[Either[BlockfrostErrorResponse, Seq[MetadataContentJson]]] =
+    BlockfrostErrorResponse.decoder.orElseEither(JsonDecoder.seq[MetadataContentJson])
 }
 
 object MetadataContentCBOR {
   given decoder: JsonDecoder[MetadataContentCBOR] = DeriveJsonDecoder.gen[MetadataContentCBOR]
   given encoder: JsonEncoder[MetadataContentCBOR] = DeriveJsonEncoder.gen[MetadataContentCBOR]
+
+  given decoderSeqOrError: JsonDecoder[Either[BlockfrostErrorResponse, Seq[MetadataContentCBOR]]] =
+    BlockfrostErrorResponse.decoder.orElseEither(JsonDecoder.seq[MetadataContentCBOR])
 }
 
 /** Blockfrost API
