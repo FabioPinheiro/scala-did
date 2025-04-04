@@ -41,23 +41,25 @@ object Indexer extends ZIOAppDefault {
     .paginateChunkZIO(pageJump) { pageNumber =>
       for {
         _ <- ZIO.log(s"pageNumber=$pageNumber; (entries ${pageNumber * PAGE_SIZE}-${(pageNumber + 1) * PAGE_SIZE})")
-        response <- Client
-          .batched(
-            Request
-              .get(path =
-                API.metadataContentJson(
-                  network = network,
-                  label = PRISM_LABEL_CIP_10,
-                  page = pageNumber + 1,
-                  count = PAGE_SIZE
-                )
-              )
-              .addHeaders(Headers(Header.Custom("project_id", apiKey)))
-          )
+        urlRequest = API.metadataContentJson(
+          network = network,
+          label = PRISM_LABEL_CIP_10,
+          page = pageNumber + 1,
+          count = PAGE_SIZE
+        )
+        _ <- ZIO.log(s"Next request call: $urlRequest") // For Debug
+        response <- Client.batched(
+          Request.get(path = urlRequest).addHeaders(Headers(Header.Custom("project_id", apiKey)))
+        )
         responseStr <- response.body.asString
-        page <- responseStr.fromJson[Seq[MetadataContentJson]] match
+        page <- responseStr.fromJson[Either[BlockfrostErrorResponse, Seq[MetadataContentJson]]](
+          MetadataContentJson.decoderSeqOrError
+        ) match
           case Left(error) => ZIO.logError(responseStr) *> ZIO.fail(new RuntimeException("fail to parse"))
-          case Right(value) =>
+          case Right(Left(value: BlockfrostErrorResponse)) =>
+            ZIO.logError(s"Got a BlockfrostErrorResponse: '$value' from the call '$urlRequest'")
+              *> ZIO.succeed(Seq.empty)
+          case Right(Right(value: Seq[MetadataContentJson])) =>
             ZIO.succeed(
               value.zipWithIndex.map((metadataContent, index) =>
                 CardanoMetadataJson(
@@ -75,23 +77,26 @@ object Indexer extends ZIOAppDefault {
     .paginateChunkZIO(pageJump) { pageNumber =>
       for {
         _ <- ZIO.log(s"pageNumber=$pageNumber; (entries ${pageNumber * PAGE_SIZE}-${(pageNumber + 1) * PAGE_SIZE})")
-        response <- Client
-          .batched(
-            Request
-              .get(path =
-                API.metadataContentCBOR(
-                  network = network,
-                  label = PRISM_LABEL_CIP_10,
-                  page = pageNumber + 1,
-                  count = PAGE_SIZE
-                )
-              )
-              .addHeaders(Headers(Header.Custom("project_id", apiKey)))
-          )
+        urlRequest = API.metadataContentCBOR(
+          network = network,
+          label = PRISM_LABEL_CIP_10,
+          page = pageNumber + 1,
+          count = PAGE_SIZE
+        )
+        _ <- ZIO.log(s"Next request call: $urlRequest") // For Debug
+        response <- Client.batched(
+          Request.get(path = urlRequest).addHeaders(Headers(Header.Custom("project_id", apiKey)))
+        )
         responseStr <- response.body.asString
-        page <- responseStr.fromJson[Seq[MetadataContentCBOR]] match
+
+        page <- responseStr.fromJson[Either[BlockfrostErrorResponse, Seq[MetadataContentCBOR]]](
+          MetadataContentCBOR.decoderSeqOrError
+        ) match
           case Left(error) => ZIO.logError(responseStr) *> ZIO.fail(new RuntimeException(s"fail to parse: $error"))
-          case Right(value) =>
+          case Right(Left(value: BlockfrostErrorResponse)) =>
+            ZIO.logError(s"Got a BlockfrostErrorResponse: '$value' from the call '$urlRequest'")
+              *> ZIO.succeed(Seq.empty)
+          case Right(Right(value: Seq[MetadataContentCBOR])) =>
             ZIO.succeed(
               value.zipWithIndex.map((metadataContent, index) =>
                 CardanoMetadataCBOR(pageNumber * PAGE_SIZE + index, metadataContent.tx_hash, metadataContent.metadata)
