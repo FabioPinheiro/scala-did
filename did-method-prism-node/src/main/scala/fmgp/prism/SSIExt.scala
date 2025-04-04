@@ -56,7 +56,7 @@ object SSIExt {
           case PrismKeyUsage.CapabilitydelegationKeyUsage => KeyUsage.CAPABILITY_DELEGATION_KEY
           case PrismKeyUsage.VdrKeyUsage                  => KeyUsage.VDR_KEY
         }
-      case _ => ???
+      case k: PrismPublicKey.VoidKey => ???
     }
   }
 
@@ -77,7 +77,7 @@ object SSIExt {
             data = com.google.protobuf.ByteString.copyFrom(Base64.urlDecoder.decode(k.publicKey.x))
           )
         )
-      case _ => ???
+      case k: PrismPublicKey.VoidKey => ???
     }
   }
   // TODO:  MyService name should be renamed to PrismService

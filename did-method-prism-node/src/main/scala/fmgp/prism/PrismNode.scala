@@ -9,12 +9,18 @@ import zio.*
   * https://scalapb.github.io/docs/
   *
   * https://scalapb.github.io/zio-grpc/
+  *
+  * didPrismNode/runMain fmgp.prism.PrismNode
   */
 object PrismNode extends ServerMain {
 
-  // Default port is 9000
-  override def port: Int = 8980
-
-  override def services = ServiceList.addZIO(ZIO.succeed(PrismNodeImpl(State.empty)))
+  override def port: Int = 8980 // Default port is 9000
+  override def services = ServiceList
+    .addZIO(PrismNodeImpl.make)
+    .provide(
+      ZLayer.fromZIO(
+        Ref.make(PrismState.empty)
+      )
+    )
 
 }
