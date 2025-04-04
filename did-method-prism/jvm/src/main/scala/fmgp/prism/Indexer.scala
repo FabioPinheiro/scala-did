@@ -1,13 +1,12 @@
 package fmgp.prism
 
-import java.nio.file.StandardOpenOption._
+import fmgp.blockfrost.*
+import zio.*
+import zio.http.*
+import zio.json.*
+import zio.stream.*
 
-import zio._
-import zio.stream._
-import zio.json._
-import zio.http._
-
-import fmgp.blockfrost._
+import java.nio.file.StandardOpenOption.*
 
 /** @param apiKey
   *   blockfrost API key
@@ -125,15 +124,16 @@ object Indexer extends ZIOAppDefault {
   )
 
   /** pipeline to update the State */
-  def pipelineState = ZPipeline.mapZIO[Ref[State], Nothing, MaybeOperation[OP], MaybeOperation[OP]] { maybeOperation =>
-    maybeOperation match
-      case InvalidPrismObject(tx, b, reason)             => ZIO.succeed(maybeOperation)
-      case InvalidSignedPrismOperation(tx, b, o, reason) => ZIO.succeed(maybeOperation)
-      case op: MySignedPrismOperation[OP] =>
-        for {
-          refState <- ZIO.service[Ref[State]]
-          _ <- refState.update(_.addOp(op))
-        } yield (maybeOperation)
+  def pipelineState = ZPipeline.mapZIO[Ref[PrismState], Nothing, MaybeOperation[OP], MaybeOperation[OP]] {
+    maybeOperation =>
+      maybeOperation match
+        case InvalidPrismObject(tx, b, reason)             => ZIO.succeed(maybeOperation)
+        case InvalidSignedPrismOperation(tx, b, o, reason) => ZIO.succeed(maybeOperation)
+        case op: MySignedPrismOperation[OP] =>
+          for {
+            refState <- ZIO.service[Ref[PrismState]]
+            _ <- refState.update(_.addOp(op))
+          } yield (maybeOperation)
   }
 
   def sinkLog: ZSink[Any, java.io.IOException, MaybeOperation[OP], Nothing, Unit] = ZSink.foreach {
@@ -188,7 +188,7 @@ object Indexer extends ZIOAppDefault {
           |- https://protobuf-decoder.netlify.app/
           |""".stripMargin
       )
-      stateRef <- Ref.make(State.empty)
+      stateRef <- Ref.make(PrismState.empty)
       indexerConfigZLayer <- getArgs
         .map(_.toSeq)
         .flatMap {

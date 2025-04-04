@@ -1,0 +1,283 @@
+syntax = "proto3";
+
+import "scalapb/scalapb.proto";
+option (scalapb.options) = {
+  package_name: "proto.prism.node"
+  flat_package: true
+  java_conversions: false
+  lenses: false
+  getters: false
+  retain_source_code_info: false
+  no_default_values_in_constructor: true
+  scala3_sources: true
+};
+
+import "google/protobuf/timestamp.proto";
+import "prism-version.proto";
+import "prism-ssi.proto";
+import "prism.proto";
+  
+/**
+ * Service for PRISM Node API. Provides a way to store, retrieve and update
+ * Decentralized identifiers (DIDs) into/from the underlying blockchain.
+ */
+service NodeService {
+  /**
+    * PUBLIC
+    *
+    * Sends a request that can be used to check service health.
+    * All PRISM services expose an RPC that accepts this message as request.
+    */
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
+
+  /**
+  * PUBLIC
+  *
+  * Retrieves a DID Document associated to a DID.
+  *
+  * Errors:
+  * - Invalid long form DID (INVALID_ARGUMENT)
+  * - DID format not supported (INVALID_ARGUMENT)
+  * - Invalid DID (INVALID_ARGUMENT)
+  * - Unknown DID (INVALID_ARGUMENT)
+  */
+  rpc GetDidDocument(GetDidDocumentRequest) returns (GetDidDocumentResponse) {}
+
+  /**
+  * PUBLIC
+  *
+  * Retrieves the Node version info.
+  */
+  rpc GetNodeBuildInfo(GetNodeBuildInfoRequest) returns (GetNodeBuildInfoResponse) {}
+
+  /**
+  * PUBLIC
+  *
+  * Retrieves the Node version info.
+  */
+  rpc GetNodeNetworkProtocolInfo(GetNodeNetworkProtocolInfoRequest) returns (GetNodeNetworkProtocolInfoResponse) {}
+
+  /**
+    * PUBLIC
+    *
+    * Retrieves the status of an operation.
+    */
+  rpc GetOperationInfo(GetOperationInfoRequest) returns (GetOperationInfoResponse) {}
+
+  /**
+    * PUBLIC
+    *
+    * Timestamp of the latest block processed by PRISM Node.
+    */
+  rpc GetLastSyncedBlockTimestamp(GetLastSyncedBlockTimestampRequest) returns (GetLastSyncedBlockTimestampResponse) {}
+
+  /**
+    * PUBLIC
+    *
+    * Schedules a list of operations for further publication.
+    */
+  rpc ScheduleOperations(ScheduleOperationsRequest) returns (ScheduleOperationsResponse) {}
+}
+
+
+/**
+ * Request to find a DID Document.
+ * See NodeService.GetDidDocument for more information.
+ */
+message GetDidDocumentRequest {
+  string did = 1; // The DID.
+}
+/**
+ * Response to a DID Document query.
+ * See NodeService.GetDidDocument for more information.
+ */
+message GetDidDocumentResponse {
+  DIDData document = 1; // The DID Document.
+  google.protobuf.Timestamp last_synced_block_timestamp = 5; // Timestamp of the latest synchronized block.
+  bytes last_update_operation = 6; // The hash of the last did update operation.
+}
+
+// The DID Document's data.
+message DIDData {
+  string id = 1; // The DID suffix, where DID is in form did:prism:[DID suffix]
+  repeated PublicKey public_keys = 2; // The keys that belong to this DID Document.
+  repeated Service services = 3; // The list of services that belong to this DID Document.
+  repeated string context = 4; // The list of @context values to consider on JSON-LD representations
+}
+
+/**
+ * Request to get the Node version info.
+ * See NodeService.GetNodeBuildInfo for more information.
+ */
+message GetNodeBuildInfoRequest {
+}
+/**
+ * Response with the Node version info.
+ * See NodeService.GetNodeBuildInfo for more information.
+ */
+message GetNodeBuildInfoResponse {
+  reserved 4;
+
+  string version = 1; // The actual version.
+  string scala_version = 2; // The Scala version used to compile the app.
+  string sbt_version = 3; // The SBT version used to compile the app.
+}
+
+/**
+ * Request to get the Node version info.
+ * See NodeService.GetNodeBuildInfo for more information.
+ */
+message GetNodeNetworkProtocolInfoRequest {
+}
+/**
+ * Response with the Node Protocol version info.
+ * See NodeService.GetNodeProtocolVersionInfo for more information.
+ */
+message GetNodeNetworkProtocolInfoResponse {
+  ProtocolVersion supported_network_protocol_version = 5; // Network protocol version number supported by Node.
+  ProtocolVersion current_network_protocol_version = 6; // Current network protocol version number.
+}
+
+/**
+ * Request to get the operation status.
+ * See NodeService.GetOperationInfo for more information.
+ */
+message GetOperationInfoRequest {
+  bytes operation_id = 1; // Operation identifier. The identifier is returned to the corresponding operation request.
+}
+/**
+ * Response with the current operation status.
+ *  See NodeService.GetOperationInfo for more information.
+ */
+message GetOperationInfoResponse {
+  OperationStatus operation_status = 1; // Contains the status of this operation.
+  string transaction_id = 3; // Transaction identifier containing the operation. Presented only when operation was approved by the ledger.
+  google.protobuf.Timestamp last_synced_block_timestamp = 2; // Timestamp of the latest synchronized block.
+  string details = 4; // Contains additional information about the operation state. For example, error descriptions. Can be empty.
+}
+
+/**
+ * Request to retrieve the timestamp of the latest synchronized (processed by PRISM Node) block.
+ * See NodeService.GetLastSyncedBlockTimestampRequest for more information.
+ */
+message GetLastSyncedBlockTimestampRequest {
+}
+/**
+ * Response with the timestamp of the latest synchronized (processed by PRISM Node) block.
+ * See NodeService.GetLastSyncedBlockTimestampResponse for more information.
+ */
+message GetLastSyncedBlockTimestampResponse {
+  /**
+    * Timestamp of the latest synchronized (processed by PRISM Node) block.
+    */
+  google.protobuf.Timestamp last_synced_block_timestamp = 1;
+}
+
+/**
+ * Request to retrieve transaction info and operations outputs.
+ */
+message ScheduleOperationsRequest {
+  /**
+  * List of signed operations to apply. The operations will be applied in the order specified here.
+  */
+  repeated SignedPrismOperation signed_operations = 1; // a list of signed operations
+}
+
+/**
+ * Response with the transaction info and operations outputs.
+ */
+message ScheduleOperationsResponse {
+  /**
+    * The responses for scheduled operations, ordered the same as the operations sent in ScheduleOperationsRequest.
+    */
+  repeated OperationOutput outputs = 1;
+}
+
+
+
+// Used to encode the responses of the operations issued in an AtalaBlock.
+message OperationOutput {
+  oneof result {
+    // Represents the response provided by IssueCredentialBatchOperation.
+    CreateDIDOutput create_did_output = 2;
+    // Represents the response provided by UpdateDIDOperation.
+    UpdateDIDOutput update_did_output = 3;
+    // Represents the response provided by ProtocolVersionUpdateOperation.
+    ProtocolVersionUpdateOutput protocol_version_update_output = 7;
+    DeactivateDIDOutput deactivate_did_output = 8;
+  }
+  oneof operation_maybe {
+    bytes operation_id = 5; // Operation identifier.
+    string error = 6; // Error description if PRISM Node service haven't scheduled the operation.
+  }
+}
+
+message CreateDIDOutput {
+  string did_suffix = 1;
+}
+message UpdateDIDOutput {}
+message ProtocolVersionUpdateOutput {}
+message DeactivateDIDOutput {}
+
+
+
+/**
+ * A request that can be used to check service health.
+ * All PRISM services expose an RPC that accepts this message as request.
+ */
+ message HealthCheckRequest {}
+
+ /**
+  * A response that represents service health.
+  * Status code 0 with empty response represents a healthy and reachable service,
+  * while all other status codes represent issues with the service.
+  */
+ message HealthCheckResponse {}
+ 
+ /**
+  * The supported ledger types. Specifies which chain is used for storing transactions.
+  */
+ enum Ledger {
+     reserved 2; // Removed BITCOIN_TESTNET
+     reserved "BITCOIN_TESTNET";
+     reserved 3; // Removed BITCOIN_MAINNET
+     reserved "BITCOIN_MAINNET";
+ 
+     UNKNOWN_LEDGER = 0; // Invalid default value.
+     IN_MEMORY = 1; // Store transactions in memory instead of blockchain, used only for development.
+     CARDANO_TESTNET = 4; // Cardano testnet, used for testing.
+     CARDANO_MAINNET = 5; // Cardano mainnet, used in production.
+ }
+ 
+ /**
+  * Information about a ledger block.
+  * See Ledger documentation for details on which ledgers are possible.
+  */
+ message BlockInfo {
+     reserved 2; // Removed timestamp_deprecated field
+     reserved "timestamp_deprecated";
+ 
+     int32 number = 1; // Number of the block in the ledger.
+     int32 index = 3; // Index of the transaction within the block.
+     google.protobuf.Timestamp timestamp = 4; // Timestamp when the block was created.
+ }
+ 
+ /**
+  * Information about a ledger transaction and the block that the transaction is included in.
+  */
+ message TransactionInfo {
+     string transaction_id = 1; // Transaction ID.
+     Ledger ledger = 2; // Ledger the transaction was published to.
+     BlockInfo block = 3; // Block the transaction was included in.
+ }
+ 
+ /**
+  * The status of an Atala operation.
+  */
+ enum OperationStatus {
+     UNKNOWN_OPERATION = 0; // The operation hasn't been received by the node service yet.
+     PENDING_SUBMISSION = 1; // The transaction containing this operation hasn't been published to the chain yet.
+     AWAIT_CONFIRMATION = 2; // The transaction containing this operation has been published to the chain, but hasn't been processed by PRISM yet.
+     CONFIRMED_AND_APPLIED = 3; // The operation has been successfully applied to the PRISM.
+     CONFIRMED_AND_REJECTED = 4; // The operation has been processed by PRISM, but rejected because of some error.
+ }

@@ -549,6 +549,9 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "com.google.crypto.tink" % "tink" % "1.17.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
     libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.2",
+    // https://oss.sonatype.org/#nexus-search;quick~com.bloxbean.cardano
+    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.6.3",
+    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.6.3",
     assembly / mainClass := Some("fmgp.prism.Indexer"), // TODO Move to a new repo
     assembly / assemblyJarName := "prism-Indexer.jar", // TODO Move to a new repo
   )
@@ -574,9 +577,39 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // Compile / npmDependencies ++= Seq(NPM.elliptic, NPM.ellipticType),
     // stMinimize := Selection.All,
     // stMinimizeKeep ++= List(..
+    // https://developers.cardano.org/docs/get-started/cardano-serialization-lib/overview/
   )
   .dependsOn(did, multiformats)
   .configure(docConfigure)
+
+lazy val didPrismNode = project
+  .in(file("did-method-prism-node"))
+  .settings(publish / skip := true)
+  .settings(
+    name := "prism-node",
+    libraryDependencies += D.munit.value,
+    libraryDependencies += D.zioMunitTest.value,
+  )
+  .settings(
+    Compile / PB.targets := Seq(
+      scalapb.gen(grpc = true) -> (Compile / sourceManaged).value / "scalapb",
+      scalapb.zio_grpc.ZioCodeGenerator -> (Compile / sourceManaged).value / "scalapb",
+    ),
+    Compile / PB.protoSources := Seq(
+      rootPaths.value.apply("BASE").toFile() / "did-method-prism-node" / "src/main/protobuf"
+    ),
+    libraryDependencies ++= Seq(
+      "io.grpc" % "grpc-netty" % "1.70.0", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
+      // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion,
+      // REMOVE // The following needed only if you include scalapb/scalapb.proto:
+      // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
+      "com.thesamet.scalapb" %%% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
+    ),
+    assembly / mainClass := Some("fmgp.prism.Node"), // TODO Move to a new repo
+    assembly / assemblyJarName := "prism-node.jar", // TODO Move to a new repo
+    run / fork := true
+  )
+  .dependsOn(didResolverPrism.jvm)
 
 //https://w3c-ccg.github.io/did-method-web/
 lazy val didResolverWeb = crossProject(JSPlatform, JVMPlatform)

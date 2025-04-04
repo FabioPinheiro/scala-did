@@ -11,17 +11,22 @@ object OpId {
   given JsonEncoder[OpId] = DeriveJsonEncoder.gen[OpId]
 }
 
-object State {
-  given JsonDecoder[State] = DeriveJsonDecoder.gen[State]
-  given JsonEncoder[State] = DeriveJsonEncoder.gen[State]
-  def empty = State(Map.empty, Map.empty, Map.empty)
+object PrismState {
+  given JsonDecoder[PrismState] = DeriveJsonDecoder.gen[PrismState]
+  given JsonEncoder[PrismState] = DeriveJsonEncoder.gen[PrismState]
+  def empty = PrismState(Map.empty, Map.empty, Map.empty)
 }
 
-case class State(
+case class PrismState(
     opHash2op: Map[String, MySignedPrismOperation[OP]],
     tx2opId: Map[String, Seq[OpId]],
     ssi2opId: Map[String, Seq[OpId]],
 ) {
+
+  def lastSyncedBlockEpochSecondNano: (Long, Int) = {
+    val now = java.time.Instant.now // FIXME
+    (now.getEpochSecond, now.getNano)
+  }
 
   @scala.annotation.tailrec
   final def ssiFromPreviousOperationHash(previousHash: String): Option[String] = {
@@ -72,7 +77,7 @@ case class State(
               case None      => Some(Seq(opId))
               case Some(seq) => Some(seq :+ opId)
           }
-          State(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
+          PrismState(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
         case UpdateDidOP(previousOperationHash, id, actions) =>
           ssiFromPreviousOperationHash(previousOperationHash) match
             case None => this
@@ -82,7 +87,7 @@ case class State(
                 case None      => None
                 case Some(seq) => Some(seq :+ opId)
               }
-              State(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
+              PrismState(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
         case DeactivateDidOP(previousOperationHash, id) =>
           ssiFromPreviousOperationHash(previousOperationHash) match
             case None => this
@@ -92,7 +97,7 @@ case class State(
                 case None      => None
                 case Some(seq) => Some(seq :+ opId)
               }
-              State(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
+              PrismState(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
 
   def makeSSI: Seq[SSI] = this.ssi2opId.map { (ssi, ops) =>
     ops.foldLeft(SSI.init(ssi)) { case (tmpSSI, opId) =>

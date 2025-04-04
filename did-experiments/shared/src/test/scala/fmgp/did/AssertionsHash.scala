@@ -1,7 +1,9 @@
 package fmgp.did
 
-import munit._
-import zio.prelude.{Hash, Equal}
+import munit.*
+import munit.diff.DiffOptions
+import zio.prelude.Equal
+import zio.prelude.Hash
 
 trait AssertionsHash extends Assertions {
   import munit.internal.console.{Lines, Printers, StackTraces}
@@ -32,7 +34,6 @@ trait AssertionsHash extends Assertions {
           hashA.hash(obtained),
           hashB.hash(expected),
           clue,
-          loc,
           this
         )
       }
