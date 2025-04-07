@@ -11,6 +11,8 @@ import zio.*
 object PrismNodeImpl {
   def make = for {
     state <- ZIO.service[Ref[PrismState]]
+    ssiCount <- state.get.map(_.ssi2opId.size)
+    _ <- ZIO.log(s"Init PrismNodeImpl Service with PrismState (with $ssiCount SSI)")
     node = PrismNodeImpl(state)
   } yield node
 }

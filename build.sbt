@@ -589,6 +589,7 @@ lazy val didPrismNode = project
     name := "prism-node",
     libraryDependencies += D.munit.value,
     libraryDependencies += D.zioMunitTest.value,
+    libraryDependencies += "dev.zio" %% "zio-logging-slf4j2-bridge" % "2.5.0"
   )
   .settings(
     Compile / PB.targets := Seq(

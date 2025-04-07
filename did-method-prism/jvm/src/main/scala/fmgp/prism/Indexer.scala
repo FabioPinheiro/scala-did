@@ -7,6 +7,9 @@ import zio.json.*
 import zio.stream.*
 
 import java.nio.file.StandardOpenOption.*
+import scala.util.Try
+import scala.util.Failure
+import scala.util.Success
 
 /** @param apiKey
   *   blockfrost API key
@@ -105,37 +108,6 @@ object Indexer extends ZIOAppDefault {
     }
     .provideSomeLayer(Client.default ++ Scope.default)
 
-  def pipeline = ZPipeline.map[CardanoMetadata, Seq[MaybeOperation[OP]]](cardanoMetadata =>
-    cardanoMetadata.toCardanoPrismEntry match
-      case Left(error) =>
-        Seq(
-          InvalidPrismObject(
-            tx = cardanoMetadata.tx,
-            b = cardanoMetadata.b,
-            reason = error,
-          )
-        )
-      case Right(cardanoPrismEntry) =>
-        MaybeOperation.fromProto(
-          tx = cardanoPrismEntry.tx,
-          blockIndex = cardanoPrismEntry.index,
-          prismObject = cardanoPrismEntry.content
-        )
-  )
-
-  /** pipeline to update the State */
-  def pipelineState = ZPipeline.mapZIO[Ref[PrismState], Nothing, MaybeOperation[OP], MaybeOperation[OP]] {
-    maybeOperation =>
-      maybeOperation match
-        case InvalidPrismObject(tx, b, reason)             => ZIO.succeed(maybeOperation)
-        case InvalidSignedPrismOperation(tx, b, o, reason) => ZIO.succeed(maybeOperation)
-        case op: MySignedPrismOperation[OP] =>
-          for {
-            refState <- ZIO.service[Ref[PrismState]]
-            _ <- refState.update(_.addOp(op))
-          } yield (maybeOperation)
-  }
-
   def sinkLog: ZSink[Any, java.io.IOException, MaybeOperation[OP], Nothing, Unit] = ZSink.foreach {
     case InvalidPrismObject(tx, b, reason)             => Console.printLineError(s"$b - tx:$tx - $reason")
     case InvalidSignedPrismOperation(tx, b, o, reason) => Console.printLineError(s"$b - tx:$tx op:$o - $reason")
@@ -149,10 +121,19 @@ object Indexer extends ZIOAppDefault {
   }
 
   def findChunkFiles(rawMetadataPath: String) =
-    new java.io.File(rawMetadataPath)
-      .listFiles()
-      .filter(_.getName.startsWith(FILE_CHUNK_NAME))
-      .sorted
+    Try(
+      Option(
+        new java.io.File(rawMetadataPath).listFiles()
+      ) match
+        case None => // becuase of: Exception when loading chunks: java.lang.NullPointerException: Cannot invoke "Object.getClass()" because "$this" is null
+          val msg = s"Unable to load folder with chunks from: $rawMetadataPath"
+          ZIO.logError(msg) *> ZIO.fail(new RuntimeException(msg))
+        case Some(files) =>
+          ZIO.log(s"Chunks Files: ${files.mkString("; ")}") *>
+            ZIO.succeed(files.filter(_.getName.startsWith(FILE_CHUNK_NAME)).sorted)
+    ) match
+      case Failure(exception) => ZIO.logError(s"Exception when loading chunks: $exception") *> ZIO.fail(exception)
+      case Success(value)     => value
 
   def sinkRawTransactions(filePath: String): ZSink[Any, Throwable, CardanoMetadataCBOR, Nothing, Unit] =
     ZSink
@@ -188,7 +169,6 @@ object Indexer extends ZIOAppDefault {
           |- https://protobuf-decoder.netlify.app/
           |""".stripMargin
       )
-      stateRef <- Ref.make(PrismState.empty)
       indexerConfigZLayer <- getArgs
         .map(_.toSeq)
         .flatMap {
@@ -213,7 +193,8 @@ object Indexer extends ZIOAppDefault {
       indexerConfig <- ZIO.service[IndexerConfig].provideLayer(indexerConfigZLayer)
 
       _ <- ZIO.log(s"Check the LastTransactionIndexStored")
-      lastTransactionIndexStored <- findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath).lastOption match
+      chunkFilesBeforeStart <- findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath)
+      lastTransactionIndexStored <- chunkFilesBeforeStart.lastOption match
         case None => ZIO.succeed(None)
         case Some(lastChunkFilesPath) =>
           ZStream
@@ -248,34 +229,11 @@ object Indexer extends ZIOAppDefault {
             .run(ZSink.drain)
             *> ZIO.log(s"End updating the raw metadata '${indexerConfig.rawMetadataPath}'")
 
-      streamAllChunkFiles = ZStream.fromIterable {
-        findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath).map { fileName =>
-          ZStream
-            .fromFile(fileName)
-            .via(ZPipeline.utf8Decode >>> ZPipeline.splitLines)
-            .map { _.fromJson[CardanoMetadataCBOR].getOrElse(???) }
-            .via(pipeline)
-            .flatMap(e => ZStream.fromIterable(e))
-            .tapSink {
-              ZSink
-                .fromFileName(
-                  name = s"${indexerConfig.eventsPath}/${fileName.getName}",
-                  options = Set(WRITE, TRUNCATE_EXISTING, CREATE)
-                )
-                .contramapChunks[MaybeOperation[OP]](_.flatMap { case op => s"${op.toJson}\n".getBytes })
-            }
-        }
-      }.flatten
-      streamMetadata = streamAllChunkFiles
-
-      _ <- streamMetadata
-        .via(pipelineState)
-        .run(ZSink.count)
-        .provideEnvironment(ZEnvironment(stateRef))
-      _ <- ZIO.log(s"Finish Indexing")
+      // Load PRISM State from chunk files
+      refPrismState <- IndexerUtils.loadPrismStateFromChunkFiles.provideLayer(indexerConfigZLayer)
+      state <- refPrismState.get
       // ###############################################
-      state <- stateRef.get
-      _ <- ZIO.log(s"State have ${state.ssi2opId.size} SSI")
+
       _ <- ZStream
         .fromIterable(state.ssi2opId)
         .mapZIO { case (did, opidSeq) =>
