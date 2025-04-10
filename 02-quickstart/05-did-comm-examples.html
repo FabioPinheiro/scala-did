@@ -137,7 +137,7 @@
   </span><span class="identifier">from</span><span> = </span><span class="type-name">Some</span><span>(</span><span class="type-name">FROM</span><span>(</span><span class="string-literal">&quot;did:example:456&quot;</span><span>)), 
 )
 </span><span class="comment">// message: BasicMessage = BasicMessage(
-//   id = &quot;92a06ff7-be65-4401-9b44-0748cdadf9d3&quot;,
+//   id = &quot;c5abd495-5e44-4aa2-8e0c-78c57692c394&quot;,
 //   to = Set(&quot;did:example:123&quot;),
 //   from = Some(value = &quot;did:example:456&quot;),
 //   lang = None,
@@ -148,7 +148,7 @@
 
 </span><span class="identifier">message</span><span>.</span><span class="identifier">toPlaintextMessage</span><span>.</span><span class="identifier">toJsonPretty</span><span>
 </span><span class="comment">// res0: String = &quot;&quot;&quot;{
-//   &quot;id&quot; : &quot;92a06ff7-be65-4401-9b44-0748cdadf9d3&quot;,
+//   &quot;id&quot; : &quot;c5abd495-5e44-4aa2-8e0c-78c57692c394&quot;,
 //   &quot;type&quot; : &quot;https://didcomm.org/basicmessage/2.0/message&quot;,
 //   &quot;to&quot; : [
 //     &quot;did:example:123&quot;
@@ -159,7 +159,10 @@
 //   }
 // }&quot;&quot;&quot;</span></code></pre>
         <p>To receive messages, you can use the following code:</p>
-        <pre><code></code></pre>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">// TODO
+// didcomm.onMessage { message =&gt;
+//   println(s&quot;Received message from ${message.from}: ${message.body}&quot;)
+// }</span></code></pre>
         
         <h2 id="further-resources" class="section"><a class="anchor-link left" href="#further-resources"><i class="icofont-laika link">&#xef71;</i></a>Further Resources</h2>
         <p>The library&#39;s documentation 
