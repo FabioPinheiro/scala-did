@@ -10,18 +10,19 @@ import proto.prism.PublicKey.KeyData.EcKeyData
 import proto.prism.Service
 import proto.prism.node.DIDData
 
-object SSIExt {
-  extension (ssi: SSI) {
-    def didData: DIDData = {
-      DIDData(
-        id = ssi.did,
-        publicKeys = ssi.keys.map(k => toPublicKey(k)),
-        services = ssi.services.map(s => toService(s)),
-        context = ssi.context,
-        unknownFields = scalapb.UnknownFieldSet.empty
-      )
-    }
+extension (ssi: SSI) {
+  def didData: DIDData = {
+    DIDData(
+      id = ssi.did,
+      publicKeys = ssi.keys.map(k => SSIExtension.toPublicKey(k)),
+      services = ssi.services.map(s => SSIExtension.toService(s)),
+      context = ssi.context,
+      unknownFields = scalapb.UnknownFieldSet.empty
+    )
   }
+}
+
+object SSIExtension {
 
   def toPublicKey(key: PrismPublicKey): PublicKey = {
     PublicKey(

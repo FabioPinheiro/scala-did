@@ -1,7 +1,6 @@
 package fmgp.prism
 
 import fmgp.crypto.SHA256
-import fmgp.prism.SSIExt.*
 import fmgp.util.Base64
 import proto.prism.PublicKey
 import proto.prism.Service
@@ -13,11 +12,13 @@ object PrismNodeImpl {
     state <- ZIO.service[Ref[PrismState]]
     ssiCount <- state.get.map(_.ssi2opId.size)
     _ <- ZIO.log(s"Init PrismNodeImpl Service with PrismState (with $ssiCount SSI)")
-    node = PrismNodeImpl(state)
+    walletConfig = CardanoWalletConfig()
+    node = PrismNodeImpl(state, walletConfig)
   } yield node
 }
 
-case class PrismNodeImpl(refState: Ref[PrismState]) extends ZioPrismNodeApi.NodeService {
+case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletConfig)
+    extends ZioPrismNodeApi.NodeService {
 //   type Generic[-C, +E] = GNodeService[C, E]
 
   def healthCheck(
@@ -152,6 +153,11 @@ case class PrismNodeImpl(refState: Ref[PrismState]) extends ZioPrismNodeApi.Node
   def scheduleOperations(
       request: ScheduleOperationsRequest
   ): IO[io.grpc.StatusException, ScheduleOperationsResponse] = for {
-    _ <- ZIO.log("scheduleOperations")
-  } yield ???
+    _ <- ZIO.log(s"scheduleOperations with ${request.signedOperations.size} signed operations")
+    _ <- ZIO.foreach(request.signedOperations.toSeq.zipWithIndex) { case (sp, index) =>
+      ZIO.log(s"Operation $index to '${sp.toProtoString}'")
+    }
+  } yield ScheduleOperationsResponse(
+    outputs = Seq.empty
+  )
 }
