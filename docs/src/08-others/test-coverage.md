@@ -33,11 +33,11 @@ From 2024-03-03 coverage to 2024-03-04 coverage the sbt-scalafix ad update to 0.
 ## Report output
 
 You should open the reports with your browser. The reports will be in each module `target/scala-<scala-version>/scoverage-report`
-- `all/aggregate` -> `/target/scala-3.3.3/scoverage-report/index.html`
-- `did` -> `/did/jvm/target/scala-3.3.3/scoverage-report/index.html`
-- `did-imp` -> `/did-imp/jvm/target/scala-3.3.3/scoverage-report/index.html`
-- `did-framework` -> `/did-framework/jvm/target/scala-3.3.3/scoverage-report/index.html`
-- `did-resolver-web` -> `/did-method-web/jvm/target/scala-3.3.3/scoverage-report/index.html`
-- `did-resolver-peer` -> `/did-method-peer/jvm/target/scala-3.3.3/scoverage-report/index.html`
-- `uniresolver` -> `/did-uniresolver/jvm/target/scala-3.3.3/scoverage-report/index.html`
-- `multiformats` -> `/multiformats/jvm/target/scala-3.3.3/scoverage-report/index.html`
+- `all/aggregate` -> `/target/scala-3.3.5/scoverage-report/index.html`
+- `did` -> `/did/jvm/target/scala-3.3.5/scoverage-report/index.html`
+- `did-imp` -> `/did-imp/jvm/target/scala-3.3.5/scoverage-report/index.html`
+- `did-framework` -> `/did-framework/jvm/target/scala-3.3.5/scoverage-report/index.html`
+- `did-resolver-web` -> `/did-method-web/jvm/target/scala-3.3.5/scoverage-report/index.html`
+- `did-resolver-peer` -> `/did-method-peer/jvm/target/scala-3.3.5/scoverage-report/index.html`
+- `uniresolver` -> `/did-uniresolver/jvm/target/scala-3.3.5/scoverage-report/index.html`
+- `multiformats` -> `/multiformats/jvm/target/scala-3.3.5/scoverage-report/index.html`

@@ -17,7 +17,10 @@ class KeySuite extends FunSuite {
     assertEquals(KTY.OKP.toJson.fromJson[KTY], Right(KTY.OKP))
   }
   test("parse gibberish as KTY") {
-    assertEquals(""""gibberish"""".fromJson[KTY], Left("(enum case not found: gibberish)"))
+    assertEquals(
+      """"gibberish"""".fromJson[KTY],
+      Left("(enum fmgp.crypto.KTY has no case with name: gibberish)")
+    )
   }
 
   test("parse & serialize JWAAlgorithm ES256K") {
@@ -46,7 +49,10 @@ class KeySuite extends FunSuite {
   }
 
   test("parse gibberish as JWAAlgorithm") {
-    assertEquals(""""gibberish"""".fromJson[JWAAlgorithm], Left("(enum case not found: gibberish)"))
+    assertEquals(
+      """"gibberish"""".fromJson[JWAAlgorithm],
+      Left("(enum fmgp.crypto.JWAAlgorithm has no case with name: gibberish)")
+    )
   }
 
   test("parse & serialize Curve P-256") {
@@ -70,7 +76,10 @@ class KeySuite extends FunSuite {
   }
 
   test("parse gibberish as Curve") {
-    assertEquals(""""gibberish"""".fromJson[Curve], Left("(enum case not found: gibberish)"))
+    assertEquals(
+      """"gibberish"""".fromJson[Curve],
+      Left("(enum fmgp.crypto.Curve has no case with name: gibberish)")
+    )
   }
 
   test("parse & stringify PrivateKey") {

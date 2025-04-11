@@ -24,7 +24,10 @@ class ProtectedHeaderSuite extends ZSuite {
     assertEquals(ENCAlgorithm.`A256CBC-HS512`.toJson.fromJson[ENCAlgorithm], Right(ENCAlgorithm.`A256CBC-HS512`))
   }
   test("parse gibberish as ENCAlgorithm") {
-    assertEquals(""""gibberish"""".fromJson[ENCAlgorithm], Left("(enum case not found: gibberish)"))
+    assertEquals(
+      """"gibberish"""".fromJson[ENCAlgorithm],
+      Left("(enum fmgp.did.comm.ENCAlgorithm has no case with name: gibberish)")
+    )
   }
 
   test("parse & serialize KWAlgorithm ECDH-ES+A256KW") {
@@ -36,7 +39,10 @@ class ProtectedHeaderSuite extends ZSuite {
     assertEquals(KWAlgorithm.`ECDH-1PU+A256KW`.toJson.fromJson[KWAlgorithm], Right(KWAlgorithm.`ECDH-1PU+A256KW`))
   }
   test("parse gibberish as KWAlgorithm") {
-    assertEquals(""""gibberish"""".fromJson[KWAlgorithm], Left("(enum case not found: gibberish)"))
+    assertEquals(
+      """"gibberish"""".fromJson[KWAlgorithm],
+      Left("(enum fmgp.did.comm.KWAlgorithm has no case with name: gibberish)")
+    )
   }
 
 //   val h1 =
