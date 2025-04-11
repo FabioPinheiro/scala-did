@@ -6,7 +6,7 @@ import scala.sys.process._
 
 inThisBuild(
   Seq(
-    scalaVersion := "3.3.3", // Also update docs/publishWebsite.sh and any ref to scala-3.3.3
+    scalaVersion := "3.3.5", // Also update docs/publishWebsite.sh and any ref to scala-3.3.5
     // scalaVersion := "3.4.2", // Also update docs/publishWebsite.sh and any ref to scala-3.4.2
   )
 )
@@ -141,7 +141,7 @@ lazy val V = new {
   // val scalajsLogging = "1.1.2-SNAPSHOT" //"1.1.2"
 
   // https://mvnrepository.com/artifact/dev.zio/zio
-  val zio = "2.1.16"
+  val zio = "2.1.17"
   val zioJson = "0.6.2"
   val zioMunitTest = "0.3.0"
   val zioHttp = "3.0.1" // FIXES CORS https://github.com/zio/zio-http/pull/2490
@@ -156,7 +156,7 @@ lazy val V = new {
   val scalaLogging = "3.9.4"
 
   val bouncycastle = "1.78.1"
-  val nimbusJoseJwt = "10.1"
+  val nimbusJoseJwt = "10.2"
 
   val laika = "1.0.0"
 
