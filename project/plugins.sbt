@@ -1,4 +1,4 @@
-val scalaJSVersion = sys.env.getOrElse("SCALAJS_VERSION", "1.18.2")
+val scalaJSVersion = sys.env.getOrElse("SCALAJS_VERSION", "1.19.0")
 // crossproject - https://github.com/portable-scala/sbt-crossproject/tags
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.3.2")
 
