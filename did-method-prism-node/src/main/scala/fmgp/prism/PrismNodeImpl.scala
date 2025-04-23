@@ -10,7 +10,7 @@ import zio.*
 object PrismNodeImpl {
   def make = for {
     state <- ZIO.service[Ref[PrismState]]
-    ssiCount <- state.get.map(_.ssi2opId.size)
+    ssiCount <- state.get.map(_.ssiCount)
     _ <- ZIO.log(s"Init PrismNodeImpl Service with PrismState (with $ssiCount SSI)")
     walletConfig = CardanoWalletConfig()
     node = PrismNodeImpl(state, walletConfig)
@@ -19,7 +19,6 @@ object PrismNodeImpl {
 
 case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletConfig)
     extends ZioPrismNodeApi.NodeService {
-//   type Generic[-C, +E] = GNodeService[C, E]
 
   def healthCheck(
       request: HealthCheckRequest
@@ -33,8 +32,8 @@ case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletC
   ): IO[io.grpc.StatusException, GetDidDocumentResponse] = for {
     _ <- ZIO.log("getDidDocument")
     state <- refState.get
-    didDataEffect = state.ssi2opId.get(request.did).map { operations =>
-      val ops = operations.map(op => state.opHash2op.get(op.opHash)).flatten
+    didDataEffect = state.ssi2eventsId.get(request.did).map { operations =>
+      val ops = operations.map(op => state.getEventsByHash(op.opHash)).flatten
       SSI.make(request.did, ops).didData
     }
     ret = GetDidDocumentResponse(
@@ -93,7 +92,7 @@ case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletC
       )
 
     operationEffect = operationHashEffect.map { opHash =>
-      state.opHash2op.get(opHash).map { op =>
+      state.getEventsByHash(opHash).map { op =>
         assert(op.opHash == opHash, s"Operation hash mismatch: ${op.opHash} != $opHash")
 
         OperationInfo(

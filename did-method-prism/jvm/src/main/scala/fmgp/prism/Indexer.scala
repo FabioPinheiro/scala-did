@@ -11,20 +11,6 @@ import scala.util.Try
 import scala.util.Failure
 import scala.util.Success
 
-/** @param apiKey
-  *   blockfrost API key
-  */
-case class IndexerConfig(apiKey: Option[String], workdir: String, network: String) {
-  def rawMetadataPath = s"$workdir/cardano-21325"
-  def eventsPath = s"$workdir/prism-events"
-  // def statePath = s"$workdir/prism-state.json"
-
-  def opidPath(did: String) = s"$workdir/opid/$did"
-  def opsPath(did: String) = s"$workdir/ops/$did"
-  def ssiPath(did: String) = s"$workdir/ssi/$did"
-  def diddocPath(did: String) = s"$workdir/diddoc/$did"
-}
-
 object Indexer extends ZIOAppDefault {
 
   val PRISM_LABEL_CIP_10 = "21325"
@@ -235,11 +221,11 @@ object Indexer extends ZIOAppDefault {
       // ###############################################
 
       _ <- ZStream
-        .fromIterable(state.ssi2opId)
+        .fromIterable(state.ssi2eventsId)
         .mapZIO { case (did, opidSeq) =>
           for {
             _ <- ZIO.logDebug(s"DID: $did")
-            ops = state.allOpForDID(did)
+            ops = state.getEventsForSSI(did)
             _ <- ZStream.fromIterable(ops).run {
               ZSink
                 .fromFileName(name = indexerConfig.opsPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))

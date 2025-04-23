@@ -122,6 +122,7 @@ lazy val docs = project
         multiformats.jvm,
         didResolverPeer.jvm,
         didResolverPrism.jvm,
+        didPrismNode,
         didResolverWeb.jvm,
         didUniresolver.jvm,
       ), // or inAnyProject -- inProjects(...)
@@ -367,6 +368,7 @@ lazy val root = project
   .aggregate(multiformats.js, multiformats.jvm) // publish
   .aggregate(didResolverPeer.js, didResolverPeer.jvm) // publish
   .aggregate(didResolverPrism.js, didResolverPrism.jvm) // publish
+  .aggregate(didPrismNode) // NOT publish
   .aggregate(didResolverWeb.js, didResolverWeb.jvm) // publish
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
   .aggregate(docs) // just to aggregate the command clean

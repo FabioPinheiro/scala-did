@@ -74,8 +74,7 @@ object CardanoClient extends ZIOAppDefault {
         .builder()
         .address(senderAccount.baseAddress)
         .assetName(LOVELACE)
-        .qty(BigInteger.valueOf(1)) // adaToLovelace(1)
-        // .qty(adaToLovelace(1))
+        .qty(BigInteger.valueOf(1)) // .qty(adaToLovelace(1))
         .build();
 
       metadata = {

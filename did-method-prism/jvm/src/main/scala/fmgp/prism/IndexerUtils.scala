@@ -34,7 +34,7 @@ object IndexerUtils {
         case op: MySignedPrismOperation[OP] =>
           for {
             refState <- ZIO.service[Ref[PrismState]]
-            _ <- refState.update(_.addOp(op))
+            _ <- refState.update(_.addEvent(op))
           } yield (maybeOperation)
   }
 
@@ -62,7 +62,7 @@ object IndexerUtils {
       .provideEnvironment(ZEnvironment(stateRef))
     _ <- ZIO.log(s"Finish Init PrismState: $countEvents")
     state <- stateRef.get
-    _ <- ZIO.log(s"PrismState was ${state.ssi2opId.size} SSI")
+    _ <- ZIO.log(s"PrismState was ${state.ssiCount} SSI")
   } yield stateRef
 
 }
