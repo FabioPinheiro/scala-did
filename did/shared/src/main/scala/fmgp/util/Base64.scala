@@ -2,7 +2,7 @@ package fmgp.util
 
 import java.{util => ju}
 import zio.json._
-import scala.collection.compat.immutable.ArraySeq
+// import scala.collection.compat.immutable.ArraySeq
 import scala.util.Try
 
 // Base64 URL
