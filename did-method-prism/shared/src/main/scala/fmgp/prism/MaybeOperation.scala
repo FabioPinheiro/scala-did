@@ -12,6 +12,7 @@ import proto.prism.CreateDIDOperation.DIDCreationData
 import fmgp.util.safeValueOf
 import fmgp.util.bytes2Hex
 
+// TODO Rename to MaybeEvent
 sealed trait MaybeOperation[+T <: OP] // sealed abstract class MaybeOperation[+T <: OP]
 
 case class InvalidPrismObject(

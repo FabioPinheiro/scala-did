@@ -92,13 +92,16 @@ flowchart BT
       did-imp_js:::JS ==>|compiles together| did-imp
       did-imp_jvm:::JVM ==>|compiles together| did-imp
     end
-    did-resolver-peer --> did
     did-resolver-web --> did
+    did-resolver-peer --> did
+    did-resolver-prism ---> did
     did-comm-protocols --> did
     did-framework --> did
     did-framework --> did-comm-protocols
     did-imp --> did
   end
+
+  prism-node:::JVM -----> did-resolver-prism
 
   did-example ----> did
   did-example --> did-imp
@@ -140,5 +143,5 @@ NOTES:
 - Blue boxes is JavaScript's platform specific.
 - Other boxes are not platform specific.
 - The `did-imp-hw` is a idea how to extend for other implementation. Like a hardware/platform specific or with hardware wallet support.
-- `did-resolver-web` & `did-resolver-peer` are implementations of the respective did methods.
+- `did-resolver-web` & `did-resolver-peer` & `did-resolver-prism` are implementations of the respective did methods.
 

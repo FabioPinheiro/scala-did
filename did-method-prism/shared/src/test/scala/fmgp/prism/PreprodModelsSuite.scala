@@ -44,13 +44,13 @@ class PreprodModelsSuite extends FunSuite {
     // println(s"UpdateDidOP ${op1.opHash} -- ${op1.operation.previousOperationHash}")
     // println(s"CreateDidOP ${op2.opHash} -- ${op2.operation.previousOperationHash}")
 
-    val s0 = State.empty
+    val s0 = PrismStateInMemory.empty
     // println("State 0")
-    val s1 = s0.addOp(op0)
+    val s1 = s0.addEvent(op0)
     // println("State 1")
-    val s2 = s1.addOp(op1)
+    val s2 = s1.addEvent(op1)
     // println("State 2")
-    val s3 = s2.addOp(op2)
+    val s3 = s2.addEvent(op2)
     // println("State 3")
     // println(s3.toJsonPretty)
   }

@@ -5,23 +5,17 @@ import zio.json._
 import scala.annotation.tailrec
 import fmgp.did.DIDDocument
 
-case class OpId(b: Int, o: Int, opHash: String)
-object OpId {
-  given JsonDecoder[OpId] = DeriveJsonDecoder.gen[OpId]
-  given JsonEncoder[OpId] = DeriveJsonEncoder.gen[OpId]
+object PrismStateInMemory {
+  def empty = PrismStateInMemory(Map.empty, Map.empty, Map.empty)
 }
 
-object State {
-  given JsonDecoder[State] = DeriveJsonDecoder.gen[State]
-  given JsonEncoder[State] = DeriveJsonEncoder.gen[State]
-  def empty = State(Map.empty, Map.empty, Map.empty)
-}
-
-case class State(
+case class PrismStateInMemory(
     opHash2op: Map[String, MySignedPrismOperation[OP]],
     tx2opId: Map[String, Seq[OpId]],
     ssi2opId: Map[String, Seq[OpId]],
-) {
+) extends PrismState {
+
+  def ssi2eventsId = tx2opId // TODO RENAME
 
   @scala.annotation.tailrec
   final def ssiFromPreviousOperationHash(previousHash: String): Option[String] = {
@@ -34,18 +28,17 @@ case class State(
           case _                                              => None
   }
 
-  def allOpForDID(did: String): Seq[MySignedPrismOperation[OP]] =
-    ssi2opId
-      .get(did)
-      .getOrElse(Seq.empty)
-      .map(opId =>
-        this.opHash2op.getOrElse(
-          opId.opHash,
-          throw new RuntimeException("impossible state: missing Operation Hash")
-        )
-      )
+  def getEventsIdBySSI(ssi: String): Seq[OpId] =
+    ssi2opId.get(ssi) match
+      case None      => Seq.empty
+      case Some(seq) => seq
 
-  def addOp(op: MySignedPrismOperation[OP]) = op match
+  def getEventsByHash(refHash: String): Option[MySignedPrismOperation[OP]] =
+    this.opHash2op.get(refHash) match
+      case None              => None
+      case Some(signedEvent) => Some(signedEvent)
+
+  def addEvent(op: MySignedPrismOperation[OP]): PrismState = op match
     case MySignedPrismOperation(tx, prismBlockIndex, prismOperationIndex, signedWith, signature, operation, pb) =>
       val opId = op.opId
       val newOpHash2op = opHash2op.updatedWith(opId.opHash) {
@@ -72,7 +65,7 @@ case class State(
               case None      => Some(Seq(opId))
               case Some(seq) => Some(seq :+ opId)
           }
-          State(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
+          PrismStateInMemory(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
         case UpdateDidOP(previousOperationHash, id, actions) =>
           ssiFromPreviousOperationHash(previousOperationHash) match
             case None => this
@@ -82,7 +75,7 @@ case class State(
                 case None      => None
                 case Some(seq) => Some(seq :+ opId)
               }
-              State(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
+              PrismStateInMemory(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
         case DeactivateDidOP(previousOperationHash, id) =>
           ssiFromPreviousOperationHash(previousOperationHash) match
             case None => this
@@ -92,7 +85,7 @@ case class State(
                 case None      => None
                 case Some(seq) => Some(seq :+ opId)
               }
-              State(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
+              PrismStateInMemory(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
 
   def makeSSI: Seq[SSI] = this.ssi2opId.map { (ssi, ops) =>
     ops.foldLeft(SSI.init(ssi)) { case (tmpSSI, opId) =>
