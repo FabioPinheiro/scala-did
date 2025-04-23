@@ -2,14 +2,6 @@ package fmgp.prism
 
 import zio._
 import zio.json._
-import fmgp.did.DIDDocument
-
-case class OpId(b: Int, o: Int, opHash: String)
-object OpId {
-  given JsonDecoder[OpId] = DeriveJsonDecoder.gen[OpId]
-  given JsonEncoder[OpId] = DeriveJsonEncoder.gen[OpId]
-}
-
 object PrismState {
   def empty: PrismState = PrismStateInMemory.empty
 }
@@ -23,11 +15,11 @@ trait PrismState {
   def addEvent(op: MySignedPrismOperation[OP]): PrismState
 
   // TODO REMOVE
-  def ssi2eventsId: Map[String, Seq[OpId]]
+  def ssi2eventsId: Map[String, Seq[EventRef]]
   // TODO REMOVE
   def ssiCount: Int = ssi2eventsId.size
 
-  def getEventsIdBySSI(ssi: String): Seq[OpId]
+  def getEventsIdBySSI(ssi: String): Seq[EventRef]
 
   def getEventsByHash(refHash: String): Option[MySignedPrismOperation[OP]]
 

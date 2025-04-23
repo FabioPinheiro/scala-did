@@ -41,7 +41,7 @@ case class MySignedPrismOperation[+T <: OP](
 ) extends MaybeOperation[T]
     with PrismOperationIndex {
   def opHash = SHA256.digestToHex(protobuf.toByteArray)
-  def opId = OpId(b = b, o = o, opHash = opHash)
+  def eventRef = EventRef(b = b, o = o, opHash = opHash)
 }
 
 object InvalidPrismObject {

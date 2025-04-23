@@ -1,6 +1,7 @@
 package fmgp.prism
 
 case class CardanoWalletConfig(
+    // TODO REMVOE defualt
     mnemonic: Seq[String] = Seq(
       "mention",
       "side",

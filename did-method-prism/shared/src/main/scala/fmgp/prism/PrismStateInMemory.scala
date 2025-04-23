@@ -11,11 +11,11 @@ object PrismStateInMemory {
 
 case class PrismStateInMemory(
     opHash2op: Map[String, MySignedPrismOperation[OP]],
-    tx2opId: Map[String, Seq[OpId]],
-    ssi2opId: Map[String, Seq[OpId]],
+    tx2eventRef: Map[String, Seq[EventRef]],
+    ssi2eventRef: Map[String, Seq[EventRef]],
 ) extends PrismState {
 
-  def ssi2eventsId = tx2opId // TODO RENAME
+  def ssi2eventsId = tx2eventRef // TODO RENAME
 
   @scala.annotation.tailrec
   final def ssiFromPreviousOperationHash(previousHash: String): Option[String] = {
@@ -28,8 +28,8 @@ case class PrismStateInMemory(
           case _                                              => None
   }
 
-  def getEventsIdBySSI(ssi: String): Seq[OpId] =
-    ssi2opId.get(ssi) match
+  def getEventsIdBySSI(ssi: String): Seq[EventRef] =
+    ssi2eventRef.get(ssi) match
       case None      => Seq.empty
       case Some(seq) => seq
 
@@ -40,14 +40,14 @@ case class PrismStateInMemory(
 
   def addEvent(op: MySignedPrismOperation[OP]): PrismState = op match
     case MySignedPrismOperation(tx, prismBlockIndex, prismOperationIndex, signedWith, signature, operation, pb) =>
-      val opId = op.opId
+      val opId = op.eventRef
       val newOpHash2op = opHash2op.updatedWith(opId.opHash) {
         case Some(value) =>
           if (value.opHash == opId.opHash) Some(op)
           else throw new RuntimeException("impossible state: duplicated operation but with different hash?")
         case None => Some(op)
       }
-      val newTx2opId = tx2opId.updatedWith(tx) {
+      val newTx2eventRef = tx2eventRef.updatedWith(tx) {
         case None      => Some(Seq(opId))
         case Some(seq) => Some(seq :+ opId)
       }
@@ -60,34 +60,34 @@ case class PrismStateInMemory(
         case UpdateStorageEntryOP(value)    => this
         case CreateDidOP(publicKeys, services, context) =>
           val did = s"did:prism:${op.opHash}"
-          val newSSI2opId = ssi2opId.updatedWith(did) {
+          val newSSI2eventRef = ssi2eventRef.updatedWith(did) {
             _ match
               case None      => Some(Seq(opId))
               case Some(seq) => Some(seq :+ opId)
           }
-          PrismStateInMemory(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
+          PrismStateInMemory(opHash2op = newOpHash2op, tx2eventRef = newTx2eventRef, ssi2eventRef = newSSI2eventRef)
         case UpdateDidOP(previousOperationHash, id, actions) =>
           ssiFromPreviousOperationHash(previousOperationHash) match
             case None => this
             case Some(ssiHash) =>
               val did = s"did:prism:$ssiHash"
-              val newSSI2opId = ssi2opId.updatedWith(did) {
+              val newSSI2eventRef = ssi2eventRef.updatedWith(did) {
                 case None      => None
                 case Some(seq) => Some(seq :+ opId)
               }
-              PrismStateInMemory(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
+              PrismStateInMemory(opHash2op = newOpHash2op, tx2eventRef = newTx2eventRef, ssi2eventRef = newSSI2eventRef)
         case DeactivateDidOP(previousOperationHash, id) =>
           ssiFromPreviousOperationHash(previousOperationHash) match
             case None => this
             case Some(ssiHash) =>
               val did = s"did:prism:$ssiHash"
-              val newSSI2opId = ssi2opId.updatedWith(did) {
+              val newSSI2eventRef = ssi2eventRef.updatedWith(did) {
                 case None      => None
                 case Some(seq) => Some(seq :+ opId)
               }
-              PrismStateInMemory(opHash2op = newOpHash2op, tx2opId = newTx2opId, ssi2opId = newSSI2opId)
+              PrismStateInMemory(opHash2op = newOpHash2op, tx2eventRef = newTx2eventRef, ssi2eventRef = newSSI2eventRef)
 
-  def makeSSI: Seq[SSI] = this.ssi2opId.map { (ssi, ops) =>
+  def makeSSI: Seq[SSI] = this.ssi2eventRef.map { (ssi, ops) =>
     ops.foldLeft(SSI.init(ssi)) { case (tmpSSI, opId) =>
       this.opHash2op.get(opId.opHash) match
         case None     => ???
