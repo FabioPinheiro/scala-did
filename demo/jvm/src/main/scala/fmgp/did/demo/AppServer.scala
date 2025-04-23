@@ -128,7 +128,7 @@ object AppServer extends ZIOAppDefault {
                   .fromResource("assets")
                   .getLines()
                   .map { file => li(a(href := file, file)): Html }
-                  .toSeq): _*
+                  .toSeq)*
               )
             )
           )

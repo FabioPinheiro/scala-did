@@ -175,7 +175,7 @@ object Indexer extends ZIOAppDefault {
             ZIO.logWarning(s"Fail to parse indexerConfig from '${next.mkString(" ")}'") *>
               ZIO.fail(RuntimeException("Indexer <dataPath> [mainnet|preprod|preview <dataPath>]"))
         }
-        .map(ZLayer.succeed _)
+        .map(ZLayer.succeed)
       indexerConfig <- ZIO.service[IndexerConfig].provideLayer(indexerConfigZLayer)
 
       _ <- ZIO.log(s"Check the LastTransactionIndexStored")

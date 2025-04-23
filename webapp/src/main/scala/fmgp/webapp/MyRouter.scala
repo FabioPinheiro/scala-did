@@ -101,8 +101,8 @@ object MyRouter {
   val router = new Router[Page](
     routes = routes,
     getPageTitle = _.title, // displayed in the browser tab next to favicon
-    serializePage = page => write(page)(rw), // serialize page data for storage in History API log
-    deserializePage = pageStr => read(pageStr)(rw), // deserialize the above
+    serializePage = page => write(page)(using rw), // serialize page data for storage in History API log
+    deserializePage = pageStr => read(pageStr)(using rw), // deserialize the above
     routeFallback = { (_: String) => HomePage },
   )(
     popStateEvents = windowEvents(_.onPopState), // this is how Waypoint avoids an explicit dependency on Laminar

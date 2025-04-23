@@ -6,8 +6,9 @@ import scala.sys.process._
 
 inThisBuild(
   Seq(
-    scalaVersion := "3.3.5", // Also update docs/publishWebsite.sh and any ref to scala-3.3.5
+    // scalaVersion := "3.3.5", // Also update docs/publishWebsite.sh and any ref to scala-3.3.5
     // scalaVersion := "3.4.2", // Also update docs/publishWebsite.sh and any ref to scala-3.4.2
+    scalaVersion := "3.6.4", // Also update docs/publishWebsite.sh and any ref to scala-3.6.4
   )
 )
 // publish config
@@ -253,7 +254,7 @@ inThisBuild(
           // NO NEED ATM "-Xsemanticdb"
           // NO NEED ATM "-Ykind-projector"
         ) ++ {
-          if (true) Seq("-Xfatal-warnings") else Seq("-rewrite", "-source", "3.4-migration")
+          if (false) Seq("-Xfatal-warnings") else Seq("-rewrite", "-source", "3.4-migration")
         } ++
         // Because DeriveJson(Decoder/Encoder).gen[DidFail] exceeded maximal number of successive inlines (default is 32)
         Seq("-Xmax-inlines", "43")
