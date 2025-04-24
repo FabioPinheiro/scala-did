@@ -552,8 +552,8 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
     libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.2",
     // https://oss.sonatype.org/#nexus-search;quick~com.bloxbean.cardano
-    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.6.3",
-    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.6.3",
+    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.6.4",
+    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.6.4",
     assembly / mainClass := Some("fmgp.prism.Indexer"), // TODO Move to a new repo
     assembly / assemblyJarName := "prism-Indexer.jar", // TODO Move to a new repo
   )
