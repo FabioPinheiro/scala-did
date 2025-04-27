@@ -75,7 +75,17 @@ lazy val docConfigure: Project => Project =
     apiURL := Some(url(s"https://doc.did.fmgp.app/api/")), // or s"https://javadoc.io/doc/app.fmgp/${name.value}_3"
   )
 
-val MUnitFramework = new TestFramework("munit.Framework")
+// Test Framework config
+inThisBuild {
+  val MUnitFramework = new TestFramework("munit.Framework")
+  val testConfig: Tests.Argument =
+    if (sys.env.get("SKIP_INTEGRATION_TEST").isDefined)
+      Tests.Argument(MUnitFramework, "--exclude-tags=IntregrationTest")
+    else
+      Tests.Argument(MUnitFramework)
+
+  Seq(Test / testOptions += testConfig)
+}
 
 /** Custom commands:
   *   - doc
@@ -622,9 +632,6 @@ lazy val didResolverWeb = crossProject(JSPlatform, JVMPlatform)
     name := "did-method-web",
     libraryDependencies += D.munit.value,
     libraryDependencies += D.zioMunitTest.value,
-  )
-  .settings(
-    Test / testOptions += Tests.Argument(MUnitFramework, "--exclude-tags=IntregrationTest")
   )
   .jvmSettings(libraryDependencies += D.ziohttp.value)
   .jvmSettings( // FIXME https://github.com/zio/zio-http/issues/2280#issuecomment-2166894061
