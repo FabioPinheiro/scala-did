@@ -6,6 +6,7 @@ import fmgp.did._
 import fmgp.did.comm.FROMTO
 import fmgp.crypto._
 
+// TODO RENAME DIDPeerResolver
 class DidPeerResolver extends Resolver {
   override protected def didDocumentOf(did: FROMTO): IO[UnsupportedMethod, DIDDocument] = did.toDID match {
     case peer: DIDPeer => DidPeerResolver.didDocument(peer)

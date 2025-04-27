@@ -2,17 +2,12 @@ package fmgp.prism
 
 import zio._
 import zio.json._
-object PrismState {
-  def empty: PrismState = PrismStateInMemory.empty
-}
 
-trait PrismState {
+trait PrismStateRead {
   def lastSyncedBlockEpochSecondNano: (Long, Int) = {
     val now = java.time.Instant.now // FIXME
     (now.getEpochSecond, now.getNano)
   }
-
-  def addEvent(op: MySignedPrismOperation[OP]): PrismState
 
   // TODO REMOVE
   def ssi2eventsId: Map[String, Seq[EventRef]]
@@ -29,4 +24,12 @@ trait PrismState {
         case None        => throw new RuntimeException("impossible state: missing Event/Operation Hash") // TODO
         case Some(value) => value
     }
+}
+
+object PrismState {
+  def empty: PrismState = PrismStateInMemory.empty
+}
+
+trait PrismState extends PrismStateRead {
+  def addEvent(op: MySignedPrismOperation[OP]): PrismState
 }

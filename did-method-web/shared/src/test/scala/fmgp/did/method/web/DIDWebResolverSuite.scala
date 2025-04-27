@@ -6,6 +6,7 @@ import fmgp.did.comm._
 
 import zio._
 
+/** didResolverWebJVM/testOnly fmgp.did.method.web.DIDWebResolverSuite */
 class DIDWebResolverSuite extends ZSuite {
 
   val intregrationTest = new munit.Tag("IntregrationTest")
