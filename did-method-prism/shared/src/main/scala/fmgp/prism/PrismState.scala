@@ -2,6 +2,7 @@ package fmgp.prism
 
 import zio._
 import zio.json._
+import fmgp.did.method.prism._
 
 trait PrismStateRead {
   def lastSyncedBlockEpochSecondNano: (Long, Int) = {
@@ -16,14 +17,21 @@ trait PrismStateRead {
 
   def getEventsIdBySSI(ssi: String): Seq[EventRef]
 
-  def getEventsByHash(refHash: String): Option[MySignedPrismOperation[OP]]
-
-  def getEventsForSSI(ssi: String): Seq[MySignedPrismOperation[OP]] =
-    getEventsIdBySSI(ssi).map { opId =>
-      getEventsByHash(opId.opHash) match
-        case None        => throw new RuntimeException("impossible state: missing Event/Operation Hash") // TODO
-        case Some(value) => value
+  def getEventsForSSI(ssi: String): ZIO[Any, Throwable, Seq[MySignedPrismOperation[OP]]] =
+    getEventsIdBySSI(ssi)
+      .foldLeft(Right(Seq.empty): Either[String, Seq[MySignedPrismOperation[OP]]])((acc, eventRef) =>
+        acc match
+          case Left(errors) => Left(errors)
+          case Right(seq) =>
+            getEventsByHash(eventRef.opHash) match
+              case None => Left(s"impossible state: missing Event/Operation Hash '${eventRef.opHash}'")
+              case Some(signedPrismOperation) => Right(seq :+ signedPrismOperation)
+      ) match {
+      case Left(error) => ZIO.fail(new RuntimeException(error))
+      case Right(seq)  => ZIO.succeed(seq)
     }
+
+  def getEventsByHash(refHash: String): Option[MySignedPrismOperation[OP]]
 }
 
 object PrismState {

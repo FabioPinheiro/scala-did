@@ -35,5 +35,4 @@ class DIDPrismSuite extends ZSuite {
     assert(!DIDPrism.regexPrismLongForm.matches(d))
     assert(DIDPrism.regexPrismShortForm.matches(d))
   }
-
 }

@@ -4,6 +4,7 @@ import zio._
 import zio.json._
 import scala.annotation.tailrec
 import fmgp.did.DIDDocument
+import fmgp.did.method.prism._
 
 object PrismStateInMemory {
   def empty = PrismStateInMemory(Map.empty, Map.empty, Map.empty)
@@ -15,7 +16,7 @@ case class PrismStateInMemory(
     ssi2eventRef: Map[String, Seq[EventRef]],
 ) extends PrismState {
 
-  def ssi2eventsId = tx2eventRef // TODO RENAME
+  override def ssi2eventsId = tx2eventRef // TODO RENAME
 
   @scala.annotation.tailrec
   final def ssiFromPreviousOperationHash(previousHash: String): Option[String] = {
@@ -28,17 +29,17 @@ case class PrismStateInMemory(
           case _                                              => None
   }
 
-  def getEventsIdBySSI(ssi: String): Seq[EventRef] =
+  override def getEventsIdBySSI(ssi: String): Seq[EventRef] =
     ssi2eventRef.get(ssi) match
       case None      => Seq.empty
       case Some(seq) => seq
 
-  def getEventsByHash(refHash: String): Option[MySignedPrismOperation[OP]] =
+  override def getEventsByHash(refHash: String): Option[MySignedPrismOperation[OP]] =
     this.opHash2op.get(refHash) match
       case None              => None
       case Some(signedEvent) => Some(signedEvent)
 
-  def addEvent(op: MySignedPrismOperation[OP]): PrismState = op match
+  override def addEvent(op: MySignedPrismOperation[OP]): PrismState = op match
     case MySignedPrismOperation(tx, prismBlockIndex, prismOperationIndex, signedWith, signature, operation, pb) =>
       val opId = op.eventRef
       val newOpHash2op = opHash2op.updatedWith(opId.opHash) {

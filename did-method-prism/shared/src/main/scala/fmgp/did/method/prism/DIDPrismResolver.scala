@@ -6,23 +6,36 @@ import fmgp.did._
 import fmgp.did.comm.FROMTO
 import fmgp.crypto._
 
-class DIDPrismResolver extends Resolver {
-  override protected def didDocumentOf(did: FROMTO): IO[UnsupportedMethod, DIDDocument] = did.toDID match {
-    case prism: DIDPrism => DIDPrismResolver.didDocument(prism)
+class DIDPrismResolver(baseUrl: String, httpUtils: HttpUtils) extends Resolver {
+  override protected def didDocumentOf(did: FROMTO): IO[ResolverError, DIDDocument] = did.toDID match {
+    case prism: DIDPrism =>
+      DIDPrismResolver
+        .didDocument(baseUrl, prism)
+        .provideEnvironment(ZEnvironment(httpUtils))
     case did if DIDPrism.regexPrism.matches(did.string) =>
-      DIDPrismResolver.didDocument(DIDPrism(did.specificId))
+      DIDPrismResolver
+        .didDocument(baseUrl, DIDPrism(did.specificId))
+        .provideEnvironment(ZEnvironment(httpUtils))
     case did => ZIO.fail(UnsupportedMethod(did.namespace))
   }
 }
 object DIDPrismResolver {
-  val default = new DIDPrismResolver()
-  val layer: ULayer[Resolver] = ZLayer.succeed(default)
-  val layerDIDPrismResolver: ULayer[DIDPrismResolver] = ZLayer.succeed(default)
+  def makeLayer(baseUrl: String): URLayer[HttpUtils, Resolver] = makeLayerDIDPrismResolver(baseUrl)
+  def makeLayerDIDPrismResolver(baseUrl: String): URLayer[HttpUtils, DIDPrismResolver] =
+    ZLayer.fromZIO(
+      for {
+        httpUtils <- ZIO.service[HttpUtils]
+      } yield DIDPrismResolver(baseUrl, httpUtils)
+    )
 
   // /** see https://identity.foundation/peer-did-method-spec/#generation-method */
-  def didDocument(did: DIDPrism): UIO[DIDDocument] = did match {
-    case prism: DIDPrism => genesisDocument(prism)
+  def didDocument(baseUrl: String, did: DIDPrism): ZIO[HttpUtils, ResolverError, DIDDocument] = did match {
+    case prism: DIDPrism =>
+      for {
+        httpUtils <- ZIO.service[HttpUtils]
+        didDoc <- httpUtils
+          .getT[DIDDocument](s"$baseUrl/${did.string}")
+          .mapError(ex => DIDresolutionFail.fromThrowable(ex))
+      } yield didDoc
   }
-
-  def genesisDocument(did: DIDPrism): UIO[DIDDocument] = ZIO.succeed(???)
 }

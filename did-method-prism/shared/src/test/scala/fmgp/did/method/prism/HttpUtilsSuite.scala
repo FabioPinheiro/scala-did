@@ -12,8 +12,8 @@ import zio.json.ast.Json
 import fmgp.util.Base64
 import scala.util.matching.Regex
 
-/** didResolverPrismJVM/testOnly fmgp.did.method.prism.DIDResolverProxySuite */
-class DIDResolverProxySuite extends ZSuite {
+/** didResolverPrismJVM/testOnly fmgp.did.method.prism.HttpUtilsSuite */
+class HttpUtilsSuite extends ZSuite {
 
   override val munitTimeout = scala.concurrent.duration.Duration(5, "s")
 
@@ -22,10 +22,11 @@ class DIDResolverProxySuite extends ZSuite {
   testZ("Get DIDDocument for a DID".tag(intregrationTest)) {
     {
       for {
-        proxy <- ZIO.service[DIDResolverProxy]
+        proxy <- ZIO.service[HttpUtils]
         tmp <- proxy
-          .httpProxy(
-            DIDSubject("did:prism:00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae").toDID
+          .getT[DIDDocument](
+            "https://raw.githubusercontent.com/FabioPinheiro/prism-vdr/refs/heads/main/mainnet/diddoc/" +
+              DIDSubject("did:prism:00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae").toDID.string
           )
         _ = assertEquals(
           tmp.toJsonPretty,
@@ -48,7 +49,7 @@ class DIDResolverProxySuite extends ZSuite {
           |}""".stripMargin
         )
       } yield ()
-    }.provide(DIDResolverProxySuiteUtils.layer)
+    }.provide(HttpUtilsSuiteAUX.layer)
     // https://raw.githubusercontent.com/FabioPinheiro/prism-vdr/refs/heads/main/mainnet/di:c/d:prism:00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae
   }
 }
