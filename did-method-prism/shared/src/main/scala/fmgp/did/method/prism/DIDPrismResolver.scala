@@ -20,13 +20,12 @@ class DIDPrismResolver(baseUrl: String, httpUtils: HttpUtils) extends Resolver {
   }
 }
 object DIDPrismResolver {
-  def makeLayer(baseUrl: String): URLayer[HttpUtils, Resolver] = makeLayerDIDPrismResolver(baseUrl)
-  def makeLayerDIDPrismResolver(baseUrl: String): URLayer[HttpUtils, DIDPrismResolver] =
-    ZLayer.fromZIO(
-      for {
-        httpUtils <- ZIO.service[HttpUtils]
-      } yield DIDPrismResolver(baseUrl, httpUtils)
-    )
+  def make(baseUrl: String): ZIO[HttpUtils, Nothing, DIDPrismResolver] = for {
+    httpUtils <- ZIO.service[HttpUtils]
+  } yield DIDPrismResolver(baseUrl, httpUtils)
+
+  def layer(baseUrl: String): URLayer[HttpUtils, Resolver] = layerDIDPrismResolver(baseUrl)
+  def layerDIDPrismResolver(baseUrl: String): URLayer[HttpUtils, DIDPrismResolver] = ZLayer.fromZIO(make(baseUrl))
 
   // /** see https://identity.foundation/peer-did-method-spec/#generation-method */
   def didDocument(baseUrl: String, did: DIDPrism): ZIO[HttpUtils, ResolverError, DIDDocument] = did match {

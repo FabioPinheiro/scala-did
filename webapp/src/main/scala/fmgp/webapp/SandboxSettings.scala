@@ -14,6 +14,7 @@ import scala.util.Failure
 import scala.util.Success
 import zio._
 import zio.json._
+import fmgp.did.uniresolver.Uniresolver
 
 object SandboxSettings {
   val keyTest: Var[Option[OKPPrivateKey]] = Var(initial = None)
@@ -77,6 +78,90 @@ object SandboxSettings {
           nbsp,
           code("""<a href="web+did:peer:...">Alice DID</a>""")
         )
+      ),
+      // Revolver
+      h2("Prism DID Revolver"),
+      p(
+        "Choose the URL to be used for fetching the Blockchain Cardano data related with DID PRISM (transactions with the metadata label '21325' - CIP 10)"
+      ),
+      div(
+        input(
+          placeholder("https://raw.githubusercontent.com/FabioPinheiro/prism-vdr/refs/heads/main/mainnet/diddoc"),
+          `type`.:=("textbox"),
+          autoFocus(true),
+          value <-- Global.baseUrlForDIDPrismResolverVar,
+          inContext { thisNode => onInput.map(_ => thisNode.ref.value) --> Global.baseUrlForDIDPrismResolverVar }
+        ),
+      ),
+      ul(
+        li(
+          div(
+            p("Official 'mainnet' - VDR data from the Cardano that follow the DID PRISM specs"),
+            ul(
+              li(
+                a(
+                  href := "https://github.com/blockfrost/prism-vdr/tree/main/mainnet/diddoc",
+                  "https://raw.githubusercontent.com/blockfrost/prism-vdr/refs/heads/main/mainnet/diddoc"
+                )
+              ),
+              li(
+                a(
+                  href := "https://github.com/FabioPinheiro/prism-vdr/tree/main/mainnet/diddoc",
+                  "https://raw.githubusercontent.com/FabioPinheiro/prism-vdr/refs/heads/main/mainnet/diddoc"
+                )
+              ),
+            )
+          )
+        ),
+        li(
+          div(
+            p(
+              "Unofficial 'preprod' - VDR data from the Cardano 'preprod' that follow the DID PRISM protocol but using 'preprod' network as the source of truth - For testing purpose"
+            ),
+            ul(
+              li(
+                a(
+                  href := "https://github.com/blockfrost/prism-vdr/tree/main/preprod/diddoc",
+                  "https://raw.githubusercontent.com/blockfrost/prism-vdr/refs/heads/main/preprod/diddoc"
+                )
+              ),
+              li(
+                a(
+                  href := "https://github.com/FabioPinheiro/prism-vdr/tree/main/preprod/diddoc",
+                  "https://raw.githubusercontent.com/FabioPinheiro/prism-vdr/refs/heads/main/preprod/diddoc"
+                )
+              ),
+            )
+          )
+        ),
+        li(
+          div(
+            p(
+              "Unofficial 'preview' -  VDR data from the Cardano 'preview' that  follow the DID PRISM protocol but using 'preview' network as the source of truth - Currently empty"
+            ),
+            ul(
+              li(
+                a(
+                  href := "https://github.com/FabioPinheiro/prism-vdr/tree/main/preview/diddoc",
+                  "https://raw.githubusercontent.com/blockfrost/prism-vdr/refs/heads/main/preview/diddoc"
+                ),
+              )
+            )
+          )
+        )
+      ),
+      h2("Uniresolver"),
+      p(
+        "Choose the URL to be used for fetching DIDs from the Uniresolver"
+      ),
+      div(
+        input(
+          placeholder(Uniresolver.defaultEndpoint),
+          `type`.:=("textbox"),
+          autoFocus(true),
+          value <-- Global.urlForUniresolverVar,
+          inContext { thisNode => onInput.map(_ => thisNode.ref.value) --> Global.urlForUniresolverVar }
+        ),
       ),
       // ### ServiceWorker ###
       h2("ServiceWorker"),

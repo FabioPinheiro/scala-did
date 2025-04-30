@@ -15,6 +15,7 @@ object Uniresolver {
   val defaultEndpoint = "https://dev.uniresolver.io/1.0/identifiers/"
   def make(url: String = defaultEndpoint): ZIO[Any, Nothing, Uniresolver] = ZIO.succeed(Uniresolver(url))
   def layer(url: String = defaultEndpoint): ULayer[Resolver] = ZLayer.succeed(Uniresolver(url))
+  def layerUniresolver(url: String = defaultEndpoint): ULayer[Uniresolver] = ZLayer.succeed(Uniresolver(url))
 }
 
 case class Uniresolver(uniresolverServer: String) extends Resolver {

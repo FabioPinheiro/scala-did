@@ -174,6 +174,7 @@ object AppServer extends ZIOAppDefault {
       // DidPeerUniresolverDriver.resolverPeer
   ) @@ (Middleware.cors) // ++ MiddlewareUtils.all)
 
+  // FIXME see fmgp.webapp.Global
   val resolverLayer = ZLayer.fromZIO(makeResolver)
   def makeResolver: ZIO[Client & Scope, Nothing, MultiFallbackResolver] = for {
     // FIX -> has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource

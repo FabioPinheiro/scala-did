@@ -39,9 +39,9 @@ class DIDPrismResolverSuite extends ZSuite {
             |}""".stripMargin
         )
       } yield assertEquals(doc.id, subject)
-    } // .provideLayer(DIDPrismResolverSuiteUtils.resolverLayer)
+    }
       .provide(
-        HttpUtilsSuiteAUX.layer >>> DIDPrismResolver.makeLayer(
+        HttpUtilsSuiteAUX.layer >>> DIDPrismResolver.layer(
           "https://raw.githubusercontent.com/FabioPinheiro/prism-vdr/refs/heads/main/mainnet/diddoc"
         )
       )
@@ -60,9 +60,9 @@ class DIDPrismResolverSuite extends ZSuite {
             |}""".stripMargin
         )
       } yield assertEquals(doc.id, subject)
-    } // .provideLayer(DIDPrismResolverSuiteUtils.resolverLayer)
+    }
       .provide(
-        HttpUtilsSuiteAUX.layer >>> DIDPrismResolver.makeLayer(
+        HttpUtilsSuiteAUX.layer >>> DIDPrismResolver.layer(
           "https://raw.githubusercontent.com/FabioPinheiro/prism-vdr/refs/heads/main/mainnet/diddoc"
         )
       )

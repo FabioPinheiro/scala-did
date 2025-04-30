@@ -712,7 +712,7 @@ lazy val webapp = project
 lazy val didExample = crossProject(JSPlatform, JVMPlatform)
   .in(file("did-example"))
   .settings(publish / skip := true)
-  .dependsOn(did, didImp, didFramework, didResolverPeer, didResolverWeb, didUniresolver)
+  .dependsOn(did, didImp, didFramework, didResolverPeer, didResolverPrism, didResolverWeb, didUniresolver)
 
 lazy val demo = crossProject(JSPlatform, JVMPlatform)
   .in(file("demo"))

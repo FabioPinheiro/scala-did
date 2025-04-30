@@ -14,19 +14,36 @@ import fmgp.did.comm._
 import fmgp.did.agent.MessageStorage
 import fmgp.did.method.web.DIDWebResolver
 import fmgp.did.method.peer.DidPeerResolver
+import fmgp.did.method.prism.{HttpUtils, DIDPrismResolver}
 import fmgp.did.method.hardcode.HardcodeResolver
 import fmgp.did.uniresolver.Uniresolver
 import fmgp.Utils
 
 object Global {
 
-  val resolverLayer = ZLayer.fromZIO(makeResolver)
-  def makeResolver: ZIO[Any, Nothing, MultiFallbackResolver] = for {
+  val urlForUniresolverVar = Var[String](initial = Uniresolver.defaultEndpoint)
+  def urlForUniresolver = Global.urlForUniresolverVar.now() // TODO improve
+
+  val baseUrlForDIDPrismResolverVar = // /FabioPinheiro/prism-vdr/
+    Var[String](initial = "https://raw.githubusercontent.com/blockfrost/prism-vdr/refs/heads/main/mainnet/diddoc")
+
+  def baseUrlForDIDPrismResolver = Global.baseUrlForDIDPrismResolverVar.now() // TODO improve
+
+  def resolverLayer: ZLayer[Any, Nothing, MultiFallbackResolver] =
+    (
+      ZLayer.empty
+        ++ Uniresolver.layerUniresolver(urlForUniresolver)
+        ++ (HttpUtils.layer >>> DIDPrismResolver.layerDIDPrismResolver(baseUrlForDIDPrismResolver))
+    ) >>> ZLayer.fromZIO(makeResolver)
+
+  def makeResolver: ZIO[DIDPrismResolver & Uniresolver, Nothing, MultiFallbackResolver] = for {
     // FIX -> has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource
-    uniresolver <- Uniresolver.make()
+    uniresolver <- ZIO.service[Uniresolver]
+    didPrismResolver <- ZIO.service[DIDPrismResolver]
     multiResolver = MultiFallbackResolver(
       HardcodeResolver.default,
       DidPeerResolver.default,
+      didPrismResolver,
       DIDWebResolver.default,
       uniresolver,
     )
