@@ -45,8 +45,8 @@ object CardanoTransactionMetadataPrismCBOR {
             }
             case "c" => {
               val protoBytes = reader.read[Array[Array[Byte]]]().flatten // read protobuf bytes!
-              if (reader.hasString & (reader.readString() == "v") & (reader.readInt() == 1)) {
-                val version = reader.readInt() // PRISM version
+              if (reader.hasString & (reader.readString() == "v")) {
+                val version = reader.readInt() // PRISM version'
                 CardanoTransactionMetadataPrismCBOR(version = version, protoBytes = protoBytes)
               } else reader.unexpectedDataItem(expected = "the map key 'v'")
             }

@@ -6,16 +6,22 @@ import fmgp.did.DIDSubject
 
 object DIDPrismExamples {
 
+  /** missing in mainnet */
   val ex1_prism_specs_long =
     """did:prism
       |:9b5118411248d9663b6ab15128fba8106511230ff654e7514cdcc4ce919bde9b
       |:Cj8KPRI7CgdtYXN0ZXIwEAFKLgoJc2VjcDI1NmsxEiEDHpf-yhIns-LP3tLvA8icC5FJ1ZlBwbllPtIdNZ3q0jU
       |""".stripMargin.replaceAll("\n", "")
+
+  /** missing in mainnet */
   val ex1_prism_specs_short =
     """did:prism:9b5118411248d9663b6ab15128fba8106511230ff654e7514cdcc4ce919bde9b"""
+
+  /** missing in mainnet */
   val ex2_prism_specs_short =
     """did:prism:db47e78dd57d2043a7a704fbd9d186a586682110a2097ac06dbc83b35602f290"""
 
+  /** missing in mainnet */
   def ex1_prism_specs_short_didDocument =
     """{
       |  "@context": [
