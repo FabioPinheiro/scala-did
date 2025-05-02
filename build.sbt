@@ -742,6 +742,7 @@ ThisBuild / assemblyMergeStrategy := {
   case "META-INF/versions/9/module-info.class"    => MergeStrategy.first
   case "META-INF/io.netty.versions.properties"    => MergeStrategy.first
   case "META-INF/versions/9/OSGI-INF/MANIFEST.MF" => MergeStrategy.first
+  case "META-INF/okio.kotlin_module"              => MergeStrategy.first
   case webjarsPattern(file)                       => MergeStrategy.discard
 //   case PathList("javax", "servlet", xs @ _*)         => MergeStrategy.first
 //   case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
