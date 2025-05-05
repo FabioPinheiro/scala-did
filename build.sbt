@@ -145,7 +145,7 @@ lazy val V = new {
   val scalajsJavaSecureRandom = "1.0.0"
 
   // FIXME another bug in the test framework https://github.com/scalameta/munit/issues/554
-  val munit = "1.1.0" // "0.7.29"
+  val munit = "1.1.1" // "0.7.29"
 
   // https://mvnrepository.com/artifact/org.scala-js/scalajs-dom
   val scalajsDom = "2.8.0"
@@ -154,14 +154,14 @@ lazy val V = new {
   // https://mvnrepository.com/artifact/dev.zio/zio
   val zio = "2.1.17"
   val zioJson = "0.7.42"
-  val zioMunitTest = "0.3.0"
+  val zioMunitTest = "0.4.0"
   val zioHttp = "3.2.0" // FIXES CORS https://github.com/zio/zio-http/pull/2490
   val zioPrelude = "1.0.0-RC21"
 
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time
   val scalaJavaTime = "2.5.0"
 
-  val bullet = "1.16.0"
+  val bullet = "1.16.1"
 
   val logbackClassic = "1.2.10"
   val scalaLogging = "3.9.4"
