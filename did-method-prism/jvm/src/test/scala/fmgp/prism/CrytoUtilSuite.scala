@@ -19,6 +19,7 @@ import java.security.spec.ECPrivateKeySpec
 import java.security.KeyFactory
 import java.security.spec.ECPublicKeySpec
 
+/** didResolverPrismJVM/testOnly fmgp.prism.CrytoUtilSuite */
 class CrytoUtilSuite extends FunSuite {
 
   val ecPublicKeyBase64 =

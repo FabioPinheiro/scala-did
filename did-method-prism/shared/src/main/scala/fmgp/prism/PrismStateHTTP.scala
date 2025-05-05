@@ -10,7 +10,7 @@ case class PrismStateHTTP(
     pathEventsByDID: String = "https://raw.githubusercontent.com/FabioPinheiro/prism-vdr/refs/heads/main/mainnet/ops",
 ) extends PrismStateRead {
 
-  override def getEventsForSSI(ssi: String): ZIO[Any, Throwable, Seq[MySignedPrismOperation[OP]]] = {
+  override def getEventsForSSI(ssi: DIDSubject): ZIO[Any, Throwable, Seq[MySignedPrismOperation[OP]]] = {
     val destination = s"$pathEventsByDID/$ssi"
     for {
       proxy <- ZIO.service[HttpUtils]
@@ -19,7 +19,7 @@ case class PrismStateHTTP(
   }.provideEnvironment(ZEnvironment(httpUtils))
 
   override def getEventsByHash(refHash: String): Option[MySignedPrismOperation[OP]] = ???
-  override def getEventsIdBySSI(ssi: String): Seq[EventRef] = ???
-  override def ssi2eventsId: Map[String, Seq[EventRef]] = ???
+  override def getEventsIdBySSI(ssi: DIDSubject): Seq[EventRef] = ???
+  override def ssi2eventsId: Map[DIDSubject, Seq[fmgp.prism.EventRef]] = ???
 
 }

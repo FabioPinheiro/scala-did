@@ -3,6 +3,7 @@ package fmgp.prism
 import zio._
 import zio.json._
 import fmgp.did.method.prism._
+import fmgp.did.DIDSubject
 
 trait PrismStateRead {
   def lastSyncedBlockEpochSecondNano: (Long, Int) = {
@@ -11,13 +12,13 @@ trait PrismStateRead {
   }
 
   // TODO REMOVE
-  def ssi2eventsId: Map[String, Seq[EventRef]]
+  def ssi2eventsId: Map[DIDSubject, Seq[EventRef]]
   // TODO REMOVE
   def ssiCount: Int = ssi2eventsId.size
 
-  def getEventsIdBySSI(ssi: String): Seq[EventRef]
+  def getEventsIdBySSI(ssi: DIDSubject): Seq[EventRef]
 
-  def getEventsForSSI(ssi: String): ZIO[Any, Throwable, Seq[MySignedPrismOperation[OP]]] =
+  def getEventsForSSI(ssi: DIDSubject): ZIO[Any, Throwable, Seq[MySignedPrismOperation[OP]]] =
     getEventsIdBySSI(ssi)
       .foldLeft(Right(Seq.empty): Either[String, Seq[MySignedPrismOperation[OP]]])((acc, eventRef) =>
         acc match

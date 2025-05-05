@@ -6,6 +6,7 @@ import proto.prism.PublicKey
 import proto.prism.Service
 import proto.prism.node.*
 import zio.*
+import fmgp.did.DIDSubject
 
 object PrismNodeImpl {
   def make = for {
@@ -31,10 +32,17 @@ case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletC
       request: GetDidDocumentRequest
   ): IO[io.grpc.StatusException, GetDidDocumentResponse] = for {
     _ <- ZIO.log("getDidDocument")
+    did <- ZIO
+      .fromEither(DIDSubject.either(request.did))
+      .mapError(exFailToParse => // StatusException
+        io.grpc.Status.NOT_FOUND
+          .withDescription(s"Fail to parse '${request.did}': ${exFailToParse.error}")
+          .asException()
+      )
     state <- refState.get
-    didDataEffect = state.ssi2eventsId.get(request.did).map { operations =>
+    didDataEffect = state.ssi2eventsId.get(did).map { operations =>
       val ops = operations.map(op => state.getEventsByHash(op.opHash)).flatten
-      SSI.make(request.did, ops).didData
+      SSI.make(did, ops).didData
     }
     ret = GetDidDocumentResponse(
       document = didDataEffect,

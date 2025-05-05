@@ -13,7 +13,7 @@ import proto.prism.node.DIDData
 extension (ssi: SSI) {
   def didData: DIDData = {
     DIDData(
-      id = ssi.did,
+      id = ssi.did.string,
       publicKeys = ssi.keys.map(k => SSIExtension.toPublicKey(k)),
       services = ssi.services.map(s => SSIExtension.toService(s)),
       context = ssi.context,

@@ -1,13 +1,14 @@
 package fmgp.prism
 
+import fmgp.did.DIDSubject
+
 /** @param apiKey
   *   blockfrost API key
   */
 case class IndexerConfig(apiKey: Option[String], workdir: String, network: String) {
   def rawMetadataPath = s"$workdir/cardano-21325"
-  def eventsPath = s"$workdir/prism-events"
 
-  def opsPath(did: String) = s"$workdir/ops/$did"
-  def ssiPath(did: String) = s"$workdir/ssi/$did"
-  def diddocPath(did: String) = s"$workdir/diddoc/$did"
+  def opsPath(did: DIDSubject) = s"$workdir/ops/${did.string}"
+  def ssiPath(did: DIDSubject) = s"$workdir/ssi/${did.string}"
+  def diddocPath(did: DIDSubject) = s"$workdir/diddoc/${did.string}"
 }

@@ -10,6 +10,8 @@ import java.nio.file.StandardOpenOption.*
 import scala.util.Try
 import scala.util.Failure
 import scala.util.Success
+import fmgp.did.method.prism.DIDPrism
+import fmgp.did.DIDSubject
 
 object Indexer extends ZIOAppDefault {
 
@@ -228,7 +230,10 @@ object Indexer extends ZIOAppDefault {
             ops <- state.getEventsForSSI(did)
             _ <- ZStream.fromIterable(ops).run { // TODO _ <- ZStream.fromIterableZIO(state.getEventsForSSI(did))
               ZSink
-                .fromFileName(name = indexerConfig.opsPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
+                .fromFileName(
+                  name = indexerConfig.opsPath(did),
+                  options = Set(WRITE, TRUNCATE_EXISTING, CREATE)
+                )
                 .contramapChunks[MySignedPrismOperation[OP]](_.flatMap { spo => s"${spo.toJson}\n".getBytes })
             }
             ssi = SSI.make(did, ops)

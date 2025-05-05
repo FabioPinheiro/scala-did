@@ -120,8 +120,8 @@ object CrytoUtil {
     val privateKeyBytes = privateKeyParams.getD.toByteArray
     val publicKeyBytes = publicKeyParams.getQ.getEncoded(true)
 
-    println(s"Private key: ${bytes2Hex(privateKeyBytes)}");
-    println(s"Public key:  ${bytes2Hex(publicKeyBytes)}");
+    // println(s"Private key: ${bytes2Hex(privateKeyBytes)}");
+    // println(s"Public key:  ${bytes2Hex(publicKeyBytes)}");
     (privateKeyParams, publicKeyParams)
   }
 

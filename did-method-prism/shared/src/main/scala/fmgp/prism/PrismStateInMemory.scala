@@ -5,6 +5,7 @@ import zio.json._
 import scala.annotation.tailrec
 import fmgp.did.DIDDocument
 import fmgp.did.method.prism._
+import fmgp.did.DIDSubject
 
 object PrismStateInMemory {
   def empty = PrismStateInMemory(Map.empty, Map.empty, Map.empty)
@@ -13,10 +14,10 @@ object PrismStateInMemory {
 case class PrismStateInMemory(
     opHash2op: Map[String, MySignedPrismOperation[OP]],
     tx2eventRef: Map[String, Seq[EventRef]],
-    ssi2eventRef: Map[String, Seq[EventRef]],
+    ssi2eventRef: Map[DIDSubject, Seq[EventRef]],
 ) extends PrismState {
 
-  override def ssi2eventsId = tx2eventRef // TODO RENAME
+  override def ssi2eventsId: Map[DIDSubject, Seq[EventRef]] = ssi2eventRef // TODO RENAME
 
   @scala.annotation.tailrec
   final def ssiFromPreviousOperationHash(previousHash: String): Option[String] = {
@@ -29,7 +30,7 @@ case class PrismStateInMemory(
           case _                                              => None
   }
 
-  override def getEventsIdBySSI(ssi: String): Seq[EventRef] =
+  override def getEventsIdBySSI(ssi: DIDSubject): Seq[EventRef] =
     ssi2eventRef.get(ssi) match
       case None      => Seq.empty
       case Some(seq) => seq
@@ -60,7 +61,7 @@ case class PrismStateInMemory(
         case CreateStorageEntryOP(value)    => this
         case UpdateStorageEntryOP(value)    => this
         case CreateDidOP(publicKeys, services, context) =>
-          val did = s"did:prism:${op.opHash}"
+          val did = DIDPrism(op.opHash)
           val newSSI2eventRef = ssi2eventRef.updatedWith(did) {
             _ match
               case None      => Some(Seq(opId))
@@ -71,7 +72,7 @@ case class PrismStateInMemory(
           ssiFromPreviousOperationHash(previousOperationHash) match
             case None => this
             case Some(ssiHash) =>
-              val did = s"did:prism:$ssiHash"
+              val did = DIDPrism(ssiHash)
               val newSSI2eventRef = ssi2eventRef.updatedWith(did) {
                 case None      => None
                 case Some(seq) => Some(seq :+ opId)
@@ -81,7 +82,7 @@ case class PrismStateInMemory(
           ssiFromPreviousOperationHash(previousOperationHash) match
             case None => this
             case Some(ssiHash) =>
-              val did = s"did:prism:$ssiHash"
+              val did = DIDPrism(ssiHash)
               val newSSI2eventRef = ssi2eventRef.updatedWith(did) {
                 case None      => None
                 case Some(seq) => Some(seq :+ opId)

@@ -17,7 +17,7 @@ class PrismStateHTTPSuite extends ZSuite {
       for {
         httpUtils <- ZIO.service[HttpUtils]
         state = PrismStateHTTP(httpUtils)
-        events <- state.getEventsForSSI("did:prism:00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae")
+        events <- state.getEventsForSSI(DIDPrism("00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae"))
         _ = assertEquals(events.size, 2)
         _ = assertEquals(
           events.head.toJsonPretty,

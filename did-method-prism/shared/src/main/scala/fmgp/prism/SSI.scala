@@ -6,9 +6,11 @@ import fmgp.prism.PrismPublicKey.VoidKey
 import scala.util.chaining._
 import zio.json._
 import fmgp.did._
+import fmgp.did.method.prism.DIDPrism
 
+/** This is the SSI representing a DID PRISM */
 final case class SSI(
-    did: String,
+    did: DIDSubject,
     latestHash: Option[String],
     keys: Seq[UncompressedECKey | CompressedECKey],
     services: Seq[MyService],
@@ -85,27 +87,27 @@ final case class SSI(
   def didDocument: DIDDocument = {
     val authentication = keys
       .filter(_.usage == PrismKeyUsage.AuthenticationKeyUsage)
-      .map(k => k.getVerificationMethod(id = s"$did#${k.id}", controller = did))
+      .map(k => k.getVerificationMethod(id = s"$did#${k.id}", controller = did.string))
     val assertionMethod = keys
       .filter(_.usage == PrismKeyUsage.IssuingKeyUsage)
-      .map(k => k.getVerificationMethod(id = s"$did#${k.id}", controller = did))
+      .map(k => k.getVerificationMethod(id = s"$did#${k.id}", controller = did.string))
     val keyAgreement = keys
       .filter(_.usage == PrismKeyUsage.KeyagreementKeyUsage)
-      .map(k => k.getVerificationMethod(id = s"$did#${k.id}", controller = did))
+      .map(k => k.getVerificationMethod(id = s"$did#${k.id}", controller = did.string))
       .toSet[VerificationMethod]
     val capabilityInvocation = keys
       .filter(_.usage == PrismKeyUsage.CapabilityinvocationKeyUsage)
-      .map(k => k.getVerificationMethod(id = s"$did#${k.id}", controller = did))
+      .map(k => k.getVerificationMethod(id = s"$did#${k.id}", controller = did.string))
     val capabilityDelegation = keys
       .filter(_.usage == PrismKeyUsage.CapabilitydelegationKeyUsage)
-      .map(k => k.getVerificationMethod(id = s"$did#${k.id}", controller = did))
+      .map(k => k.getVerificationMethod(id = s"$did#${k.id}", controller = did.string))
 
     val services = this.services
       .map(s => DIDServiceGeneric(id = s.id, `type` = s.`type`, serviceEndpoint = ast.Json.Str(s.serviceEndpoint)))
       .toSet[DIDService]
 
     DIDDocumentClass(
-      id = DIDSubject(this.did),
+      id = this.did,
       alsoKnownAs = None,
       verificationMethod = None,
       authentication = Some(authentication).filter(_.nonEmpty),
@@ -126,11 +128,9 @@ object SSI {
   given decoder: JsonDecoder[SSI] = DeriveJsonDecoder.gen[SSI]
   given encoder: JsonEncoder[SSI] = DeriveJsonEncoder.gen[SSI]
 
-  def init(did: String) = {
-    assert(did.startsWith("did:prism:"))
+  def init(did: DIDSubject) =
     SSI(did = did, latestHash = None, keys = Seq.empty, services = Seq.empty, context = Seq.empty, disabled = false)
-  }
 
-  def make(ssi: String, ops: Seq[MySignedPrismOperation[OP]]) =
+  def make(ssi: DIDSubject, ops: Seq[MySignedPrismOperation[OP]]) =
     ops.foldLeft(SSI.init(ssi)) { case (tmpSSI, op) => tmpSSI.appendAny(op) }
 }
