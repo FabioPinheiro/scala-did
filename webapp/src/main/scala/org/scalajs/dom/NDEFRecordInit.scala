@@ -18,7 +18,7 @@ trait NDEFRecordInit extends js.Object {
     * DataView, or an array of nested records.
     */
   var data: js.UndefOr[
-    String | js.typedarray.DataView | js.typedarray.ArrayBuffer | js.typedarray.TypedArray[_, _] |
+    String | js.typedarray.DataView | js.typedarray.ArrayBuffer | js.typedarray.TypedArray[?, ?] |
       js.typedarray.DataView | js.Array[NDEFRecord]
   ] = js.undefined
 

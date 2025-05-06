@@ -99,7 +99,7 @@ object CrytoUtil {
   }
 
   def generateKeyPair = {
-    val params = ECNamedCurveTable getParameterSpec ("secp256k1")
+    val params = ECNamedCurveTable.getParameterSpec("secp256k1")
     // val fact = KeyFactory.getInstance("ECDSA", provider)
     val domainParams = new ECDomainParameters(params.getCurve, params.getG, params.getN, params.getH, params.getSeed)
     // val domainParams = new ECDomainParameters(params.getCurve, params.getG, params.getN, params.getH)
