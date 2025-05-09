@@ -1,6 +1,6 @@
 FROM azul/zulu-openjdk-alpine:11
 
-COPY ./jvm/target/scala-3.3.5/scala-did-demo-server.jar /app/app.jar
+COPY ./jvm/target/scala-3.3.6/scala-did-demo-server.jar /app/app.jar
 WORKDIR /app
 
 EXPOSE 8080

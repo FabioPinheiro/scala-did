@@ -29,16 +29,16 @@ npm run dev
 
 ```shell
 sbt assemblyAll
-# java -jar jvm/target/scala-3.3.5/scala-did-demo-server.jar
+# java -jar jvm/target/scala-3.3.6/scala-did-demo-server.jar
 docker build --tag scala_did_demo ./demo/
 #docker buildx build --platform linux/amd64,linux/arm64 --tag scala_did_demo ./demo/
 docker run --rm -p 8080:8080 --memory="100m" --cpus="1.0" scala_did_demo
 ```
 
 ```
-jar tf /home/fabio/workspace/ScalaDID/demo/jvm/target/scala-3.3.5/scala-did-demo-server.jar | less
-jar tvf /home/fabio/workspace/ScalaDID/demo/jvm/target/scala-3.3.5/scala-did-demo-server.jar | sort -rnk 1 | less
-java -jar /home/fabio/workspace/ScalaDID/demo/jvm/target/scala-3.3.5/scala-did-demo-server.jar
+jar tf /home/fabio/workspace/ScalaDID/demo/jvm/target/scala-3.3.6/scala-did-demo-server.jar | less
+jar tvf /home/fabio/workspace/ScalaDID/demo/jvm/target/scala-3.3.6/scala-did-demo-server.jar | sort -rnk 1 | less
+java -jar /home/fabio/workspace/ScalaDID/demo/jvm/target/scala-3.3.6/scala-did-demo-server.jar
 ```
 
 ## FLY.IO
@@ -88,10 +88,10 @@ Size of the last docker layer:
 ## Others
 
 Sort by file size
-`jar tvf demo/jvm/target/scala-3.3.5/scala-did-demo-server.jar | sort -k1nr | less`
+`jar tvf demo/jvm/target/scala-3.3.6/scala-did-demo-server.jar | sort -k1nr | less`
 
 Show assets
-`jar tvf demo/jvm/target/scala-3.3.5/scala-did-demo-server.jar | sort -k1nr | grep "assets/"`
+`jar tvf demo/jvm/target/scala-3.3.6/scala-did-demo-server.jar | sort -k1nr | grep "assets/"`
 
 Show jar size
-`du -h demo/jvm/target/scala-3.3.5/scala-did-demo-server.jar`
+`du -h demo/jvm/target/scala-3.3.6/scala-did-demo-server.jar`

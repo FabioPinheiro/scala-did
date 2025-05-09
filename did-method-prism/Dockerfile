@@ -1,6 +1,6 @@
 FROM azul/zulu-openjdk-alpine:17
 
-COPY ./jvm/target/scala-3.3.5/prism-Indexer.jar /prism-indexer.jar
+COPY ./jvm/target/scala-3.3.6/prism-Indexer.jar /prism-indexer.jar
 VOLUME /data
 
 # ENTRYPOINT [ "java", "-Dport=8080", "-XX:+UseContainerSupport", "-jar", "app.jar" ]
