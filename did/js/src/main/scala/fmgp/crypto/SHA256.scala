@@ -8,14 +8,15 @@ import zio._
 import fmgp.crypto.error.SomeThrowable
 import fmgp.typings.std.global.TextEncoder
 import fmgp.typings.jsSha256
-import fmgp.util.bytes2Hex
+import fmgp.util._
 
 object SHA256 {
   def digestToHex(str: String): String = bytes2Hex(digest(str))
   def digestToHex(data: Array[Byte]): String = bytes2Hex(digest(data))
 
   def digest(str: String): Array[Byte] = jsSha256.mod.sha256.array(str).map(_.toByte).toArray
-  def digest(data: Array[Byte]): Array[Byte] = digest(String(data.map(_.toChar)))
+  def digest(data: Array[Byte]): Array[Byte] =
+    arrayBuffer2ByteArray(jsSha256.mod.sha256.arrayBuffer(byteArray2Uint8Array(data)))
 }
 
 object SHA256ZIO {
@@ -37,9 +38,7 @@ object SHA256ZIO {
             .asInstanceOf[js.Promise[ArrayBuffer]]
         )
       // .catchAll(ex => ZIO.fail(SomeThrowable(ex))) // TODO ERROR Type
-      hashArray = new Uint8Array(hashBuffer).toArray
-      hashArrayByte = hashArray.map(_.toByte)
-    } yield hashArrayByte
+    } yield arrayBuffer2ByteArray(hashBuffer)
   }.orDie
 
   def digest(data: Array[Byte]): UIO[Array[Byte]] = {
@@ -51,13 +50,11 @@ object SHA256ZIO {
           crypto.subtle
             .digest(
               HashAlgorithm.`SHA-256`,
-              Uint8Array.from(data.map(_.toShort).toJSArray)
+              byteArray2Uint8Array(data)
             )
             .asInstanceOf[js.Promise[ArrayBuffer]]
         )
       // .catchAll(ex => ZIO.fail(SomeThrowable(ex))) // TODO ERROR Type
-      hashArray = new Uint8Array(hashBuffer).toArray
-      hashArrayByte = hashArray.map(_.toByte)
-    } yield hashArrayByte
+    } yield arrayBuffer2ByteArray(hashBuffer)
   }.orDie
 }

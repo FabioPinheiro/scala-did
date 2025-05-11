@@ -4,6 +4,7 @@ import munit._
 import zio.json._
 
 import fmgp.util.hex2bytes
+import fmgp.util.bytes2Hex
 
 // didJS/testOnly fmgp.crypto.SHASuite
 // didJVM/testOnly fmgp.crypto.SHASuite
@@ -35,6 +36,31 @@ class SHASuite extends ZSuite {
       "34aa973cd4c4daa4f61eeb2bdbad27316534016f",
       "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0"
     ),
+  )
+
+  val testVectorsFromBytes = Seq(
+    (
+      Array.emptyByteArray,
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    ),
+    (
+      Array(211.toByte, 212.toByte),
+      "182889f925ae4e5cc37118ded6ed87f7bdc7cab5ec5e78faef2e50048999473f"
+    ),
+    (
+      hex2bytes("123"),
+      "3d73c0c831c942c1996ca667b639970e571d58c6b7b996e4082a6d091be0b956"
+    ),
+    (
+      hex2bytes("1234567891"),
+      "1ce98679f2f7a245044742f558e89d8e2adf0ac80e2d4a2449f49c614b25e9ed"
+    ),
+    (
+      hex2bytes(
+        "0a3f0a3d123b0a076d61737465723010014a2e0a09736563703235366b311221021456f5dd7bcddca7a3e48edad8cc68d0ce6a7a5991492cb48bac817c2e4d9adc"
+      ),
+      "00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae" // "did:prism:"
+    )
   )
 
   // FIXME
@@ -71,6 +97,15 @@ class SHASuite extends ZSuite {
         d <- SHA256ZIO.digest(input.getBytes())
         _ = assertEquals(d.toSeq, hex2bytes(sha256out).toSeq)
       } yield ()
+    }
+  }
+
+  testVectorsFromBytes.foreach { (input, sha256out) =>
+    val hex = bytes2Hex(input)
+    val n = 20
+    test(s"SHA-256 Basic digest from bytes:'${if (hex.size > 20) hex.slice(0, n) ++ "..." else hex}'") {
+      assertEquals(SHA256.digestToHex(input), sha256out)
+      assertEquals(SHA256.digest(input).toSeq, hex2bytes(sha256out).toSeq)
     }
   }
 

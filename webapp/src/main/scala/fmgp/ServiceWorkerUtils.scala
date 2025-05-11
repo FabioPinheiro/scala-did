@@ -57,8 +57,9 @@ object NotificationsSubscription {
 def base642Uint8Array(base64: String): Uint8Array =
   byteArray2Uint8Array(java.util.Base64.getUrlDecoder.decode(base64))
 
-def byteArray2Uint8Array(arr: Array[Byte]): Uint8Array =
-  js.Dynamic.newInstance(js.Dynamic.global.Uint8Array)(arr.toJSArray).asInstanceOf[Uint8Array]
+def byteArray2Uint8Array(arr: Array[Byte]): Uint8Array = Uint8Array(arr.toJSArray.map(_.toShort))
+// def byteArray2Uint8Array(arr: Array[Byte]): Uint8Array =
+// js.Dynamic.newInstance(js.Dynamic.global.Uint8Array)(arr.toJSArray).asInstanceOf[Uint8Array]
 
 @scala.scalajs.js.annotation.JSExportTopLevel("ServiceWorkerUtils")
 object ServiceWorkerUtils {

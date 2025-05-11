@@ -178,7 +178,7 @@ lazy val V = new {
 
 /** NPM Dependencies */
 lazy val NPM = new { // When update the dependencies also update in package.json
-  val sha256 = "js-sha256" -> "0.9.0"
+  val sha256 = "js-sha256" -> "0.11.0"
   val jose = "jose" -> "5.3.0"
 
   // val elliptic = "elliptic" -> "6.6.1"
