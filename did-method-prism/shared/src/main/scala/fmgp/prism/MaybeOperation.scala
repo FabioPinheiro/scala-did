@@ -105,25 +105,13 @@ object MaybeOperation {
             operation match
               case None => InvalidSignedPrismOperation(tx = tx, b = blockIndex, o = opIndex, "operation is missing")
               case Some(prismOperation) =>
-                import proto.prism.PrismOperation.Operation._
-                val op = prismOperation.operation match {
-                  case Empty                    => VoidOP("PRISM Operation is missing")
-                  case CreateDid(p)             => CreateDidOP.fromProto(p)
-                  case UpdateDid(p)             => UpdateDidOP.fromProto(p)
-                  case IssueCredentialBatch(p)  => VoidOP("TODO IssueCredential") // IssueCredentialBatchOP.fromProto(p)
-                  case RevokeCredentials(p)     => VoidOP("TODO RevokeCredentials") // RevokeCredentialsOP.fromProto(p)
-                  case ProtocolVersionUpdate(p) => VoidOP("TODO") // ProtocolVersionUpdateOP.fromProto(p)
-                  case DeactivateDid(p)         => DeactivateDidOP.fromProto(p)
-                  case CreateStorageEntry(p)    => VoidOP("TODO") // CreateStorageEntryOP.fromProto(p)
-                  case UpdateStorageEntry(p)    => VoidOP("TODO") // UpdateStorageEntryOP.fromProto(p)
-                }
                 MySignedPrismOperation(
                   tx = tx,
                   b = blockIndex,
                   o = opIndex,
                   signedWith = signedWith,
                   signature = signature.toByteArray(),
-                  operation = op,
+                  operation = OP.fromPrismOperation(prismOperation),
                   protobuf = prismOperation,
                 )
         }

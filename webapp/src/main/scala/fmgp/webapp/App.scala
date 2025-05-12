@@ -81,6 +81,7 @@ object App {
     // .collectStatic(AgentDBPage)(AgentDB())
     .collectStatic(AgentMessageStoragePage)(AgentMessageStorage())
     .collectSignal[ResolverPage](page => ResolverTool(page))
+    .collectStatic(PrismVdrPage)(PrismVdrTool())
     .collectStatic(EncryptPage)(EncryptTool())
     .collectStatic(DecryptPage)(DecryptTool())
     .collectStatic(BasicMessagePage)(BasicMessageTool())
@@ -95,6 +96,7 @@ object App {
     NFCScannerPage,
     OOBPage(oobExample),
     ResolverPage(didExample),
+    PrismVdrPage,
     AgentManagementPage,
     AgentMessageStoragePage,
     EncryptPage,

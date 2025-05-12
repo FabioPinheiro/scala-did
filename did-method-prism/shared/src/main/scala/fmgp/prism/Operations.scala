@@ -10,11 +10,27 @@ import proto.prism.ProtocolVersionUpdateOperation
 import proto.prism.DeactivateDIDOperation
 import proto.prism.CreateStorageEntryOperation
 import proto.prism.UpdateStorageEntryOperation
+import proto.prism.PrismOperation
 
 sealed trait OP
 object OP {
   given JsonDecoder[OP] = DeriveJsonDecoder.gen[OP]
   given JsonEncoder[OP] = DeriveJsonEncoder.gen[OP]
+
+  def fromPrismOperation(prismOperation: PrismOperation): OP = {
+    import proto.prism.PrismOperation.Operation._
+    prismOperation.operation match {
+      case Empty                    => VoidOP("PRISM Operation is missing")
+      case CreateDid(p)             => CreateDidOP.fromProto(p)
+      case UpdateDid(p)             => UpdateDidOP.fromProto(p)
+      case IssueCredentialBatch(p)  => VoidOP("TODO IssueCredential") // IssueCredentialBatchOP.fromProto(p)
+      case RevokeCredentials(p)     => VoidOP("TODO RevokeCredentials") // RevokeCredentialsOP.fromProto(p)
+      case ProtocolVersionUpdate(p) => VoidOP("TODO") // ProtocolVersionUpdateOP.fromProto(p)
+      case DeactivateDid(p)         => DeactivateDidOP.fromProto(p)
+      case CreateStorageEntry(p)    => VoidOP("TODO") // CreateStorageEntryOP.fromProto(p)
+      case UpdateStorageEntry(p)    => VoidOP("TODO") // UpdateStorageEntryOP.fromProto(p)
+    }
+  }
 }
 case class VoidOP(reason: String) extends OP
 

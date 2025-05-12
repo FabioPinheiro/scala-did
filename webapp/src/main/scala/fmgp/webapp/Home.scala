@@ -34,6 +34,7 @@ object Home {
       showPage(MyRouter.QRcodePage, "DIDComm over QRcode"),
       showPage(MyRouter.NFCScannerPage, "DIDComm over NFC"),
       showPage(MyRouter.ResolverPage(App.didExample), "DID Resolver Tool"),
+      showPage(MyRouter.PrismVdrPage, "PRISM VDR Tool"),
       showPage(MyRouter.EncryptPage, "Encrypt/Sign Tool"),
       showPage(MyRouter.DecryptPage, "Decrypt/Verify Tool"),
       // p(
