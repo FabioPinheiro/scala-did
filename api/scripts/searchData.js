@@ -3810,6 +3810,7 @@ pages = [{"l":"index.html#","e":false,"i":"","n":"scala-did-docs","t":"scala-did
 {"l":"fmgp/prism/MySignedPrismOperation$.html#encoder-0","e":false,"i":"","n":"encoder","t":"encoder: JsonEncoder[MySignedPrismOperation[OP]]","d":"fmgp.prism.MySignedPrismOperation","k":"given","x":""},
 {"l":"fmgp/prism/OP.html#","e":false,"i":"","n":"OP","t":"OP","d":"fmgp.prism","k":"trait","x":""},
 {"l":"fmgp/prism/OP$.html#","e":false,"i":"","n":"OP","t":"OP","d":"fmgp.prism","k":"object","x":""},
+{"l":"fmgp/prism/OP$.html#fromPrismOperation-eb3","e":false,"i":"","n":"fromPrismOperation","t":"fromPrismOperation(prismOperation: PrismOperation): OP","d":"fmgp.prism.OP","k":"def","x":""},
 {"l":"fmgp/prism/OP$.html#given_JsonDecoder_OP-0","e":false,"i":"","n":"given_JsonDecoder_OP","t":"given_JsonDecoder_OP: JsonDecoder[OP]","d":"fmgp.prism.OP","k":"given","x":""},
 {"l":"fmgp/prism/OP$.html#given_JsonEncoder_OP-0","e":false,"i":"","n":"given_JsonEncoder_OP","t":"given_JsonEncoder_OP: JsonEncoder[OP]","d":"fmgp.prism.OP","k":"given","x":""},
 {"l":"fmgp/prism/PrismBlockIndex.html#","e":false,"i":"","n":"PrismBlockIndex","t":"PrismBlockIndex","d":"fmgp.prism","k":"trait","x":""},
