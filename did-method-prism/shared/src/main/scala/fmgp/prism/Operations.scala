@@ -2,15 +2,7 @@ package fmgp.prism
 
 import zio.json._
 import fmgp.util.bytes2Hex
-import proto.prism.CreateDIDOperation
-import proto.prism.UpdateDIDOperation
-import proto.prism.IssueCredentialBatchOperation
-import proto.prism.RevokeCredentialsOperation
-import proto.prism.ProtocolVersionUpdateOperation
-import proto.prism.DeactivateDIDOperation
-import proto.prism.CreateStorageEntryOperation
-import proto.prism.UpdateStorageEntryOperation
-import proto.prism.PrismOperation
+import proto.prism._
 
 sealed trait OP
 object OP {
@@ -18,17 +10,18 @@ object OP {
   given JsonEncoder[OP] = DeriveJsonEncoder.gen[OP]
 
   def fromPrismOperation(prismOperation: PrismOperation): OP = {
-    import proto.prism.PrismOperation.Operation._
+    import proto.prism.PrismOperation.Operation
     prismOperation.operation match {
-      case Empty                    => VoidOP("PRISM Operation is missing")
-      case CreateDid(p)             => CreateDidOP.fromProto(p)
-      case UpdateDid(p)             => UpdateDidOP.fromProto(p)
-      case IssueCredentialBatch(p)  => VoidOP("TODO IssueCredential") // IssueCredentialBatchOP.fromProto(p)
-      case RevokeCredentials(p)     => VoidOP("TODO RevokeCredentials") // RevokeCredentialsOP.fromProto(p)
-      case ProtocolVersionUpdate(p) => VoidOP("TODO") // ProtocolVersionUpdateOP.fromProto(p)
-      case DeactivateDid(p)         => DeactivateDidOP.fromProto(p)
-      case CreateStorageEntry(p)    => VoidOP("TODO") // CreateStorageEntryOP.fromProto(p)
-      case UpdateStorageEntry(p)    => VoidOP("TODO") // UpdateStorageEntryOP.fromProto(p)
+      case Operation.Empty                     => VoidOP("PRISM Event/Operation is missing")
+      case Operation.CreateDid(p)              => CreateDidOP.fromProto(p)
+      case Operation.UpdateDid(p)              => UpdateDidOP.fromProto(p)
+      case Operation.IssueCredentialBatch(p)   => VoidOP("TODO IssueCredential") // IssueCredentialBatchOP.fromProto(p)
+      case Operation.RevokeCredentials(p)      => VoidOP("TODO RevokeCredentials") // RevokeCredentialsOP.fromProto(p)
+      case Operation.ProtocolVersionUpdate(p)  => VoidOP("TODO") // ProtocolVersionUpdateOP.fromProto(p)
+      case Operation.DeactivateDid(p)          => DeactivateDidOP.fromProto(p)
+      case Operation.CreateStorageEntry(p)     => VoidOP("TODO") // CreateStorageEntryOP.fromProto(p)
+      case Operation.UpdateStorageEntry(p)     => VoidOP("TODO") // UpdateStorageEntryOP.fromProto(p)
+      case Operation.DeactivateStorageEntry(p) => VoidOP("TODO") // DeactivateStorageEntryOP.fromProto(p)
     }
   }
 }
@@ -68,16 +61,20 @@ case class ProtocolVersionUpdateOP(value: String) extends OP
   *   (2) - DID Suffix of the DID to be deactivated
   */
 case class DeactivateDidOP(previousOperationHash: String, id: String) extends OP
-case class CreateStorageEntryOP(value: String) extends OP
-case class UpdateStorageEntryOP(value: String) extends OP
+
+case class CreateStorageEntryOP(didPrismHash: String, nonce: Array[Byte], data: Array[Byte]) extends OP {
+  def nonceInHex = bytes2Hex(nonce)
+}
+case class UpdateStorageEntryOP(previousOperationHash: String, data: Array[Byte]) extends OP
+case class DeactivateStorageEntryOP(previousOperationHash: String) extends OP
 
 object CreateDidOP {
-  import proto.prism.CreateDIDOperation.DIDCreationData
-  def fromProto(p: CreateDIDOperation) = p match
-    case CreateDIDOperation(None, unknownFields) => VoidOP("CreateDIDOperation is missing DIDCreationData")
-    case CreateDIDOperation(Some(didData), unknownFields) =>
+  import proto.prism.ProtoCreateDID.DIDCreationData
+  def fromProto(p: ProtoCreateDID) = p match
+    case ProtoCreateDID(None, unknownFields) => VoidOP("ProtoCreateDID is missing DIDCreationData")
+    case ProtoCreateDID(Some(didData), unknownFields) =>
       didData match
-        case DIDCreationData(publicKeys, services, context, unknownFields) =>
+        case ProtoCreateDID.DIDCreationData(publicKeys, services, context, unknownFields) =>
           CreateDidOP(
             publicKeys = publicKeys.map(PrismPublicKey.fromProto(_)),
             services = services.map(MyService.fromProto),
@@ -108,10 +105,10 @@ object UpdateDidOP {
   ) extends Action
   case class PatchContext(context: Seq[String]) extends Action
 
-  def fromProto(p: UpdateDIDOperation) = {
+  def fromProto(p: ProtoUpdateDID) = {
     import proto.prism.UpdateDIDAction.{Action => UAction}
     p match
-      case UpdateDIDOperation(previousOperationHash, id, actions, unknownFields) =>
+      case ProtoUpdateDID(previousOperationHash, id, actions, unknownFields) =>
         import proto.prism._
         val myAction = actions.map { case UpdateDIDAction(action, unknownFields) =>
           action match
@@ -166,13 +163,36 @@ object UpdateDidOP {
   }
 
 }
-object IssueCredentialBatchOP { def fromProto(p: IssueCredentialBatchOperation) = ??? } //FIXME
-object RevokeCredentialsOP { def fromProto(p: RevokeCredentialsOperation) = ??? } //FIXME
-object ProtocolVersionUpdateOP { def fromProto(p: ProtocolVersionUpdateOperation) = ??? } //FIXME
+object IssueCredentialBatchOP { def fromProto(p: ProtoIssueCredentialBatch) = ??? } //FIXME
+object RevokeCredentialsOP { def fromProto(p: ProtoRevokeCredentials) = ??? } //FIXME
+object ProtocolVersionUpdateOP { def fromProto(p: ProtoProtocolVersionUpdate) = ??? } //FIXME
 object DeactivateDidOP {
-  def fromProto(p: DeactivateDIDOperation) = p match
-    case DeactivateDIDOperation(previousOperationHash, id, unknownFields) =>
+  def fromProto(p: ProtoDeactivateDID) = p match
+    case ProtoDeactivateDID(previousOperationHash, id, unknownFields) =>
       DeactivateDidOP(previousOperationHash = bytes2Hex(previousOperationHash.toByteArray()), id = id)
 }
-object CreateStorageEntryOP { def fromProto(p: CreateStorageEntryOperation) = ??? } //FIXME
-object UpdateStorageEntryOP { def fromProto(p: UpdateStorageEntryOperation) = ??? } //FIXME
+
+object CreateStorageEntryOP {
+  def fromProto(p: ProtoCreateStorageEntry) = p match
+    case ProtoCreateStorageEntry(didPrismHash, nonce, data, unknownFields) =>
+      CreateStorageEntryOP(
+        didPrismHash = bytes2Hex(didPrismHash.toByteArray()),
+        nonce = nonce.toByteArray(),
+        data = data match {
+          case ProtoCreateStorageEntry.Data.Empty        => ??? // FIXME
+          case ProtoCreateStorageEntry.Data.Bytes(value) => value.toByteArray()
+        },
+      )
+}
+object UpdateStorageEntryOP {
+  def fromProto(p: ProtoUpdateStorageEntry) = p match
+    case ProtoUpdateStorageEntry(previousOperationHash, data, unknownFields) =>
+      UpdateStorageEntryOP(
+        previousOperationHash = bytes2Hex(previousOperationHash.toByteArray()),
+        data = data match {
+          case ProtoUpdateStorageEntry.Data.Empty        => ??? // FIXME
+          case ProtoUpdateStorageEntry.Data.Bytes(value) => value.toByteArray()
+        },
+      )
+
+}

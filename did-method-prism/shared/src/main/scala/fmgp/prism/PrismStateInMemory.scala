@@ -54,12 +54,13 @@ case class PrismStateInMemory(
         case Some(seq) => Some(seq :+ opId)
       }
       operation match
-        case VoidOP(reason)                 => this
-        case IssueCredentialBatchOP(value)  => this
-        case RevokeCredentialsOP(value)     => this
-        case ProtocolVersionUpdateOP(value) => this
-        case CreateStorageEntryOP(value)    => this
-        case UpdateStorageEntryOP(value)    => this
+        case VoidOP(reason)                                    => this
+        case IssueCredentialBatchOP(value)                     => this
+        case RevokeCredentialsOP(value)                        => this
+        case ProtocolVersionUpdateOP(value)                    => this
+        case CreateStorageEntryOP(didPrismHash, nonce, data)   => this // TODO
+        case UpdateStorageEntryOP(previousOperationHash, data) => this // TODO
+        case DeactivateStorageEntryOP(previousOperationHash)   => this // TODO
         case CreateDidOP(publicKeys, services, context) =>
           val did = DIDPrism(op.opHash)
           val newSSI2eventRef = ssi2eventRef.updatedWith(did) {

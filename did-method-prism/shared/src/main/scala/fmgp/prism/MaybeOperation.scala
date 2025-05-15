@@ -8,7 +8,6 @@ import fmgp.crypto.SHA256
 import proto.prism.PrismOperation
 import proto.prism.PrismObject
 import proto.prism.SignedPrismOperation
-import proto.prism.CreateDIDOperation.DIDCreationData
 import fmgp.util.safeValueOf
 import fmgp.util.bytes2Hex
 

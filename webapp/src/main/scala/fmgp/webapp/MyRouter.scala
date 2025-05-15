@@ -33,6 +33,7 @@ object MyRouter {
   case object AgentMessageStoragePage extends Page("AgentMessageStorage", "forum")
   case class ResolverPage(did: String) extends Page("Resolver", "dns")
   case object PrismVdrPage extends Page("PrismVdrPage", "dns")
+  case object PrismVdrEditPage extends Page("PrismVdrEditPage", "dns")
   case object EncryptPage extends Page("Encrypt/Sign", "enhanced_encryption")
   case object DecryptPage extends Page("Decrypt/Verify", "email")
   case object BasicMessagePage extends Page("BasicMessage", "message")
@@ -53,6 +54,7 @@ object MyRouter {
   given agentMessageStoragePageRW: ReadWriter[AgentMessageStoragePage.type] = macroRW
   given resolverPageRW: ReadWriter[ResolverPage] = macroRW
   given prismVdrPageRW: ReadWriter[PrismVdrPage.type] = macroRW
+  given prismVdrEditPageRW: ReadWriter[PrismVdrEditPage.type] = macroRW
   given encryptPageRW: ReadWriter[EncryptPage.type] = macroRW
   given decryptPageRW: ReadWriter[DecryptPage.type] = macroRW
   given basicMessagePageRW: ReadWriter[BasicMessagePage.type] = macroRW
@@ -87,6 +89,7 @@ object MyRouter {
     // Route.static(AgentDBPage, root / "db" / endOfSegments, Router.localFragmentBasePath),
     Route.static(AgentMessageStoragePage, root / "agent" / endOfSegments, Router.localFragmentBasePath),
     Route.static(PrismVdrPage, root / "vdr" / endOfSegments, Router.localFragmentBasePath),
+    Route.static(PrismVdrEditPage, root / "prism" / endOfSegments, Router.localFragmentBasePath),
     Route.static(EncryptPage, root / "encrypt" / endOfSegments, Router.localFragmentBasePath),
     Route.static(DecryptPage, root / "decrypt" / endOfSegments, Router.localFragmentBasePath),
     Route.static(BasicMessagePage, root / "basicmessage" / endOfSegments, Router.localFragmentBasePath),

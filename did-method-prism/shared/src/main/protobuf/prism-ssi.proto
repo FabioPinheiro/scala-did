@@ -13,7 +13,7 @@ option (scalapb.options) = {
 };
 
 // The operation to create a public DID.
-message CreateDIDOperation {
+message ProtoCreateDID {
   DIDCreationData did_data = 1; // DIDCreationData with public keys and services
 
   // The data necessary to create a DID.
@@ -26,13 +26,13 @@ message CreateDIDOperation {
 }
 
 // Specifies the necessary data to update a public DID.
-message UpdateDIDOperation {
+message ProtoUpdateDID {
   bytes previous_operation_hash = 1; // The hash of the most recent operation that was used to create or update the DID.
   string id = 2; // @exclude TODO: To be redefined after we start using this operation.
   repeated UpdateDIDAction actions = 3; // The actual updates to perform on the DID.
 }
 
-message DeactivateDIDOperation {
+message ProtoDeactivateDID {
   bytes previous_operation_hash = 1; // The hash of the most recent operation that was used to create or update the DID.
   string id = 2; // DID Suffix of the DID to be deactivated
 }

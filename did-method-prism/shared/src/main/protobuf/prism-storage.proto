@@ -14,10 +14,10 @@ option (scalapb.options) = {
 
 /** StorageEventCreateEntry
  * To be valid, this operation needs to be signed by an issuing key of the DID:
- * - 1) The issuing key need to be valid at the Operation momment
+ * - 1) The issuing key need to be valid at the Event/Operation momment
  * - 2) The DID needs not to be Deactivate
  */
-message CreateStorageEntryOperation {
+message ProtoCreateStorageEntry {
   bytes did_prism_hash = 1; // The specificId of the did:prism.
   bytes nonce = 2; // Used to generate reference diferents hash for the reference of the name
   oneof data {
@@ -34,13 +34,12 @@ message CreateStorageEntryOperation {
     // ??? what about IPNS? https://docs.ipfs.tech/concepts/ipns/ is there a use case for this?
   }
 }
-
 /** StorageEventUpdateEntry
  * To be valid, this operation needs to be signed by an issuing key of the DID:
- * - 1) The issuing key need to be valid at the Operation momment
+ * - 1) The issuing key need to be valid at the Event/Operation momment
  * - 2) The DID needs not to be Deactivate
  */
-message UpdateStorageEntryOperation {
+message ProtoUpdateStorageEntry {
   bytes previous_operation_hash = 1; // The hash of the most recent operation that was used to create or update the VDR Entry.
   oneof data {
     bytes bytes = 2; //replace the bytes
@@ -49,6 +48,10 @@ message UpdateStorageEntryOperation {
     // string ipfs = 3; // Update/replace the data with a link to IPFS. This is static data
     // ??? what about IPNS? https://docs.ipfs.tech/concepts/ipns/ is there a use case for this?
   }
+}
+
+message ProtoDeactivateStorageEntry{
+  bytes previous_operation_hash = 1; // The hash of the most recent operation that was used to create or update the DID.
 }
 
 // /** BitstringStatusList is used for JWT VC ______ LINK!
