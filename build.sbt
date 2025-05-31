@@ -185,6 +185,7 @@ lazy val NPM = new { // When update the dependencies also update in package.json
   // val ellipticType = "@types/elliptic" -> "6.4.18"
 
   val nobleCurves = "@noble/curves" -> "1.8.1"
+  val appoloJS = "@hyperledger/identus-apollo" -> "^1.4.5"
 
 }
 
@@ -590,6 +591,12 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // stMinimize := Selection.All,
     // stMinimizeKeep ++= List(..
     // https://developers.cardano.org/docs/get-started/cardano-serialization-lib/overview/
+  )
+  // Apollo
+  .jvmSettings(libraryDependencies += "org.hyperledger.identus.apollo" % "apollo-jvm" % "1.4.5")
+  .jsSettings(
+    Compile / npmDependencies ++= Seq(NPM.appoloJS),
+    stIgnore += "node",
   )
   .dependsOn(did, multiformats)
   .configure(docConfigure)
