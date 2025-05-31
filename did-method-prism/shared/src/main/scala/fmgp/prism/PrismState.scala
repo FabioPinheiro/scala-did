@@ -17,8 +17,11 @@ trait PrismStateRead {
   def ssiCount: Int = ssi2eventsId.size
 
   def getEventsIdBySSI(ssi: DIDSubject): Seq[EventRef]
+  def getEventsIdByVDR(id: RefVDR): Seq[EventRef]
 
-  def getEventsForSSI(ssi: DIDSubject): ZIO[Any, Throwable, Seq[MySignedPrismOperation[OP]]] =
+  def getEventsForSSI(ssi: DIDSubject): ZIO[Any, Throwable, Seq[MySignedPrismOperation[
+    CreateDidOP | UpdateDidOP | DeactivateDidOP
+  ]]] =
     getEventsIdBySSI(ssi)
       .foldLeft(Right(Seq.empty): Either[String, Seq[MySignedPrismOperation[OP]]])((acc, eventRef) =>
         acc match
@@ -29,7 +32,25 @@ trait PrismStateRead {
               case Some(signedPrismOperation) => Right(seq :+ signedPrismOperation)
       ) match {
       case Left(error) => ZIO.fail(new RuntimeException(error))
-      case Right(seq)  => ZIO.succeed(seq)
+      case Right(seq)  => PrismState.forceType2DidEvent(seq)
+    }
+
+  def getEventsForVDR(
+      refVDR: RefVDR
+  ): ZIO[Any, Throwable, Seq[MySignedPrismOperation[
+    CreateStorageEntryOP | UpdateStorageEntryOP | DeactivateStorageEntryOP
+  ]]] =
+    getEventsIdByVDR(refVDR)
+      .foldLeft(Right(Seq.empty): Either[String, Seq[MySignedPrismOperation[OP]]])((acc, eventRef) =>
+        acc match
+          case Left(errors) => Left(errors)
+          case Right(seq) =>
+            getEventsByHash(eventRef.opHash) match
+              case None => Left(s"impossible state: missing Event/Operation Hash '${eventRef.opHash}'")
+              case Some(signedPrismOperation) => Right(seq :+ signedPrismOperation)
+      ) match {
+      case Left(error) => ZIO.fail(new RuntimeException(error))
+      case Right(seq)  => PrismState.forceType2StorageEvent(seq)
     }
 
   def getEventsByHash(refHash: String): Option[MySignedPrismOperation[OP]]
@@ -37,6 +58,37 @@ trait PrismStateRead {
 
 object PrismState {
   def empty: PrismState = PrismStateInMemory.empty
+
+  def forceType2DidEvent(seq: Seq[MySignedPrismOperation[OP]]): ZIO[Any, RuntimeException, Seq[
+    MySignedPrismOperation[CreateDidOP | UpdateDidOP | DeactivateDidOP]
+  ]] = {
+    ZIO.foldLeft(seq)(Seq.empty[MySignedPrismOperation[OP.TypeDidEvent]]) { (s, event) =>
+      event.operation match
+        case _: CreateDidOP =>
+          ZIO.succeed(s :+ event.asInstanceOf[MySignedPrismOperation[OP.TypeDidEvent]])
+        case _: UpdateDidOP =>
+          ZIO.succeed(s :+ event.asInstanceOf[MySignedPrismOperation[OP.TypeDidEvent]])
+        case _: DeactivateDidOP =>
+          ZIO.succeed(s :+ event.asInstanceOf[MySignedPrismOperation[OP.TypeDidEvent]])
+        case event => ZIO.fail(new RuntimeException("This Event is not a DID Event")) // FIXME
+    }
+  }
+
+  def forceType2StorageEvent(seq: Seq[MySignedPrismOperation[OP]]): ZIO[Any, RuntimeException, Seq[
+    MySignedPrismOperation[CreateStorageEntryOP | UpdateStorageEntryOP | DeactivateStorageEntryOP]
+  ]] = {
+    ZIO.foldLeft(seq)(Seq.empty[MySignedPrismOperation[OP.TypeStorageEntryEvent]]) { (s, event) =>
+      event.operation match
+        case _: CreateStorageEntryOP =>
+          ZIO.succeed(s :+ event.asInstanceOf[MySignedPrismOperation[OP.TypeStorageEntryEvent]])
+        case _: UpdateStorageEntryOP =>
+          ZIO.succeed(s :+ event.asInstanceOf[MySignedPrismOperation[OP.TypeStorageEntryEvent]])
+        case _: DeactivateStorageEntryOP =>
+          ZIO.succeed(s :+ event.asInstanceOf[MySignedPrismOperation[OP.TypeStorageEntryEvent]])
+        case event => ZIO.fail(new RuntimeException("This Event is not a Storage Entry")) // FIXME
+    }
+  }
+
 }
 
 trait PrismState extends PrismStateRead {

@@ -17,6 +17,8 @@ final case class SSI(
     context: Seq[String],
     disabled: Boolean
 ) { self =>
+  def didPrism: DIDPrism = DIDPrism.fromDID(did).getOrElse(???) // FIXME
+
   def appendAny(spo: MySignedPrismOperation[OP]): SSI = spo.operation match
     case _: CreateDidOP     => append(spo.asInstanceOf[MySignedPrismOperation[CreateDidOP]])
     case _: UpdateDidOP     => append(spo.asInstanceOf[MySignedPrismOperation[UpdateDidOP]])
@@ -133,4 +135,8 @@ object SSI {
 
   def make(ssi: DIDSubject, ops: Seq[MySignedPrismOperation[OP]]) =
     ops.foldLeft(SSI.init(ssi)) { case (tmpSSI, op) => tmpSSI.appendAny(op) }
+
+  // def fromCreateEvent(op: MySignedPrismOperation[CreateDidOP | UpdateDidOP | DeactivateDidOP]) =
+  def fromCreateEvent(op: MySignedPrismOperation[CreateDidOP]) =
+    SSI.init(DIDPrism(op.opHash)).append(op)
 }

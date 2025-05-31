@@ -6,6 +6,9 @@ import proto.prism._
 
 sealed trait OP
 object OP {
+  type TypeDidEvent = CreateDidOP | UpdateDidOP | DeactivateDidOP
+  type TypeStorageEntryEvent = CreateStorageEntryOP | UpdateStorageEntryOP | DeactivateStorageEntryOP
+
   given JsonDecoder[OP] = DeriveJsonDecoder.gen[OP]
   given JsonEncoder[OP] = DeriveJsonEncoder.gen[OP]
 
@@ -19,9 +22,9 @@ object OP {
       case Operation.RevokeCredentials(p)      => VoidOP("TODO RevokeCredentials") // RevokeCredentialsOP.fromProto(p)
       case Operation.ProtocolVersionUpdate(p)  => VoidOP("TODO") // ProtocolVersionUpdateOP.fromProto(p)
       case Operation.DeactivateDid(p)          => DeactivateDidOP.fromProto(p)
-      case Operation.CreateStorageEntry(p)     => VoidOP("TODO") // CreateStorageEntryOP.fromProto(p)
-      case Operation.UpdateStorageEntry(p)     => VoidOP("TODO") // UpdateStorageEntryOP.fromProto(p)
-      case Operation.DeactivateStorageEntry(p) => VoidOP("TODO") // DeactivateStorageEntryOP.fromProto(p)
+      case Operation.CreateStorageEntry(p)     => CreateStorageEntryOP.fromProto(p)
+      case Operation.UpdateStorageEntry(p)     => UpdateStorageEntryOP.fromProto(p)
+      case Operation.DeactivateStorageEntry(p) => DeactivateStorageEntryOP.fromProto(p)
     }
   }
 }
@@ -195,4 +198,12 @@ object UpdateStorageEntryOP {
         },
       )
 
+}
+
+object DeactivateStorageEntryOP {
+  def fromProto(p: ProtoDeactivateStorageEntry) = p match
+    case ProtoDeactivateStorageEntry(previousOperationHash, unknownFields) =>
+      DeactivateStorageEntryOP(
+        previousOperationHash = bytes2Hex(previousOperationHash.toByteArray()),
+      )
 }

@@ -5,6 +5,8 @@ import zio.json._
 import fmgp.did._
 import fmgp.did.comm.FROMTO
 import fmgp.crypto._
+import fmgp.util.hex2bytes
+import fmgp.prism.SSI
 
 /** DID Prism (only short form)
   *
@@ -17,6 +19,8 @@ case class DIDPrism(specificId: String) extends DID {
   final def namespace: String = DIDPrism.namespace
 
   def domainName: String = specificId.split(":").head // NOTE split always have head
+
+  def hashRef: Array[Byte] = hex2bytes(specificId)
 
 }
 
@@ -44,4 +48,9 @@ object DIDPrism {
     case any                            => Left(s"Not a did:prism '$any'")
     // FIXME what about case any ??? //TODO add test in DIDPeerSuite
   }
+
+  def fromSSI(ssi: SSI): DIDPrism = ssi.didPrism
+  // // def fromCreateEvent(op: MySignedPrismOperation[CreateDidOP | UpdateDidOP | DeactivateDidOP]) =
+  // def fromCreateEvent(op: MySignedPrismOperation[CreateDidOP]) =
+  //   SSI.init(DIDPrism(op.opHash)).append(op).didDocument
 }

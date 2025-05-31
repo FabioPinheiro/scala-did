@@ -4,7 +4,6 @@ import scala.scalajs.js.timers._
 import scala.scalajs.js.JSConverters._
 
 import org.scalajs.dom
-import org.scalajs.dom.HTMLButtonElement
 import com.raquo.airstream.core.Sink
 import com.raquo.airstream.ownership._
 import com.raquo.laminar.api.L._
@@ -28,76 +27,14 @@ import fmgp.NotificationsSubscription
 import scala.annotation.tailrec
 import scalapb.GeneratedMessageCompanion
 import scalapb.GeneratedMessage
-import scala.util.Try
-import scala.util.Failure
-import scala.util.Success
-import fmgp.util.hex2bytes
+import fmgp.util._
 import scalapb.descriptors._
 import scala.collection.View.Single
 import fmgp.prism.OP
-import fmgp.util.bytes2Hex
+import fmgp.webapp.utils.ProtoHTML
+import com.google.protobuf.ByteString
 
 object PrismVdrEditTool {
-
-  // sealed trait Command {
-  //   def index: Int
-  //   def uri: String
-  //   def command: String
-  //   def copyButton: ReactiveHtmlElement[HTMLButtonElement]
-  //   protected def program: ZIO[Resolver, DidFail, Unit]
-  //   def executeCommand: Fiber[Nothing, Unit] = Utils.runProgram(program.provide(Global.resolverLayer))
-  //   def executeCommandButton =
-  //     button(
-  //       "Execute Command",
-  //       onClick --> Sink.jsCallbackToSink(_ =>
-  //         encryptedMessageVar.now() match {
-  //           case Some(Right((plaintext, eMsg))) =>
-  //             Global.messageSend(eMsg, Global.agentVar.now().map(_.id.asFROM).getOrElse(???), plaintext) // side effect
-  //             executeCommand // side effect
-  //           case _ => // None
-  //         }
-  //       )
-  //     )
-  // }
-  // case class CommandHttp(index: Int, uri: String, msg: EncryptedMessage) extends Command {
-  //   def command = s"""curl -X POST $uri -H 'content-type: application/didcomm-encrypted+json' -d '${msg.toJson}'"""
-  //   def copyButton = button("Copy curl command", onClick --> { _ => Global.copyToClipboard(command) })
-  //   def program = Client
-  //     .makeDIDCommPost(msg, uri) // TODO this should be a TransportDIDComm
-  //     .map { // side effects
-  //       case None => Left(s"Zero responses in this Transport in the time frame of ${Global.transportTimeoutVar.now()}s")
-  //       case Some(output) =>
-  //         import SignedOrEncryptedMessage.given
-  //         output.fromJson[SignedOrEncryptedMessage] match
-  //           case Left(fail) => Left(s"Fail to parse due to: '$fail'")
-  //           case right      => right
-  //     }
-  //     .tapBoth(
-  //       error => ZIO.logError(error.toString) *> ZIO.succeed(outputFromCallVar.update(_ :+ Left(error.toString()))),
-  //       item => ZIO.succeed(outputFromCallVar.update(_ :+ item)) // side effect
-  //     )
-  //     .unit
-  // }
-  // case class CommandWs(index: Int, uri: String, msg: EncryptedMessage) extends Command {
-  //   def command = s"""wscat -c $uri -w 3 -x '${msg.toJson}'"""
-  //   def copyButton = button("Copy wscat command", onClick --> { _ => Global.copyToClipboard(command) })
-  //   def program =
-  //     for {
-  //       transport <- Utils.openWsProgram(wsUrl = uri, timeout = Global.transportTimeoutVar.now())
-  //       _ <- transport.send(msg)
-  //       _ <- transport.inbound.foreach {
-  //         case eMsg: EncryptedMessage => ZIO.succeed(outputFromCallVar.update(_ :+ Right(eMsg)))
-  //         case sMsg: SignedMessage =>
-  //           ZIO.succeed(outputFromCallVar.update(_ :+ Left("UI not implemented for SignedMessage"))) // TODO
-  //       }
-  //     } yield ()
-  // }
-  // case class CommandInvalid(index: Int, uri: String) extends Command {
-  //   def command = s"unknown protocol: '$uri'"
-  //   def copyButton = button("Copy command", disabled := true)
-  //   def program = ZIO.fail(FailToParse(command))
-  // }
-
   // val encryptedMessageVar: Var[Option[Either[DidFail, (PlaintextMessage, EncryptedMessage)]]] = Var(initial = None)
   // val signMessageVar: Var[Option[Either[DidFail, (PlaintextMessage, SignedMessage)]]] = Var(initial = None)
 
@@ -148,255 +85,90 @@ object PrismVdrEditTool {
     )
   }
 
+  val prismOperationVar: Var[Option[PrismOperation]] =
+    Var(initial =
+      Some(
+        PrismOperation.parseFrom(
+          hex2bytes(
+            "12eb010a2000592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae1240303035393261313431613463326263623761366161363931373530353131653265396230343832333138323031323565313561623730623132613231306161651a400a3e0a3c0a0869737375696e673010024a2e0a09736563703235366b31122102a680f17d9b683a9043b45a89989d37fed7a2de8a025eb19790933f59412b64f31a430a410a3f0a0b7265766f636174696f6e3010054a2e0a09736563703235366b3112210384cdd12ac3cf34f241a75281e755e97b35984845b0b7b922df14790b2a9a2266"
+          )
+        )
+      )
+    )
+
   val companionVar: Var[Option[scalapb.GeneratedMessageCompanion[PrismOperation]]] =
     Var(initial = Some(PrismOperation.messageCompanion))
 
-  class FieldBuilder(val descriptor: scalapb.descriptors.FieldDescriptor, val builder: AuxBuilder)
-  trait AuxBuilder {
-    def signalPValue: Signal[PValue]
-    def html: ReactiveHtmlElement[dom.html.Element]
-  }
+  def htmlInputFromCompanionProto(
+      companion: GeneratedMessageCompanion[PrismOperation],
+      // maybeOP: Option[PrismOperation]
+  ): ReactiveHtmlElement[dom.html.Element] = {
+    val mb = ProtoHTML.MessageBuilder(companion)
 
-  def htmlFieldFieldDescriptor[A <: GeneratedMessage](
-      companion: GeneratedMessageCompanion[A],
-      level: Int = 0,
-      field: FieldDescriptor,
-  ): Signal[FieldBuilder] = {
-    import scalapb.descriptors._
-    field.scalaType match {
-      case ScalaType.Boolean =>
-        Signal.fromValue(
-          FieldBuilder(
-            descriptor = field,
-            builder = new AuxBuilder {
-              def signalPValue: Signal[PValue] = Signal.fromValue(PEmpty)
-              def html = code(s"${field.number} ${field.name} - Boolean: ")
-            }
-          )
-        )
-      case ScalaType.ByteString =>
-        Signal.fromValue(
-          FieldBuilder(
-            descriptor = field,
-            builder = new AuxBuilder {
-              val auxVar: Var[String] = Var("")
-              val aux = input(
-                placeholder("ByteString in Hex"),
-                value <-- auxVar,
-                onInput.mapToValue --> auxVar
-              )
-              def signalPValue =
-                auxVar.signal.map { str =>
-                  if (str.isEmpty) PByteString(com.google.protobuf.ByteString.EMPTY)
-                  else PByteString(com.google.protobuf.ByteString.copyFrom(hex2bytes(str)))
-                }
-
-              def html = div(code(s"${field.number} ${field.name} - ByteString: "), aux)
-            }
-          )
-        )
-      case ScalaType.Double =>
-        Signal.fromValue(
-          FieldBuilder(
-            descriptor = field,
-            builder = new AuxBuilder {
-              def signalPValue: Signal[PValue] = Signal.fromValue(PEmpty)
-              def html = code(s"${field.number} ${field.name} - Double: ")
-            }
-          )
-        )
-      case ScalaType.Float =>
-        Signal.fromValue(
-          FieldBuilder(
-            descriptor = field,
-            builder = new AuxBuilder {
-              def signalPValue: Signal[PValue] = Signal.fromValue(PEmpty)
-              def html = code(s"${field.number} ${field.name} - Float: ")
-            }
-          )
-        )
-      case ScalaType.Int =>
-        Signal.fromValue(
-          FieldBuilder(
-            descriptor = field,
-            builder = new AuxBuilder {
-              def signalPValue: Signal[PValue] = Signal.fromValue(PEmpty)
-              def html = code(s"${field.number} ${field.name} - Int: ")
-            }
-          )
-        )
-      case ScalaType.Long =>
-        Signal.fromValue(
-          FieldBuilder(
-            descriptor = field,
-            builder = new AuxBuilder {
-              def signalPValue: Signal[PValue] = Signal.fromValue(PEmpty)
-              def html = code(s"${field.number} ${field.name} - Long: ")
-            }
-          )
-        )
-      case ScalaType.String =>
-        Signal.fromValue(
-          FieldBuilder(
-            descriptor = field,
-            builder = new AuxBuilder {
-              val auxVar: Var[String] = Var("")
-              val aux = input(
-                placeholder("String"),
-                value <-- auxVar,
-                onInput.mapToValue --> auxVar
-              )
-              def signalPValue = auxVar.signal.map(str => PString(str))
-              def html = div(code(s"${field.number} ${field.name} - String: "), aux)
-            }
-          )
-        )
-      case ScalaType.Enum(descriptor) =>
-        Signal.fromValue(
-          FieldBuilder(
-            descriptor = field,
-            builder = new AuxBuilder {
-
-              val optionsVec = descriptor.values
-              val selectedVar = Var(optionsVec.head)
-              val selectHtml = select(
-                value <-- selectedVar.signal.map(_.number.toString),
-                onChange.mapToValue.map { n => optionsVec.find(_.number == n.toInt).get } --> selectedVar,
-                optionsVec.map(d => option(value := d.number.toString(), d.fullName))
-              )
-              def signalPValue: Signal[PValue] = selectedVar.signal.map(selected => PEnum(selected))
-              def html = div(code(s"${field.number} ${field.name} - Enum: "), selectHtml)
-            }
-          )
-        )
-      case ScalaType.Message(descriptor) =>
-        Try(companion.messageCompanionForFieldNumber(field.number)) match
-          case Failure(exception) =>
-            Signal.fromValue(
-              FieldBuilder(
-                descriptor = field,
-                builder = new AuxBuilder {
-                  def signalPValue: Signal[PValue] = Signal.fromValue(PEmpty)
-                  def html = code(
-                    s"## ${field.number} ${field.name} - ${descriptor.fullName}: ERROR>  ${exception.getMessage()}"
-                  )
-                }
-              )
-            )
-          case Success(nextCompanion) =>
-            htmlFromCompanionProto(nextCompanion, level + 1).map((tmp, signal) =>
-              FieldBuilder(
-                descriptor = field,
-                builder = new AuxBuilder {
-                  def signalPValue: Signal[PValue] = signal
-                  def html = div(code(s"${field.number} ${field.name} - ${descriptor.fullName}"), tmp)
-                }
-              )
-            )
-    }
-  }
-
-  def htmlFromCompanionProto[A <: GeneratedMessage](
-      companion: GeneratedMessageCompanion[A],
-      level: Int = 0
-  ): Signal[(ReactiveHtmlElement[dom.html.Element], Signal[PValue])] = {
-    val descriptor = companion.scalaDescriptor
-
-    val selectors = descriptor.oneofs.toSeq.map { oneofDescriptor =>
-      val descriptorVec = oneofDescriptor.fields
-      val tmpVar = Var(descriptorVec.head)
-      val selectHtml = select(
-        value <-- tmpVar.signal.map(_.number.toString),
-        onChange.mapToValue.map { n => descriptorVec.find(_.number == n.toInt).get } --> tmpVar,
-        descriptorVec.map(d => option(value := d.number.toString(), d.fullName))
-      )
-      (oneofDescriptor, selectHtml, tmpVar)
-    }
-
-    val allFD_that_is_oneofs = descriptor.oneofs.flatMap(e => e.fields)
-    val allFD_that_is_not_oneofs = descriptor.fields.filterNot(fd => allFD_that_is_oneofs.contains(fd))
-    val selectedFDs = Signal.combineSeq(selectors.map(_._3.signal))
-    val allActiveFDs = Signal.fromValue(allFD_that_is_not_oneofs).combineWith(selectedFDs).map(e => e._1 ++ e._2)
-
-    allActiveFDs
-      .flatMap { fields =>
-        val retFields: Vector[Signal[FieldBuilder]] = fields.map { field =>
-          htmlFieldFieldDescriptor(companion, level, field)
-        }
-        val retFields2: Signal[Seq[FieldBuilder]] = Signal.combineSeq(retFields)
-        retFields2
-      }
-      .map { retFields =>
-        val tmp = retFields.map { field =>
-          val builder = field.builder
-          if (!field.descriptor.isRepeated) (field.descriptor, builder.html, builder.signalPValue)
-          else
-            (
-              field.descriptor,
-              builder.html,
-              Signal.combineSeq(Seq(builder.signalPValue)).map(v => PRepeated(v.toVector))
-            )
-        }
-        (
-          div(
-            marginRight.px(20),
-            div(
-              code(descriptor.fullName + ":"),
-              if (selectors.isEmpty) Vector.empty[ReactiveHtmlElement[dom.html.Element]]
-              else selectors.map(selector => div(label("using "), selector._2))
-            ),
-            ul(tmp.map(e => li(e._2))),
-          ),
-          Signal
-            .combineSeq(tmp.map((fd, htmlElement, signalPValue) => signalPValue.map(pv => (fd, pv))))
-            .map(seq => PMessage(seq.toMap)),
-        )
-      }
-  }
-
-  def htmlInputFromCompanionProto( // [A <: GeneratedMessage](
-      companion: GeneratedMessageCompanion[PrismOperation] // [A]
-  ): Signal[ReactiveHtmlElement[dom.html.Element]] =
-    htmlFromCompanionProto(companion, 0).map { (htmlAux, signalPValue) =>
-      div(
-        htmlAux,
-        hr(),
-        pre(
-          code(
-            child <-- signalPValue.map(pv => companion.messageReads.read(pv)).map(op => bytes2Hex(op.toByteArray))
-          )
-        ),
-        hr(),
-        p(child <-- signalPValue.map(pv => pv).map(e => e.toString())),
-        hr(),
-        p(child <-- signalPValue.map(pv => companion.messageReads.read(pv)).map(e => e.toString())),
-        hr(),
-        pre(
-          code(
-            child <-- signalPValue
-              .map(pv => OP.fromPrismOperation(companion.messageReads.read(pv)))
-              .map(op => op.toJson)
-          )
+    val signalPValue = mb.signalPMessage
+    def signalPrismOperation = signalPValue
+      .map(pv => companion.messageReads.read(pv))
+    def signalSignedPrismOperation = signalPrismOperation
+      .map(prismOperation =>
+        SignedPrismOperation(
+          signedWith = "vdr-key-id",
+          signature = ByteString.copyFrom("fixme".getBytes()),
+          operation = Some(prismOperation)
         )
       )
-    }
 
-  ProtoCreateDID.messageCompanion.defaultInstance
+    div(
+      mb.html,
+      hr(),
+      h2("PrismOperation:"),
+      pre(
+        code(
+          child <-- signalPrismOperation.map(op => bytes2Hex(op.toByteArray))
+        )
+      ),
+      hr(),
+      p(child <-- signalPValue.map(pv => pv).map(e => e.toString())),
+      hr(),
+      p(child <-- signalPrismOperation.map(e => e.toString())),
+      hr(),
+      h2("SignedPrismOperation:"),
+      pre(
+        code(
+          child <-- signalPrismOperation
+            .map(prismOperation => OP.fromPrismOperation(prismOperation))
+            .map(op => op.toJson)
+        )
+      ),
+      hr(),
+      h2("PrismBlock:"),
+      pre(
+        code(
+          child <-- signalSignedPrismOperation
+            .map(signedPrismOperation => PrismBlock(Seq(signedPrismOperation)))
+            .map(op => bytes2Hex(op.toByteArray))
+        )
+      )
+    )
+  }
 
   val rootElement = div(
-    onMountCallback { ctx =>
-      // callSignViaRPC(ctx.owner) // side effect
-      // callEncryptedViaRPC(ctx.owner) // side effect
-      // jobNextForward(ctx.owner) // side effect
-      // callCommand(ctx.owner) // side effect
-      ()
-    },
+    // onMountCallback { ctx => () }, // side effect
     div(h1("PrismVdrEdit Tool")),
     hr(),
     div(
-      child <-- companionVar.signal.flatMap {
-        case None             => Signal.fromValue(div())
-        case Some(descriptor) => htmlInputFromCompanionProto(descriptor)
+      child <-- companionVar.signal.map {
+        case None => div()
+        case Some(descriptor) =>
+          htmlInputFromCompanionProto(
+            descriptor,
+            // Some(
+            //   PrismOperation.parseFrom(
+            //     hex2bytes(
+            //       "0a3f0a3d123b0a076d61737465723010014a2e0a09736563703235366b311221021456f5dd7bcddca7a3e48edad8cc68d0ce6a7a5991492cb48bac817c2e4d9adc"
+            //     )
+            //   )
+            // )
+          )
       }
     ),
   )

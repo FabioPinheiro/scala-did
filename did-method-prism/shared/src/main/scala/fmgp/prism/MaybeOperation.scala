@@ -67,6 +67,11 @@ object MySignedPrismOperation {
     DeriveJsonEncoder.gen[MySignedPrismOperation[OP]]
   }
 
+  given encoderTypeDidEvent: JsonEncoder[MySignedPrismOperation[OP.TypeDidEvent]] =
+    encoder.contramap(e => e)
+  given encoderTypeStorageEntryEvent: JsonEncoder[MySignedPrismOperation[OP.TypeStorageEntryEvent]] =
+    encoder.contramap(e => e)
+
 }
 
 object MaybeOperation {
@@ -86,9 +91,6 @@ object MaybeOperation {
       }
     }
   }
-
-  // given JsonDecoder[MaybeOperation[OP]] = DeriveJsonDecoder.gen[MaybeOperation[OP]]
-  // given JsonEncoder[MaybeOperation[OP]] = DeriveJsonEncoder.gen[MaybeOperation[OP]]
 
   def fromProto(
       tx: String,
