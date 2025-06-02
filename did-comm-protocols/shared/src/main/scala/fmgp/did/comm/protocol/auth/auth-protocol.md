@@ -15,7 +15,7 @@ This protocol is used a authenticate and or authorization an user (DID) or opera
     - If the message is encrypt it MUST be `authcrypt(plaintext)`
   - Ex: can be used to autenticate a WebSocket Secure (WSS)
 
-- `https://fmgp.app/auth/1.0/reply`
+- `https://fmgp.app/auth/1.0/msg`
   - **Mediate Reply**
   - for register opetations we can use `signed(plaintext)`; `anoncrypt(sign(plaintext))`; `authcrypt(sign(plaintext))`
   - for unregister operation we can use `authcrypt(plaintext)`, by default this encrypted mode will not be accepted.

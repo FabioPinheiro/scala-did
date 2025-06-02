@@ -1,8 +1,6 @@
 package fmgp.did.demo
 
 import scala.io.Source
-import java.io.File
-import java.io.FileNotFoundException
 
 import zio._
 import zio.json._
@@ -163,8 +161,9 @@ object AppServer extends ZIOAppDefault {
     ),
   )
 
-  val app: Routes[Operator & Operations & Resolver, Nothing] = (
+  val app: Routes[Operator & Operations & Resolver & Ref[DemoAgent.Table], Nothing] = (
     DIDCommRoutes.appRoutes ++
+      DemoAgent.loginDemo ++
       didWebs ++
       appTest ++
       DocsApp.mdocHTML ++
@@ -222,6 +221,7 @@ object AppServer extends ZIOAppDefault {
           OperatorImp.layer ++
           Operations.layerOperations ++
           resolverLayer.project(i => i: Resolver) ++ // DidPeerResolver.layerDidPeerResolver ++
+          DemoAgent.tableDataRef ++
           Server.defaultWithPort(port)
           // Server.defaultWith(
           //   _.port(port)
