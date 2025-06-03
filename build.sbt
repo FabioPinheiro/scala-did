@@ -152,7 +152,7 @@ lazy val V = new {
   // val scalajsLogging = "1.1.2-SNAPSHOT" //"1.1.2"
 
   // https://mvnrepository.com/artifact/dev.zio/zio
-  val zio = "2.1.17"
+  val zio = "2.1.19"
   val zioJson = "0.7.43"
   val zioMunitTest = "0.4.0"
   val zioHttp = "3.2.0" // FIXES CORS https://github.com/zio/zio-http/pull/2490
@@ -469,7 +469,7 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
     libraryDependencies += "com.google.crypto.tink" % "tink" % "1.17.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
-    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.30.2",
+    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.31.1",
   )
   .jsConfigure(scalaJSLibConfigure)
   .jsSettings(
@@ -561,7 +561,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
     libraryDependencies += "com.google.crypto.tink" % "tink" % "1.17.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
-    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.2",
+    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.5",
     // https://oss.sonatype.org/#nexus-search;quick~com.bloxbean.cardano
     libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.6.4",
     libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.6.4",
@@ -619,7 +619,7 @@ lazy val didPrismNode = project
       rootPaths.value.apply("BASE").toFile() / "did-method-prism-node" / "src/main/protobuf"
     ),
     libraryDependencies ++= Seq(
-      "io.grpc" % "grpc-netty" % "1.72.0", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
+      "io.grpc" % "grpc-netty" % "1.73.0", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
       // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion,
       // REMOVE // The following needed only if you include scalapb/scalapb.proto:
       // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
