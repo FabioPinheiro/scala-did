@@ -155,7 +155,7 @@ lazy val V = new {
   val zio = "2.1.19"
   val zioJson = "0.7.43"
   val zioMunitTest = "0.4.0"
-  val zioHttp = "3.2.0" // FIXES CORS https://github.com/zio/zio-http/pull/2490
+  val zioHttp = "3.3.3" // FIXES CORS https://github.com/zio/zio-http/pull/2490
   val zioPrelude = "1.0.0-RC21"
 
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time
@@ -754,6 +754,7 @@ val protobufPattern2 = "(com/google/protobuf/.*)".r
 
 ThisBuild / assemblyMergeStrategy := {
   case "META-INF/versions/9/module-info.class"    => MergeStrategy.first
+  case "META-INF/versions/11/module-info.class"   => MergeStrategy.first
   case "META-INF/io.netty.versions.properties"    => MergeStrategy.first
   case "META-INF/versions/9/OSGI-INF/MANIFEST.MF" => MergeStrategy.first
   case "META-INF/okio.kotlin_module"              => MergeStrategy.first
