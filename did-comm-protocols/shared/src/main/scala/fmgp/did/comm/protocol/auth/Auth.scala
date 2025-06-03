@@ -74,7 +74,7 @@ final case class AuthMsg(
 }
 
 object AuthMsg {
-  def piuri = PIURI("https://fmgp.app/auth/0.1/msg")
+  def piuri = PIURI("https://fmgp.app/auth/0.1/auth")
 
   // protected final case class Body(scopes: Option[Seq[String]], metaData: Option[Map[String, String]]) {
 

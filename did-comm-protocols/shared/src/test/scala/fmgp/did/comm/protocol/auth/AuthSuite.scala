@@ -34,7 +34,7 @@ class AuthSuite extends FunSuite {
   val msgAuthExample =
     """{
       |  "id" : "MsgID-2",
-      |  "type" : "https://fmgp.app/auth/0.1/msg",
+      |  "type" : "https://fmgp.app/auth/0.1/auth",
       |  "thid": "MsgID-1",
       |  "from" : "did:example:bob",
       |  "to" : [ "did:example:alice" ]
@@ -42,7 +42,7 @@ class AuthSuite extends FunSuite {
   val msgAuthExample_Missing_thid =
     """{
       |  "id" : "MsgID-2",
-      |  "type" : "https://fmgp.app/auth/0.1/msg",
+      |  "type" : "https://fmgp.app/auth/0.1/auth",
       |  "from" : "did:example:bob",
       |  "to" : [ "did:example:alice" ]
       |}""".stripMargin
@@ -72,7 +72,7 @@ class AuthSuite extends FunSuite {
 
     (fMsg.toAuthMsg) match {
       case Right(msg)  => fail("fMsg MUST fail with missing a thid")
-      case Left(error) => assertEquals(error, "'https://fmgp.app/auth/0.1/msg' MUST have field 'thid'")
+      case Left(error) => assertEquals(error, "'https://fmgp.app/auth/0.1/auth' MUST have field 'thid'")
     }
   }
 
