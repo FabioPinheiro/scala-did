@@ -166,7 +166,7 @@ lazy val V = new {
   val logbackClassic = "1.2.10"
   val scalaLogging = "3.9.4"
 
-  val bouncycastle = "1.78.1"
+  val bouncycastle = "1.80"
   val nimbusJoseJwt = "10.3"
 
   val laika = "1.0.0"
@@ -227,9 +227,9 @@ lazy val D = new {
   // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt
   // https://bitbucket.org/connect2id/nimbus-jose-jwt/branches/compare/release-9.35%0Drelease-9.32
   val bouncycastle_bcprov = // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
-    Def.setting("org.bouncycastle" % "bcprov-jdk18on" % "1.80")
+    Def.setting("org.bouncycastle" % "bcprov-jdk18on" % V.bouncycastle)
   val bouncycastle_bcpkix = // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
-    Def.setting("org.bouncycastle" % "bcpkix-jdk18on" % "1.80")
+    Def.setting("org.bouncycastle" % "bcpkix-jdk18on" % V.bouncycastle)
 
   val nimbusJoseJwt = Def.setting("com.nimbusds" % "nimbus-jose-jwt" % V.nimbusJoseJwt)
 
@@ -534,8 +534,8 @@ lazy val didResolverPeer = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "org.didcommx" % "peerdid" % "0.5.0" % Test,
     resolvers += "jitpack" at "https://jitpack.io", // For java-multibase
     libraryDependencies += "com.github.multiformats" % "java-multibase" % "1.2.0" % Test, // FIX CVE-2020-15250 in peerdid
-    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.77" % Test,
-    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.77" % Test,
+    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.80" % Test,
+    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.80" % Test,
     libraryDependencies += D.nimbusJoseJwt.value % Test,
     // libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.16-preview.1" % Test,
   )
@@ -745,12 +745,25 @@ lazy val demo = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(did, didImp, didFramework, didResolverPeer, didResolverWeb, didUniresolver, didExample)
 
 val webjarsPattern = "(META-INF/resources/webjars/.*)".r
+val bouncycastlePattern1 = "(org/bouncycastle/.*)".r
+val bouncycastlePattern2 = "(META-INF/versions/9/org/bouncycastle/.*)".r
+val bouncycastlePattern3 = "(META-INF/versions/11/org/bouncycastle/.*)".r
+val bouncycastlePattern4 = "(META-INF/versions/15/org/bouncycastle/.*)".r
+val protobufPattern1 = "(google/protobuf/.*)".r
+val protobufPattern2 = "(com/google/protobuf/.*)".r
+
 ThisBuild / assemblyMergeStrategy := {
   case "META-INF/versions/9/module-info.class"    => MergeStrategy.first
   case "META-INF/io.netty.versions.properties"    => MergeStrategy.first
   case "META-INF/versions/9/OSGI-INF/MANIFEST.MF" => MergeStrategy.first
   case "META-INF/okio.kotlin_module"              => MergeStrategy.first
   case webjarsPattern(file)                       => MergeStrategy.discard
+  case bouncycastlePattern1(file) => MergeStrategy.preferProject // because of a Apollo is using very old version
+  case bouncycastlePattern2(file) => MergeStrategy.preferProject // because of a Apollo is using very old version
+  case bouncycastlePattern3(file) => MergeStrategy.preferProject // because of a Apollo is using very old version
+  case bouncycastlePattern4(file) => MergeStrategy.preferProject // because of a Apollo is using very old version
+  case protobufPattern1(file)     => MergeStrategy.preferProject // because of a Apollo is using very old version
+  case protobufPattern2(file)     => MergeStrategy.preferProject // because of a Apollo is using very old version
 //   case PathList("javax", "servlet", xs @ _*)         => MergeStrategy.first
 //   case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
 //   case "application.conf"                            => MergeStrategy.concat
