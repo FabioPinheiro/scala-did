@@ -619,7 +619,7 @@ lazy val didPrismNode = project
       rootPaths.value.apply("BASE").toFile() / "did-method-prism-node" / "src/main/protobuf"
     ),
     libraryDependencies ++= Seq(
-      "io.grpc" % "grpc-netty" % "1.72.0", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
+      "io.grpc" % "grpc-netty" % "1.73.0", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
       // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion,
       // REMOVE // The following needed only if you include scalapb/scalapb.proto:
       // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
