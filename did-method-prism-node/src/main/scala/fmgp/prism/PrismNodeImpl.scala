@@ -7,6 +7,7 @@ import proto.prism.Service
 import proto.prism.node.*
 import zio.*
 import fmgp.did.DIDSubject
+import fmgp.did.method.prism._
 
 object PrismNodeImpl {
   def make = for {
@@ -41,7 +42,7 @@ case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletC
       )
     state <- refState.get
     didDataEffect = state.ssi2eventsId.get(did).map { operations =>
-      val ops = operations.map(op => state.getEventsByHash(op.opHash)).flatten
+      val ops = operations.map(op => state.getEventsByHash(op.eventHash)).flatten
       SSI.make(did, ops).didData
     }
     ret = GetDidDocumentResponse(

@@ -1,4 +1,4 @@
-package fmgp.prism
+package fmgp.did.method.prism
 
 import fmgp.prism.PrismPublicKey.UncompressedECKey
 import fmgp.prism.PrismPublicKey.CompressedECKey
@@ -7,6 +7,7 @@ import scala.util.chaining._
 import zio.json._
 import fmgp.did._
 import fmgp.did.method.prism.DIDPrism
+import fmgp.prism._
 
 /** This is the SSI representing a DID PRISM */
 final case class SSI(

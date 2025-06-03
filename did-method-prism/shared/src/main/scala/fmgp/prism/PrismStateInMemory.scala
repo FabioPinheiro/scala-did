@@ -6,6 +6,8 @@ import scala.annotation.tailrec
 import fmgp.did.DIDDocument
 import fmgp.did.method.prism._
 import fmgp.did.DIDSubject
+import fmgp.did.method.prism.SSI
+import fmgp.did.method.prism.RefVDR
 
 object PrismStateInMemory {
   def empty = PrismStateInMemory(Map.empty, Map.empty, Map.empty)
@@ -44,9 +46,9 @@ case class PrismStateInMemory(
   override def addEvent(op: MySignedPrismOperation[OP]): PrismState = op match
     case MySignedPrismOperation(tx, prismBlockIndex, prismOperationIndex, signedWith, signature, operation, pb) =>
       val opId = op.eventRef
-      val newOpHash2op = opHash2op.updatedWith(opId.opHash) {
+      val newOpHash2op = opHash2op.updatedWith(opId.eventHash) {
         case Some(value) =>
-          if (value.opHash == opId.opHash) Some(op)
+          if (value.opHash == opId.eventHash) Some(op)
           else throw new RuntimeException("impossible state: duplicated operation but with different hash?")
         case None => Some(op)
       }
@@ -92,8 +94,8 @@ case class PrismStateInMemory(
               PrismStateInMemory(opHash2op = newOpHash2op, tx2eventRef = newTx2eventRef, ssi2eventRef = newSSI2eventRef)
 
   def makeSSI: Seq[SSI] = this.ssi2eventRef.map { (ssi, ops) =>
-    ops.foldLeft(SSI.init(ssi)) { case (tmpSSI, opId) =>
-      this.opHash2op.get(opId.opHash) match
+    ops.foldLeft(fmgp.did.method.prism.SSI.init(ssi)) { case (tmpSSI, opId) =>
+      this.opHash2op.get(opId.eventHash) match
         case None     => ???
         case Some(op) => tmpSSI.appendAny(op)
     }

@@ -6,7 +6,6 @@ import fmgp.did._
 import fmgp.did.comm.FROMTO
 import fmgp.crypto._
 import fmgp.util.hex2bytes
-import fmgp.prism.SSI
 
 /** DID Prism (only short form)
   *

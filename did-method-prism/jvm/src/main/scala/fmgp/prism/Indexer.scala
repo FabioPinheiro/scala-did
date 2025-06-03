@@ -12,6 +12,7 @@ import scala.util.Failure
 import scala.util.Success
 import fmgp.did.method.prism.DIDPrism
 import fmgp.did.DIDSubject
+import fmgp.did.method.prism.SSI
 
 object Indexer extends ZIOAppDefault {
 
@@ -236,7 +237,7 @@ object Indexer extends ZIOAppDefault {
                 )
                 .contramapChunks[MySignedPrismOperation[OP]](_.flatMap { spo => s"${spo.toJson}\n".getBytes })
             }
-            ssi = SSI.make(did, ops)
+            ssi = fmgp.did.method.prism.SSI.make(did, ops)
             _ <- ZStream.from(ssi).run {
               ZSink
                 .fromFileName(name = indexerConfig.ssiPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))

@@ -21,7 +21,9 @@ message ProtoCreateStorageEntry {
   bytes did_prism_hash = 1; // The specificId of the did:prism.
   bytes nonce = 2; // Used to generate reference diferents hash for the reference of the name
   oneof data {
-    bytes bytes = 3;
+    bytes bytes = 10;
+    string ipfs = 11; // CID
+    StatusListEntry statusListEntry = 12;
     // BitstringStatusList bitstring_status_list = 4;
     // StatusListToken status_list_token = 5;
 
@@ -42,12 +44,20 @@ message ProtoCreateStorageEntry {
 message ProtoUpdateStorageEntry {
   bytes previous_operation_hash = 1; // The hash of the most recent operation that was used to create or update the VDR Entry.
   oneof data {
-    bytes bytes = 2; //replace the bytes
+    bytes bytes = 10; //replace the bytes
+    string ipfs = 11; // Update/replace the data with a CID to IPFS. This is static data
+    StatusListEntry statusListEntry = 12;
 
     // array[int] =  // update is to filt bytes
-    // string ipfs = 3; // Update/replace the data with a link to IPFS. This is static data
     // ??? what about IPNS? https://docs.ipfs.tech/concepts/ipns/ is there a use case for this?
   }
+}
+
+/** Status List entry */
+message StatusListEntry {
+  int64 state = 1;
+  string name = 2; // optional
+  string details = 3; // optional
 }
 
 message ProtoDeactivateStorageEntry{

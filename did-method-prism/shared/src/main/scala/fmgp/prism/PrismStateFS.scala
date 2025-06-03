@@ -4,6 +4,7 @@ import zio._
 import zio.json._
 import fmgp.did.method.prism._
 import fmgp.did.DIDSubject
+import fmgp.did.method.prism.RefVDR
 
 case class PrismStateFS(config: IndexerConfig) extends PrismStateRead {
 

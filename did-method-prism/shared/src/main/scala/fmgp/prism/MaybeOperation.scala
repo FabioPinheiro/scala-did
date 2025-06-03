@@ -10,6 +10,7 @@ import proto.prism.PrismObject
 import proto.prism.SignedPrismOperation
 import fmgp.util.safeValueOf
 import fmgp.util.bytes2Hex
+import fmgp.did.method.prism._
 
 // TODO Rename to MaybeEvent
 sealed trait MaybeOperation[+T <: OP] // sealed abstract class MaybeOperation[+T <: OP]
@@ -39,8 +40,8 @@ case class MySignedPrismOperation[+T <: OP](
     protobuf: PrismOperation
 ) extends MaybeOperation[T]
     with PrismOperationIndex {
-  def opHash = SHA256.digestToHex(protobuf.toByteArray)
-  def eventRef = EventRef(b = b, o = o, opHash = opHash)
+  def opHash = protobuf.eventHashStr
+  def eventRef = EventRef(b = b, o = o, eventHash = protobuf.eventHashStr)
 }
 
 object InvalidPrismObject {

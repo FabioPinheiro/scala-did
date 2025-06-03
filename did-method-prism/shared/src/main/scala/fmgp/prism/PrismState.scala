@@ -4,6 +4,7 @@ import zio._
 import zio.json._
 import fmgp.did.method.prism._
 import fmgp.did.DIDSubject
+import fmgp.did.method.prism.RefVDR
 
 trait PrismStateRead {
   def lastSyncedBlockEpochSecondNano: (Long, Int) = {
@@ -27,8 +28,8 @@ trait PrismStateRead {
         acc match
           case Left(errors) => Left(errors)
           case Right(seq) =>
-            getEventsByHash(eventRef.opHash) match
-              case None => Left(s"impossible state: missing Event/Operation Hash '${eventRef.opHash}'")
+            getEventsByHash(eventRef.eventHash) match
+              case None => Left(s"impossible state: missing Event/Operation Hash '${eventRef.eventHash}'")
               case Some(signedPrismOperation) => Right(seq :+ signedPrismOperation)
       ) match {
       case Left(error) => ZIO.fail(new RuntimeException(error))
@@ -45,8 +46,8 @@ trait PrismStateRead {
         acc match
           case Left(errors) => Left(errors)
           case Right(seq) =>
-            getEventsByHash(eventRef.opHash) match
-              case None => Left(s"impossible state: missing Event/Operation Hash '${eventRef.opHash}'")
+            getEventsByHash(eventRef.eventHash) match
+              case None => Left(s"impossible state: missing Event/Operation Hash '${eventRef.eventHash}'")
               case Some(signedPrismOperation) => Right(seq :+ signedPrismOperation)
       ) match {
       case Left(error) => ZIO.fail(new RuntimeException(error))

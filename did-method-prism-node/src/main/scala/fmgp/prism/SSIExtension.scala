@@ -9,6 +9,7 @@ import proto.prism.PublicKey.KeyData.CompressedEcKeyData
 import proto.prism.PublicKey.KeyData.EcKeyData
 import proto.prism.Service
 import proto.prism.node.DIDData
+import fmgp.did.method.prism._
 
 extension (ssi: SSI) {
   def didData: DIDData = {

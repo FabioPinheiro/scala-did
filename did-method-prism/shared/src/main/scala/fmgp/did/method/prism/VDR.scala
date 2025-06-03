@@ -1,7 +1,9 @@
-package fmgp.prism
+package fmgp.did.method.prism
 
 import zio.json._
 import fmgp.did.method.prism.DIDPrism
+import fmgp.prism._
+import proto.prism.ProtoUpdateStorageEntry
 
 opaque type RefVDR = String
 object RefVDR:
@@ -15,7 +17,7 @@ final case class VDR(
     did: DIDPrism,
     // ssi: SSI, ///FIXME
     latestVDRHash: Option[String],
-    data: Array[Byte]
+    data: VDR.DataType
 ) { self =>
   def appendAny(spo: MySignedPrismOperation[OP]): VDR = spo.operation match
     // VDR
@@ -33,18 +35,41 @@ final case class VDR(
     spo match
       case MySignedPrismOperation(tx, b, o, signedWith, signature, operation, protobuf) =>
         operation match
-          case event @ CreateStorageEntryOP(didPrismHash, nonce, data) =>
+          case event @ CreateStorageEntryOP(didPrismHash, nonce, newData) =>
             println("CreateStorageEntryOP") // FIXME REMOVE
             assert(did.specificId == didPrismHash) // FIXME
+            // self.copy(data = self.data.update(newData))
             self
-
-          case event @ UpdateStorageEntryOP(previousOperationHash, data) =>
+          case event @ UpdateStorageEntryOP(previousOperationHash, newData) =>
             println("UpdateStorageEntryOP") // FIXME REMOVE
-            self
+            self.copy(data = self.data.update(newData))
           case event @ DeactivateStorageEntryOP(previousOperationHash) =>
             println("DeactivateStorageEntryOP") // FIXME REMOVE
-            self
+            self.copy(data = VDR.DataDeactivated(self.data))
 
 }
 
-object VDR {}
+object VDR {
+  sealed trait DataType { self =>
+    def update(op: DataUpdateType): DataType = (self, op) match
+      case (old: DataByteArray, update: DataByteArray)   => update // Replace
+      case (old: DataIPFS, update: DataIPFS)             => update // Replace
+      case (old: DataStatusList, update: DataStatusList) => ??? // FIXME
+      case (old, update)                                 => self // ignore update
+
+  }
+  sealed trait DataUpdateType
+  object DataType {
+    given JsonDecoder[DataType] = DeriveJsonDecoder.gen[DataType]
+    given JsonEncoder[DataType] = DeriveJsonEncoder.gen[DataType]
+  }
+  object DataUpdateType {
+    given JsonDecoder[DataUpdateType] = DeriveJsonDecoder.gen[DataUpdateType]
+    given JsonEncoder[DataUpdateType] = DeriveJsonEncoder.gen[DataUpdateType]
+  }
+
+  case class DataDeactivated(data: DataType) extends DataType
+  case class DataByteArray(byteArray: Array[Byte]) extends DataType with DataUpdateType
+  case class DataIPFS(cid: String) extends DataType with DataUpdateType
+  case class DataStatusList(status: Map[Int, Array[Byte]]) extends DataType with DataUpdateType // TODO
+}
