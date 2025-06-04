@@ -534,8 +534,8 @@ lazy val didResolverPeer = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "org.didcommx" % "peerdid" % "0.5.0" % Test,
     resolvers += "jitpack" at "https://jitpack.io", // For java-multibase
     libraryDependencies += "com.github.multiformats" % "java-multibase" % "1.2.0" % Test, // FIX CVE-2020-15250 in peerdid
-    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.80" % Test,
-    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.80" % Test,
+    libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.81" % Test,
+    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.81" % Test,
     libraryDependencies += D.nimbusJoseJwt.value % Test,
     // libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.16-preview.1" % Test,
   )
