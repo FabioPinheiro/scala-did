@@ -21,7 +21,9 @@ publishLocal
 
 ## Publish to Sonatype
 
-The library is publish to https://oss.sonatype.org/
+NEW system: https://central.sonatype.com/account
+
+Legacy OSSRH: The library is publish to https://oss.sonatype.org/
 
 ### Config 
 
@@ -50,8 +52,12 @@ Job's ENV notes:
 
 ### Run ci-release Local
 
-
 `SONATYPE_USERNAME=??? SONATYPE_PASSWORD=??? PGP_SECRET=??? sbt`
+
+sbt:
+- > `+publish`
+- > `+publishSigned`
+- > `+sonatypeBundleRelease`
 
 ### Check that is release
 
