@@ -32,12 +32,14 @@ gpg -k fabiomgpinheiro+Scala-Steward@gmail.com
 gpg --armor --export $LONG_ID # Get the LONG_ID from the 
 # gpg --armor --export 212722AA6D9EC1A86799D54924607459115D94B0
 
-gpg --keyserver hkp://keyserver.ubuntu.com --send-key $LONG_ID && \
- gpg --keyserver hkp://pgp.mit.edu --send-key $LONG_ID && \
- gpg --keyserver hkp://pool.sks-keyservers.net --send-key $LONG_ID
+# check public key https://keyserver.ubuntu.com/pks/lookup?search=fabiomgpinheiro%2BScala-Steward%40gmail.com&fingerprint=on&op=index
+gpg --keyserver hkp://keyserver.ubuntu.com --send-key $LONG_ID
+gpg --keyserver hkp://pgp.mit.edu --send-key $LONG_ID
+gpg --keyserver hkp://pool.sks-keyservers.net --send-key $LONG_ID
 
  gpg --armor --export-secret-keys $LONG_ID | base64 | sed -z 's;\n;;g' | xclip -selection clipboard -i # for the PGP_SECRET
  gpg --armor --export-secret-keys 212722AA6D9EC1A86799D54924607459115D94B0 | base64 | sed -z 's;\n;;g' | xclip -selection clipboard -i # for the PGP_SECRET
+ gpg --armor --export-secret-keys 1067AF39C0447AF8E42381384B9FF6586B1F1292 | base64 | sed 's;\n;;g' | pbcopy # for the PGP_SECRET (MAC)
 ```
 
 ### Config CI
