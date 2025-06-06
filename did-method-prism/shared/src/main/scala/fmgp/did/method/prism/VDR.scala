@@ -1,9 +1,7 @@
 package fmgp.did.method.prism
 
 import zio.json._
-import fmgp.did.method.prism.DIDPrism
-import fmgp.prism._
-import proto.prism.ProtoUpdateStorageEntry
+import fmgp.did.method.prism.proto._
 
 opaque type RefVDR = String
 object RefVDR:

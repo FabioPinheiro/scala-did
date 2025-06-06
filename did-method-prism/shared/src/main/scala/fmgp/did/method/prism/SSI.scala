@@ -1,19 +1,16 @@
 package fmgp.did.method.prism
 
-import fmgp.prism.PrismPublicKey.UncompressedECKey
-import fmgp.prism.PrismPublicKey.CompressedECKey
-import fmgp.prism.PrismPublicKey.VoidKey
 import scala.util.chaining._
 import zio.json._
+import fmgp.did.method.prism._
+import fmgp.did.method.prism.proto._
 import fmgp.did._
-import fmgp.did.method.prism.DIDPrism
-import fmgp.prism._
 
 /** This is the SSI representing a DID PRISM */
 final case class SSI(
     did: DIDSubject,
     latestHash: Option[String],
-    keys: Seq[UncompressedECKey | CompressedECKey],
+    keys: Seq[PrismPublicKey.UncompressedECKey | PrismPublicKey.CompressedECKey],
     services: Seq[MyService],
     context: Seq[String],
     disabled: Boolean
@@ -27,11 +24,11 @@ final case class SSI(
     case _                  => self
 
   private def addKey(k: PrismPublicKey): SSI = k match
-    case _: VoidKey           => self
-    case k: UncompressedECKey => addKey(k)
-    case k: CompressedECKey   => addKey(k)
+    case _: PrismPublicKey.VoidKey           => self
+    case k: PrismPublicKey.UncompressedECKey => addKey(k)
+    case k: PrismPublicKey.CompressedECKey   => addKey(k)
 
-  private def addKey(k: UncompressedECKey | CompressedECKey): SSI =
+  private def addKey(k: PrismPublicKey.UncompressedECKey | PrismPublicKey.CompressedECKey): SSI =
     if (keys.exists(_.id == k.id)) self //  ID must be unique
     else self.copy(keys = this.keys :+ k)
 
@@ -60,9 +57,9 @@ final case class SSI(
                     case UpdateDidOP.VoidAction(reason) => tmpSSI
                     case UpdateDidOP.AddKey(key) =>
                       key match
-                        case VoidKey(id, reason)                           => tmpSSI
-                        case k @ UncompressedECKey(id, usage, curve, x, y) => tmpSSI.addKey(k)
-                        case k @ CompressedECKey(id, usage, curve, data)   => tmpSSI.addKey(k)
+                        case PrismPublicKey.VoidKey(id, reason)                           => tmpSSI
+                        case k @ PrismPublicKey.UncompressedECKey(id, usage, curve, x, y) => tmpSSI.addKey(k)
+                        case k @ PrismPublicKey.CompressedECKey(id, usage, curve, data)   => tmpSSI.addKey(k)
                     case UpdateDidOP.RemoveKey(keyId)    => tmpSSI.copy(keys = tmpSSI.keys.filter(_.id != keyId))
                     case UpdateDidOP.AddService(service) => tmpSSI.copy(services = services :+ service)
                     case UpdateDidOP.RemoveService(sId)  => tmpSSI.copy(services = services.filter(_.id != sId))
