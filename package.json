@@ -29,6 +29,6 @@
     "mermaid": "^11.6.0",
     "multiformats": "^9.6.4",
     "qr-scanner": "^1.4.2",
-    "qrcode": "^1.5.3"
+    "qrcode": "^1.5.4"
   }
 }
