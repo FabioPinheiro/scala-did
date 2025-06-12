@@ -20,7 +20,9 @@ option (scalapb.options) = {
 message ProtoCreateStorageEntry {
   bytes did_prism_hash = 1; // The specificId of the did:prism.
   bytes nonce = 2; // Used to generate reference diferents hash for the reference of the name
+  reserved 5-9; // Those field will be used for validation in the future
   oneof data {
+    // Nothing // The data field can be missing representing ANY type
     bytes bytes = 10;
     string ipfs = 11; // CID
     StatusListEntry statusListEntry = 12;
@@ -43,8 +45,10 @@ message ProtoCreateStorageEntry {
  */
 message ProtoUpdateStorageEntry {
   bytes previous_operation_hash = 1; // The hash of the most recent operation that was used to create or update the VDR Entry.
-  oneof data {
-    bytes bytes = 10; //replace the bytes
+  reserved 5-9; // Those field will be used for validation in the future
+  oneof data { // The data field can be missing
+    // Nothing // The data field can be missing representing ANY type
+    bytes bytes = 10; // replace the bytes
     string ipfs = 11; // Update/replace the data with a CID to IPFS. This is static data
     StatusListEntry statusListEntry = 12;
 
@@ -62,6 +66,7 @@ message StatusListEntry {
 
 message ProtoDeactivateStorageEntry{
   bytes previous_operation_hash = 1; // The hash of the most recent operation that was used to create or update the DID.
+  reserved 5-9; // Those field will be used for validation in the future
 }
 
 // /** BitstringStatusList is used for JWT VC ______ LINK!

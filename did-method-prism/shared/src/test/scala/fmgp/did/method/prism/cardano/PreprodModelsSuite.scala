@@ -24,9 +24,9 @@ class PreprodModelsSuite extends FunSuite {
 
     val aux1 = seq.map(cardanoPrismEntry =>
       MaybeOperation.fromProto(
+        prismObject = cardanoPrismEntry.content,
         tx = cardanoPrismEntry.tx,
         blockIndex = cardanoPrismEntry.index,
-        prismObject = cardanoPrismEntry.content
       )
     )
 

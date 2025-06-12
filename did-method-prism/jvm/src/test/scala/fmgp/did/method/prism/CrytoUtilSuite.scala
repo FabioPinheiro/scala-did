@@ -15,7 +15,7 @@ import java.security.spec.ECPublicKeySpec
 import fmgp.did.method.prism.cardano._
 import fmgp.did.method.prism.proto._
 
-/** didResolverPrismJVM/testOnly fmgp.prism.CrytoUtilSuite */
+/** didResolverPrismJVM/testOnly fmgp.did.method.prism.CrytoUtilSuite */
 class CrytoUtilSuite extends FunSuite {
 
   val ecPublicKeyBase64 =
@@ -90,7 +90,7 @@ class CrytoUtilSuite extends FunSuite {
 
   test("Metadata 6418 (CompressedECKey)") {
     val cardanoPrismEntry = MainnetExamples.metadata_6418.toCardanoPrismEntry.getOrElse(???)
-    val tmp = MaybeOperation.fromProto("tx", -1, cardanoPrismEntry.content)
+    val tmp = MaybeOperation.fromProto(cardanoPrismEntry.content, "tx", -1)
     val mySignedPrismOperation = tmp.head.asInstanceOf[MySignedPrismOperation[OP]]
 
     PrismPublicKey
@@ -116,7 +116,7 @@ class CrytoUtilSuite extends FunSuite {
 
   test("Metadata 6451 (CompressedECKey)") {
     val cardanoPrismEntry = MainnetExamples.metadata_6451.toCardanoPrismEntry.getOrElse(???)
-    val tmp = MaybeOperation.fromProto("tx", -1, cardanoPrismEntry.content)
+    val tmp = MaybeOperation.fromProto(cardanoPrismEntry.content, "tx", -1)
     val mySignedPrismOperation = tmp.head.asInstanceOf[MySignedPrismOperation[OP]]
 
     PrismPublicKey

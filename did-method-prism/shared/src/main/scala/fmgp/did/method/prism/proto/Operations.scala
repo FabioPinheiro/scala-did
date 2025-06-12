@@ -4,6 +4,7 @@ import zio.json._
 import fmgp.util.bytes2Hex
 import proto.prism._
 import fmgp.did.method.prism.VDR
+import fmgp.did.method.prism.DIDPrism
 
 sealed trait OP
 object OP {
@@ -66,7 +67,7 @@ case class ProtocolVersionUpdateOP(value: String) extends OP
   */
 case class DeactivateDidOP(previousOperationHash: String, id: String) extends OP
 
-case class CreateStorageEntryOP(didPrismHash: String, nonce: Array[Byte], data: VDR.DataType) extends OP {
+case class CreateStorageEntryOP(didPrism: DIDPrism, nonce: Array[Byte], data: VDR.DataType) extends OP {
   def nonceInHex = bytes2Hex(nonce)
 }
 case class UpdateStorageEntryOP(previousOperationHash: String, data: VDR.DataUpdateType) extends OP
@@ -180,10 +181,10 @@ object CreateStorageEntryOP {
   def fromProto(p: ProtoCreateStorageEntry) = p match
     case ProtoCreateStorageEntry(didPrismHash, nonce, data, unknownFields) =>
       CreateStorageEntryOP(
-        didPrismHash = bytes2Hex(didPrismHash.toByteArray()),
+        didPrism = DIDPrism.fromEventHash(didPrismHash.toByteArray()),
         nonce = nonce.toByteArray(),
         data = data match
-          case ProtoCreateStorageEntry.Data.Empty                  => ??? // FIXME
+          case ProtoCreateStorageEntry.Data.Empty                  => VDR.DataEmpty()
           case ProtoCreateStorageEntry.Data.Bytes(value)           => VDR.DataByteArray(value.toByteArray())
           case ProtoCreateStorageEntry.Data.Ipfs(cid)              => VDR.DataIPFS(cid)
           case ProtoCreateStorageEntry.Data.StatusListEntry(value) => ??? // FIXME
@@ -195,7 +196,7 @@ object UpdateStorageEntryOP {
       UpdateStorageEntryOP(
         previousOperationHash = bytes2Hex(previousOperationHash.toByteArray()),
         data = data match {
-          case ProtoUpdateStorageEntry.Data.Empty              => ??? // FIXME
+          case ProtoUpdateStorageEntry.Data.Empty              => VDR.DataEmpty()
           case ProtoUpdateStorageEntry.Data.Bytes(value)       => VDR.DataByteArray(value.toByteArray())
           case ProtoUpdateStorageEntry.Data.Ipfs(cid)          => VDR.DataIPFS(cid)
           case ProtoUpdateStorageEntry.Data.StatusListEntry(_) => ???

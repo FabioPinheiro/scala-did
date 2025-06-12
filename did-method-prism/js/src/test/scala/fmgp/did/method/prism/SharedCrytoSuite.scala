@@ -11,7 +11,7 @@ class SharedCrytoSuite extends FunSuite {
   test("Metadata 6418 checkECDSASignature".ignore) {
     val cardanoPrismEntry =
       fmgp.did.method.prism.cardano.MainnetExamples.metadata_6418.toCardanoPrismEntry.getOrElse(???)
-    val tmp = MaybeOperation.fromProto("tx", -1, cardanoPrismEntry.content)
+    val tmp = MaybeOperation.fromProto(cardanoPrismEntry.content, "tx", -1)
     val mySignedPrismOperation = tmp.head.asInstanceOf[MySignedPrismOperation[OP]]
 
     PrismPublicKey

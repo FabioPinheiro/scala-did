@@ -11,7 +11,7 @@ import proto.prism.SignedPrismOperation
 import fmgp.util.safeValueOf
 import fmgp.util.bytes2Hex
 import fmgp.did.method.prism._
-import fmgp.did.method.prism.cardano.{PrismBlockIndex, PrismOperationIndex}
+import fmgp.did.method.prism.cardano.{PrismBlockIndex, PrismOperationIndex, EventCursor}
 
 // TODO Rename to MaybeEvent
 sealed trait MaybeOperation[+T <: OP] // sealed abstract class MaybeOperation[+T <: OP]
@@ -43,6 +43,7 @@ case class MySignedPrismOperation[+T <: OP](
     with PrismOperationIndex {
   def opHash = protobuf.eventHashStr
   def eventRef = EventRef(b = b, o = o, eventHash = protobuf.eventHashStr)
+  def eventCursor = EventCursor(b = b, o = o)
 }
 
 object InvalidPrismObject {
@@ -95,28 +96,36 @@ object MaybeOperation {
   }
 
   def fromProto(
+      prismObject: PrismObject,
       tx: String,
       blockIndex: Int,
-      prismObject: PrismObject,
   ): Seq[MaybeOperation[OP]] =
     prismObject.blockContent match
       case None => Seq(InvalidPrismObject(tx = tx, b = blockIndex, reason = "blockContent is missing"))
       case Some(prismBlock) =>
-        prismBlock.operations.zipWithIndex.map {
-          case (SignedPrismOperation(signedWith, signature, operation, unknownFields), opIndex) =>
-            assert(unknownFields.serializedSize == 0, "SignedPrismOperation have unknownFields")
-            operation match
-              case None => InvalidSignedPrismOperation(tx = tx, b = blockIndex, o = opIndex, "operation is missing")
-              case Some(prismOperation) =>
-                MySignedPrismOperation(
-                  tx = tx,
-                  b = blockIndex,
-                  o = opIndex,
-                  signedWith = signedWith,
-                  signature = signature.toByteArray(),
-                  operation = OP.fromPrismOperation(prismOperation),
-                  protobuf = prismOperation,
-                )
+        prismBlock.operations.zipWithIndex.map { case (signedPrismOperation, opIndex) =>
+          fromProto(signedPrismOperation = signedPrismOperation, tx = tx, blockIndex = blockIndex, opIndex = opIndex)
         }
 
+  def fromProto(
+      signedPrismOperation: SignedPrismOperation,
+      tx: String,
+      blockIndex: Int,
+      opIndex: Int,
+  ): MaybeOperation[OP] =
+    signedPrismOperation match
+      case SignedPrismOperation(signedWith, signature, operation, unknownFields) =>
+        assert(unknownFields.serializedSize == 0, "SignedPrismOperation have unknownFields")
+        operation match
+          case None => InvalidSignedPrismOperation(tx = tx, b = blockIndex, o = opIndex, "operation is missing")
+          case Some(prismOperation) =>
+            MySignedPrismOperation(
+              tx = tx,
+              b = blockIndex,
+              o = opIndex,
+              signedWith = signedWith,
+              signature = signature.toByteArray(),
+              operation = OP.fromPrismOperation(prismOperation),
+              protobuf = prismOperation,
+            )
 }
