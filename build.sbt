@@ -184,7 +184,7 @@ lazy val NPM = new { // When update the dependencies also update in package.json
   // val elliptic = "elliptic" -> "6.6.1"
   // val ellipticType = "@types/elliptic" -> "6.4.18"
 
-  val nobleCurves = "@noble/curves" -> "1.8.1"
+  val nobleCurves = "@noble/curves" -> "1.9.2"
   val appoloJS = "@hyperledger/identus-apollo" -> "^1.4.5"
 
 }

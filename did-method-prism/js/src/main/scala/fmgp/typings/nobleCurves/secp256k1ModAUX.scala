@@ -1,8 +1,8 @@
 package fmgp.typings.nobleCurves
 
 import fmgp.typings.nobleCurves.abstractHashToCurveMod.HTFMethod
-import fmgp.typings.nobleCurves.abstractUtilsMod.Hex
-import fmgp.typings.nobleCurves.abstractUtilsMod.PrivKey
+import fmgp.typings.nobleCurves.esmUtilsMod.Hex
+import fmgp.typings.nobleCurves.esmUtilsMod.PrivKey
 import fmgp.typings.nobleCurves.abstractWeierstrassMod.ProjPointType
 import fmgp.typings.nobleCurves.abstractWeierstrassMod.SignatureType
 import fmgp.typings.nobleCurves.anon.BytesToNumberBE
@@ -33,33 +33,34 @@ object secp256k1ModAUX {
     val ^ : CurveFnWithCreate = js.native
 
     /* This class was inferred from a value with a constructor. In rare cases (like HTMLElement in the DOM) it might not work as you expect. */
+    @deprecated("Interface is no longer nessesaty", "@noble/curves@1.9.1") // in the update from 1.8.2 to 1.9.2
     @JSImport("@noble/curves/secp256k1", "secp256k1.ProjectivePoint")
     @js.native
     open class ProjectivePoint protected () extends StObject with ProjPointType[js.BigInt] {
       def this(x: js.BigInt, y: js.BigInt, z: js.BigInt) = this()
 
-      /* CompleteClass */
-      override def add(other: ProjPointType[js.BigInt]): ProjPointType[js.BigInt] = js.native
+      // /* CompleteClass */
+      // override def add(other: ProjPointType[js.BigInt]): ProjPointType[js.BigInt] = js.native
 
-      /* CompleteClass */
-      override def double(): ProjPointType[js.BigInt] = js.native
+      // /* CompleteClass */
+      // override def double(): ProjPointType[js.BigInt] = js.native
 
-      /* CompleteClass */
-      override def multiply(scalar: js.BigInt): ProjPointType[js.BigInt] = js.native
+      // /* CompleteClass */
+      // override def multiply(scalar: js.BigInt): ProjPointType[js.BigInt] = js.native
 
-      /* CompleteClass */
-      override def negate(): ProjPointType[js.BigInt] = js.native
+      // /* CompleteClass */
+      // override def negate(): ProjPointType[js.BigInt] = js.native
 
-      /* CompleteClass */
-      override def subtract(other: ProjPointType[js.BigInt]): ProjPointType[js.BigInt] = js.native
+      // /* CompleteClass */
+      // override def subtract(other: ProjPointType[js.BigInt]): ProjPointType[js.BigInt] = js.native
     }
 
-    /* This class was inferred from a value with a constructor. In rare cases (like HTMLElement in the DOM) it might not work as you expect. */
-    @JSImport("@noble/curves/secp256k1", "secp256k1.Signature")
-    @js.native
-    open class Signature protected () extends StObject with SignatureType {
-      def this(r: js.BigInt, s: js.BigInt) = this()
-    }
+    // / * This class was inferred from a value with a constructor. In rare cases (like HTMLElement in the DOM) it might not work as you expect. * /
+    // @JSImport("@noble/curves/secp256k1", "secp256k1.Signature")
+    // @js.native
+    // open class Signature protected () extends StObject with SignatureType {
+    //   def this(r: js.BigInt, s: js.BigInt) = this()
+    // }
 
     type _To = CurveFnWithCreate
 
