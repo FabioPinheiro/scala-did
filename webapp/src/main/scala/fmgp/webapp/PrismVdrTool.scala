@@ -16,7 +16,7 @@ import zio.json._
 import proto.prism.PrismOperation
 import fmgp.crypto.SHA256
 import fmgp.did.method.prism._
-import fmgp.prism._
+import fmgp.did.method.prism.proto._
 import fmgp.util._
 
 @js.annotation.JSExportTopLevel("PrismVdrTool")

@@ -3,7 +3,7 @@ package fmgp.did.method.prism.proto
 import zio.json._
 import proto.prism.Service
 
-// TODO Rename
+// TODO Rename PrismDidService
 case class MyService(
     id: String, // (1)
     `type`: String, // (2)

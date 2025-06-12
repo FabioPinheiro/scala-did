@@ -22,9 +22,9 @@ object IndexerUtils {
           )
         case Right(cardanoPrismEntry) =>
           MaybeOperation.fromProto(
+            prismObject = cardanoPrismEntry.content,
             tx = cardanoPrismEntry.tx,
             blockIndex = cardanoPrismEntry.index,
-            prismObject = cardanoPrismEntry.content
           )
     )
 
@@ -46,7 +46,7 @@ object IndexerUtils {
     chunkFilesAfter <- fmgp.did.method.prism.indexer.Indexer
       .findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath)
     _ <- ZIO.log(s"Read chunkFiles")
-    streamAllChunkFiles = ZStream.fromIterable {
+    streamAllMaybeOperationFromChunkFiles = ZStream.fromIterable {
       chunkFilesAfter.map { fileName =>
         ZStream
           .fromFile(fileName)
@@ -56,10 +56,9 @@ object IndexerUtils {
           .flatMap(e => ZStream.fromIterable(e))
       }
     }.flatten
-    streamMetadata = streamAllChunkFiles
     _ <- ZIO.log(s"Init PrismState")
     stateRef <- Ref.make(PrismState.empty)
-    countEvents <- streamMetadata
+    countEvents <- streamAllMaybeOperationFromChunkFiles
       .via(IndexerUtils.pipelinePrismState)
       .run(ZSink.count)
       .provideEnvironment(ZEnvironment(stateRef))
