@@ -10,9 +10,7 @@ import scalapb.descriptors._
 import scalapb._
 
 import fmgp.util._
-import fmgp.typings.nobleCurves.esmEd25519Mod.ed25519ctx._to
 import fmgp.webapp.utils.ProtoHTML.AuxBuilder
-import typings.vscodeLanguageserverTypes.mod.SemanticTokenModifiers.`abstract`
 
 object ProtoHTML {
 
