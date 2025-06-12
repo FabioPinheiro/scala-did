@@ -1,6 +1,8 @@
 package fmgp.did.method.prism
 
 import scala.jdk.CollectionConverters._
+import zio._
+import zio.stream._
 
 import org.hyperledger.identus.apollo.derivation.MnemonicHelper
 import org.hyperledger.identus.apollo.derivation.HDKey
@@ -44,8 +46,8 @@ object PrismTestUtils {
 
   def signedPrismUpdateEventVDR = SignedPrismOperation(
     signedWith = "vdr1",
-    signature = ByteString.copyFrom(KeyConstanceUtils.pk1VDR.sign(createVDR.toByteArray)),
-    operation = Some(createVDR)
+    signature = ByteString.copyFrom(KeyConstanceUtils.pk1VDR.sign(updateVDR1.toByteArray)),
+    operation = Some(updateVDR1)
   )
 
   def createDID = PrismOperation(
@@ -66,7 +68,7 @@ object PrismTestUtils {
               ),
               PublicKey(
                 id = "vdr1",
-                usage = KeyUsage.MASTER_KEY,
+                usage = KeyUsage.VDR_KEY,
                 keyData = PublicKey.KeyData.CompressedEcKeyData(
                   value = CompressedECKeyData(
                     curve = "secp256k1",
@@ -98,7 +100,7 @@ object PrismTestUtils {
   def updateVDR1 = PrismOperation(
     operation = PrismOperation.Operation.UpdateStorageEntry(
       value = ProtoUpdateStorageEntry(
-        previousOperationHash = ByteString.copyFrom(createDID.eventHash),
+        previousOperationHash = ByteString.copyFrom(createVDR.eventHash),
         data = ProtoUpdateStorageEntry.Data.Bytes(ByteString.copyFrom(hex2bytes("3300ffcc"))),
       )
     ),
@@ -121,20 +123,46 @@ object PrismTestUtils {
 
 }
 
-/** didResolverPrismJVM/Test/runMain fmgp.prism.MainVDR */
+/** didResolverPrismJVM/Test/runMain fmgp.did.method.prism.MainVDR */
 @main def MainVDR() = {
   println("*" * 100)
   println("Main VDR")
 
+  val e1 = PrismTestUtils.signedPrismCreateEventDID
+  val e2 = PrismTestUtils.signedPrismCreateEventVDR
+  val e3 = PrismTestUtils.signedPrismUpdateEventVDR
+
   // println("CreateDID: " + bytes2Hex(PrismTestUtils.createDID.toByteArray))
-  println("signatureCreateDID: " + bytes2Hex(PrismTestUtils.signedPrismCreateEventDID.signature.toByteArray))
-  println("signedPrismCreateEventDID: " + bytes2Hex(PrismTestUtils.signedPrismCreateEventDID.toByteArray))
+  println("signatureCreateDID: " + bytes2Hex(e1.signature.toByteArray))
+  println("signedPrismCreateEventDID: " + bytes2Hex(e1.toByteArray))
   println(PrismTestUtils.createDID.didPrism.getOrElse(???).string)
   // println("PrismOperation: " + bytes2Hex(PrismTestUtils.createVDR.toByteArray))
-  println("signature CreateEventVDR: " + bytes2Hex(PrismTestUtils.signedPrismCreateEventVDR.signature.toByteArray))
-  println("signedPrismOperation: " + bytes2Hex(PrismTestUtils.signedPrismCreateEventVDR.toByteArray))
+  println("signature CreateEventVDR: " + bytes2Hex(e2.signature.toByteArray))
+  println("signedPrismOperation: " + bytes2Hex(e2.toByteArray))
 
-  println("signature UpdateEventVDR: " + bytes2Hex(PrismTestUtils.signedPrismUpdateEventVDR.signature.toByteArray))
-  println("signedPrismOperation: " + bytes2Hex(PrismTestUtils.signedPrismUpdateEventVDR.toByteArray))
+  println("signature UpdateEventVDR: " + bytes2Hex(e3.signature.toByteArray))
+  println("signedPrismOperation: " + bytes2Hex(e3.toByteArray))
+
+  val program = for {
+    _ <- ZIO.log("""### MainVDR program ###""".stripMargin)
+    sink = {
+      import java.nio.file.StandardOpenOption.*
+      ZSink
+        .fromFileName(name = "vdr_data_example", options = Set(WRITE, APPEND, CREATE, SYNC))
+        .contramapChunks[String](_.flatMap { e => (e + "\n").getBytes })
+        .ignoreLeftover // TODO review
+        .mapZIO(bytes => ZIO.log(s"ZSink PRISM Events into 'vdr_data_example' (write $bytes bytes)"))
+    }
+    stream = ZStream.fromIterable(
+      Seq(e1, e2, e3).map(event => bytes2Hex(event.toByteArray))
+    )
+    _ <- stream.run(sink)
+  } yield ()
+
+  Unsafe.unsafe { implicit unsafe => // Run side effect
+    Runtime.default.unsafe
+      .run(program) // .provide(Operations.layerOperations ++ DidPeerResolver.layer))
+      .getOrThrowFiberFailure()
+  }
 
 }

@@ -78,8 +78,7 @@ object UtilsJS {
   extension (key: OKP_EC_Key) {
 
     private def toJWK: JWK = {
-      val keyJWK = JWK()
-      keyJWK.setKty(key.kty.toString)
+      val keyJWK = JWK(kty = key.kty.toString)
       keyJWK.setX(key.x)
       key match {
         case ec: ECKey   => keyJWK.setY(ec.y)

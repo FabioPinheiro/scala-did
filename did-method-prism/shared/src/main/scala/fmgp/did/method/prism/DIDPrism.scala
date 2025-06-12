@@ -5,7 +5,8 @@ import zio.json._
 import fmgp.did._
 import fmgp.did.comm.FROMTO
 import fmgp.crypto._
-import fmgp.util.hex2bytes
+import fmgp.util._
+import fmgp.did.method.prism.proto._
 
 /** DID Prism (only short form)
   *
@@ -25,6 +26,11 @@ case class DIDPrism(specificId: String) extends DID {
 
 object DIDPrism {
 
+  given decoder: JsonDecoder[DIDPrism] = DIDSubject.decoder.mapOrFail(did => DIDPrism.fromDID(did))
+  // JsonDecoder.string.map(DIDPrism(_))
+  given encoder: JsonEncoder[DIDPrism] = DIDSubject.encoder.contramap(did => did.asDIDSubject)
+  // JsonEncoder.string.contramap[DIDPrism](_.specificId)
+
   /** Syntax
     * {{{
     *   prism-did          = "did:prism:" initial-hash [encoded-state]
@@ -39,6 +45,12 @@ object DIDPrism {
 
   def namespace: String = "prism"
   def applyUnsafe(did: String): DIDPrism = DIDPrism(DIDSubject(did).specificId)
+
+  def fromEventHash(hash: Array[Byte]): DIDPrism = DIDPrism(bytes2Hex(hash))
+  def fromEvent(event: MySignedPrismOperation[OP]): DIDPrism = // Either[String, DIDPrism]
+    event.operation match
+      case CreateDidOP(publicKeys, services, context) => applyUnsafe(event.eventRef.eventHash)
+      case _                                          => ??? // FIXME
 
   def fromDID(did: DID): Either[String, DIDPrism] = did.string match {
     case regexPrismShortForm(hash)      => Right(DIDPrism(hash))
