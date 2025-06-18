@@ -23,7 +23,11 @@ package object util {
   }.mkString
 
   inline def hex2bytes(hex: String): Array[Byte] = {
-    hex.replaceAll("[^0-9A-Fa-f]", "").sliding(2, 2).toArray.map(Integer.parseInt(_, 16).toByte)
+    val tmp = hex.replaceAll("[^0-9A-Fa-f]", "")
+    (if (tmp.size % 2 == 0) tmp else "0" + tmp)
+      .sliding(2, 2)
+      .toArray
+      .map(Integer.parseInt(_, 16).toByte)
   }
 
   given decoderByteArray: JsonDecoder[Array[Byte]] = // use mapOrFail

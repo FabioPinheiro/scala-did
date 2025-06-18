@@ -48,8 +48,12 @@ class SHASuite extends ZSuite {
       "182889f925ae4e5cc37118ded6ed87f7bdc7cab5ec5e78faef2e50048999473f"
     ),
     (
-      hex2bytes("123"),
+      hex2bytes("1203"),
       "3d73c0c831c942c1996ca667b639970e571d58c6b7b996e4082a6d091be0b956"
+    ),
+    (
+      hex2bytes("123"),
+      "b71de80778f2783383f5d5a3028af84eab2f18a4eb38968172ca41724dd4b3f4" // https://emn178.github.io/online-tools/sha256.html
     ),
     (
       hex2bytes("1234567891"),
