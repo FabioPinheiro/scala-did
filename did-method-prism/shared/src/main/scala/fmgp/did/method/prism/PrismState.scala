@@ -56,6 +56,29 @@ trait PrismStateRead {
     }
 
   def getEventsByHash(refHash: String): Option[MySignedPrismOperation[OP]]
+
+  def getSSI(ssi: DIDSubject): ZIO[Any, Throwable, SSI] =
+    getSSIHistory(ssi).map(_.latestVersion) // getEventsForSSI(ssi).map { events => SSI.make(ssi, events) }
+
+  def getSSIHistory(ssi: DIDSubject): ZIO[Any, Throwable, SSIHistory] =
+    getEventsForSSI(ssi).map { events => SSI.makeSSIHistory(ssi, events) }
+
+  def getVDR(ref: RefVDR): zio.ZIO[Any, Throwable, VDR] = getEventsForVDR(ref)
+    .flatMap { events =>
+      events.headOption match
+        case None => ZIO.succeed(VDR.init(ref)) // owner is missing
+        case Some(headEvent) =>
+          headEvent.operation match {
+            case _: CreateStorageEntryOP =>
+              val didPrismOwner =
+                headEvent.asInstanceOf[MySignedPrismOperation[CreateStorageEntryOP]].operation.didPrism
+              getSSIHistory(didPrismOwner).map { ssiHistory =>
+                VDR.make(vdrRef = ref, ssiHistory = ssiHistory, ops = events)
+              }
+            case event => ???
+          }
+    }
+
 }
 
 object PrismState {

@@ -24,7 +24,7 @@ case class PrismStateInMemory(
 ) extends PrismState {
 
   override def ssi2eventsId: Map[DIDSubject, Seq[EventRef]] = ssi2eventRef // TODO RENAME
-  override def getEventsIdByVDR(id: RefVDR): Seq[EventRef] = ??? // FIXME TODO
+  override def getEventsIdByVDR(id: RefVDR): Seq[EventRef] = vdr2eventRef.get(id).getOrElse(Seq.empty)
 
   @scala.annotation.tailrec
   final def ssiFromPreviousOperationHash(previousHash: String): Option[String] = {

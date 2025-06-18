@@ -10,7 +10,7 @@ import fmgp.did.method.prism.cardano._
 /** This is the SSI representing a DID PRISM */
 final case class SSI(
     did: DIDSubject,
-    latestHash: Option[String],
+    latestHash: Option[String], // TODO TYPE SAFE
     keys: Seq[PrismPublicKey.UncompressedECKey | PrismPublicKey.CompressedECKey],
     services: Seq[MyService],
     context: Seq[String],
@@ -149,10 +149,34 @@ object SSI {
       cursor = EventCursor.init
     )
 
-  def make(ssi: DIDSubject, ops: Seq[MySignedPrismOperation[OP]]) =
+  def make(ssi: DIDSubject, ops: Seq[MySignedPrismOperation[OP]]): SSI =
     ops.foldLeft(SSI.init(ssi)) { case (tmpSSI, op) => tmpSSI.appendAny(op) }
 
-  // def fromCreateEvent(op: MySignedPrismOperation[CreateDidOP | UpdateDidOP | DeactivateDidOP]) =
-  def fromCreateEvent(op: MySignedPrismOperation[CreateDidOP]) =
-    SSI.init(DIDPrism(op.opHash)).append(op)
+  def makeSSIHistory(ssi: DIDSubject, ops: Seq[MySignedPrismOperation[OP]]): SSIHistory =
+    ops.foldLeft(SSIHistory.init(ssi)) { case (history, op) => history.appendAny(op) }
+}
+
+case class SSIHistory(did: DIDSubject, versions: Seq[SSI]) {
+  def didPrism: DIDPrism = DIDPrism.fromDID(did).getOrElse(???) // FIXME
+
+  def appendAny(spo: MySignedPrismOperation[OP]): SSIHistory =
+    copy(versions = versions :+ latestVersion.appendAny(spo))
+
+  def latestVersion: SSI = versions.lastOption match
+    case Some(lastSSI) => lastSSI
+    case None          => SSI.init(did)
+
+  def latestVersionBefore(cursor: EventCursor) =
+    versions
+      .filter(ssi => Ordering[EventCursor].lt(ssi.cursor, cursor))
+      .lastOption match {
+      case None      => SSI.init(did)
+      case Some(ssi) => ssi
+    }
+
+}
+object SSIHistory {
+  given decoder: JsonDecoder[SSIHistory] = DeriveJsonDecoder.gen[SSIHistory]
+  given encoder: JsonEncoder[SSIHistory] = DeriveJsonEncoder.gen[SSIHistory]
+  def init(did: DIDSubject): SSIHistory = SSIHistory(did, versions = Seq.empty)
 }
