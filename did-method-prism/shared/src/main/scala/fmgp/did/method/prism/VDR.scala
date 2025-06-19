@@ -12,10 +12,10 @@ object RefVDR:
   def fromEventHash(hash: Array[Byte]): RefVDR = bytes2Hex(hash)
   def fromEvent(event: MySignedPrismOperation[OP]): RefVDR =
     event.operation match
-      case CreateStorageEntryOP(didPrism, nonce, data)       => event.eventRef.eventHash
-      case UpdateStorageEntryOP(previousOperationHash, data) => event.eventRef.eventHash
-      case DeactivateStorageEntryOP(previousOperationHash)   => event.eventRef.eventHash
-      case _                                                 => ??? // FIXME
+      case CreateStorageEntryOP(didPrism, nonce, data)   => event.eventRef.eventHash
+      case UpdateStorageEntryOP(previousEventHash, data) => event.eventRef.eventHash
+      case DeactivateStorageEntryOP(previousEventHash)   => event.eventRef.eventHash
+      case _                                             => ??? // FIXME
 
   extension (id: RefVDR)
     def value: String = id

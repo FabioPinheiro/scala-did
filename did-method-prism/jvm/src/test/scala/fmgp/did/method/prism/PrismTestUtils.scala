@@ -86,12 +86,12 @@ object PrismTestUtils {
       vdrKeyName: String,
       vdrKey: KMMECSecp256k1PrivateKey,
   ): SignedPrismOperation = {
-    val previousOperationHash =
+    val previousEventHash =
       SHA256.digest(previousOperation.operation.get.toByteArray)
     def op = PrismOperation(
       operation = PrismOperation.Operation.UpdateDid(
         value = ProtoUpdateDID(
-          previousOperationHash = ByteString.copyFrom(previousOperationHash),
+          previousOperationHash = ByteString.copyFrom(previousEventHash),
           id = didPrism.did,
           actions = Seq(
             UpdateDIDAction(
@@ -154,12 +154,12 @@ object PrismTestUtils {
       keyName: String,
       data: Array[Byte],
   ): SignedPrismOperation = {
-    val previousOperationHash =
+    val previousEventHash =
       SHA256.digest(previousOperation.operation.get.toByteArray)
     def op = PrismOperation(
       operation = PrismOperation.Operation.UpdateStorageEntry(
         value = ProtoUpdateStorageEntry(
-          previousOperationHash = ByteString.copyFrom(previousOperationHash),
+          previousEventHash = ByteString.copyFrom(previousEventHash),
           data = ProtoUpdateStorageEntry.Data.Bytes(ByteString.copyFrom(data)),
         )
       ),

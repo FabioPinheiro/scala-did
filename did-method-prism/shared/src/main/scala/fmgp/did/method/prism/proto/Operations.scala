@@ -70,8 +70,8 @@ case class DeactivateDidOP(previousOperationHash: String, id: String) extends OP
 case class CreateStorageEntryOP(didPrism: DIDPrism, nonce: Array[Byte], data: VDR.DataType) extends OP {
   def nonceInHex = bytes2Hex(nonce)
 }
-case class UpdateStorageEntryOP(previousOperationHash: String, data: VDR.DataUpdateType) extends OP
-case class DeactivateStorageEntryOP(previousOperationHash: String) extends OP
+case class UpdateStorageEntryOP(previousEventHash: String, data: VDR.DataUpdateType) extends OP
+case class DeactivateStorageEntryOP(previousEventHash: String) extends OP
 
 object CreateDidOP {
   import proto.prism.ProtoCreateDID.DIDCreationData
@@ -192,9 +192,9 @@ object CreateStorageEntryOP {
 }
 object UpdateStorageEntryOP {
   def fromProto(p: ProtoUpdateStorageEntry) = p match
-    case ProtoUpdateStorageEntry(previousOperationHash, data, unknownFields) =>
+    case ProtoUpdateStorageEntry(previousEventHash, data, unknownFields) =>
       UpdateStorageEntryOP(
-        previousOperationHash = bytes2Hex(previousOperationHash.toByteArray()),
+        previousEventHash = bytes2Hex(previousEventHash.toByteArray()),
         data = data match {
           case ProtoUpdateStorageEntry.Data.Empty              => VDR.DataEmpty()
           case ProtoUpdateStorageEntry.Data.Bytes(value)       => VDR.DataByteArray(value.toByteArray())
@@ -206,8 +206,8 @@ object UpdateStorageEntryOP {
 
 object DeactivateStorageEntryOP {
   def fromProto(p: ProtoDeactivateStorageEntry) = p match
-    case ProtoDeactivateStorageEntry(previousOperationHash, unknownFields) =>
+    case ProtoDeactivateStorageEntry(previousEventHash, unknownFields) =>
       DeactivateStorageEntryOP(
-        previousOperationHash = bytes2Hex(previousOperationHash.toByteArray()),
+        previousEventHash = bytes2Hex(previousEventHash.toByteArray()),
       )
 }
