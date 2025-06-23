@@ -51,7 +51,7 @@ object API {
     * @return
     *   MetadataContentJson
     */
-  def metadataContentJson(network: String, label: String, page: Int, count: Int = 100) =
+  def metadataContentJson(network: String, label: Int, page: Int, count: Int = 100) =
     s"$network/metadata/txs/labels/$label?page=$page&count=$count&order=asc"
 
   /** @param label
@@ -63,7 +63,7 @@ object API {
     * @return
     *   MetadataContentCBOR
     */
-  def metadataContentCBOR(network: String, label: String, page: Int, count: Int = 100) =
+  def metadataContentCBOR(network: String, label: Int, page: Int, count: Int = 100) =
     s"$network/metadata/txs/labels/$label/cbor?page=$page&count=$count&order=asc"
 
   // SortedPageRequest

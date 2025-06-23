@@ -13,9 +13,14 @@ import fmgp.did.method.prism._
 import fmgp.did.method.prism.cardano._
 import fmgp.did.method.prism.proto._
 
+/** Indexer
+  *
+  * {{{
+  * didResolverPrismJVM/runMain fmgp.did.method.prism.indexer.Indexer ../prism-vdr/prismnet preprod preprodTOKEN
+  * }}}
+  */
 object Indexer extends ZIOAppDefault {
 
-  val PRISM_LABEL_CIP_10 = "21325"
   val PAGE_SIZE = 100
 
   /** Transactions per chunk file

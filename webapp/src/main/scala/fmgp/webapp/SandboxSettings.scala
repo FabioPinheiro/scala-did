@@ -1,20 +1,21 @@
 package fmgp.webapp
 
+import scala.util.Failure
+import scala.util.Success
+import zio._
+import zio.json._
+
 import org.scalajs.dom
 import scala.scalajs.js
 import com.raquo.laminar.api.L._
 
 import fmgp.ServiceWorkerUtils
 import fmgp.SettingsFromHTML
-import fmgp.Utils
-import fmgp.Config
+import fmgp._
 import fmgp.did._
 import fmgp.crypto._
-import scala.util.Failure
-import scala.util.Success
-import zio._
-import zio.json._
 import fmgp.did.uniresolver.Uniresolver
+import fmgp.did.method.prism.cardano.PRISM_LABEL_CIP_10
 
 object SandboxSettings {
   val keyTest: Var[Option[OKPPrivateKey]] = Var(initial = None)
@@ -82,7 +83,7 @@ object SandboxSettings {
       // Revolver
       h2("Prism DID Revolver"),
       p(
-        "Choose the URL to be used for fetching the Blockchain Cardano data related with DID PRISM (transactions with the metadata label '21325' - CIP 10)"
+        s"Choose the URL to be used for fetching the Blockchain Cardano data related with DID PRISM (transactions with the metadata label '$PRISM_LABEL_CIP_10' - CIP 10)"
       ),
       div(
         input(

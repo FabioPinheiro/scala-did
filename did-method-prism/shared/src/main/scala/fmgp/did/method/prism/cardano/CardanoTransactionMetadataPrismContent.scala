@@ -32,7 +32,7 @@ object CardanoTransactionMetadataPrismCBOR {
   given Decoder[CardanoTransactionMetadataPrismCBOR] = Decoder { reader =>
     if (reader.hasMapHeader) {
       reader.readMapHeader(1)
-      if (reader.hasInt & reader.readInt() == 21325) {
+      if (reader.hasInt & reader.readInt() == PRISM_LABEL_CIP_10) {
         if (reader.hasMapHeader(2)) {
           val readerPrismStr = reader.readMapHeader(2)
           reader.readString() match
@@ -52,7 +52,7 @@ object CardanoTransactionMetadataPrismCBOR {
             }
             case _ => reader.unexpectedDataItem("the map key 'v' or 'c'")
         } else reader.unexpectedDataItem(expected = "`MapHeader` with the PRISM structure")
-      } else reader.unexpectedDataItem(expected = "`Int` with value 21325")
+      } else reader.unexpectedDataItem(expected = s"`Int` with value $PRISM_LABEL_CIP_10")
     } else reader.unexpectedDataItem(expected = "Cardano Metadata MUST start with a MapHeader with the label")
   }
 }
