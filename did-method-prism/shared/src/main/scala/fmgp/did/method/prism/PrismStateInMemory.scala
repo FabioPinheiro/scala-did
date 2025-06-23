@@ -27,27 +27,27 @@ case class PrismStateInMemory(
   override def getEventsIdByVDR(id: RefVDR): Seq[EventRef] = vdr2eventRef.get(id).getOrElse(Seq.empty)
 
   @scala.annotation.tailrec
-  final def ssiFromPreviousOperationHash(previousHash: String): Option[String] = {
+  final def ssiFromPreviousEventHash(previousHash: String): Option[String] = {
     opHash2op.get(previousHash) match
       case None => None
       case Some(previousOp) =>
         previousOp.operation match
           case CreateDidOP(publicKeys, services, context)     => Some(previousOp.opHash)
-          case UpdateDidOP(previousPreviousHash, id, actions) => ssiFromPreviousOperationHash(previousPreviousHash)
+          case UpdateDidOP(previousPreviousHash, id, actions) => ssiFromPreviousEventHash(previousPreviousHash)
           case DeactivateDidOP(previousOperationHash, id)     => None
           case _                                              => None
   }
 
   @scala.annotation.tailrec
-  final def vdrFromPreviousOperationHash(previousHash: String): Option[RefVDR] = {
+  final def vdrFromPreviousEventHash(previousHash: String): Option[RefVDR] = {
     opHash2op.get(previousHash) match
       case None => None
       case Some(previousOp) =>
         previousOp.operation match
-          case CreateStorageEntryOP(didPrism, nonce, data)       => Some(RefVDR.fromEvent(previousOp))
-          case UpdateStorageEntryOP(previousOperationHash, data) => vdrFromPreviousOperationHash(previousOperationHash)
-          case DeactivateStorageEntryOP(previousOperationHash)   => None
-          case _                                                 => None
+          case CreateStorageEntryOP(didPrism, nonce, data, _)   => Some(RefVDR.fromEvent(previousOp))
+          case UpdateStorageEntryOP(previousEventHash, data, _) => vdrFromPreviousEventHash(previousEventHash)
+          case DeactivateStorageEntryOP(previousEventHash, _)   => None
+          case _                                                => None
   }
 
   override def getEventsIdBySSI(ssi: DIDSubject): Seq[EventRef] =
@@ -96,7 +96,7 @@ case class PrismStateInMemory(
             vdr2eventRef = this.vdr2eventRef,
           )
         case UpdateDidOP(previousOperationHash, id, actions) =>
-          ssiFromPreviousOperationHash(previousOperationHash) match
+          ssiFromPreviousEventHash(previousOperationHash) match
             case None => this // TODO add to the void
             case Some(ssiHash) =>
               val did = DIDPrism(ssiHash)
@@ -111,7 +111,7 @@ case class PrismStateInMemory(
                 vdr2eventRef = this.vdr2eventRef,
               )
         case DeactivateDidOP(previousOperationHash, id) =>
-          ssiFromPreviousOperationHash(previousOperationHash) match
+          ssiFromPreviousEventHash(previousOperationHash) match
             case None => this // TODO add to the void
             case Some(ssiHash) =>
               val did = DIDPrism(ssiHash)
@@ -125,7 +125,7 @@ case class PrismStateInMemory(
                 ssi2eventRef = newSSI2eventRef,
                 vdr2eventRef = this.vdr2eventRef,
               )
-        case CreateStorageEntryOP(didPrism, nonce, data) =>
+        case CreateStorageEntryOP(didPrism, nonce, data, unknownFields) =>
           val vdrRef = RefVDR.fromEvent(op)
           val newVDR2eventRef = vdr2eventRef.updatedWith(vdrRef) {
             case None      => Some(Seq(opId)) // Normal case
@@ -137,8 +137,8 @@ case class PrismStateInMemory(
             ssi2eventRef = this.ssi2eventRef,
             vdr2eventRef = newVDR2eventRef,
           )
-        case UpdateStorageEntryOP(previousOperationHash, data) =>
-          vdrFromPreviousOperationHash(previousOperationHash) match
+        case UpdateStorageEntryOP(previousOperationHash, data, unknownFields) =>
+          vdrFromPreviousEventHash(previousOperationHash) match
             case None => this
             case Some(vdrRef) =>
               val newVDR2eventRef = vdr2eventRef.updatedWith(vdrRef) {
@@ -151,8 +151,8 @@ case class PrismStateInMemory(
                 ssi2eventRef = this.ssi2eventRef,
                 vdr2eventRef = newVDR2eventRef,
               )
-        case DeactivateStorageEntryOP(previousOperationHash) =>
-          vdrFromPreviousOperationHash(previousOperationHash) match
+        case DeactivateStorageEntryOP(previousOperationHash, unknownFields) =>
+          vdrFromPreviousEventHash(previousOperationHash) match
             case None => this
             case Some(vdrRef) =>
               val newVDR2eventRef = vdr2eventRef.updatedWith(vdrRef) {

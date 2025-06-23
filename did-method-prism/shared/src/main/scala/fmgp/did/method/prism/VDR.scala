@@ -12,10 +12,10 @@ object RefVDR:
   def fromEventHash(hash: Array[Byte]): RefVDR = bytes2Hex(hash)
   def fromEvent(event: MySignedPrismOperation[OP]): RefVDR =
     event.operation match
-      case CreateStorageEntryOP(didPrism, nonce, data)   => event.eventRef.eventHash
-      case UpdateStorageEntryOP(previousEventHash, data) => event.eventRef.eventHash
-      case DeactivateStorageEntryOP(previousEventHash)   => event.eventRef.eventHash
-      case _                                             => ??? // FIXME
+      case _: CreateStorageEntryOP     => event.eventRef.eventHash
+      case _: UpdateStorageEntryOP     => event.eventRef.eventHash
+      case _: DeactivateStorageEntryOP => event.eventRef.eventHash
+      case _                           => ??? // FIXME
 
   extension (id: RefVDR)
     def value: String = id
@@ -35,6 +35,7 @@ final case class VDR(
     cursor: EventCursor, // append cursor
     nonce: Option[Array[Byte]],
     data: VDR.DataType,
+    unsupportedValidationField: Boolean,
     // REMOVE disabled: Boolean,  // This is already on DataType VDR.DataDeactivated
 ) { self =>
   def appendAny(spo: MySignedPrismOperation[OP], ssi: SSIHistory): VDR = spo.operation match
@@ -42,6 +43,12 @@ final case class VDR(
     case _: UpdateStorageEntryOP     => append(spo.asInstanceOf[MySignedPrismOperation[UpdateStorageEntryOP]], ssi)
     case _: DeactivateStorageEntryOP => append(spo.asInstanceOf[MySignedPrismOperation[DeactivateStorageEntryOP]], ssi)
     case _ /* others */              => self.copy(cursor = Ordering[EventCursor].max(cursor, spo.eventCursor))
+
+  /** Int proto with have {{{reserved 3 to 49;}}} those field will be used for validation the Storage Events in the
+    * future
+    */
+  private def nextUnsupportedValidationField(unknownFields: Set[Int]) =
+    self.unsupportedValidationField | unknownFields.exists(_ <= 49)
 
   def append(
       spo: MySignedPrismOperation[CreateStorageEntryOP | UpdateStorageEntryOP | DeactivateStorageEntryOP],
@@ -61,32 +68,37 @@ final case class VDR(
           spo match
             case MySignedPrismOperation(tx, b, o, signedWith, signature, operation, protobuf) =>
               operation match
-                case event @ CreateStorageEntryOP(didPrism, nonce, newData) =>
+                case event @ CreateStorageEntryOP(didPrism, nonce, newData, unknownFields) =>
                   if (latestVDRHash.isDefined) self
                   else
                     assert(
                       self.id == RefVDR(spo.eventRef.eventHash),
                       s"${self.id} != ${RefVDR(spo.eventRef.eventHash)}"
                     )
+
                     self.copy(
                       did = Some(didPrism),
                       latestVDRHash = Some(spo.eventRef.eventHash),
                       nonce = Some(event.nonce).filter(_.isEmpty),
                       data = newData,
+                      unsupportedValidationField = nextUnsupportedValidationField(unknownFields)
                     )
-                case event @ UpdateStorageEntryOP(previousOperationHash, newData) =>
+                    // unsupportedValidationField
+                case event @ UpdateStorageEntryOP(previousOperationHash, newData, unknownFields) =>
                   self.latestVDRHash match
                     case None => self
                     case Some(thisLatestVDRHash) if thisLatestVDRHash == previousOperationHash =>
                       self.copy(
                         latestVDRHash = Some(spo.eventRef.eventHash),
                         data = self.data.update(newData),
+                        unsupportedValidationField = nextUnsupportedValidationField(unknownFields)
                       )
                     case Some(value) => self // Ignore if the update points to an old state
-                case event @ DeactivateStorageEntryOP(previousOperationHash) =>
+                case event @ DeactivateStorageEntryOP(previousOperationHash, unknownFields) =>
                   self.copy(
                     latestVDRHash = Some(spo.eventRef.eventHash),
                     data = VDR.DataDeactivated(self.data),
+                    unsupportedValidationField = nextUnsupportedValidationField(unknownFields)
                   )
         }
       }.copy(cursor = spo.eventCursor)
@@ -106,6 +118,7 @@ object VDR {
       cursor = EventCursor.init,
       nonce = None, // create.nonce,
       data = DataEmpty(), // create.data,
+      unsupportedValidationField = false,
     )
 
   def make(vdrRef: RefVDR, ssiHistory: SSIHistory, ops: Seq[MySignedPrismOperation[OP]]) =

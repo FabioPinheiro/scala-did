@@ -15,6 +15,7 @@ import fmgp.did.method.prism.cardano._
 import fmgp.did.method.prism.proto._
 import org.hyperledger.identus.apollo.utils.KMMECSecp256k1PrivateKey
 import fmgp.crypto.SHA256
+import scalapb.UnknownFieldSet
 
 object KeyConstanceUtils {
   val seed = MnemonicHelper.Companion.createSeed(CardanoWalletConfig().mnemonic.asJava, "")
@@ -162,6 +163,41 @@ object PrismTestUtils {
           previousEventHash = ByteString.copyFrom(previousEventHash),
           data = ProtoUpdateStorageEntry.Data.Bytes(ByteString.copyFrom(data)),
         )
+      ),
+    )
+    def signedPrismUpdateEventVDR = SignedPrismOperation(
+      signedWith = keyName,
+      signature = ByteString.copyFrom(KeyConstanceUtils.pk1VDR.sign(op.toByteArray)),
+      operation = Some(op)
+    )
+    signedPrismUpdateEventVDR
+  }
+
+  /** just for testing purpos */
+  def updateVDREntryWithUnknownFields(
+      eventRef: RefVDR,
+      previousOperation: SignedPrismOperation,
+      vdrKey: KMMECSecp256k1PrivateKey,
+      keyName: String,
+      data: Array[Byte],
+      unknownFieldNumber: Int,
+  ): SignedPrismOperation = {
+    val previousEventHash =
+      SHA256.digest(previousOperation.operation.get.toByteArray)
+    def op = PrismOperation(
+      operation = PrismOperation.Operation.UpdateStorageEntry(
+        value = ProtoUpdateStorageEntry(
+          previousEventHash = ByteString.copyFrom(previousEventHash),
+          data = ProtoUpdateStorageEntry.Data.Bytes(ByteString.copyFrom(data)),
+          unknownFields = UnknownFieldSet(
+            Map(
+              (
+                unknownFieldNumber,
+                scalapb.UnknownFieldSet.Field(lengthDelimited = Seq(ByteString.EMPTY))
+              )
+            )
+          )
+        ),
       ),
     )
     def signedPrismUpdateEventVDR = SignedPrismOperation(

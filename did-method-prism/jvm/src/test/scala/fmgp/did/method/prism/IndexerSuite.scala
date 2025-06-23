@@ -37,6 +37,10 @@ class IndexerSuite extends ZSuite {
     "0a0476647231124730450221008aa8a6f66a57d28798b24540dbf0a93772ff317f7bd8969a0ca3a98cec7ff9d4022016336c0c8b9fc82198b661f85468f53c1b4dc0cdd23b44dc0d17853aa50944161a283a260a2051d47b13393a7cc5c1afc47099dcbecccf0c8a70828c072ac82f55225b42d4f4a2060101"
   val updateVDR = // Update Bytes data2
     "0a047664723112473045022100d07451415fecbe92f270ecd0371ee181cabd198e781759287e5122d688a9c97102202273b49e43a1f2022940f48012b5e9839f99eaacf7429c417ff67ec64e58b51b1a2a422812202a0d49ff70f6403cab5bba090478300369ff4875f849dd42c9c59ca4272a9a7ba20603020304"
+  val updateVDR_withUnknownField49 = // Update Bytes data2
+    "0a04766472311246304402206e6152ba20935eb946e79b4d39cd6cf327b162b25d37b5cc2e4df3ce9e44dd9f0220729a0891b714e6116838cf4dd2dca3e877b6e36a25814e7400fd35cb1da6084a1a2d422b12202a0d49ff70f6403cab5bba090478300369ff4875f849dd42c9c59ca4272a9a7ba206030203048a0300"
+  val updateVDR_withUnknownField99 = // Update Bytes data2
+    "0a047664723112463044022008ce25d2a5731b5946df3c57c3d4046a499830603680288b7c3c14d0b6e3d12302205c9f064f0a488e86377b0112448316827a6d356884e218a148db3d3198bf7c051a2d422b12202a0d49ff70f6403cab5bba090478300369ff4875f849dd42c9c59ca4272a9a7ba206030203049a0600"
   val updateVDR_withTheNewKey = // Update Bytes data2
     "0a047664723212473045022100b33c0b12449eb506c862c98cfbd221d48cbf31ba62e512b4af31170a34a62e2a0220329bbc57107491b62ecfb894cda5757cc221421ecccae61a7404d3d0ae1d01d41a2842261220d7c38f7d8aa4912d0a58ead87b154eed968b949b3bfb54f3f894ab9fc5365f40a2060105"
 
@@ -73,6 +77,30 @@ class IndexerSuite extends ZSuite {
     assertEquals(bytes2Hex(e3.toByteArray), updateVDR)
   }
 
+  test("update VDR WithUnknownFields 49") {
+    val e3x = updateVDREntryWithUnknownFields(
+      refVDR,
+      getSignedPrismOperationFromHex(createVDR),
+      pk1VDR,
+      "vdr1",
+      data2,
+      unknownFieldNumber = 49
+    )
+    assertEquals(bytes2Hex(e3x.toByteArray), updateVDR_withUnknownField49)
+  }
+
+  test("update VDR WithUnknownFields 99") {
+    val e3x = updateVDREntryWithUnknownFields(
+      refVDR,
+      getSignedPrismOperationFromHex(createVDR),
+      pk1VDR,
+      "vdr1",
+      data2,
+      unknownFieldNumber = 99
+    )
+    assertEquals(bytes2Hex(e3x.toByteArray), updateVDR_withUnknownField99)
+  }
+
   test("update VDR after add key in the SSI") {
     val e5 = updateVDREntry(refVDR, getSignedPrismOperationFromHex(updateVDR), pk2VDR, "vdr2", data3)
     assertEquals(bytes2Hex(e5.toByteArray), updateVDR_withTheNewKey)
@@ -104,7 +132,7 @@ class IndexerSuite extends ZSuite {
     } yield ()
   }
 
-  testZ("Index SSI and two VDR Events") {
+  testZ("Index SSI and a create and update VDR Events") {
     for {
       stateRef <- Ref.make(PrismState.empty)
       stream = ZStream.fromIterable(
@@ -121,6 +149,61 @@ class IndexerSuite extends ZSuite {
       state <- stateRef.get
       _ <- state.getEventsForVDR(refVDR).map(e => assertEquals(e.size, 2))
       vdr <- state.getVDR(refVDR)
+      _ = assertEquals(vdr.unsupportedValidationField, false)
+      _ = vdr.data match
+        case DataEmpty()              => fail("Wrong DATA type")
+        case DataDeactivated(data)    => fail("Wrong DATA type")
+        case DataByteArray(byteArray) => assertEquals(byteArray.toSeq, data2.toSeq)
+        case DataIPFS(cid)            => fail("Wrong DATA type")
+        case DataStatusList(status)   => fail("Wrong DATA type")
+    } yield ()
+  }
+
+  testZ("Index SSI and a create and update (with UnknownField 49) VDR Events") {
+    for {
+      stateRef <- Ref.make(PrismState.empty)
+      stream = ZStream.fromIterable(
+        Seq(createSSI, createVDR, updateVDR_withUnknownField49)
+          .map(e => hex2bytes(e))
+          .map(protoBytes => SignedPrismOperation.parseFrom(protoBytes))
+          .zipWithIndex
+          .map((proto, index) => MaybeOperation.fromProto(proto, "tx", 0, index))
+      )
+      _ <- stream
+        .via(IndexerUtils.pipelinePrismState)
+        .run(ZSink.count)
+        .provideEnvironment(ZEnvironment(stateRef))
+      state <- stateRef.get
+      _ <- state.getEventsForVDR(refVDR).map(e => assertEquals(e.size, 2))
+      vdr <- state.getVDR(refVDR)
+      _ = assertEquals(vdr.unsupportedValidationField, true) // Because of field 49 (3 <= _ <= 49)
+      _ = vdr.data match
+        case DataEmpty()              => fail("Wrong DATA type")
+        case DataDeactivated(data)    => fail("Wrong DATA type")
+        case DataByteArray(byteArray) => assertEquals(byteArray.toSeq, data2.toSeq)
+        case DataIPFS(cid)            => fail("Wrong DATA type")
+        case DataStatusList(status)   => fail("Wrong DATA type")
+    } yield ()
+  }
+
+  testZ("Index SSI and a create and update (with UnknownField 99) VDR Events") {
+    for {
+      stateRef <- Ref.make(PrismState.empty)
+      stream = ZStream.fromIterable(
+        Seq(createSSI, createVDR, updateVDR_withUnknownField99)
+          .map(e => hex2bytes(e))
+          .map(protoBytes => SignedPrismOperation.parseFrom(protoBytes))
+          .zipWithIndex
+          .map((proto, index) => MaybeOperation.fromProto(proto, "tx", 0, index))
+      )
+      _ <- stream
+        .via(IndexerUtils.pipelinePrismState)
+        .run(ZSink.count)
+        .provideEnvironment(ZEnvironment(stateRef))
+      state <- stateRef.get
+      _ <- state.getEventsForVDR(refVDR).map(e => assertEquals(e.size, 2))
+      vdr <- state.getVDR(refVDR)
+      _ = assertEquals(vdr.unsupportedValidationField, false)
       _ = vdr.data match
         case DataEmpty()              => fail("Wrong DATA type")
         case DataDeactivated(data)    => fail("Wrong DATA type")

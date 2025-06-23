@@ -67,11 +67,23 @@ case class ProtocolVersionUpdateOP(value: String) extends OP
   */
 case class DeactivateDidOP(previousOperationHash: String, id: String) extends OP
 
-case class CreateStorageEntryOP(didPrism: DIDPrism, nonce: Array[Byte], data: VDR.DataType) extends OP {
+case class CreateStorageEntryOP(
+    didPrism: DIDPrism,
+    nonce: Array[Byte],
+    data: VDR.DataType,
+    unknownFields: Set[Int],
+) extends OP {
   def nonceInHex = bytes2Hex(nonce)
 }
-case class UpdateStorageEntryOP(previousEventHash: String, data: VDR.DataUpdateType) extends OP
-case class DeactivateStorageEntryOP(previousEventHash: String) extends OP
+case class UpdateStorageEntryOP(
+    previousEventHash: String,
+    data: VDR.DataUpdateType,
+    unknownFields: Set[Int],
+) extends OP
+case class DeactivateStorageEntryOP(
+    previousEventHash: String,
+    unknownFields: Set[Int],
+) extends OP
 
 object CreateDidOP {
   import proto.prism.ProtoCreateDID.DIDCreationData
@@ -183,11 +195,14 @@ object CreateStorageEntryOP {
       CreateStorageEntryOP(
         didPrism = DIDPrism.fromEventHash(didPrismHash.toByteArray()),
         nonce = nonce.toByteArray(),
-        data = data match
-          case ProtoCreateStorageEntry.Data.Empty                  => VDR.DataEmpty()
-          case ProtoCreateStorageEntry.Data.Bytes(value)           => VDR.DataByteArray(value.toByteArray())
-          case ProtoCreateStorageEntry.Data.Ipfs(cid)              => VDR.DataIPFS(cid)
-          case ProtoCreateStorageEntry.Data.StatusListEntry(value) => ??? // FIXME
+        data = {
+          data match
+            case ProtoCreateStorageEntry.Data.Empty                  => VDR.DataEmpty()
+            case ProtoCreateStorageEntry.Data.Bytes(value)           => VDR.DataByteArray(value.toByteArray())
+            case ProtoCreateStorageEntry.Data.Ipfs(cid)              => VDR.DataIPFS(cid)
+            case ProtoCreateStorageEntry.Data.StatusListEntry(value) => ??? // FIXME,
+        },
+        unknownFields = unknownFields.asMap.keySet,
       )
 }
 object UpdateStorageEntryOP {
@@ -201,6 +216,7 @@ object UpdateStorageEntryOP {
           case ProtoUpdateStorageEntry.Data.Ipfs(cid)          => VDR.DataIPFS(cid)
           case ProtoUpdateStorageEntry.Data.StatusListEntry(_) => ???
         },
+        unknownFields = unknownFields.asMap.keySet,
       )
 }
 
@@ -209,5 +225,6 @@ object DeactivateStorageEntryOP {
     case ProtoDeactivateStorageEntry(previousEventHash, unknownFields) =>
       DeactivateStorageEntryOP(
         previousEventHash = bytes2Hex(previousEventHash.toByteArray()),
+        unknownFields = unknownFields.asMap.keySet,
       )
 }
