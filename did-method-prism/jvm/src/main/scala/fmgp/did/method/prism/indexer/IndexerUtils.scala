@@ -41,6 +41,24 @@ object IndexerUtils {
           } yield (maybeOperation)
   }
 
+  case class EventCounter(
+      invalidPrismObject: Int = 0,
+      invalidSignedPrismOperation: Int = 0,
+      signedPrismOperation: Int = 0
+  )
+  def countEvents(implicit trace: Trace): ZSink[Any, Nothing, MaybeOperation[OP], Nothing, EventCounter] =
+    ZSink.foldLeft(EventCounter())((ec, event) => {
+      event match
+        case InvalidPrismObject(tx, b, reason) =>
+          println(reason)
+          ec.copy(invalidPrismObject = ec.invalidPrismObject + 1)
+        case InvalidSignedPrismOperation(tx, b, o, reason) =>
+          ec.copy(invalidSignedPrismOperation = ec.invalidSignedPrismOperation + 1)
+        case MySignedPrismOperation(tx, b, o, signedWith, signature, operation, protobuf) =>
+          ec.copy(signedPrismOperation = ec.signedPrismOperation + 1)
+
+    })
+
   def loadPrismStateFromChunkFiles: ZIO[IndexerConfig, Throwable, Ref[PrismState]] = for {
     indexerConfig <- ZIO.service[IndexerConfig]
     chunkFilesAfter <- fmgp.did.method.prism.indexer.Indexer
@@ -60,11 +78,13 @@ object IndexerUtils {
     stateRef <- Ref.make(PrismState.empty)
     countEvents <- streamAllMaybeOperationFromChunkFiles
       .via(IndexerUtils.pipelinePrismState)
-      .run(ZSink.count)
+      .run(countEvents) // (ZSink.count)
       .provideEnvironment(ZEnvironment(stateRef))
     _ <- ZIO.log(s"Finish Init PrismState: $countEvents")
     state <- stateRef.get
     _ <- ZIO.log(s"PrismState was ${state.ssiCount} SSI")
+    _ <- ZIO.log(s"PrismState was ${state.asInstanceOf[PrismStateInMemory].vdr2eventRef.count(_ => true)} VDR")
+    // _ <- ZIO.log(s"PrismState was ${state.asInstanceOf[PrismStateInMemory].toJsonPretty}")
   } yield stateRef
 
 }

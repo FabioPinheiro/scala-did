@@ -232,16 +232,16 @@ object Indexer extends ZIOAppDefault {
         .mapZIO { case (did, opidSeq) =>
           for {
             _ <- ZIO.logDebug(s"DID: $did")
-            ops <- state.getEventsForSSI(did)
-            _ <- ZStream.fromIterable(ops).run { // TODO _ <- ZStream.fromIterableZIO(state.getEventsForSSI(did))
+            events <- state.getEventsForSSI(did)
+            _ <- ZStream.fromIterableZIO(state.getEventsForSSI(did)).run {
               ZSink
                 .fromFileName(
-                  name = indexerConfig.opsPath(did),
+                  name = indexerConfig.ssiEventsPath(did),
                   options = Set(WRITE, TRUNCATE_EXISTING, CREATE)
                 )
                 .contramapChunks[MySignedPrismOperation[OP]](_.flatMap { spo => s"${spo.toJson}\n".getBytes })
             }
-            ssi = fmgp.did.method.prism.SSI.make(did, ops)
+            ssi = fmgp.did.method.prism.SSI.make(did, events)
             _ <- ZStream.from(ssi).run {
               ZSink
                 .fromFileName(name = indexerConfig.ssiPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
@@ -251,6 +251,29 @@ object Indexer extends ZIOAppDefault {
               ZSink
                 .fromFileName(name = indexerConfig.diddocPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
                 .contramapChunks[SSI](_.flatMap { case ssi => s"${ssi.didDocument.toJsonPretty}\n".getBytes })
+            }
+          } yield ()
+        }
+        .run(ZSink.count)
+
+      _ <- ZStream
+        .fromIterable(state.asInstanceOf[PrismStateInMemory].vdr2eventRef) // FIXME
+        .mapZIO { case (ref, events) =>
+          for {
+            _ <- ZIO.logDebug(s"VDR: $ref")
+            _ <- ZStream.fromIterableZIO(state.getEventsForVDR(ref)).run {
+              ZSink
+                .fromFileName(
+                  name = indexerConfig.vdrEventsPath(ref),
+                  options = Set(WRITE, TRUNCATE_EXISTING, CREATE)
+                )
+                .contramapChunks[MySignedPrismOperation[OP]](_.flatMap { spo => s"${spo.toJson}\n".getBytes })
+            }
+            vdr <- state.getVDR(ref)
+            _ <- ZStream.from(vdr).run {
+              ZSink
+                .fromFileName(name = indexerConfig.vdrPath(ref), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
+                .contramapChunks[VDR](_.flatMap { case vdr => s"${vdr.toJsonPretty}\n".getBytes })
             }
           } yield ()
         }

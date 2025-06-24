@@ -5,9 +5,7 @@ package fmgp.did.method.prism.cardano
   * The value 21325 represents the last 16 bits of 344977920845, which is the decimal representation of the
   * concatenation of the hexadecimals 50 52 49 53 4d that form the word PRISM in ASCII.
   */
-val PRISM_LABEL_CIP_10 = 21325 // 21324 was used in testnet to do some tests
-
-// FIXME!!!!
+val PRISM_LABEL_CIP_10 = 21325 // 21324 was used in preprod to do some tests
 
 /** https://cips.cardano.org/cip/CIP-20
   */
