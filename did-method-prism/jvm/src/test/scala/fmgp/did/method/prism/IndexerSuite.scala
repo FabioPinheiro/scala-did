@@ -5,7 +5,7 @@ import zio._
 import zio.json._
 import zio.stream._
 
-import fmgp.did.method.prism.indexer.IndexerUtils
+import fmgp.did.method.prism.vdr.IndexerUtils
 import fmgp.did.method.prism.proto.MaybeOperation
 import _root_.proto.prism._
 import fmgp.util.hex2bytes

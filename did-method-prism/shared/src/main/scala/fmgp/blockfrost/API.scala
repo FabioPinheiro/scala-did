@@ -1,6 +1,7 @@
 package fmgp.blockfrost
 
 import zio.json._
+import fmgp.did.method.prism.cardano.CardanoNetwork
 
 case class BlockfrostErrorResponse(
     status_code: Int,
@@ -40,7 +41,7 @@ object MetadataContentCBOR {
 object API {
 
   //  ApiResponse[Seq[MetadataLabel]]
-  def metadataLabels(network: String) = s"$network/metadata/txs/labels"
+  def metadataLabels(network: CardanoNetwork) = s"${network.name}/metadata/txs/labels"
 
   /** @param label
     *   Metadata label
@@ -51,8 +52,8 @@ object API {
     * @return
     *   MetadataContentJson
     */
-  def metadataContentJson(network: String, label: Int, page: Int, count: Int = 100) =
-    s"$network/metadata/txs/labels/$label?page=$page&count=$count&order=asc"
+  def metadataContentJson(network: CardanoNetwork, label: Int, page: Int, count: Int = 100) =
+    s"${network.name}/metadata/txs/labels/$label?page=$page&count=$count&order=asc"
 
   /** @param label
     *   Metadata label
@@ -63,8 +64,8 @@ object API {
     * @return
     *   MetadataContentCBOR
     */
-  def metadataContentCBOR(network: String, label: Int, page: Int, count: Int = 100) =
-    s"$network/metadata/txs/labels/$label/cbor?page=$page&count=$count&order=asc"
+  def metadataContentCBOR(network: CardanoNetwork, label: Int, page: Int, count: Int = 100) =
+    s"${network.name}/metadata/txs/labels/$label/cbor?page=$page&count=$count&order=asc"
 
   // SortedPageRequest
 

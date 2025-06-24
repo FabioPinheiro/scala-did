@@ -1,4 +1,4 @@
-package fmgp.did.method.prism.indexer
+package fmgp.did.method.prism.vdr
 
 import fmgp.blockfrost.*
 import zio.*
@@ -16,7 +16,7 @@ import fmgp.did.method.prism.proto._
 /** Indexer
   *
   * {{{
-  * didResolverPrismJVM/runMain fmgp.did.method.prism.indexer.Indexer ../prism-vdr/prismnet preprod preprodTOKEN
+  * didResolverPrismJVM/runMain fmgp.did.method.prism.indexer.Indexer ../prism-vdr/prismnet preprodTOKEN
   * }}}
   */
 object Indexer extends ZIOAppDefault {
@@ -32,19 +32,19 @@ object Indexer extends ZIOAppDefault {
   val FILE_CHUNK_SIZE = 1000
   val FILE_CHUNK_NAME = "chunk"
 
-  def metadataFromJsonAPI(apiKey: String, network: String, pageJump: Int = 0) = ZStream
+  def metadataFromJsonAPI(blockfrastConfig: BlockfrastConfig, pageJump: Int = 0) = ZStream
     .paginateChunkZIO(pageJump) { pageNumber =>
       for {
         _ <- ZIO.log(s"pageNumber=$pageNumber; (entries ${pageNumber * PAGE_SIZE}-${(pageNumber + 1) * PAGE_SIZE})")
         urlRequest = API.metadataContentJson(
-          network = network,
+          network = blockfrastConfig.network,
           label = PRISM_LABEL_CIP_10,
           page = pageNumber + 1,
           count = PAGE_SIZE
         )
         _ <- ZIO.log(s"Next request call: $urlRequest") // For Debug
         response <- Client.batched(
-          Request.get(path = urlRequest).addHeaders(Headers(Header.Custom("project_id", apiKey)))
+          Request.get(path = urlRequest).addHeaders(Headers(Header.Custom("project_id", blockfrastConfig.token)))
         )
         responseStr <- response.body.asString
         page <- responseStr.fromJson[Either[BlockfrostErrorResponse, Seq[MetadataContentJson]]](
@@ -68,19 +68,19 @@ object Indexer extends ZIOAppDefault {
     }
     .provideSomeLayer(Client.default ++ Scope.default)
 
-  def metadataFromCBORAPI(apiKey: String, network: String, pageJump: Int = 0) = ZStream
+  def metadataFromCBORAPI(blockfrastConfig: BlockfrastConfig, pageJump: Int = 0) = ZStream
     .paginateChunkZIO(pageJump) { pageNumber =>
       for {
         _ <- ZIO.log(s"pageNumber=$pageNumber; (entries ${pageNumber * PAGE_SIZE}-${(pageNumber + 1) * PAGE_SIZE})")
         urlRequest = API.metadataContentCBOR(
-          network = network,
+          network = blockfrastConfig.network,
           label = PRISM_LABEL_CIP_10,
           page = pageNumber + 1,
           count = PAGE_SIZE
         )
         _ <- ZIO.log(s"Next request call: $urlRequest") // For Debug
         response <- Client.batched(
-          Request.get(path = urlRequest).addHeaders(Headers(Header.Custom("project_id", apiKey)))
+          Request.get(path = urlRequest).addHeaders(Headers(Header.Custom("project_id", blockfrastConfig.token)))
         )
         responseStr <- response.body.asString
 
@@ -166,21 +166,12 @@ object Indexer extends ZIOAppDefault {
         .map(_.toSeq)
         .flatMap {
           case Seq(dataPath: String) =>
-            ZIO.succeed(IndexerConfig(apiKey = None, network = Network.Mainnet, workdir = dataPath))
-          case Seq(dataPath, "mainnet", apikey) =>
-            ZIO.succeed(IndexerConfig(apiKey = Some(apikey), network = Network.Mainnet, workdir = dataPath))
-          case Seq(dataPath, "preprod", apikey) =>
-            ZIO.succeed(IndexerConfig(apiKey = Some(apikey), network = Network.Preprod, workdir = dataPath))
-          case Seq(dataPath, "preview", apikey) =>
-            ZIO.succeed(IndexerConfig(apiKey = Some(apikey), network = Network.Preview, workdir = dataPath))
-          case Seq(dataPath, "testnet", apikey) =>
-            ZIO.logWarning("Cardano testnet network has been decommissioned.") *>
-              ZIO.succeed(IndexerConfig(apiKey = Some(apikey), network = Network.Testnet, workdir = dataPath))
-          case Seq(dataPath, network, apikey) =>
-            ZIO.fail(RuntimeException(s"The Cardano network '$network' is not recognizing"))
+            ZIO.succeed(IndexerConfig(mBlockfrastConfig = None, workdir = dataPath))
+          case Seq(dataPath, apikey) =>
+            ZIO.succeed(IndexerConfig(mBlockfrastConfig = Some(BlockfrastConfig(apikey)), workdir = dataPath))
           case next =>
             ZIO.logWarning(s"Fail to parse indexerConfig from '${next.mkString(" ")}'") *>
-              ZIO.fail(RuntimeException("Indexer <dataPath> [mainnet|preprod|preview <dataPath>]"))
+              ZIO.fail(RuntimeException("Indexer <dataPath> [<TOKEN_mainnet|preprod|preview>]"))
         }
         .map(ZLayer.succeed _)
       indexerConfig <- ZIO.service[IndexerConfig].provideLayer(indexerConfigZLayer)
@@ -204,12 +195,11 @@ object Indexer extends ZIOAppDefault {
       nextPageIndex = cardinalityOfEntries / 100
       _ <- ZIO.log(s"API calls start: nextPageIndex=$nextPageIndex; nextMetadateIndex=$nextMetadateIndex")
 
-      _ <- indexerConfig.apiKey match
+      _ <- indexerConfig.mBlockfrastConfig match
         case None => ZIO.logWarning("Token for blockfrost is missing") *> ZIO.log("Indexing from ofline file")
-        case Some(apiKey) =>
+        case Some(blockfrastConfig) =>
           metadataFromCBORAPI(
-            apiKey = apiKey,
-            network = indexerConfig.network,
+            blockfrastConfig = blockfrastConfig,
             pageJump = nextPageIndex,
           )
             .filter(_.index >= nextMetadateIndex) // .drop(nextItemIndex + 1)

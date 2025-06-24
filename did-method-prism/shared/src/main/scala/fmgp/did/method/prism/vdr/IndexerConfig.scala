@@ -1,12 +1,12 @@
-package fmgp.did.method.prism.indexer
+package fmgp.did.method.prism.vdr
 
 import fmgp.did.DIDSubject
 import fmgp.did.method.prism.RefVDR
 
-/** @param apiKey
-  *   blockfrost API key
+/** @param mBlockfrastConfig
+  *   will contain the blockfrost API key
   */
-case class IndexerConfig(apiKey: Option[String], workdir: String, network: String) {
+case class IndexerConfig(mBlockfrastConfig: Option[BlockfrastConfig], workdir: String) {
   def rawMetadataPath = s"$workdir/cardano-21325"
 
   def ssiEventsPath(did: DIDSubject) = s"$workdir/events/${did.specificId}"

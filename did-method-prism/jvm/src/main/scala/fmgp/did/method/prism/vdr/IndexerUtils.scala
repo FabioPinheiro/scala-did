@@ -1,4 +1,4 @@
-package fmgp.did.method.prism.indexer
+package fmgp.did.method.prism.vdr
 
 import zio.*
 import zio.json.*
@@ -6,6 +6,7 @@ import zio.stream.*
 import fmgp.did.method.prism._
 import fmgp.did.method.prism.cardano._
 import fmgp.did.method.prism.proto._
+import fmgp.did.method.prism.vdr.IndexerConfig
 
 object IndexerUtils {
 
@@ -61,7 +62,7 @@ object IndexerUtils {
 
   def loadPrismStateFromChunkFiles: ZIO[IndexerConfig, Throwable, Ref[PrismState]] = for {
     indexerConfig <- ZIO.service[IndexerConfig]
-    chunkFilesAfter <- fmgp.did.method.prism.indexer.Indexer
+    chunkFilesAfter <- fmgp.did.method.prism.vdr.Indexer
       .findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath)
     _ <- ZIO.log(s"Read chunkFiles")
     streamAllMaybeOperationFromChunkFiles = ZStream.fromIterable {
@@ -82,8 +83,9 @@ object IndexerUtils {
       .provideEnvironment(ZEnvironment(stateRef))
     _ <- ZIO.log(s"Finish Init PrismState: $countEvents")
     state <- stateRef.get
-    _ <- ZIO.log(s"PrismState was ${state.ssiCount} SSI")
-    _ <- ZIO.log(s"PrismState was ${state.asInstanceOf[PrismStateInMemory].vdr2eventRef.count(_ => true)} VDR")
+    _ <- ZIO.log(
+      s"PrismState was ${state.ssiCount} SSI and ${state.asInstanceOf[PrismStateInMemory].vdr2eventRef.count(_ => true)} VDR"
+    )
     // _ <- ZIO.log(s"PrismState was ${state.asInstanceOf[PrismStateInMemory].toJsonPretty}")
   } yield stateRef
 
