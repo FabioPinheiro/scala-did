@@ -26,7 +26,7 @@ object KeyConstanceUtils {
   val pk3VDR = HDKey(seed, 0, 3).getKMMSecp256k1PrivateKey()
 }
 
-object PrismTestUtils {
+object VDRUtilsTestExtra {
   import KeyConstanceUtils._
 
   def createDID(
@@ -123,54 +123,6 @@ object PrismTestUtils {
       operation = Some(op)
     )
     signedPrismCreateEventDID
-  }
-
-  def createVDREntry(
-      didPrism: DIDPrism,
-      vdrKey: KMMECSecp256k1PrivateKey,
-      keyName: String,
-      data: Array[Byte],
-  ): (RefVDR, SignedPrismOperation) = {
-    def op = PrismOperation(
-      operation = PrismOperation.Operation.CreateStorageEntry(
-        value = ProtoCreateStorageEntry(
-          didPrismHash = ByteString.copyFrom(didPrism.hashRef),
-          nonce = ByteString.EMPTY,
-          data = ProtoCreateStorageEntry.Data.Bytes(ByteString.copyFrom(data))
-        )
-      )
-    )
-    def signedPrismCreateEventVDR = SignedPrismOperation(
-      signedWith = keyName,
-      signature = ByteString.copyFrom(vdrKey.sign(op.toByteArray)),
-      operation = Some(op)
-    )
-    (RefVDR.fromEventHash(signedPrismCreateEventVDR.operation.get.eventHash), signedPrismCreateEventVDR)
-  }
-
-  def updateVDREntry(
-      eventRef: RefVDR,
-      previousOperation: SignedPrismOperation,
-      vdrKey: KMMECSecp256k1PrivateKey,
-      keyName: String,
-      data: Array[Byte],
-  ): SignedPrismOperation = {
-    val previousEventHash =
-      SHA256.digest(previousOperation.operation.get.toByteArray)
-    def op = PrismOperation(
-      operation = PrismOperation.Operation.UpdateStorageEntry(
-        value = ProtoUpdateStorageEntry(
-          previousEventHash = ByteString.copyFrom(previousEventHash),
-          data = ProtoUpdateStorageEntry.Data.Bytes(ByteString.copyFrom(data)),
-        )
-      ),
-    )
-    def signedPrismUpdateEventVDR = SignedPrismOperation(
-      signedWith = keyName,
-      signature = ByteString.copyFrom(KeyConstanceUtils.pk1VDR.sign(op.toByteArray)),
-      operation = Some(op)
-    )
-    signedPrismUpdateEventVDR
   }
 
   /** just for testing purpos */

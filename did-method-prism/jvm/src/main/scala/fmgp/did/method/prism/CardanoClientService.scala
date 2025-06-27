@@ -85,14 +85,14 @@ object CardanoService {
       .put(PRISM_LABEL_CIP_10, internal.prismObject2metadata(prismObject))
       .put(MSG_LABEL_CIP_20, msgCIP20)
 
-  def makeTxBuilder(config: BlockfrastConfig, wallet: CardanoWalletConfig, metadata: Metadata): TxBuilder = {
-    val senderAccount: Account = makeAccount(config, wallet)
+  def makeTxBuilder(bfConfig: BlockfrastConfig, wallet: CardanoWalletConfig, metadata: Metadata): TxBuilder = {
+    val senderAccount: Account = makeAccount(bfConfig, wallet)
     val output = internal.makeOutput(senderAccount)
     internal.txBuilder(senderAccount, output, metadata)
   }
 
-  def makeTxBuilder(config: BlockfrastConfig, wallet: CardanoWalletConfig, prismObject: PrismObject): TxBuilder =
-    makeTxBuilder(config, wallet, makeMetadataPrismWithCIP20(prismObject))
+  def makeTxBuilder(bfConfig: BlockfrastConfig, wallet: CardanoWalletConfig, prismObject: PrismObject): TxBuilder =
+    makeTxBuilder(bfConfig, wallet, makeMetadataPrismWithCIP20(prismObject))
 
   def makeTxBuilder(
       config: BlockfrastConfig,
@@ -102,17 +102,17 @@ object CardanoService {
     makeTxBuilder(config, wallet, PrismObject(blockContent = Some(PrismBlock(operations = prismEvents))))
 
   def makeTrasation(
-      config: BlockfrastConfig,
+      bfConfig: BlockfrastConfig,
       wallet: CardanoWalletConfig,
       prismEvents: Seq[SignedPrismOperation]
   ): Transaction = {
 
-    val senderAccount: Account = makeAccount(config, wallet)
-    val backendService: BackendService = makeBFBackendService(config)
+    val senderAccount: Account = makeAccount(bfConfig, wallet)
+    val backendService: BackendService = makeBFBackendService(bfConfig)
     val utxoSupplier: UtxoSupplier = new DefaultUtxoSupplier(backendService.getUtxoService())
     val protocolParamsSupplier: ProtocolParamsSupplier =
       new DefaultProtocolParamsSupplier(backendService.getEpochService())
-    val txBuilder = makeTxBuilder(config, wallet, prismEvents)
+    val txBuilder = makeTxBuilder(bfConfig, wallet, prismEvents)
 
     // Build and sign the transaction
     val signedTransaction: Transaction = TxBuilderContext
@@ -126,10 +126,10 @@ object CardanoService {
     case CardanoNetwork.Testnet => Networks.testnet()
     case CardanoNetwork.Preprod => Networks.preprod()
     case CardanoNetwork.Preview => Networks.preview()
-  private def makeBFBackendService(config: BlockfrastConfig) =
-    new BFBackendService(config.network.blockfrostURL + "/", config.token)
-  private def makeAccount(config: BlockfrastConfig, wallet: CardanoWalletConfig) =
-    new Account(makeBFNetworks(config.network), wallet.mnemonicPhrase)
+  private def makeBFBackendService(bfConfig: BlockfrastConfig) =
+    new BFBackendService(bfConfig.network.blockfrostURL + "/", bfConfig.token)
+  private def makeAccount(bfConfig: BlockfrastConfig, wallet: CardanoWalletConfig) =
+    new Account(makeBFNetworks(bfConfig.network), wallet.mnemonicPhrase)
 
   def submitTransaction(tx: Transaction): ZIO[BlockfrastConfig, Throwable, (Int, String)] =
     for {

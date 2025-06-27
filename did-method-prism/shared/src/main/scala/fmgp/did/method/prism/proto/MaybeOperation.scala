@@ -37,7 +37,7 @@ case class MySignedPrismOperation[+T <: OP](
     o: Int,
     signedWith: String,
     signature: Array[Byte],
-    operation: T,
+    operation: T, // TODO REMOVE when encoding
     protobuf: PrismOperation
 ) extends MaybeOperation[T]
     with PrismOperationIndex {
@@ -45,6 +45,19 @@ case class MySignedPrismOperation[+T <: OP](
   def eventRef = EventRef(b = b, o = o, eventHash = protobuf.eventHashStr)
   def eventCursor = EventCursor(b = b, o = o)
 }
+
+// TODO replace MySignedPrismOperation
+// case class CompresedSignedPrismOperation[+T <: OP](
+//     tx: String,
+//     b: Int,
+//     o: Int,
+//     signedWith: String,
+//     signature: Array[Byte],
+//     protobuf: PrismOperation,
+// ) extends MaybeOperation[OP]
+//     with PrismOperationIndex {
+//   lazy val operation: T = OP.fromPrismOperation(protobuf).asInstanceOf[T] //FIXME
+// }
 
 object InvalidPrismObject {
   given decoder: JsonDecoder[InvalidPrismObject] = DeriveJsonDecoder.gen[InvalidPrismObject]

@@ -23,7 +23,8 @@ import fmgp.crypto.SHA256
 class IndexerSuite extends ZSuite {
 
   import KeyConstanceUtils._
-  import PrismTestUtils._
+  import VDRUtilsTestExtra._
+  import vdr.VDRUtils._
 
   val didPrism = DIDPrism("51d47b13393a7cc5c1afc47099dcbecccf0c8a70828c072ac82f55225b42d4f4")
   val refVDR = RefVDR("2a0d49ff70f6403cab5bba090478300369ff4875f849dd42c9c59ca4272a9a7b")
@@ -68,12 +69,12 @@ class IndexerSuite extends ZSuite {
     assertEquals(bytes2Hex(e4.toByteArray), updateSSI_addKey)
   }
   test("create VDR") {
-    val (vdr, e2) = createVDREntry(didPrism, pk1VDR, "vdr1", data1)
+    val (vdr, e2) = createVDREntryBytes(didPrism, pk1VDR, "vdr1", data1, nonce = Array.empty)
     assertEquals(vdr, refVDR)
     assertEquals(bytes2Hex(e2.toByteArray), createVDR)
   }
   test("update VDR") {
-    val e3 = updateVDREntry(refVDR, getSignedPrismOperationFromHex(createVDR), pk1VDR, "vdr1", data2)
+    val e3 = updateVDREntryBytes(refVDR, getSignedPrismOperationFromHex(createVDR), pk1VDR, "vdr1", data2)
     assertEquals(bytes2Hex(e3.toByteArray), updateVDR)
   }
 
@@ -102,7 +103,7 @@ class IndexerSuite extends ZSuite {
   }
 
   test("update VDR after add key in the SSI") {
-    val e5 = updateVDREntry(refVDR, getSignedPrismOperationFromHex(updateVDR), pk2VDR, "vdr2", data3)
+    val e5 = updateVDREntryBytes(refVDR, getSignedPrismOperationFromHex(updateVDR), pk2VDR, "vdr2", data3)
     assertEquals(bytes2Hex(e5.toByteArray), updateVDR_withTheNewKey)
   }
 

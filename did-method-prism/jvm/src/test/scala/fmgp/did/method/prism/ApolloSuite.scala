@@ -1,7 +1,6 @@
 package fmgp.did.method.prism
 
 import munit.FunSuite
-import org.hyperledger.identus.apollo.utils.KMMECSecp256k1PrivateKey
 import org.hyperledger.identus.apollo.utils._
 import org.hyperledger.identus.apollo.derivation.MnemonicHelper
 import org.hyperledger.identus.apollo.derivation.HDKey
