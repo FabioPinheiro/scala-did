@@ -6,7 +6,7 @@ import zio.*
 import zio.json._
 import zio.stream._
 import java.nio.file.StandardOpenOption.*
-import fmgp.did.method.prism.indexer._
+import fmgp.did.method.prism.vdr._
 
 /** Main PrismNode
   *
@@ -24,7 +24,7 @@ object PrismNode extends ServerMain {
     .addZIO(ZIO.log("Start PrismNode") *> PrismNodeImpl.make)
     .provide(
       // ZLayer.fromZIO(Ref.make(PrismState.empty))
-      ZLayer.succeed(IndexerConfig(apiKey = None, workdir = "../../prism-vdr/mainnet", network = "mainnet")) >>>
+      ZLayer.succeed(IndexerConfig(mBlockfrastConfig = None, workdir = "../../prism-vdr/mainnet")) >>>
         ZLayer.fromZIO(IndexerUtils.loadPrismStateFromChunkFiles)
     )
 
