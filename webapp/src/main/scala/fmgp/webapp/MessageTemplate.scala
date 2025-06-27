@@ -12,8 +12,7 @@ import fmgp.did.comm.protocol.trustping2._
 import fmgp.did.comm.protocol.reportproblem2._
 import fmgp.did.comm.protocol.discoverfeatures2._
 import fmgp.util.Base64
-import fmgp.Config
-import fmgp.NotificationsSubscription
+import fmgp.*
 
 object MessageTemplate {
   def mFrom: Option[FROM] = Global.agentVar.now().flatMap(o => FROM.either(o.id.string).toOption)
@@ -274,7 +273,7 @@ object MessageTemplate {
       thid = Some(MsgID()),
       pthid = None,
       created_time = None,
-      body = SetupToSubscribe.Body(publicKey = Config.PushNotifications.applicationServerKey)
+      body = SetupToSubscribe.Body(publicKey = WebappConfig.PushNotifications.applicationServerKey)
     )
 
     def exSubscribe = Subscribe(

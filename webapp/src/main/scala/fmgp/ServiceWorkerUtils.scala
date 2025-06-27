@@ -17,7 +17,7 @@ import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.typedarray.Uint8Array
 import fmgp.did.Client
-import fmgp.Config.PushNotifications
+import fmgp.WebappConfig.PushNotifications
 
 case class NotificationsSubscription(
     endpoint: String,

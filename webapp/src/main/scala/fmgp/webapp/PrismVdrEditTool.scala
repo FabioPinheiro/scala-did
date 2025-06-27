@@ -13,6 +13,7 @@ import zio._
 import zio.json._
 
 import proto.prism._
+import fmgp.*
 import fmgp.did._
 import fmgp.did.comm._
 import fmgp.did.comm.extension._
@@ -21,10 +22,6 @@ import fmgp.did.method.prism.proto._
 import fmgp.did.uniresolver.Uniresolver
 import fmgp.did.comm.protocol.routing2.ForwardMessage
 import fmgp.crypto.error._
-import fmgp.Utils
-import fmgp.ServiceWorkerUtils
-import fmgp.Config
-import fmgp.NotificationsSubscription
 import scala.annotation.tailrec
 import scalapb.GeneratedMessageCompanion
 import scalapb.GeneratedMessage

@@ -20,10 +20,7 @@ import fmgp.did.method.peer.DIDPeer2
 import fmgp.did.uniresolver.Uniresolver
 import fmgp.did.comm.protocol.routing2.ForwardMessage
 import fmgp.crypto.error._
-import fmgp.Utils
-import fmgp.ServiceWorkerUtils
-import fmgp.Config
-import fmgp.NotificationsSubscription
+import fmgp.*
 
 object EncryptTool {
 
@@ -432,7 +429,7 @@ object EncryptTool {
                 Unsafe.unsafe { implicit unsafe => // Run side effect
                   Runtime.default.unsafe.runToFuture(
                     ServiceWorkerUtils
-                      .subscribeToNotifications(Config.PushNotifications.applicationServerKey)
+                      .subscribeToNotifications(WebappConfig.PushNotifications.applicationServerKey)
                       .map(ps => NotificationsSubscription.unsafeFromPushSubscription(ps))
                       .map(ns => dataTextVar.set(exSubscribe(ns).toPlaintextMessage.toJsonPretty))
                   )

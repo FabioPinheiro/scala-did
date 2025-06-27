@@ -1,6 +1,6 @@
 package fmgp
 
-object Config {
+object WebappConfig {
   object PushNotifications {
     def publicKey = "BK0xP-d_SOEhucOAhadwSN-jILAqmkY2wGb5Ae56G8jFSivvgJV3Vw6AzVYmYi5M2grK_DC-0EZxsXIQBajW67s"
 

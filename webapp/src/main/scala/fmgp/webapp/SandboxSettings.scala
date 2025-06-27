@@ -176,13 +176,13 @@ object SandboxSettings {
       // ### Notifications ###
       h2("Notifications"),
       div(
-        p(code(s"Subscribe with Public key '${Config.PushNotifications.applicationServerKey}'")),
+        p(code(s"Subscribe with Public key '${WebappConfig.PushNotifications.applicationServerKey}'")),
         button(
           "Subscribe To Notifications",
           onClick --> { _ =>
             implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
             ServiceWorkerUtils
-              .runSubscribeToNotifications(Config.PushNotifications.applicationServerKey)
+              .runSubscribeToNotifications(WebappConfig.PushNotifications.applicationServerKey)
               .onComplete { // side effect
                 case Failure(exception)        => scala.Console.err.print("Fail Subscribe To Notifications")
                 case Success(pushSubscription) => Global.valuePushSubscriptionVar.set(Some(pushSubscription))
