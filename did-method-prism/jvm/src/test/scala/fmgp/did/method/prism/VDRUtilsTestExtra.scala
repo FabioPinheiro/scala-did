@@ -18,12 +18,11 @@ import fmgp.crypto.SHA256
 import scalapb.UnknownFieldSet
 
 object KeyConstanceUtils {
-  val seed = MnemonicHelper.Companion.createSeed(CardanoWalletConfig().mnemonic.asJava, "")
-  // FIXME missing the DerivationPath.Companion.fromPath("m/axis1/axis2/")
-  val pkMaster = HDKey(seed, 0, 0).getKMMSecp256k1PrivateKey()
-  val pk1VDR = HDKey(seed, 0, 1).getKMMSecp256k1PrivateKey()
-  val pk2VDR = HDKey(seed, 0, 2).getKMMSecp256k1PrivateKey()
-  val pk3VDR = HDKey(seed, 0, 3).getKMMSecp256k1PrivateKey()
+  val wallet = CardanoWalletConfig()
+  val pkMaster = wallet.secp256k1PrivateKey(0, 0) // HDKey(seed, 0, 0).getKMMSecp256k1PrivateKey()
+  val pk1VDR = wallet.secp256k1PrivateKey(0, 1) // HDKey(seed, 0, 1).getKMMSecp256k1PrivateKey()
+  val pk2VDR = wallet.secp256k1PrivateKey(0, 2) // HDKey(seed, 0, 2).getKMMSecp256k1PrivateKey()
+  val pk3VDR = wallet.secp256k1PrivateKey(0, 3) // HDKey(seed, 0, 3).getKMMSecp256k1PrivateKey()
 }
 
 object VDRUtilsTestExtra {

@@ -16,6 +16,7 @@ class GenericVDRDriver(
     didPrism: DIDPrism,
     keyName: String,
     vdrKey: KMMECSecp256k1PrivateKey,
+    maybeMsgCIP20: Option[String],
 ) {
   var globalState = PrismState.empty
 //   def refState = Ref.make(globalState)
@@ -33,7 +34,7 @@ class GenericVDRDriver(
   // HACK
   def updateState = ZIO.succeed(globalState) // FIXME
 
-  def createBytesEntry(data: Array[Byte]): ZIO[Any, Throwable, Unit] =
+  def createBytesEntry(data: Array[Byte]): ZIO[Any, Throwable, (RefVDR, Int, String)] =
     for {
       // TODO check is in of the type bytes
       // TODO check key
@@ -51,15 +52,16 @@ class GenericVDRDriver(
       tx = CardanoService.makeTrasation(
         bfConfig = bfConfig,
         wallet = wallet,
-        prismEvents = Seq(signedPrismOperation)
+        prismEvents = Seq(signedPrismOperation),
+        maybeMsgCIP20,
       )
       _ <- ZIO.log(s"Transation: ${bytes2Hex(tx.serialize)}")
-      _ <- CardanoService
+      ret <- CardanoService
         .submitTransaction(tx)
         .provideEnvironment(ZEnvironment(bfConfig))
-    } yield ()
+    } yield (refVDR, ret._1, ret._2)
 
-  def updateBytesEntry(eventRef: RefVDR, data: Array[Byte]): ZIO[Any, Throwable, Unit] =
+  def updateBytesEntry(eventRef: RefVDR, data: Array[Byte]): ZIO[Any, Throwable, (RefVDR, Int, String)] = {
     for {
       //   stateRef <- ZIO.service[Ref[PrismState]]
       //   state <- stateRef.get
@@ -79,13 +81,19 @@ class GenericVDRDriver(
       tx = CardanoService.makeTrasation(
         bfConfig = bfConfig,
         wallet = wallet,
-        prismEvents = Seq(signedPrismOperation)
+        prismEvents = Seq(signedPrismOperation),
+        maybeMsgCIP20,
       )
       _ <- ZIO.log(s"Transation: ${bytes2Hex(tx.serialize)}")
-      _ <- CardanoService
+      ret <- CardanoService
         .submitTransaction(tx)
         .provideEnvironment(ZEnvironment(bfConfig))
-    } yield ()
+    } yield (eventRef, ret._1, ret._2)
+  }
+
+  def read(eventRef: RefVDR): ZIO[Any, Throwable, VDR] = ???
+
+  def deleteBytesEntry(eventRef: RefVDR): ZIO[Any, Throwable, (RefVDR, Int, String)] = ???
 
 }
 

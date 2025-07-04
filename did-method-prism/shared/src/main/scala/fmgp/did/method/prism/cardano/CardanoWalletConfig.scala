@@ -27,7 +27,8 @@ case class CardanoWalletConfig(
       "curve",
       "lecture",
       "edge"
-    )
+    ),
+    passphrase: String = ""
 ) {
   def mnemonicPhrase = mnemonic.mkString(" ")
 }

@@ -91,20 +91,34 @@ object CardanoService {
     internal.txBuilder(senderAccount, output, metadata)
   }
 
-  def makeTxBuilder(bfConfig: BlockfrastConfig, wallet: CardanoWalletConfig, prismObject: PrismObject): TxBuilder =
-    makeTxBuilder(bfConfig, wallet, makeMetadataPrismWithCIP20(prismObject))
+  def makeTxBuilder(
+      bfConfig: BlockfrastConfig,
+      wallet: CardanoWalletConfig,
+      prismObject: PrismObject,
+      maybeMsgCIP20: Option[String]
+  ): TxBuilder =
+    maybeMsgCIP20 match
+      case None           => makeTxBuilder(bfConfig, wallet, makeMetadataPrism(prismObject))
+      case Some(msgCIP20) => makeTxBuilder(bfConfig, wallet, makeMetadataPrismWithCIP20(prismObject, msgCIP20))
 
   def makeTxBuilder(
-      config: BlockfrastConfig,
+      bfConfig: BlockfrastConfig,
       wallet: CardanoWalletConfig,
-      prismEvents: Seq[SignedPrismOperation]
+      prismEvents: Seq[SignedPrismOperation],
+      maybeMsgCIP20: Option[String],
   ): TxBuilder =
-    makeTxBuilder(config, wallet, PrismObject(blockContent = Some(PrismBlock(operations = prismEvents))))
+    makeTxBuilder(
+      bfConfig,
+      wallet,
+      PrismObject(blockContent = Some(PrismBlock(operations = prismEvents))),
+      maybeMsgCIP20
+    )
 
   def makeTrasation(
       bfConfig: BlockfrastConfig,
       wallet: CardanoWalletConfig,
-      prismEvents: Seq[SignedPrismOperation]
+      prismEvents: Seq[SignedPrismOperation],
+      maybeMsgCIP20: Option[String],
   ): Transaction = {
 
     val senderAccount: Account = makeAccount(bfConfig, wallet)
@@ -112,7 +126,7 @@ object CardanoService {
     val utxoSupplier: UtxoSupplier = new DefaultUtxoSupplier(backendService.getUtxoService())
     val protocolParamsSupplier: ProtocolParamsSupplier =
       new DefaultProtocolParamsSupplier(backendService.getEpochService())
-    val txBuilder = makeTxBuilder(bfConfig, wallet, prismEvents)
+    val txBuilder = makeTxBuilder(bfConfig, wallet, prismEvents, maybeMsgCIP20)
 
     // Build and sign the transaction
     val signedTransaction: Transaction = TxBuilderContext
