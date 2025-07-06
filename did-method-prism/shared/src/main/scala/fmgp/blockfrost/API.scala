@@ -41,7 +41,7 @@ object MetadataContentCBOR {
 object API {
 
   //  ApiResponse[Seq[MetadataLabel]]
-  def metadataLabels(network: CardanoNetwork) = s"${network.name}/metadata/txs/labels"
+  def metadataLabels(network: CardanoNetwork) = s"${network.blockfrostURL}/metadata/txs/labels"
 
   /** @param label
     *   Metadata label
@@ -53,7 +53,7 @@ object API {
     *   MetadataContentJson
     */
   def metadataContentJson(network: CardanoNetwork, label: Int, page: Int, count: Int = 100) =
-    s"${network.name}/metadata/txs/labels/$label?page=$page&count=$count&order=asc"
+    s"${network.blockfrostURL}/metadata/txs/labels/$label?page=$page&count=$count&order=asc"
 
   /** @param label
     *   Metadata label
@@ -65,7 +65,7 @@ object API {
     *   MetadataContentCBOR
     */
   def metadataContentCBOR(network: CardanoNetwork, label: Int, page: Int, count: Int = 100) =
-    s"${network.name}/metadata/txs/labels/$label/cbor?page=$page&count=$count&order=asc"
+    s"${network.blockfrostURL}/metadata/txs/labels/$label/cbor?page=$page&count=$count&order=asc"
 
   // SortedPageRequest
 
