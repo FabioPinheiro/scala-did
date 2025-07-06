@@ -2,12 +2,18 @@ package fmgp.did.method.prism.cli
 
 import zio.cli.*
 import fmgp.did.method.prism.DIDPrism
+import fmgp.did.method.prism.cardano.CardanoNetwork
 
 // Conventions https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
 // https://www.gnu.org/software/libc/manual/html_node/Argp.html
 
 val blockfrostTokenOpt =
   Options.text("blockfrost-token").optional.??("Blockfrost's API token/key")
+
+val networkFlag =
+  Options
+    .enumeration[CardanoNetwork]("network")(CardanoNetwork.values.toSeq.map(e => (e.name, e)): _*)
+    .withDefault(CardanoNetwork.Mainnet)
 
 val didArg =
   Args
