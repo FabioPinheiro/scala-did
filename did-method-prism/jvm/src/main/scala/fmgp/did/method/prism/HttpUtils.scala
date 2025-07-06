@@ -24,14 +24,17 @@ case class HttpUtils(client: Client, scope: Scope) {
         .batched(Request.get(path = url))
         .provideEnvironment(ZEnvironment(client, scope))
       // .mapError(ex => DIDresolutionFail.fromThrowable(ex))
-      _ = res
-      data <- res.body.asString
+      data <-
+        if (!res.status.isError) res.body.asString
+        else ZIO.fail(new RuntimeException(s"Fail to parse because got 404 from endpoint '$url'"))
       // .mapError(ex => DIDresolutionFail.fromThrowable(ex))
       didDoc <- data.fromJson[T] match
         // case Left(error) => ZIO.fail(DIDresolutionFail.fromParseError(classTag.runtimeClass.getName(), error))
         case Left(fail) =>
           val aux = s"Fail to parse: $fail"
-          ZIO.logWarning(aux) *> ZIO.fail(new RuntimeException(aux))
+          ZIO.logWarning(url) *>
+            ZIO.logWarning(aux) *>
+            ZIO.fail(new RuntimeException(aux))
         case Right(doc) => ZIO.succeed(doc)
     } yield (didDoc)
 

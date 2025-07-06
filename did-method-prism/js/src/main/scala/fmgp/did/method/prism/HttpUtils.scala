@@ -58,5 +58,3 @@ case class HttpUtils() {
           ZIO.logError(aux) *> ZIO.fail(new RuntimeException(aux))
     } yield ret
 }
-
-object DIDWebResolver {}
