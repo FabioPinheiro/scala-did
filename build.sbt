@@ -565,8 +565,16 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // https://oss.sonatype.org/#nexus-search;quick~com.bloxbean.cardano
     libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.6.6",
     libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.6.6",
-    assembly / mainClass := Some("fmgp.prism.Indexer"), // TODO Move to a new repo
-    assembly / assemblyJarName := "prism-Indexer.jar", // TODO Move to a new repo
+  )
+  .jvmSettings( // PoC for a prism-cli tooling // TODO Move to a new repo
+    // assembly / mainClass := Some("fmgp.did.method.prism.vdr.Indexer"),
+    // assembly / assemblyJarName := "prism-Indexer.jar",
+
+    // run / fork := true,
+    // run / connectInput := true,
+    libraryDependencies += "dev.zio" %% "zio-cli" % "0.7.2",
+    assembly / mainClass := Some("fmgp.did.method.prism.cli.PrismCli"),
+    assembly / assemblyJarName := "cardano-prism.jar",
   )
   .settings(
     Compile / PB.targets := Seq(scalapb.gen() -> (Compile / sourceManaged).value / "scalapb"),
