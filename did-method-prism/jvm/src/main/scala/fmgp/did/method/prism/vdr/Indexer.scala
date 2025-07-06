@@ -32,19 +32,19 @@ object Indexer extends ZIOAppDefault {
   val FILE_CHUNK_SIZE = 1000
   val FILE_CHUNK_NAME = "chunk"
 
-  def metadataFromJsonAPI(blockfrastConfig: BlockfrastConfig, pageJump: Int = 0) = ZStream
+  def metadataFromJsonAPI(blockfrostConfig: BlockfrostConfig, pageJump: Int = 0) = ZStream
     .paginateChunkZIO(pageJump) { pageNumber =>
       for {
         _ <- ZIO.log(s"pageNumber=$pageNumber; (entries ${pageNumber * PAGE_SIZE}-${(pageNumber + 1) * PAGE_SIZE})")
         urlRequest = API.metadataContentJson(
-          network = blockfrastConfig.network,
+          network = blockfrostConfig.network,
           label = PRISM_LABEL_CIP_10,
           page = pageNumber + 1,
           count = PAGE_SIZE
         )
         _ <- ZIO.log(s"Next request call: $urlRequest") // For Debug
         response <- Client.batched(
-          Request.get(path = urlRequest).addHeaders(Headers(Header.Custom("project_id", blockfrastConfig.token)))
+          Request.get(path = urlRequest).addHeaders(Headers(Header.Custom("project_id", blockfrostConfig.token)))
         )
         responseStr <- response.body.asString
         page <- responseStr.fromJson[Either[BlockfrostErrorResponse, Seq[MetadataContentJson]]](
@@ -68,19 +68,19 @@ object Indexer extends ZIOAppDefault {
     }
     .provideSomeLayer(Client.default ++ Scope.default)
 
-  def metadataFromCBORAPI(blockfrastConfig: BlockfrastConfig, pageJump: Int = 0) = ZStream
+  def metadataFromCBORAPI(blockfrostConfig: BlockfrostConfig, pageJump: Int = 0) = ZStream
     .paginateChunkZIO(pageJump) { pageNumber =>
       for {
         _ <- ZIO.log(s"pageNumber=$pageNumber; (entries ${pageNumber * PAGE_SIZE}-${(pageNumber + 1) * PAGE_SIZE})")
         urlRequest = API.metadataContentCBOR(
-          network = blockfrastConfig.network,
+          network = blockfrostConfig.network,
           label = PRISM_LABEL_CIP_10,
           page = pageNumber + 1,
           count = PAGE_SIZE
         )
         _ <- ZIO.log(s"Next request call: $urlRequest") // For Debug
         response <- Client.batched(
-          Request.get(path = urlRequest).addHeaders(Headers(Header.Custom("project_id", blockfrastConfig.token)))
+          Request.get(path = urlRequest).addHeaders(Headers(Header.Custom("project_id", blockfrostConfig.token)))
         )
         responseStr <- response.body.asString
 
@@ -135,140 +135,147 @@ object Indexer extends ZIOAppDefault {
       .ignoreLeftover // TODO review
       .mapZIO(bytes => ZIO.log(s"ZSink PRISM Events into $filePath (write $bytes bytes)"))
 
+  def indexerLogo = Console.printLine(
+    """██████╗ ██████╗ ██╗███████╗███╗   ███╗    ██╗   ██╗██████╗ ██████╗ 
+      |██╔══██╗██╔══██╗██║██╔════╝████╗ ████║    ██║   ██║██╔══██╗██╔══██╗
+      |██████╔╝██████╔╝██║███████╗██╔████╔██║    ██║   ██║██║  ██║██████╔╝
+      |██╔═══╝ ██╔══██╗██║╚════██║██║╚██╔╝██║    ╚██╗ ██╔╝██║  ██║██╔══██╗
+      |██║     ██║  ██║██║███████║██║ ╚═╝ ██║     ╚████╔╝ ██████╔╝██║  ██║
+      |╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝     ╚═╝      ╚═══╝  ╚═════╝ ╚═╝  ╚═╝
+      |                                                                   
+      |       ██╗███╗   ██╗██████╗ ███████╗██╗  ██╗███████╗██████╗        
+      |       ██║████╗  ██║██╔══██╗██╔════╝╚██╗██╔╝██╔════╝██╔══██╗       
+      |       ██║██╔██╗ ██║██║  ██║█████╗   ╚███╔╝ █████╗  ██████╔╝       
+      |       ██║██║╚██╗██║██║  ██║██╔══╝   ██╔██╗ ██╔══╝  ██╔══██╗       
+      |       ██║██║ ╚████║██████╔╝███████╗██╔╝ ██╗███████╗██║  ██║       
+      |       ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝       
+      |PRISM - Verifiable Data Registry (VDR) Indexer
+      |Vist: https://github.com/FabioPinheiro/scala-did
+      |
+      |DID PRISM resolves:
+      |- https://statistics.blocktrust.dev/resolve
+      |- https://neoprism.patlo.dev/explorer
+      |
+      |Tools: 
+      |- https://protobuf-decoder.netlify.app/
+      |""".stripMargin
+  )
+
+  def makeIndexerConfigZLayerFromArgs = getArgs
+    .map(_.toSeq)
+    .flatMap {
+      case Seq(dataPath: String) =>
+        ZIO.succeed(IndexerConfig(mBlockfrostConfig = None, workdir = dataPath))
+      case Seq(dataPath, apikey) =>
+        ZIO.succeed(IndexerConfig(mBlockfrostConfig = Some(BlockfrostConfig(apikey)), workdir = dataPath))
+      case next =>
+        ZIO.logWarning(s"Fail to parse indexerConfig from '${next.mkString(" ")}'") *>
+          ZIO.fail(RuntimeException("Indexer <dataPath> [<TOKEN_mainnet|preprod|preview>]"))
+    }
+    .map(ZLayer.succeed _)
+
+  def indexerJob = for {
+    indexerConfig <- ZIO.service[IndexerConfig]
+    _ <- ZIO.log(s"Check the LastTransactionIndexStored")
+    chunkFilesBeforeStart <- findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath)
+    lastTransactionIndexStored <- chunkFilesBeforeStart.lastOption match
+      case None => ZIO.succeed(None)
+      case Some(lastChunkFilesPath) =>
+        ZStream
+          .fromFile(lastChunkFilesPath)
+          .via(ZPipeline.utf8Decode >>> ZPipeline.splitLines)
+          .takeRight(1) // last line
+          .map { _.fromJson[CardanoMetadataCBOR].getOrElse(???) }
+          .map(_.index)
+          .runCollect
+          .map(_.headOption)
+
+    nextMetadateIndex = lastTransactionIndexStored.map(_ + 1).getOrElse(0)
+    cardinalityOfEntries = nextMetadateIndex + 1
+    nextPageIndex = cardinalityOfEntries / 100
+    _ <- ZIO.log(s"API calls start: nextPageIndex=$nextPageIndex; nextMetadateIndex=$nextMetadateIndex")
+
+    _ <- indexerConfig.mBlockfrostConfig match
+      case None => ZIO.logWarning("Token for blockfrost is missing") *> ZIO.log("Indexing from ofline file")
+      case Some(blockfrostConfig) =>
+        metadataFromCBORAPI(
+          blockfrostConfig = blockfrostConfig,
+          pageJump = nextPageIndex,
+        )
+          .filter(_.index >= nextMetadateIndex) // .drop(nextItemIndex + 1)
+          .groupByKey(_.index / FILE_CHUNK_SIZE) { (fileN, stream) =>
+            stream.tapSink {
+              val fileName = f"$FILE_CHUNK_NAME${fileN}%03.0f"
+              sinkRawTransactions(indexerConfig.rawMetadataPath + s"/$fileName")
+            }
+          }
+          .run(ZSink.drain)
+          *> ZIO.log(s"End updating the raw metadata '${indexerConfig.rawMetadataPath}'")
+
+    // Load PRISM State from chunk files
+    refPrismState <- IndexerUtils.loadPrismStateFromChunkFiles // .provideLayer(indexerConfigZLayer)
+    state <- refPrismState.get
+    // ###############################################
+
+    _ <- ZStream
+      .fromIterable(state.ssi2eventsId)
+      .mapZIO { case (did, opidSeq) =>
+        for {
+          _ <- ZIO.logDebug(s"DID: $did")
+          events <- state.getEventsForSSI(did)
+          _ <- ZStream.fromIterableZIO(state.getEventsForSSI(did)).run {
+            ZSink
+              .fromFileName(
+                name = indexerConfig.ssiEventsPath(did),
+                options = Set(WRITE, TRUNCATE_EXISTING, CREATE)
+              )
+              .contramapChunks[MySignedPrismOperation[OP]](_.flatMap { spo => s"${spo.toJson}\n".getBytes })
+          }
+          ssi = fmgp.did.method.prism.SSI.make(did, events)
+          _ <- ZStream.from(ssi).run {
+            ZSink
+              .fromFileName(name = indexerConfig.ssiPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
+              .contramapChunks[SSI](_.flatMap { case ssi => s"${ssi.toJsonPretty}\n".getBytes })
+          }
+          _ <- ZStream.from(ssi).run {
+            ZSink
+              .fromFileName(name = indexerConfig.diddocPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
+              .contramapChunks[SSI](_.flatMap { case ssi => s"${ssi.didDocument.toJsonPretty}\n".getBytes })
+          }
+        } yield ()
+      }
+      .run(ZSink.count)
+
+    _ <- ZStream
+      .fromIterable(state.asInstanceOf[PrismStateInMemory].vdr2eventRef) // FIXME
+      .mapZIO { case (ref, events) =>
+        for {
+          _ <- ZIO.logDebug(s"VDR: $ref")
+          _ <- ZStream.fromIterableZIO(state.getEventsForVDR(ref)).run {
+            ZSink
+              .fromFileName(
+                name = indexerConfig.vdrEventsPath(ref),
+                options = Set(WRITE, TRUNCATE_EXISTING, CREATE)
+              )
+              .contramapChunks[MySignedPrismOperation[OP]](_.flatMap { spo => s"${spo.toJson}\n".getBytes })
+          }
+          vdr <- state.getVDR(ref)
+          _ <- ZStream.from(vdr).run {
+            ZSink
+              .fromFileName(name = indexerConfig.vdrPath(ref), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
+              .contramapChunks[VDR](_.flatMap { case vdr => s"${vdr.toJsonPretty}\n".getBytes })
+          }
+        } yield ()
+      }
+      .run(ZSink.count)
+  } yield ()
+
   override val run = {
     for {
-      _ <- Console.printLine(
-        """██████╗ ██████╗ ██╗███████╗███╗   ███╗    ██╗   ██╗██████╗ ██████╗ 
-          |██╔══██╗██╔══██╗██║██╔════╝████╗ ████║    ██║   ██║██╔══██╗██╔══██╗
-          |██████╔╝██████╔╝██║███████╗██╔████╔██║    ██║   ██║██║  ██║██████╔╝
-          |██╔═══╝ ██╔══██╗██║╚════██║██║╚██╔╝██║    ╚██╗ ██╔╝██║  ██║██╔══██╗
-          |██║     ██║  ██║██║███████║██║ ╚═╝ ██║     ╚████╔╝ ██████╔╝██║  ██║
-          |╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝     ╚═╝      ╚═══╝  ╚═════╝ ╚═╝  ╚═╝
-          |                                                                   
-          |       ██╗███╗   ██╗██████╗ ███████╗██╗  ██╗███████╗██████╗        
-          |       ██║████╗  ██║██╔══██╗██╔════╝╚██╗██╔╝██╔════╝██╔══██╗       
-          |       ██║██╔██╗ ██║██║  ██║█████╗   ╚███╔╝ █████╗  ██████╔╝       
-          |       ██║██║╚██╗██║██║  ██║██╔══╝   ██╔██╗ ██╔══╝  ██╔══██╗       
-          |       ██║██║ ╚████║██████╔╝███████╗██╔╝ ██╗███████╗██║  ██║       
-          |       ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝       
-          |PRISM - Verifiable Data Registry (VDR) Indexer
-          |Vist: https://github.com/FabioPinheiro/scala-did
-          |
-          |DID PRISM resolves:
-          |- https://statistics.blocktrust.dev/resolve
-          |- https://neoprism.patlo.dev/explorer
-          |
-          |Tools: 
-          |- https://protobuf-decoder.netlify.app/
-          |""".stripMargin
-      )
-      indexerConfigZLayer <- getArgs
-        .map(_.toSeq)
-        .flatMap {
-          case Seq(dataPath: String) =>
-            ZIO.succeed(IndexerConfig(mBlockfrastConfig = None, workdir = dataPath))
-          case Seq(dataPath, apikey) =>
-            ZIO.succeed(IndexerConfig(mBlockfrastConfig = Some(BlockfrastConfig(apikey)), workdir = dataPath))
-          case next =>
-            ZIO.logWarning(s"Fail to parse indexerConfig from '${next.mkString(" ")}'") *>
-              ZIO.fail(RuntimeException("Indexer <dataPath> [<TOKEN_mainnet|preprod|preview>]"))
-        }
-        .map(ZLayer.succeed _)
-      indexerConfig <- ZIO.service[IndexerConfig].provideLayer(indexerConfigZLayer)
-
-      _ <- ZIO.log(s"Check the LastTransactionIndexStored")
-      chunkFilesBeforeStart <- findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath)
-      lastTransactionIndexStored <- chunkFilesBeforeStart.lastOption match
-        case None => ZIO.succeed(None)
-        case Some(lastChunkFilesPath) =>
-          ZStream
-            .fromFile(lastChunkFilesPath)
-            .via(ZPipeline.utf8Decode >>> ZPipeline.splitLines)
-            .takeRight(1) // last line
-            .map { _.fromJson[CardanoMetadataCBOR].getOrElse(???) }
-            .map(_.index)
-            .runCollect
-            .map(_.headOption)
-
-      nextMetadateIndex = lastTransactionIndexStored.map(_ + 1).getOrElse(0)
-      cardinalityOfEntries = nextMetadateIndex + 1
-      nextPageIndex = cardinalityOfEntries / 100
-      _ <- ZIO.log(s"API calls start: nextPageIndex=$nextPageIndex; nextMetadateIndex=$nextMetadateIndex")
-
-      _ <- indexerConfig.mBlockfrastConfig match
-        case None => ZIO.logWarning("Token for blockfrost is missing") *> ZIO.log("Indexing from ofline file")
-        case Some(blockfrastConfig) =>
-          metadataFromCBORAPI(
-            blockfrastConfig = blockfrastConfig,
-            pageJump = nextPageIndex,
-          )
-            .filter(_.index >= nextMetadateIndex) // .drop(nextItemIndex + 1)
-            .groupByKey(_.index / FILE_CHUNK_SIZE) { (fileN, stream) =>
-              stream.tapSink {
-                val fileName = f"$FILE_CHUNK_NAME${fileN}%03.0f"
-                sinkRawTransactions(indexerConfig.rawMetadataPath + s"/$fileName")
-              }
-            }
-            .run(ZSink.drain)
-            *> ZIO.log(s"End updating the raw metadata '${indexerConfig.rawMetadataPath}'")
-
-      // Load PRISM State from chunk files
-      refPrismState <- IndexerUtils.loadPrismStateFromChunkFiles.provideLayer(indexerConfigZLayer)
-      state <- refPrismState.get
-      // ###############################################
-
-      _ <- ZStream
-        .fromIterable(state.ssi2eventsId)
-        .mapZIO { case (did, opidSeq) =>
-          for {
-            _ <- ZIO.logDebug(s"DID: $did")
-            events <- state.getEventsForSSI(did)
-            _ <- ZStream.fromIterableZIO(state.getEventsForSSI(did)).run {
-              ZSink
-                .fromFileName(
-                  name = indexerConfig.ssiEventsPath(did),
-                  options = Set(WRITE, TRUNCATE_EXISTING, CREATE)
-                )
-                .contramapChunks[MySignedPrismOperation[OP]](_.flatMap { spo => s"${spo.toJson}\n".getBytes })
-            }
-            ssi = fmgp.did.method.prism.SSI.make(did, events)
-            _ <- ZStream.from(ssi).run {
-              ZSink
-                .fromFileName(name = indexerConfig.ssiPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
-                .contramapChunks[SSI](_.flatMap { case ssi => s"${ssi.toJsonPretty}\n".getBytes })
-            }
-            _ <- ZStream.from(ssi).run {
-              ZSink
-                .fromFileName(name = indexerConfig.diddocPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
-                .contramapChunks[SSI](_.flatMap { case ssi => s"${ssi.didDocument.toJsonPretty}\n".getBytes })
-            }
-          } yield ()
-        }
-        .run(ZSink.count)
-
-      _ <- ZStream
-        .fromIterable(state.asInstanceOf[PrismStateInMemory].vdr2eventRef) // FIXME
-        .mapZIO { case (ref, events) =>
-          for {
-            _ <- ZIO.logDebug(s"VDR: $ref")
-            _ <- ZStream.fromIterableZIO(state.getEventsForVDR(ref)).run {
-              ZSink
-                .fromFileName(
-                  name = indexerConfig.vdrEventsPath(ref),
-                  options = Set(WRITE, TRUNCATE_EXISTING, CREATE)
-                )
-                .contramapChunks[MySignedPrismOperation[OP]](_.flatMap { spo => s"${spo.toJson}\n".getBytes })
-            }
-            vdr <- state.getVDR(ref)
-            _ <- ZStream.from(vdr).run {
-              ZSink
-                .fromFileName(name = indexerConfig.vdrPath(ref), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
-                .contramapChunks[VDR](_.flatMap { case vdr => s"${vdr.toJsonPretty}\n".getBytes })
-            }
-          } yield ()
-        }
-        .run(ZSink.count)
-
+      _ <- indexerLogo
+      indexerConfigZLayer <- makeIndexerConfigZLayerFromArgs
+      _ <- indexerJob.provideLayer(indexerConfigZLayer)
     } yield ()
   }
+
 }

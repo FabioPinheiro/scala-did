@@ -37,9 +37,7 @@ object CardanoClient extends ZIOAppDefault {
           |
           |""".stripMargin
       )
-      // aaa = com.bloxbean.cardano.client.crypto.bip39.MnemonicCode .toSeed(nemonic)
-
-      blockfrastConfig = BlockfrastConfig(
+      blockfrostConfig = BlockfrostConfig(
         token = "preprod9EGSSMf6oWb81qoi8eW65iWaQuHJ1HwB"
       ) // FIXME recreate my personal IOHK API key
       wallet = CardanoWalletConfig()
@@ -64,7 +62,7 @@ object CardanoClient extends ZIOAppDefault {
           .map(protoBytes => SignedPrismOperation.parseFrom(protoBytes))
 
       signedTransaction = CardanoService.makeTrasation(
-        blockfrastConfig,
+        blockfrostConfig,
         wallet,
         prismEvents,
         maybeMsgCIP20 = Some("PRISM VDR (by fmgp)")
@@ -75,7 +73,7 @@ object CardanoClient extends ZIOAppDefault {
       // 84a400d901028182582074595c9a3b4701b2ad70d0b0537b9e714ffb4c56f6144cb4b9594e2754312219000181825839000a53930fc08a96c804f29a2fd47c9f4685bce6f0dddbd43f8e9379d954da2e2e92b55ae605ea9916d298d300da4817f11231b02745a5f3331b000000025331b8fb021a0002e639075820dc518771a85f9396530edcc60a5a566a5fea2b03d1e08794b4c43c224d9a4083a100d90102818258208bdbeed2b2bd78c79db1492fb77fc79c8adeec0fc1a953f90f0198220b6588fc58404408ae6139d05e188cde97e73ee1d8de4b1c14f8da16b019b4218f2f2a7cc53e9025d38f5b21964c4dc18f4732a95a3c5cc3f6853cf279c2557bcee1e999340cf5a21902a273505249534d205644522028627920666d67702919534ca261638f582022ca0312cf010a076d61737465723112473045022100fd1f2ea66ea9e7f378615820dbe1599fb12b7ca3297e9efa872504bfc54f1daebec502205f0152d45b266b55582024d2fe8eb38aaa1d3e78dc053b4f50d98fe4564f50c4c0da1a7b0a790a77123b58200a076d61737465723110014a2e0a09736563703235366b311221028210fd4c425820b148df2b908eb6a5c507822f63c440facc283b30c84859fde2e30f12380a0476582064723110084a2e0a09736563703235366b311221028210fd4c42b148df2b908e5820b6a5c507822f63c440facc283b30c84859fde2e30f12790a04766472311247305820450221008aa8a6f66a57d28798b24540dbf0a93772ff317f7bd8969a0ca3a98c5820ec7ff9d4022016336c0c8b9fc82198b661f85468f53c1b4dc0cdd23b44dc0d175820853aa50944161a283a260a2051d47b13393a7cc5c1afc47099dcbecccf0c8a705820828c072ac82f55225b42d4f4a2060101127b0a047664723112473045022100d058207451415fecbe92f270ecd0371ee181cabd198e781759287e5122d688a9c971025820202273b49e43a1f2022940f48012b5e9839f99eaacf7429c417ff67ec64e58b558201b1a2a422812202a0d49ff70f6403cab5bba090478300369ff4875f849dd42c94dc59ca4272a9a7ba20603020304617601
       // Lixo https://preprod.cardanoscan.io/transaction/e10e33b55e6946d7d8d1d0748d304384435a5cccd821805ff77ad97d2e575af0
 
-      result <- CardanoService.submitTransaction(signedTransaction).provide(ZLayer.succeed(blockfrastConfig))
+      result <- CardanoService.submitTransaction(signedTransaction).provide(ZLayer.succeed(blockfrostConfig))
       _ <- ZIO.log(result.toString())
     } yield ()
 

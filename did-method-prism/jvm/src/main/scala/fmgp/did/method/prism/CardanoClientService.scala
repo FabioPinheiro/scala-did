@@ -85,14 +85,14 @@ object CardanoService {
       .put(PRISM_LABEL_CIP_10, internal.prismObject2metadata(prismObject))
       .put(MSG_LABEL_CIP_20, msgCIP20)
 
-  def makeTxBuilder(bfConfig: BlockfrastConfig, wallet: CardanoWalletConfig, metadata: Metadata): TxBuilder = {
+  def makeTxBuilder(bfConfig: BlockfrostConfig, wallet: CardanoWalletConfig, metadata: Metadata): TxBuilder = {
     val senderAccount: Account = makeAccount(bfConfig, wallet)
     val output = internal.makeOutput(senderAccount)
     internal.txBuilder(senderAccount, output, metadata)
   }
 
   def makeTxBuilder(
-      bfConfig: BlockfrastConfig,
+      bfConfig: BlockfrostConfig,
       wallet: CardanoWalletConfig,
       prismObject: PrismObject,
       maybeMsgCIP20: Option[String]
@@ -102,7 +102,7 @@ object CardanoService {
       case Some(msgCIP20) => makeTxBuilder(bfConfig, wallet, makeMetadataPrismWithCIP20(prismObject, msgCIP20))
 
   def makeTxBuilder(
-      bfConfig: BlockfrastConfig,
+      bfConfig: BlockfrostConfig,
       wallet: CardanoWalletConfig,
       prismEvents: Seq[SignedPrismOperation],
       maybeMsgCIP20: Option[String],
@@ -115,7 +115,7 @@ object CardanoService {
     )
 
   def makeTrasation(
-      bfConfig: BlockfrastConfig,
+      bfConfig: BlockfrostConfig,
       wallet: CardanoWalletConfig,
       prismEvents: Seq[SignedPrismOperation],
       maybeMsgCIP20: Option[String],
@@ -140,15 +140,15 @@ object CardanoService {
     case CardanoNetwork.Testnet => Networks.testnet()
     case CardanoNetwork.Preprod => Networks.preprod()
     case CardanoNetwork.Preview => Networks.preview()
-  private def makeBFBackendService(bfConfig: BlockfrastConfig) =
+  private def makeBFBackendService(bfConfig: BlockfrostConfig) =
     new BFBackendService(bfConfig.network.blockfrostURL + "/", bfConfig.token)
-  private def makeAccount(bfConfig: BlockfrastConfig, wallet: CardanoWalletConfig) =
+  private def makeAccount(bfConfig: BlockfrostConfig, wallet: CardanoWalletConfig) =
     new Account(makeBFNetworks(bfConfig.network), wallet.mnemonicPhrase)
 
-  def submitTransaction(tx: Transaction): ZIO[BlockfrastConfig, Throwable, (Int, String)] =
+  def submitTransaction(tx: Transaction): ZIO[BlockfrostConfig, Throwable, (Int, String)] =
     for {
       _ <- ZIO.log("submitTransaction")
-      backendService: BackendService <- ZIO.service[BlockfrastConfig].map(makeBFBackendService(_))
+      backendService: BackendService <- ZIO.service[BlockfrostConfig].map(makeBFBackendService(_))
       txPayload = tx.serialize()
       _ <- ZIO.log(s"submitTransaction txPayload = ${bytes2Hex(tx.serialize())}")
       result <- ZIO.attempt(backendService.getTransactionService().submitTransaction(txPayload))

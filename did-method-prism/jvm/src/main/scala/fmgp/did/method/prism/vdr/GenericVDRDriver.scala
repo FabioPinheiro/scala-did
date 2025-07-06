@@ -10,7 +10,7 @@ import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
 
 class GenericVDRDriver(
-    bfConfig: BlockfrastConfig,
+    bfConfig: BlockfrostConfig,
     wallet: CardanoWalletConfig,
     workdir: String = "../../prism-vdr/mainnet",
     didPrism: DIDPrism,
@@ -25,7 +25,7 @@ class GenericVDRDriver(
     // stateRef <- ZIO.service[Ref[PrismState]]
     stateRef <- IndexerUtils.loadPrismStateFromChunkFiles
       .provide(
-        ZLayer.succeed(IndexerConfig(mBlockfrastConfig = None, workdir))
+        ZLayer.succeed(IndexerConfig(mBlockfrostConfig = None, workdir))
       )
     state <- stateRef.get
     _ <- ZIO.log(s"Init GenericVDRDriver Service with PrismState (with ${state.ssiCount} SSI)")

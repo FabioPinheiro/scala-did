@@ -24,7 +24,7 @@ object PrismNode extends ServerMain {
     .addZIO(ZIO.log("Start PrismNode") *> PrismNodeImpl.make)
     .provide(
       // ZLayer.fromZIO(Ref.make(PrismState.empty))
-      ZLayer.succeed(IndexerConfig(mBlockfrastConfig = None, workdir = "../../prism-vdr/mainnet")) >>>
+      ZLayer.succeed(IndexerConfig(mBlockfrostConfig = None, workdir = "../../prism-vdr/mainnet")) >>>
         ZLayer.fromZIO(IndexerUtils.loadPrismStateFromChunkFiles)
     )
 

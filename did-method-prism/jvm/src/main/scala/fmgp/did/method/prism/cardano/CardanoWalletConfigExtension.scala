@@ -12,10 +12,6 @@ extension (wallet: CardanoWalletConfig) {
   def secp256k1PrivateKey(depth: Int, childIndex: Int): KMMECSecp256k1PrivateKey =
     HDKey(wallet.seed, depth, childIndex).getKMMSecp256k1PrivateKey()
 
-  def xxx = {
-    val aaa: Seq[Int] = ???
-    aaa.asJava
-  }
 }
 
 // object CardanoWalletConfigExtension {}
