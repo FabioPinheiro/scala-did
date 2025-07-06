@@ -87,6 +87,8 @@ object DID {
   given Conversion[DID, TO] = _.asTO // FIXME REMOVE
   given Conversion[DID, FROM] = _.asFROM // FIXME REMOVE
   given Conversion[DID, FROMTO] = _.asFROMTO // FIXME REMOVE
+
+  val regex = """^did:([^\s:]+):([^\?\#\s]+)(?!\?[^\#\s:]*)(?!\#.*)$""".r // OLD """^did:([^\s:]+):([^\s]+)$""".r
 }
 
 type DIDSyntax = String //FIXME

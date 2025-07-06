@@ -14,12 +14,10 @@ import fmgp.crypto.error._
 opaque type DIDSubject = String
 object DIDSubject {
 
-  val pattern = """^did:([^\s:]+):([^\?\#\s]+)(?!\?[^\#\s:]*)(?!\#.*)$""".r // OLD """^did:([^\s:]+):([^\s]+)$""".r
-
   /** @throws AssertionError if not a valid DIDSubject */
   inline def parseString(id: String) = id match {
-    case pattern(namespace, specificId) => (namespace, specificId)
-    case _                              => throw new java.lang.AssertionError(s"Fail to parse DIDSubject: '$id'")
+    case DID.regex(namespace, specificId) => (namespace, specificId)
+    case _                                => throw new java.lang.AssertionError(s"Fail to parse DIDSubject: '$id'")
   }
 
   extension (id: DIDSubject)
@@ -53,7 +51,7 @@ object DIDSubject {
     */
   def apply(s: String): DIDSubject = s.tap(e => parseString(e)) // 'tap' is to throws as soon as possible
   def either(s: String): Either[FailToParse, DIDSubject] =
-    if (pattern.matches(s)) Right(DIDSubject(s)) else Left(FailToParse(s"NOT a DID subject '$s'"))
+    if (DID.regex.matches(s)) Right(DIDSubject(s)) else Left(FailToParse(s"NOT a DID subject '$s'"))
 
   given decoder: JsonDecoder[DIDSubject] = JsonDecoder.string.map(s => DIDSubject(s)) // TODO use either
   given encoder: JsonEncoder[DIDSubject] = JsonEncoder.string.contramap(e => e.value)
