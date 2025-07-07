@@ -23,7 +23,7 @@ case class PrismStateHTTP(
     } yield retTyped
   }.provideEnvironment(ZEnvironment(httpUtils))
 
-  override def getEventsByHash(refHash: String): Option[MySignedPrismOperation[OP]] = ???
+  override def getEventsByHash(refHash: EventHash): Option[MySignedPrismOperation[OP]] = ???
   override def getEventsIdBySSI(ssi: DIDSubject): Seq[EventRef] = ???
   override def getEventsIdByVDR(ref: RefVDR): Seq[EventRef] = ???
   override def ssi2eventsId: Map[DIDSubject, Seq[EventRef]] = ???

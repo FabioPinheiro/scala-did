@@ -55,7 +55,7 @@ trait PrismStateRead {
       case Right(seq)  => PrismState.forceType2StorageEvent(seq)
     }
 
-  def getEventsByHash(refHash: String): Option[MySignedPrismOperation[OP]]
+  def getEventsByHash(refHash: EventHash): Option[MySignedPrismOperation[OP]]
 
   def getSSI(ssi: DIDSubject): ZIO[Any, Throwable, SSI] =
     getSSIHistory(ssi).map(_.latestVersion) // getEventsForSSI(ssi).map { events => SSI.make(ssi, events) }

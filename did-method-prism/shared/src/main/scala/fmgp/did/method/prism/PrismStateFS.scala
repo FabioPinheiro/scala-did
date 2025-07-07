@@ -20,7 +20,7 @@ case class PrismStateFS() extends PrismStateRead {
     MySignedPrismOperation[CreateStorageEntryOP | UpdateStorageEntryOP | DeactivateStorageEntryOP]
   ]] = ???
 
-  override def getEventsByHash(refHash: String): Option[MySignedPrismOperation[OP]] = ???
+  override def getEventsByHash(refHash: EventHash): Option[MySignedPrismOperation[OP]] = ???
 
   override def ssi2eventsId: Map[DIDSubject, Seq[EventRef]] = ???
 

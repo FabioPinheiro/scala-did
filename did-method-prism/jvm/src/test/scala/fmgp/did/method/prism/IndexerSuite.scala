@@ -74,7 +74,8 @@ class IndexerSuite extends ZSuite {
     assertEquals(bytes2Hex(e2.toByteArray), createVDR)
   }
   test("update VDR") {
-    val e3 = updateVDREntryBytes(refVDR, getSignedPrismOperationFromHex(createVDR), pk1VDR, "vdr1", data2)
+    val (e3EventHash, e3) =
+      updateVDREntryBytes(refVDR, getSignedPrismOperationFromHex(createVDR), pk1VDR, "vdr1", data2)
     assertEquals(bytes2Hex(e3.toByteArray), updateVDR)
   }
 
@@ -103,7 +104,8 @@ class IndexerSuite extends ZSuite {
   }
 
   test("update VDR after add key in the SSI") {
-    val e5 = updateVDREntryBytes(refVDR, getSignedPrismOperationFromHex(updateVDR), pk2VDR, "vdr2", data3)
+    val (e5EventHash, e5) =
+      updateVDREntryBytes(refVDR, getSignedPrismOperationFromHex(updateVDR), pk2VDR, "vdr2", data3)
     assertEquals(bytes2Hex(e5.toByteArray), updateVDR_withTheNewKey)
   }
 

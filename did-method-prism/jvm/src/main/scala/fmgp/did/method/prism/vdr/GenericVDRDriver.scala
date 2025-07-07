@@ -8,6 +8,7 @@ import fmgp.did.method.prism.cardano.CardanoWalletConfig
 import org.hyperledger.identus.apollo.utils.KMMECSecp256k1PrivateKey
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
+import fmgp.did.method.prism.proto.getEventHash
 
 class GenericVDRDriver(
     bfConfig: BlockfrostConfig,
@@ -61,7 +62,7 @@ class GenericVDRDriver(
         .provideEnvironment(ZEnvironment(bfConfig))
     } yield (refVDR, ret._1, ret._2)
 
-  def updateBytesEntry(eventRef: RefVDR, data: Array[Byte]): ZIO[Any, Throwable, (RefVDR, Int, String)] = {
+  def updateBytesEntry(eventRef: RefVDR, data: Array[Byte]): ZIO[Any, Throwable, (EventHash, Int, String)] = {
     for {
       //   stateRef <- ZIO.service[Ref[PrismState]]
       //   state <- stateRef.get
@@ -70,9 +71,9 @@ class GenericVDRDriver(
       previousEventHashStr = vdrEntry.latestVDRHash.get // FIXME
       // TODO check is in of the type bytes
       // TODO check key
-      signedPrismOperation = VDRUtils.updateVDREntryBytes(
+      (eventHash, signedPrismOperation) = VDRUtils.updateVDREntryBytes(
         eventRef = eventRef,
-        previousEventHash = hex2bytes(previousEventHashStr),
+        previousEventHash = previousEventHashStr,
         vdrKey = vdrKey,
         keyName = keyName,
         data = data,
@@ -88,12 +89,12 @@ class GenericVDRDriver(
       ret <- CardanoService
         .submitTransaction(tx)
         .provideEnvironment(ZEnvironment(bfConfig))
-    } yield (eventRef, ret._1, ret._2)
+    } yield (eventHash, ret._1, ret._2)
   }
 
   def read(eventRef: RefVDR): ZIO[Any, Throwable, VDR] = ???
 
-  def deleteBytesEntry(eventRef: RefVDR): ZIO[Any, Throwable, (RefVDR, Int, String)] = ???
+  def deleteBytesEntry(eventRef: RefVDR): ZIO[Any, Throwable, (EventHash, Int, String)] = ???
 
 }
 

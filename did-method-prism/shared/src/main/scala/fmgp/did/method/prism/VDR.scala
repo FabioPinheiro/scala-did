@@ -2,36 +2,13 @@ package fmgp.did.method.prism
 
 import zio.json._
 import fmgp.did.method.prism.proto._
-import fmgp.util.bytes2Hex
 import fmgp.did.method.prism.cardano.EventCursor
-import fmgp.util.hex2bytes
-
-opaque type RefVDR = String
-object RefVDR:
-  def apply(hash: String): RefVDR = hash
-  def fromEventHash(hash: Array[Byte]): RefVDR = bytes2Hex(hash)
-  def fromEvent(event: MySignedPrismOperation[OP]): RefVDR =
-    event.operation match
-      case _: CreateStorageEntryOP     => event.eventRef.eventHash
-      case _: UpdateStorageEntryOP     => event.eventRef.eventHash
-      case _: DeactivateStorageEntryOP => event.eventRef.eventHash
-      case _                           => ??? // FIXME
-
-  extension (id: RefVDR)
-    def value: String = id
-    def byteArray: Array[Byte] = hex2bytes(id)
-
-  given decoder: JsonDecoder[RefVDR] = JsonDecoder.string.map(RefVDR(_))
-  given encoder: JsonEncoder[RefVDR] = JsonEncoder.string.contramap[RefVDR](_.value)
-  // These given are useful if we use the RefVDR as a Key (ex: Map[RefVDR , Value])
-  given JsonFieldDecoder[RefVDR] = JsonFieldDecoder.string.map(s => RefVDR(s)) // TODO use either
-  given JsonFieldEncoder[RefVDR] = JsonFieldEncoder.string.contramap(e => e.value)
 
 final case class VDR(
     id: RefVDR,
     did: Option[DIDPrism],
     // ACL // add something similar to the linux ACL System
-    latestVDRHash: Option[String], // TODO TYPE SAFE
+    latestVDRHash: Option[EventHash],
     cursor: EventCursor, // append cursor
     nonce: Option[Array[Byte]],
     data: VDR.DataType,
@@ -72,8 +49,8 @@ final case class VDR(
                   if (latestVDRHash.isDefined) self
                   else
                     assert(
-                      self.id == RefVDR(spo.eventRef.eventHash),
-                      s"${self.id} != ${RefVDR(spo.eventRef.eventHash)}"
+                      self.id == RefVDR.fromEventHash(spo.eventHash),
+                      s"${self.id} != ${RefVDR.fromEventHash(spo.eventHash)}"
                     )
 
                     self.copy(
@@ -87,7 +64,7 @@ final case class VDR(
                 case event @ UpdateStorageEntryOP(previousOperationHash, newData, unknownFields) =>
                   self.latestVDRHash match
                     case None => self
-                    case Some(thisLatestVDRHash) if thisLatestVDRHash == previousOperationHash =>
+                    case Some(thisLatestVDRHash) if thisLatestVDRHash.hex == previousOperationHash =>
                       self.copy(
                         latestVDRHash = Some(spo.eventRef.eventHash),
                         data = self.data.update(newData),

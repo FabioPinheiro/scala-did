@@ -49,7 +49,7 @@ object DIDPrism {
   def fromEventHash(hash: Array[Byte]): DIDPrism = DIDPrism(bytes2Hex(hash))
   def fromEvent(event: MySignedPrismOperation[OP]): DIDPrism = // Either[String, DIDPrism]
     event.operation match
-      case CreateDidOP(publicKeys, services, context) => applyUnsafe(event.eventRef.eventHash)
+      case CreateDidOP(publicKeys, services, context) => applyUnsafe(event.eventHash.hex)
       case _                                          => ??? // FIXME
 
   def fromString(string: String): Either[String, DIDPrism] = string match {

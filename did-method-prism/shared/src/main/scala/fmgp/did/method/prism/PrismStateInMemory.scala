@@ -17,7 +17,7 @@ object PrismStateInMemory {
 }
 
 case class PrismStateInMemory(
-    opHash2op: Map[String, MySignedPrismOperation[OP]],
+    opHash2op: Map[String, MySignedPrismOperation[OP]], // TODO type EventHash
     tx2eventRef: Map[String, Seq[EventRef]],
     ssi2eventRef: Map[DIDSubject, Seq[EventRef]],
     vdr2eventRef: Map[RefVDR, Seq[EventRef]],
@@ -55,8 +55,8 @@ case class PrismStateInMemory(
       case None      => Seq.empty
       case Some(seq) => seq
 
-  override def getEventsByHash(refHash: String): Option[MySignedPrismOperation[OP]] =
-    this.opHash2op.get(refHash) match
+  override def getEventsByHash(refHash: EventHash): Option[MySignedPrismOperation[OP]] =
+    this.opHash2op.get(refHash.hex) match
       case None              => None
       case Some(signedEvent) => Some(signedEvent)
 
@@ -67,9 +67,9 @@ case class PrismStateInMemory(
   override def addEvent(op: MySignedPrismOperation[OP]): PrismState = op match
     case MySignedPrismOperation(tx, prismBlockIndex, prismOperationIndex, signedWith, signature, operation, pb) =>
       val opId = op.eventRef // rename to eventRef
-      val newOpHash2op = opHash2op.updatedWith(opId.eventHash) {
+      val newOpHash2op = opHash2op.updatedWith(opId.eventHash.hex) {
         case Some(value) =>
-          if (value.opHash == opId.eventHash) Some(op)
+          if (value.opHash == opId.eventHash.hex) Some(op)
           else throw new RuntimeException("impossible state: duplicated operation but with different hash?")
         case None => Some(op)
       }
@@ -169,7 +169,7 @@ case class PrismStateInMemory(
 
   def makeSSI: Seq[SSI] = this.ssi2eventRef.map { (ssi, ops) =>
     ops.foldLeft(fmgp.did.method.prism.SSI.init(ssi)) { case (tmpSSI, opId) =>
-      this.opHash2op.get(opId.eventHash) match
+      this.opHash2op.get(opId.eventHash.hex) match
         case None     => ???
         case Some(op) => tmpSSI.appendAny(op)
     }

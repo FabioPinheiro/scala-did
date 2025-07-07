@@ -5,7 +5,8 @@ import fmgp.did.method.prism.*
 // import _root_.proto.prism.*
 import scala.util.Random
 import com.google.protobuf.ByteString
-import fmgp.did.method.prism.proto.eventHash
+// import fmgp.did.method.prism.proto.eventHash
+import fmgp.did.method.prism.proto.getEventHash
 import fmgp.crypto.SHA256
 import _root_.proto.prism.*
 
@@ -33,7 +34,7 @@ object VDRUtils {
       signature = ByteString.copyFrom(vdrKey.sign(op.toByteArray)),
       operation = Some(op)
     )
-    (RefVDR.fromEventHash(signedPrismCreateEventVDR.operation.get.eventHash), signedPrismCreateEventVDR)
+    (RefVDR.fromEventHash(op.getEventHash), signedPrismCreateEventVDR)
   }
 
   def updateVDREntryBytes(
@@ -42,26 +43,27 @@ object VDRUtils {
       vdrKey: KMMECSecp256k1PrivateKey,
       keyName: String,
       data: Array[Byte],
-  ): SignedPrismOperation =
+  ): (EventHash, SignedPrismOperation) = {
     updateVDREntryBytes(
       eventRef = eventRef,
-      previousEventHash = SHA256.digest(previousOperation.operation.get.toByteArray),
+      previousEventHash = previousOperation.operation.get.getEventHash,
       vdrKey = vdrKey,
       keyName = keyName,
       data = data,
     )
+  }
 
   def updateVDREntryBytes(
       eventRef: RefVDR,
-      previousEventHash: Array[Byte],
+      previousEventHash: EventHash,
       vdrKey: KMMECSecp256k1PrivateKey,
       keyName: String,
       data: Array[Byte],
-  ): SignedPrismOperation = {
+  ): (EventHash, SignedPrismOperation) = {
     def op = PrismOperation(
       operation = PrismOperation.Operation.UpdateStorageEntry(
         value = ProtoUpdateStorageEntry(
-          previousEventHash = ByteString.copyFrom(previousEventHash),
+          previousEventHash = ByteString.copyFrom(previousEventHash.byteArray),
           data = ProtoUpdateStorageEntry.Data.Bytes(ByteString.copyFrom(data)),
         )
       ),
@@ -71,6 +73,6 @@ object VDRUtils {
       signature = ByteString.copyFrom(vdrKey.sign(op.toByteArray)),
       operation = Some(op)
     )
-    signedPrismUpdateEventVDR
+    (op.getEventHash, signedPrismUpdateEventVDR)
   }
 }

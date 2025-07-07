@@ -4,7 +4,7 @@ import zio._
 import zio.json._
 import fmgp.did.DIDDocument
 
-case class EventRef(b: Int, o: Int, eventHash: String)
+case class EventRef(b: Int, o: Int, eventHash: EventHash)
 
 object EventRef {
   given JsonDecoder[EventRef] = DeriveJsonDecoder.gen[EventRef]

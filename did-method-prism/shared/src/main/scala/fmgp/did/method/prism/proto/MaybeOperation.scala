@@ -41,8 +41,9 @@ case class MySignedPrismOperation[+T <: OP](
     protobuf: PrismOperation
 ) extends MaybeOperation[T]
     with PrismOperationIndex {
-  def opHash = protobuf.eventHashStr
-  def eventRef = EventRef(b = b, o = o, eventHash = protobuf.eventHashStr)
+  def opHash = protobuf.eventHashStr // TODO REMOVE method
+  def eventHash: EventHash = protobuf.getEventHash
+  def eventRef = EventRef(b = b, o = o, eventHash = protobuf.getEventHash)
   def eventCursor = EventCursor(b = b, o = o)
 }
 
