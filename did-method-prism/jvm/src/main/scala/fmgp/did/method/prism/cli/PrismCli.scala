@@ -10,6 +10,7 @@ import fmgp.did.DIDSubject
 import fmgp.did.method.prism.*
 import fmgp.did.method.prism.vdr
 import fmgp.did.method.prism.cardano.CardanoNetwork
+import fmgp.did.method.prism.cli.Subcommand.MnemonicCreate
 
 // didResolverPrismJVM/runMain fmgp.did.method.prism.cli.PrismCli
 
@@ -59,6 +60,7 @@ object PrismCli extends ZIOCliDefault {
     command = Command("cardano-prism", Options.none, Args.none)
       .subcommands(
         Command("version").map(_ => Subcommand.Version()),
+        MnemonicCommand.mnemonicCommand,
         indexerCommand,
         didCommand
       ),
@@ -70,7 +72,8 @@ object PrismCli extends ZIOCliDefault {
       showTypes = true
     )
   ) {
-    case Subcommand.Version() => Console.printLine(s"0.1.0")
+    case Subcommand.Version()               => Console.printLine(s"0.1.0")
+    case cmd: Subcommand.MnemonicSubcommand => MnemonicCommand.mnemonicProgram(cmd)
     case cmd @ Subcommand.Indexer(workdir, mBlockfrostConfig) =>
       val program: ZIO[Any, Throwable, Unit] = for {
         _ <- vdr.Indexer.indexerLogo
