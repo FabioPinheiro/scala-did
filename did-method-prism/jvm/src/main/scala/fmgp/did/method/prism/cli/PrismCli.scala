@@ -4,13 +4,10 @@ import zio._
 import zio.cli._
 import zio.json._
 import zio.http._
-import java.nio.file.{Path => JPath}
 
 import fmgp.did.DIDSubject
 import fmgp.did.method.prism.*
-import fmgp.did.method.prism.vdr
 import fmgp.did.method.prism.cardano.CardanoNetwork
-import fmgp.did.method.prism.cli.Subcommand.MnemonicCreate
 
 // didResolverPrismJVM/runMain fmgp.did.method.prism.cli.PrismCli
 
@@ -26,14 +23,10 @@ object PrismCli extends ZIOCliDefault {
   val version = "0.3.0" // FIXME version MUST come from the build pipeline
 
   def notCurrentlyImplemented(cmd: Subcommand) = Console.printLine(
-    s"Command `$cmd` support is not currently implemented. If you are interested in adding support, please open a pull request athttps://github.com/FabioPinheiro/scala-did."
+    s"Command `$cmd` support is not currently implemented. If you are interested in adding support, please open a pull request at https://github.com/FabioPinheiro/scala-did."
   )
 
-  val indexerCommand: Command[Subcommand.Indexer] =
-    Command("indexer", blockfrostTokenOpt, indexerWorkDirAgr)
-      .map { case (token, workdir) => Subcommand.Indexer(workdir, token.map(vdr.BlockfrostConfig(_))) }
-
-  val cliApp = CliApp.make(
+  def cliApp = CliApp.make(
     name = "cardano-prism",
     version = version,
     summary = HelpDoc.Span.text("cli for the PRISM VDR protocol"),
@@ -43,7 +36,8 @@ object PrismCli extends ZIOCliDefault {
         Command("version").map(_ => Subcommand.Version()),
         Staging.command,
         MnemonicCommand.mnemonicCommand,
-        indexerCommand,
+        KeyCommand.command,
+        IndexerCommand.command,
         DIDCommand.didCommand,
         testCommand
       ),
@@ -54,36 +48,23 @@ object PrismCli extends ZIOCliDefault {
       showAllNames = true,
       showTypes = true
     )
-  ) {
-    case Subcommand.Version()               => Console.printLine(version)
-    case cmd: Subcommand.Staging            => Staging.program(cmd)
-    case cmd: Subcommand.Test               => programTest(cmd)
-    case cmd: Subcommand.MnemonicSubcommand => MnemonicCommand.program(cmd)
-    case cmd: Subcommand.DIDSubcommand =>
-      DIDCommand
-        .program(cmd)
-        .catchNonFatalOrDie(error =>
-          ZIO.succeed(error.printStackTrace()) *>
-            ZIO.logError(error.getMessage()) *>
-            ZIO.fail(exit(ExitCode.failure))
-        )
-    case cmd @ Subcommand.Indexer(workdir, mBlockfrostConfig) =>
-      val program: ZIO[Any, Throwable, Unit] = for {
-        _ <- vdr.Indexer.indexerLogo
-        indexerConfig = vdr.IndexerConfig(
-          mBlockfrostConfig = mBlockfrostConfig,
-          workdir = workdir.toAbsolutePath().normalize.toString
-        )
-        _ <- ZIO.log(s"IndexerConfig: `${indexerConfig}`")
-        indexerConfigZLayer = ZLayer.succeed(indexerConfig) // vdr.Indexer.makeIndexerConfigZLayerFromArgs
-        _ <- vdr.Indexer.indexerJob.provideLayer(indexerConfigZLayer)
-      } yield ()
-      program.catchNonFatalOrDie(error =>
-        ZIO.succeed(error.printStackTrace()) *>
-          ZIO.logError(error.getMessage()) *>
-          ZIO.fail(exit(ExitCode.failure))
-      )
-    // case input => Console.printLine(s"Args parsed: $input")
+  )(cmd => executeModel[Subcommand](cmd))
+
+  def executeModel[Model](model: Model): ZIO[Any, Unit, Unit] = {
+    model match {
+      case Subcommand.Version()               => Console.printLine(version)
+      case cmd: Subcommand.Staging            => Staging.program(cmd)
+      case cmd: Subcommand.Test               => programTest(cmd)
+      case cmd: Subcommand.MnemonicSubcommand => MnemonicCommand.program(cmd)
+      case cmd: Subcommand.Mnemonic2Key       => KeyCommand.program(cmd)
+      case cmd: Subcommand.DIDSubcommand      => DIDCommand.program(cmd)
+      case cmd: Subcommand.Indexer            => IndexerCommand.program(cmd)
+      // case input => Console.printLine(s"Args parsed: $input")
+    }
+  }.catchNonFatalOrDie { case error: java.io.IOException =>
+    ZIO.succeed(error.printStackTrace()) *>
+      ZIO.logError(error.getMessage()) *>
+      exit(ExitCode.failure)
   }
 }
 

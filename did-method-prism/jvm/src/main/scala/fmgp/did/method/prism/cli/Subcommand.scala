@@ -17,8 +17,14 @@ object Subcommand {
   sealed trait MnemonicSubcommand extends Subcommand
   final case class MnemonicCreate(setup: Setup) extends MnemonicSubcommand
   final case class MnemonicSeed(setup: Setup, mWallet: Option[CardanoWalletConfig]) extends MnemonicSubcommand
-  final case class Mnemonic2Key(setup: Setup, mWallet: Option[CardanoWalletConfig], depth: Int, childIndex: Int)
-      extends MnemonicSubcommand
+
+  // sealed trait KeySubcommand extends Subcommand
+  final case class Mnemonic2Key(
+      setup: Setup,
+      mWallet: Option[CardanoWalletConfig],
+      derivationPath: String,
+      keyLabel: Option[String]
+  ) extends Subcommand
 
   sealed trait DIDSubcommand extends Subcommand
   final case class DIDCreate() extends DIDSubcommand

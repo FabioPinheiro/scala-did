@@ -9,27 +9,42 @@ import org.hyperledger.identus.apollo.utils.KMMECSecp256k1PrivateKey
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
 
+case class Key(seed: Array[Byte], derivationPath: String, key: KMMECSecp256k1PrivateKey)
+object Key {
+  given decoder: JsonDecoder[Key] = {
+    given JsonDecoder[Array[Byte]] = Utils.decoderArrayByte
+    given JsonDecoder[KMMECSecp256k1PrivateKey] =
+      JsonDecoder.string.map(hex => KMMECSecp256k1PrivateKey.Companion.secp256k1FromByteArray(hex2bytes(hex)))
+    DeriveJsonDecoder.gen[Key]
+  }
+  given encoder: JsonEncoder[Key] = {
+    given JsonEncoder[Array[Byte]] = Utils.encoderArrayByte
+    given JsonEncoder[KMMECSecp256k1PrivateKey] = JsonEncoder.string.contramap(key => bytes2Hex(key.getEncoded()))
+    DeriveJsonEncoder.gen[Key]
+  }
+}
+
+object Utils {
+  def decoderArrayByte: JsonDecoder[Array[Byte]] = JsonDecoder.string.map(hex => hex2bytes(hex))
+  def encoderArrayByte: JsonEncoder[Array[Byte]] = JsonEncoder.string.contramap(bytes => bytes2Hex(bytes))
+
+}
 case class StagingState(
     loadStateFileByDefault: Boolean = true,
     updateStateFileByDefault: Boolean = false,
     wallet: Option[CardanoWalletConfig] = None,
     seed: Option[Array[Byte]] = None,
-    // secp256k1Keys: Map[String, Array[Byte]]
-    secp256k1PrivateKey: Map[String, KMMECSecp256k1PrivateKey] = Map(),
-    // key.getEncoded()).getEncoded()
+    secp256k1PrivateKey: Map[String, Key] = Map.empty,
     test: String = "",
 )
 object StagingState {
 
   given decoder: JsonDecoder[StagingState] = {
-    given JsonDecoder[Array[Byte]] = JsonDecoder.string.map(hex => hex2bytes(hex))
-    given JsonDecoder[KMMECSecp256k1PrivateKey] =
-      JsonDecoder.string.map(hex => KMMECSecp256k1PrivateKey.Companion.secp256k1FromByteArray(hex2bytes(hex)))
+    given JsonDecoder[Array[Byte]] = Utils.decoderArrayByte
     DeriveJsonDecoder.gen[StagingState]
   }
   given encoder: JsonEncoder[StagingState] = {
-    given JsonEncoder[Array[Byte]] = JsonEncoder.string.contramap(bytes => bytes2Hex(bytes))
-    given JsonEncoder[KMMECSecp256k1PrivateKey] = JsonEncoder.string.contramap(key => bytes2Hex(key.getEncoded()))
+    given JsonEncoder[Array[Byte]] = Utils.encoderArrayByte
     DeriveJsonEncoder.gen[StagingState]
   }
 }
@@ -64,9 +79,9 @@ object Setup {
         setup.staging match {
           case Left(error) => ZIO.log(s"StagingState parsing error: $error")
           case Right(newState) =>
-            (updateStateFile || newState.updateStateFileByDefault) match
+            (setup.updateStateFile || newState.updateStateFileByDefault) match
               case false => ZIO.unit // *> ZIO.log("updateStateFile = false")
-              case true  => ZIO.writeFile(path, newState.toJsonPretty).orDie // *> ZIO.log("StagingState close")
+              case true  => ZIO.writeFile(path, newState.toJsonPretty).orDie *> ZIO.log("StagingState close")
         }
       }
     }
@@ -80,6 +95,9 @@ def updateState(f: (StagingState) => StagingState): ZIO[Ref[Setup], Nothing, Uni
         Setup(stagingPath, updateStateFile, Right(f(state)))
     }
   )
+
+def forceStateUpdateAtEnd: ZIO[Ref[Setup], Nothing, Unit] =
+  ZIO.serviceWithZIO[Ref[Setup]](ref => ref.update(_.copy(updateStateFile = true)))
 
 def programTest(cmd: Subcommand.Test) = cmd match
   case Subcommand.Test(setup, data) =>
