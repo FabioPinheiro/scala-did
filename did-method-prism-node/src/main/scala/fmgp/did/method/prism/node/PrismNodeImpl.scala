@@ -91,7 +91,8 @@ case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletC
 
     operationHashEffect = ZIO
       .attempt {
-        SHA256.digestToHex(request.operationId.toByteArray)
+        // SHA256.digestToHex(request.operationId.toByteArray) //???? what? is this
+        EventHash(request.operationId.toByteArray)
       }
       .mapError(ex =>
         io.grpc.Status.INTERNAL
@@ -99,9 +100,9 @@ case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletC
           .asException()
       )
 
-    operationEffect = operationHashEffect.map { opHash =>
-      state.getEventsByHash(opHash).map { op =>
-        assert(op.opHash == opHash, s"Operation hash mismatch: ${op.opHash} != $opHash")
+    operationEffect = operationHashEffect.map { eventHash =>
+      state.getEventsByHash(eventHash).map { op =>
+        assert(op.opHash == eventHash.hex, s"Operation hash mismatch: ${op.opHash} != ${eventHash.hex}")
 
         OperationInfo(
           txStatus = "CONFIRMED", // if we find the operation in the state, it is confirmed
