@@ -11,11 +11,13 @@ object Subcommand {
   final case class Indexer(workdir: Path, mBlockfrostConfig: Option[BlockfrostConfig]) extends Subcommand
   // final case class DID() extends Subcommand
   final case class Version() extends Subcommand
+  final case class Staging(config: Setup, createFlag: Boolean) extends Subcommand
+  final case class Test(config: Setup, data: String) extends Subcommand
 
   sealed trait MnemonicSubcommand extends Subcommand
-  final case class MnemonicCreate() extends MnemonicSubcommand
-  final case class MnemonicSeed(mWallet: Option[CardanoWalletConfig]) extends MnemonicSubcommand
-  final case class Mnemonic2Key(mWallet: Option[CardanoWalletConfig], depth: Int, childIndex: Int)
+  final case class MnemonicCreate(setup: Setup) extends MnemonicSubcommand
+  final case class MnemonicSeed(setup: Setup, mWallet: Option[CardanoWalletConfig]) extends MnemonicSubcommand
+  final case class Mnemonic2Key(setup: Setup, mWallet: Option[CardanoWalletConfig], depth: Int, childIndex: Int)
       extends MnemonicSubcommand
 
   sealed trait DIDSubcommand extends Subcommand

@@ -64,8 +64,8 @@ object ECDH_AnonEC extends ECDH_UtilsEC {
     updatedAAD = AAD.compute(UtilsJVM.unsafe.given_Conversion_ProtectedHeader_JWEHeader(updatedHeader))
 
     sharedSecrets = ecRecipientsKeys.map { case (vmr, key) =>
-      val use_the_defualt_JCA_Provider = null
-      (vmr, ECDH.deriveSharedSecret(key.toJWK.toECPublicKey(), ephemeralPrivateKey, use_the_defualt_JCA_Provider))
+      val use_the_default_JCA_Provider = null
+      (vmr, ECDH.deriveSharedSecret(key.toJWK.toECPublicKey(), ephemeralPrivateKey, use_the_default_JCA_Provider))
     }
 
     cek: SecretKey = {
@@ -108,7 +108,7 @@ object ECDH_AnonEC extends ECDH_UtilsEC {
             ECDH.deriveSharedSecret(
               ephemeralKey.toECPublicKey(),
               recipientKey.toECPrivateKey(),
-              null /*use_the_defualt_JCA_Provider*/
+              null /*use_the_default_JCA_Provider*/
             )
           ).toEither match {
             case Left(ex) => Left(SomeThrowable(ex))
@@ -155,7 +155,7 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
     myProvider = new ECDH_AuthCryptoProvider(curve, cek)
 
     sharedSecrets = ecRecipientsKeys.map { case (vmr, key) =>
-      val use_the_defualt_JCA_Provider = null
+      val use_the_default_JCA_Provider = null
       (
         vmr,
         ECDH1PU.deriveSenderZ(
@@ -202,7 +202,7 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
               recipientKey.toECPrivateKey,
               sender.toJWK.toECPublicKey,
               ephemeralKey.toECPublicKey,
-              CryptoProvider.keyEncryptionProvider /*use_the_defualt_JCA_Provider*/
+              CryptoProvider.keyEncryptionProvider /* use_the_default_JCA_Provider */
             )
           ).toEither match {
             case Left(ex) => Left(SomeThrowable(ex))

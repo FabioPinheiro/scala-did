@@ -1,7 +1,9 @@
 package fmgp.did.method.prism.cardano
 
+import zio.json.*
+
 case class CardanoWalletConfig(
-    // TODO REMVOE defualt
+    // TODO REMVOE default
     mnemonic: Seq[String] = Seq(
       "mention",
       "side",
@@ -34,6 +36,9 @@ case class CardanoWalletConfig(
 }
 
 object CardanoWalletConfig {
+  given decoder: JsonDecoder[CardanoWalletConfig] = DeriveJsonDecoder.gen[CardanoWalletConfig]
+  given encoder: JsonEncoder[CardanoWalletConfig] = DeriveJsonEncoder.gen[CardanoWalletConfig]
+
   def fromMnemonicPhrase(phrase: String, passphrase: String = "") = phrase.split(" ") match
     case words @ Array(
           w01,
