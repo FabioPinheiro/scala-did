@@ -4,7 +4,7 @@ import fmgp.crypto.SHA256
 import fmgp.did.method.prism.proto.{CreateDidOP, CreateStorageEntryOP, OP}
 import proto.prism.PrismOperation
 // import proto.prism.SignedPrismOperation
-import fmgp.did.method.prism._
+import fmgp.did.method.prism.{DIDPrism, EventHash}
 
 // extension (obj: PrismObject) {}
 // extension (block: PrismBlock) {}

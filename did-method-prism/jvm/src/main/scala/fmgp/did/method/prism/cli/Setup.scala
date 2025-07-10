@@ -14,7 +14,7 @@ object Key {
   given decoder: JsonDecoder[Key] = {
     given JsonDecoder[Array[Byte]] = Utils.decoderArrayByte
     given JsonDecoder[KMMECSecp256k1PrivateKey] =
-      JsonDecoder.string.map(hex => KMMECSecp256k1PrivateKey.Companion.secp256k1FromByteArray(hex2bytes(hex)))
+      JsonDecoder.string.map(hex => Utils.secp256k1FromRaw(hex))
     DeriveJsonDecoder.gen[Key]
   }
   given encoder: JsonEncoder[Key] = {
@@ -28,6 +28,7 @@ object Utils {
   def decoderArrayByte: JsonDecoder[Array[Byte]] = JsonDecoder.string.map(hex => hex2bytes(hex))
   def encoderArrayByte: JsonEncoder[Array[Byte]] = JsonEncoder.string.contramap(bytes => bytes2Hex(bytes))
 
+  def secp256k1FromRaw(hex: String) = KMMECSecp256k1PrivateKey.Companion.secp256k1FromByteArray(hex2bytes(hex))
 }
 case class StagingState(
     loadStateFileByDefault: Boolean = true,
@@ -88,16 +89,17 @@ object Setup {
 }
 
 def updateState(f: (StagingState) => StagingState): ZIO[Ref[Setup], Nothing, Unit] =
-  ZIO.serviceWithZIO[Ref[Setup]](ref =>
-    ref.updateSome {
-      // case s @ Setup(stagingPath, updateStateFile, Left(stagingError)) => None
-      case s @ Setup(stagingPath, updateStateFile, Right(state)) =>
-        Setup(stagingPath, updateStateFile, Right(f(state)))
-    }
-  )
+  ZIO.serviceWithZIO[Ref[Setup]](_.updateSome {
+    // case s @ Setup(stagingPath, updateStateFile, Left(stagingError)) => None
+    case s @ Setup(stagingPath, updateStateFile, Right(state)) =>
+      Setup(stagingPath, updateStateFile, Right(f(state)))
+  })
 
 def forceStateUpdateAtEnd: ZIO[Ref[Setup], Nothing, Unit] =
-  ZIO.serviceWithZIO[Ref[Setup]](ref => ref.update(_.copy(updateStateFile = true)))
+  ZIO.serviceWithZIO[Ref[Setup]](_.update(_.copy(updateStateFile = true)))
+
+def stateLen[T](f: (StagingState) => Option[T]): ZIO[Ref[Setup], Nothing, Option[T]] =
+  ZIO.serviceWithZIO[Ref[Setup]](_.get.map(_.staging.toOption.flatMap(f(_))))
 
 def programTest(cmd: Subcommand.Test) = cmd match
   case Subcommand.Test(setup, data) =>

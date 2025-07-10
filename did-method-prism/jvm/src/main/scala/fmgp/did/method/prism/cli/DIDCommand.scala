@@ -6,6 +6,10 @@ import zio.json._
 import zio.http._
 import fmgp.did.method.prism.*
 import fmgp.did.method.prism.cli.*
+import fmgp.did.method.prism.cardano.DIDExtra
+import fmgp.did.method.prism.proto.MaybeOperation
+import fmgp.util.hex2bytes
+import fmgp.util.bytes2Hex
 
 object CliDIDResolve extends ZIOAppDefault {
   override val run = PrismCli.cliApp.run(
@@ -21,7 +25,20 @@ object CliDIDResolve extends ZIOAppDefault {
 
 object DIDCommand {
 
-  val createCommand = Command("create").map(_ => Subcommand.DIDCreate())
+  val createCommand = Command(
+    "create",
+    Staging.options
+      ++ (Options.text("master").withDefault("master") ++ Options.text("master-raw").optional)
+      ++ (Options.text("vdr").withDefault("vdr").optional ++ Options.text("vdr-raw").optional)
+  ).map { case (setup, (master, masterRaw), (vdr, vdrRaw)) =>
+    Subcommand.DIDCreate(
+      /* setup =       */ setup,
+      /* masterLabel = */ master,
+      /* masterRaw =   */ masterRaw,
+      /* vdrLabel =    */ vdr,
+      /* vdrRaw =.     */ vdrRaw
+    )
+  }
   val updateCommand = Command("update", didArg).map(Subcommand.DIDUpdate.apply)
   val deactivateCommand = Command("deactivate", didArg).map(Subcommand.DIDDeactivate.apply)
   val resolveCommand = {
@@ -41,7 +58,31 @@ object DIDCommand {
       .subcommands(createCommand, updateCommand, deactivateCommand, resolveCommand)
 
   def program(cmd: Subcommand.DIDSubcommand) = cmd match
-    case Subcommand.DIDCreate()        => PrismCli.notCurrentlyImplemented(cmd)
+    case Subcommand.DIDCreate(setup, masterLabel, masterRaw, vdrLabel, vdrRaw) =>
+      (for {
+        _ <- ZIO.log(s"Command: $cmd")
+        mkAlternative <- stateLen(_.secp256k1PrivateKey.get(masterLabel).map(_.key))
+        master = masterRaw
+          .map(rawHex => Utils.secp256k1FromRaw(rawHex))
+          .orElse(mkAlternative)
+          .map(k => (masterLabel, k))
+        mVDR <- vdrLabel match
+          case None => ZIO.none
+          case Some(label) =>
+            for {
+              alternative <- stateLen(_.secp256k1PrivateKey.get(label).map(_.key))
+              key = vdrRaw.map(rawHex => Utils.secp256k1FromRaw(rawHex)).orElse(alternative)
+            } yield key.map(k => (label, k))
+        (didPrism, signedPrismOperation) = DIDExtra.createDID(
+          masterKeys = master.toSeq,
+          vdrKeys = mVDR.toSeq,
+        )
+        _ <- ZIO.log(s"SSI: ${didPrism.string}")
+        _ <- ZIO.log(s"Event: ${bytes2Hex(signedPrismOperation.toByteArray)}")
+        maybeOperation = MaybeOperation.fromProto(signedPrismOperation, "tx-create", 0, 0)
+        _ <- ZIO.log(s"MaybeOperation: ${maybeOperation.toJsonPretty}")
+        _ <- Console.printLine(bytes2Hex(signedPrismOperation.toByteArray))
+      } yield ()).provideLayer(setup.layer)
     case Subcommand.DIDUpdate(did)     => PrismCli.notCurrentlyImplemented(cmd)
     case Subcommand.DIDDeactivate(did) => PrismCli.notCurrentlyImplemented(cmd)
     case Subcommand.DIDResolve(did, network) =>

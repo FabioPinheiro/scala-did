@@ -52,7 +52,7 @@ object KeyCommand {
         hdkey <- Try(HDKey(seed, 0, 0).derive(derivationPath)) // "m/1852'/21325'/0'/8'/0'"
           .map(ZIO.succeed(_))
           .recover { ex =>
-            ex.printStackTrace()
+            ex.printStackTrace();
             ZIO.fail(ex)
           }
           .get

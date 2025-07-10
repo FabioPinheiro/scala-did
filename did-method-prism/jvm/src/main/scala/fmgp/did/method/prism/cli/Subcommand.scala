@@ -27,7 +27,13 @@ object Subcommand {
   ) extends Subcommand
 
   sealed trait DIDSubcommand extends Subcommand
-  final case class DIDCreate() extends DIDSubcommand
+  final case class DIDCreate(
+      setup: Setup,
+      masterLabel: String,
+      masterRaw: Option[String],
+      vdrLabel: Option[String],
+      vdrRaw: Option[String]
+  ) extends DIDSubcommand
   final case class DIDUpdate(did: DIDPrism) extends DIDSubcommand
   final case class DIDDeactivate(did: DIDPrism) extends DIDSubcommand
   final case class DIDResolve(did: DIDPrism, network: CardanoNetwork) extends DIDSubcommand
