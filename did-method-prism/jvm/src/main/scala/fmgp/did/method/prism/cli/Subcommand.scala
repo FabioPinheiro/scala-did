@@ -15,8 +15,13 @@ object Subcommand {
   final case class Test(config: Setup, data: String) extends Subcommand
 
   sealed trait MnemonicSubcommand extends Subcommand
-  final case class MnemonicCreate(setup: Setup) extends MnemonicSubcommand
+  final case class MnemonicCreate(setup: Setup, walletTypeOpt: WalletType) extends MnemonicSubcommand
   final case class MnemonicSeed(setup: Setup, mWallet: Option[CardanoWalletConfig]) extends MnemonicSubcommand
+  final case class MnemonicAddress(
+      setup: Setup,
+      walletOrType: CardanoWalletConfig | WalletType.SSI.type | WalletType.Cardano.type,
+      network: CardanoNetwork,
+  ) extends MnemonicSubcommand
 
   // sealed trait KeySubcommand extends Subcommand
   final case class Mnemonic2Key(

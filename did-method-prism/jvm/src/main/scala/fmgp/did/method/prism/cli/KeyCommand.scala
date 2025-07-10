@@ -41,7 +41,7 @@ object KeyCommand {
 
   def program(cmd: Subcommand.Mnemonic2Key): ZIO[Any, Nothing, Unit] = cmd match {
     case Subcommand.Mnemonic2Key(setup, mWallet, derivationPath, keyLabel) =>
-      val (info, wallet) = mWallet.orElse(setup.mState.flatMap(_.wallet)) match
+      val (info, wallet) = mWallet.orElse(setup.mState.flatMap(_.ssiWallet)) match
         case Some(wallet) => (s"Lodding wallett: $wallet", wallet)
         case None         => { val tmp = MnemonicCommand.newWallet; (s"Generateing new wallet: $tmp", tmp) }
       (for {
@@ -73,7 +73,7 @@ object KeyCommand {
               Key(seed = seed, derivationPath = derivationPath, key = key)
             )
           )
-          stagingState.copy(wallet = Some(wallet), seed = Some(seed), secp256k1PrivateKey = keys)
+          stagingState.copy(ssiWallet = Some(wallet), seed = Some(seed), secp256k1PrivateKey = keys)
         }
         _ <- Console.printLine(bytes2Hex(key.getEncoded())).orDie
       } yield ()).provideLayer(setup.layer)

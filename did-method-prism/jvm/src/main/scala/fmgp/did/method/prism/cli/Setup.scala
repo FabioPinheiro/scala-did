@@ -33,7 +33,8 @@ object Utils {
 case class StagingState(
     loadStateFileByDefault: Boolean = true,
     updateStateFileByDefault: Boolean = false,
-    wallet: Option[CardanoWalletConfig] = None,
+    ssiWallet: Option[CardanoWalletConfig] = None,
+    cardanoWallet: Option[CardanoWalletConfig] = None,
     seed: Option[Array[Byte]] = None,
     secp256k1PrivateKey: Map[String, Key] = Map.empty,
     test: String = "",

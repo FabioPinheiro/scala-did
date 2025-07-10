@@ -9,10 +9,6 @@ import fmgp.did.DIDSubject
 import fmgp.did.method.prism.*
 import fmgp.did.method.prism.cardano.CardanoNetwork
 
-// didResolverPrismJVM/runMain fmgp.did.method.prism.cli.PrismCli
-
-//TODO https://blog.derlin.ch/from-jar-to-brew
-
 /** {{{
   * sbt "didResolverPrismJVM/assembly"
   * java -jar did-method-prism/jvm/target/scala-3.3.6/cardano-prism.jar indexer ../prism-vdr/preprod

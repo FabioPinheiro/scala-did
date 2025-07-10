@@ -142,8 +142,10 @@ object CardanoService {
     case CardanoNetwork.Preview => Networks.preview()
   private def makeBFBackendService(bfConfig: BlockfrostConfig) =
     new BFBackendService(bfConfig.network.blockfrostURL + "/", bfConfig.token)
-  private def makeAccount(bfConfig: BlockfrostConfig, wallet: CardanoWalletConfig) =
+  def makeAccount(bfConfig: BlockfrostConfig, wallet: CardanoWalletConfig): Account =
     new Account(makeBFNetworks(bfConfig.network), wallet.mnemonicPhrase)
+  def makeAccount(network: CardanoNetwork, wallet: CardanoWalletConfig): Account =
+    new Account(makeBFNetworks(network), wallet.mnemonicPhrase)
 
   def submitTransaction(tx: Transaction): ZIO[BlockfrostConfig, Throwable, (Int, String)] =
     for {

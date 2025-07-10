@@ -16,15 +16,24 @@ val networkFlag =
     .enumeration[CardanoNetwork]("network")(CardanoNetwork.values.toSeq.map(e => (e.name, e)): _*)
     .withDefault(CardanoNetwork.Mainnet)
 
-val mnemonicWords = Options.text("mnemonic")
+val mnemonicWords = Options
+  .text("mnemonic")
+  .mapOrFail(mnemonicPhrase =>
+    CardanoWalletConfig.fromMnemonicPhrase(mnemonicPhrase, passphrase = "") match
+      case Right(v)    => Right(v)
+      case Left(error) => Left(ValidationError(ValidationErrorType.InvalidValue, HelpDoc.p(error)))
+  )
 
 val mnemonicPass = Options.text("mnemonic-passphrase").withDefault("")
 
-val walletOpt = (mnemonicWords ++ mnemonicPass).mapOrFail((mnemonicPhrase, passphrase) =>
-  CardanoWalletConfig.fromMnemonicPhrase(mnemonicPhrase, passphrase) match
-    case Right(v)    => Right(v)
-    case Left(error) => Left(ValidationError(ValidationErrorType.InvalidValue, HelpDoc.p(error)))
-)
+val walletOpt = (mnemonicWords ++ mnemonicPass).map { (walletWithNoPass, passphrase) =>
+  walletWithNoPass.copy(passphrase = passphrase)
+}
+
+enum WalletType { case SSI extends WalletType; case Cardano extends WalletType }
+
+val walletTypeOpt: Options[WalletType] = Options
+  .enumeration[WalletType]("wallet-type")(("ssi", WalletType.SSI), ("cardano", WalletType.Cardano))
 
 val didArg =
   Args
