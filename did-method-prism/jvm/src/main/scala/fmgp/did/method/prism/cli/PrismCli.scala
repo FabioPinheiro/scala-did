@@ -31,10 +31,11 @@ object PrismCli extends ZIOCliDefault {
       .subcommands(
         Command("version").map(_ => Subcommand.Version()),
         Staging.command,
-        MnemonicCommand.mnemonicCommand,
+        MnemonicCommand.command,
+        BlockfrostCommand.command,
         KeyCommand.command,
         IndexerCommand.command,
-        DIDCommand.didCommand,
+        DIDCommand.command,
         testCommand
       ),
     config = CliConfig(
@@ -48,13 +49,14 @@ object PrismCli extends ZIOCliDefault {
 
   def executeModel[Model](model: Model): ZIO[Any, Unit, Unit] = {
     model match {
-      case Subcommand.Version()               => Console.printLine(version)
-      case cmd: Subcommand.Staging            => Staging.program(cmd)
-      case cmd: Subcommand.Test               => programTest(cmd)
-      case cmd: Subcommand.MnemonicSubcommand => MnemonicCommand.program(cmd)
-      case cmd: Subcommand.Mnemonic2Key       => KeyCommand.program(cmd)
-      case cmd: Subcommand.DIDSubcommand      => DIDCommand.program(cmd)
-      case cmd: Subcommand.Indexer            => IndexerCommand.program(cmd)
+      case Subcommand.Version()                 => Console.printLine(version)
+      case cmd: Subcommand.Staging              => Staging.program(cmd)
+      case cmd: Subcommand.Test                 => programTest(cmd)
+      case cmd: Subcommand.MnemonicSubcommand   => MnemonicCommand.program(cmd)
+      case cmd: Subcommand.BlockfrostSubcommand => BlockfrostCommand.program(cmd)
+      case cmd: Subcommand.Mnemonic2Key         => KeyCommand.program(cmd)
+      case cmd: Subcommand.DIDSubcommand        => DIDCommand.program(cmd)
+      case cmd: Subcommand.Indexer              => IndexerCommand.program(cmd)
       // case input => Console.printLine(s"Args parsed: $input")
     }
   }.catchNonFatalOrDie { case error: java.io.IOException =>

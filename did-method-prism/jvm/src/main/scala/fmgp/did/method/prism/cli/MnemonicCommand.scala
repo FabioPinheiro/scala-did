@@ -11,17 +11,13 @@ import fmgp.did.method.prism.cardano.CardanoWalletConfig
 import fmgp.did.method.prism.cardano.CardanoNetwork
 import fmgp.util.bytes2Hex
 
-object CliMnemonic extends ZIOAppDefault {
-  override val run = PrismCli.cliApp.run(List("mnemonic", "new"))
-} //REMOVE FIXME
-
 object MnemonicCommand {
   def newWallet = CardanoWalletConfig(
     mnemonic = MnemonicHelper.Companion.createRandomMnemonics().asScala.toSeq,
     passphrase = ""
   )
 
-  val mnemonicCommand: Command[Subcommand.MnemonicSubcommand] =
+  val command: Command[Subcommand.MnemonicSubcommand] =
     Command("mnemonic")
       .subcommands(
         Command("new", Staging.options ++ walletTypeOpt.withDefault(WalletType.SSI)).map { (setup, walletType) =>
@@ -36,8 +32,8 @@ object MnemonicCommand {
             walletOpt.optional.orElse(walletTypeOpt).withDefault(WalletType.Cardano) ++
             networkFlag
         )
-          .map { case (setup, tmp, network) =>
-            tmp match
+          .map { case (setup, walletOrType, network) =>
+            walletOrType match
               case Some(wallet)       => Subcommand.MnemonicAddress(setup, wallet, network)
               case WalletType.SSI     => Subcommand.MnemonicAddress(setup, WalletType.SSI, network)
               case WalletType.Cardano => Subcommand.MnemonicAddress(setup, WalletType.Cardano, network)

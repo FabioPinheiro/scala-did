@@ -69,4 +69,6 @@ object API {
 
   // SortedPageRequest
 
+  // def addressesTotal(network: CardanoNetwork, addresses: String) =
+  //   s"${network.blockfrostURL}/addresses/$addresses/total"
 }

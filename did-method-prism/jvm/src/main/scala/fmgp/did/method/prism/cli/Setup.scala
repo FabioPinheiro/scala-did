@@ -8,6 +8,7 @@ import fmgp.did.method.prism.cardano.CardanoWalletConfig
 import org.hyperledger.identus.apollo.utils.KMMECSecp256k1PrivateKey
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
+import fmgp.did.method.prism.vdr.BlockfrostConfig
 
 case class Key(seed: Array[Byte], derivationPath: String, key: KMMECSecp256k1PrivateKey)
 object Key {
@@ -37,16 +38,22 @@ case class StagingState(
     cardanoWallet: Option[CardanoWalletConfig] = None,
     seed: Option[Array[Byte]] = None,
     secp256k1PrivateKey: Map[String, Key] = Map.empty,
+    blockfrostMainnet: Option[BlockfrostConfig] = None,
+    blockfrostTestnet: Option[BlockfrostConfig] = None,
+    blockfrostPreprod: Option[BlockfrostConfig] = None,
+    blockfrostPreview: Option[BlockfrostConfig] = None,
     test: String = "",
 )
 object StagingState {
 
   given decoder: JsonDecoder[StagingState] = {
     given JsonDecoder[Array[Byte]] = Utils.decoderArrayByte
+    given decoder: JsonDecoder[BlockfrostConfig] = DeriveJsonDecoder.gen[BlockfrostConfig]
     DeriveJsonDecoder.gen[StagingState]
   }
   given encoder: JsonEncoder[StagingState] = {
     given JsonEncoder[Array[Byte]] = Utils.encoderArrayByte
+    given encoder: JsonEncoder[BlockfrostConfig] = DeriveJsonEncoder.gen[BlockfrostConfig]
     DeriveJsonEncoder.gen[StagingState]
   }
 }

@@ -52,7 +52,7 @@ object DIDCommand {
     c1 | c2 // Command.OrElse(c1, c2)
   }
 
-  val didCommand: Command[Subcommand.DIDSubcommand] =
+  val command: Command[Subcommand.DIDSubcommand] =
     Command("did", Options.none)
       // REPORT SCALA BUG in .map(Subcommand.DID(_)) when Subcommand was no argument
       .subcommands(createCommand, updateCommand, deactivateCommand, resolveCommand)

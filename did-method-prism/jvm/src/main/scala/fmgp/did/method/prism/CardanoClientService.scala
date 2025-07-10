@@ -157,4 +157,11 @@ object CardanoService {
       _ <- ZIO.log(s"submitTransaction result = ${result.toString}")
     } yield (result.code(), result.getResponse())
 
+  def addressesTotal(address: String): ZIO[BlockfrostConfig, Throwable, (Int, String)] =
+    for {
+      _ <- ZIO.log(s"addressesTotal for $address")
+      backendService: BackendService <- ZIO.service[BlockfrostConfig].map(makeBFBackendService(_))
+      result <- ZIO.attempt(backendService.getAddressService().getAddressDetails(address))
+      _ <- ZIO.log(s"addressesTotal result = ${result.toString}")
+    } yield (result.code(), result.getResponse())
 }

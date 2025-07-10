@@ -14,11 +14,10 @@ object Staging {
     .??("Staging file (to build complex operations)")
 
   def overrideFlag = Options
-    .boolean("staging-override")
-    .alias("s")
+    .boolean("s")
     .??("Override the staging file")
 
-  def options = (stagingPath.optional ++ overrideFlag.optional)
+  def options = (stagingPath.optional ++ overrideFlag.optional) // TODO REMOVE  optional from overrideFlag.optional
     .map((mStagingPath, mOverrideFlag) =>
       val autoload = { // AUTO LOAD
         val sourcePath = mStagingPath match

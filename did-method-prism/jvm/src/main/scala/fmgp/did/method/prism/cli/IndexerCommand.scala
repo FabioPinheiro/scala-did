@@ -8,8 +8,8 @@ import fmgp.did.method.prism.vdr
 object IndexerCommand {
 
   def command: Command[Subcommand.Indexer] =
-    Command("indexer", blockfrostTokenOpt, indexerWorkDirAgr)
-      .map { case (token, workdir) => Subcommand.Indexer(workdir, token.map(vdr.BlockfrostConfig(_))) }
+    Command("indexer", blockfrostConfigOpt, indexerWorkDirAgr)
+      .map { case (mBlockfrostConfig, workdir) => Subcommand.Indexer(workdir, mBlockfrostConfig) }
 
   def program(cmd: Subcommand.Indexer): ZIO[Any, Throwable, Unit] = cmd match {
     case cmd @ Subcommand.Indexer(workdir, mBlockfrostConfig) =>

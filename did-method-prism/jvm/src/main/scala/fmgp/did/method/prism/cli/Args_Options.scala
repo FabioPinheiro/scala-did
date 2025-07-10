@@ -4,17 +4,27 @@ import zio.cli.*
 import fmgp.did.method.prism.DIDPrism
 import fmgp.did.method.prism.cardano.CardanoNetwork
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
+import fmgp.did.method.prism.vdr.BlockfrostConfig
 
 // Conventions https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
 // https://www.gnu.org/software/libc/manual/html_node/Argp.html
 
-val blockfrostTokenOpt =
-  Options.text("blockfrost-token").optional.??("Blockfrost's API token/key")
+val blockfrostConfigOpt =
+  Options
+    .text("token")
+    .optional
+    .??("Blockfrost's API token")
+    .map(_.map(token => BlockfrostConfig(token = token)))
 
 val networkFlag =
   Options
     .enumeration[CardanoNetwork]("network")(CardanoNetwork.values.toSeq.map(e => (e.name, e)): _*)
     .withDefault(CardanoNetwork.Mainnet)
+
+val networkArgs =
+  Args.enumeration[CardanoNetwork]("network")(
+    CardanoNetwork.values.filterNot(_ == CardanoNetwork.Testnet).toSeq.map(e => (e.name, e)): _*
+  )
 
 val mnemonicWords = Options
   .text("mnemonic")

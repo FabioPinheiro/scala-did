@@ -23,6 +23,16 @@ object Subcommand {
       network: CardanoNetwork,
   ) extends MnemonicSubcommand
 
+  sealed trait BlockfrostSubcommand extends Subcommand
+  final case class BlockfrostToken(setup: Setup, network: CardanoNetwork, mBlockfrostConfig: Option[BlockfrostConfig])
+      extends BlockfrostSubcommand
+  final case class BlockfrostAddress(
+      setup: Setup,
+      network: CardanoNetwork,
+      mBlockfrostConfig: Option[BlockfrostConfig],
+      walletOrType: CardanoWalletConfig | WalletType.SSI.type | WalletType.Cardano.type,
+  ) extends BlockfrostSubcommand
+
   // sealed trait KeySubcommand extends Subcommand
   final case class Mnemonic2Key(
       setup: Setup,
