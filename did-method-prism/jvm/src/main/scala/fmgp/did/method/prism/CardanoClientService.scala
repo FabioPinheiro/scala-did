@@ -1,5 +1,7 @@
 package fmgp.did.method.prism
 
+import scala.jdk.CollectionConverters._
+
 import zio._
 import com.bloxbean.cardano.client.account.Account
 import com.bloxbean.cardano.client.api.ProtocolParamsSupplier
@@ -157,11 +159,23 @@ object CardanoService {
       _ <- ZIO.log(s"submitTransaction result = ${result.toString}")
     } yield (result.code(), result.getResponse())
 
-  def addressesTotal(address: String): ZIO[BlockfrostConfig, Throwable, (Int, String)] =
+  def addressesTotalAda(address: String): ZIO[BlockfrostConfig, Throwable, BigDecimal] =
     for {
       _ <- ZIO.log(s"addressesTotal for $address")
       backendService: BackendService <- ZIO.service[BlockfrostConfig].map(makeBFBackendService(_))
       result <- ZIO.attempt(backendService.getAddressService().getAddressDetails(address))
       _ <- ZIO.log(s"addressesTotal result = ${result.toString}")
-    } yield (result.code(), result.getResponse())
+      receivedSum = result.getValue
+        .getReceivedSum()
+        .asScala
+        .map(e => BigInt(e.getQuantity))
+        .fold(BigInt(0))((a, b) => a + b)
+      sentSum = result.getValue
+        .getSentSum()
+        .asScala
+        .map(e => BigInt(e.getQuantity))
+        .fold(BigInt(0))((a, b) => a + b)
+      total = BigDecimal(receivedSum - sentSum) / BigDecimal(1000000)
+      _ <- ZIO.log("total ADA found in address")
+    } yield total
 }

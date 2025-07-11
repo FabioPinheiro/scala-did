@@ -69,7 +69,29 @@ object BlockfrostCommand {
     case CMD.BlockfrostAddress(setup, network, mBlockfrostConfig, walletOrType) =>
       (for {
         _ <- ZIO.log(cmd.toString)
-
+        wallet <- walletOrType match {
+          case w: CardanoWalletConfig => ZIO.succeed(w)
+          case WalletType.SSI =>
+            setup.mState.flatMap(_.ssiWallet) match
+              case None => ZIO.logError("SSI Wallet not found.") *> ZIO.fail(PrismCliError("SSI Wallet not found"))
+              case Some(ssiWallet) => ZIO.log(s"Lodding ssi wallet") *> ZIO.succeed(ssiWallet)
+          case WalletType.Cardano =>
+            setup.mState.flatMap(_.cardanoWallet) match
+              case None =>
+                ZIO.logError("Cardano Wallet not found") *> ZIO.fail(PrismCliError("SSI Wallet not found"))
+              case Some(cardanoWallet) => ZIO.log(s"Lodding cardano wallet") *> ZIO.succeed(cardanoWallet)
+        }
+        account = CardanoService.makeAccount(network, wallet)
+        addresses = account.baseAddress()
+        _ <- ZIO.log(s"Get addresses totals for $addresses")
+        mBFConfig <- mBlockfrostConfig match
+          case None         => stateLen[BlockfrostConfig](_.blockfrost(network))
+          case Some(config) => ZIO.succeed(Some(config))
+        _ <- ZIO.log(s"Get addresses totals for $addresses")
+        totalAda <- mBFConfig match
+          case None           => ZIO.fail(PrismCliError(s"Token not found ($network)"))
+          case Some(bfConfig) => CardanoService.addressesTotalAda(addresses).provideEnvironment(ZEnvironment(bfConfig))
+        _ <- Console.printLine(totalAda).orDie
       } yield ()).provideLayer(setup.layer)
   }
 }
