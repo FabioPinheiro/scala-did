@@ -9,6 +9,7 @@ import org.hyperledger.identus.apollo.utils.KMMECSecp256k1PrivateKey
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
 import fmgp.did.method.prism.vdr.BlockfrostConfig
+import fmgp.did.method.prism.cardano.CardanoNetwork
 
 case class Key(seed: Array[Byte], derivationPath: String, key: KMMECSecp256k1PrivateKey)
 object Key {
@@ -43,7 +44,13 @@ case class StagingState(
     blockfrostPreprod: Option[BlockfrostConfig] = None,
     blockfrostPreview: Option[BlockfrostConfig] = None,
     test: String = "",
-)
+) {
+  def blockfrost(network: CardanoNetwork): Option[BlockfrostConfig] = network match
+    case CardanoNetwork.Mainnet => this.blockfrostMainnet
+    case CardanoNetwork.Testnet => this.blockfrostTestnet
+    case CardanoNetwork.Preprod => this.blockfrostPreprod
+    case CardanoNetwork.Preview => this.blockfrostPreview
+}
 object StagingState {
 
   given decoder: JsonDecoder[StagingState] = {
@@ -74,7 +81,8 @@ object Setup {
   given decoder: JsonDecoder[Setup] = DeriveJsonDecoder.gen[Setup]
   given encoder: JsonEncoder[Setup] = DeriveJsonEncoder.gen[Setup]
 
-  def acquireRelease(path: String = "staging.json", updateStateFile: Boolean = true) =
+  final val defaultCOnfigPath = "~/.cardano-prism-config.json" // "staging.json"
+  def acquireRelease(path: String = defaultCOnfigPath, updateStateFile: Boolean = true) =
     ZIO.acquireRelease {
       val ref = ZIO
         .readFile(path)
@@ -108,20 +116,3 @@ def forceStateUpdateAtEnd: ZIO[Ref[Setup], Nothing, Unit] =
 
 def stateLen[T](f: (StagingState) => Option[T]): ZIO[Ref[Setup], Nothing, Option[T]] =
   ZIO.serviceWithZIO[Ref[Setup]](_.get.map(_.staging.toOption.flatMap(f(_))))
-
-def programTest(cmd: Subcommand.Test) = cmd match
-  case Subcommand.Test(setup, data) =>
-    (for {
-      _ <- ZIO.log("programTest")
-      ref <- ZIO.service[Ref[Setup]]
-      _ <- ZIO.log(setup.toJsonPretty)
-      _ <- updateState(s => s.copy(test = data))
-      state <- ref.get.map(_.staging)
-      _ <- Console.printLine(state.toJsonPretty)
-    } yield ()).provideLayer(setup.layer)
-
-def testCommand = Command("test", Staging.options)
-  .subcommands(
-    Command("staging", Options.text("data")),
-  )
-  .map((config, data) => Subcommand.Test(config, data))

@@ -7,12 +7,12 @@ import fmgp.did.method.prism.vdr
 
 object IndexerCommand {
 
-  def command: Command[Subcommand.Indexer] =
+  def command: Command[CMD.Indexer] =
     Command("indexer", blockfrostConfigOpt, indexerWorkDirAgr)
-      .map { case (mBlockfrostConfig, workdir) => Subcommand.Indexer(workdir, mBlockfrostConfig) }
+      .map { case (mBlockfrostConfig, workdir) => CMD.Indexer(workdir, mBlockfrostConfig) }
 
-  def program(cmd: Subcommand.Indexer): ZIO[Any, Throwable, Unit] = cmd match {
-    case cmd @ Subcommand.Indexer(workdir, mBlockfrostConfig) =>
+  def program(cmd: CMD.Indexer): ZIO[Any, Throwable, Unit] = cmd match {
+    case cmd @ CMD.Indexer(workdir, mBlockfrostConfig) =>
       for {
         _ <- vdr.Indexer.indexerLogo
         indexerConfig = vdr.IndexerConfig(

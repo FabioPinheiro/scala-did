@@ -17,32 +17,32 @@ object MnemonicCommand {
     passphrase = ""
   )
 
-  val command: Command[Subcommand.MnemonicSubcommand] =
+  val command: Command[CMD.MnemonicCMD] =
     Command("mnemonic")
       .subcommands(
-        Command("new", Staging.options ++ walletTypeOpt.withDefault(WalletType.SSI)).map { (setup, walletType) =>
-          Subcommand.MnemonicCreate(setup, walletType)
+        Command("new", ConfigCommand.options ++ walletTypeOpt.withDefault(WalletType.SSI)).map { (setup, walletType) =>
+          CMD.MnemonicCreate(setup, walletType)
         },
-        Command("seed", Staging.options ++ mnemonicWords.optional).map { (setup, mWallet) =>
-          Subcommand.MnemonicSeed(setup, mWallet)
+        Command("seed", ConfigCommand.options ++ mnemonicWords.optional).map { (setup, mWallet) =>
+          CMD.MnemonicSeed(setup, mWallet)
         },
         Command(
           "address",
-          Staging.options ++
+          ConfigCommand.options ++
             walletOpt.optional.orElse(walletTypeOpt).withDefault(WalletType.Cardano) ++
             networkFlag
         )
           .map { case (setup, walletOrType, network) =>
             walletOrType match
-              case Some(wallet)       => Subcommand.MnemonicAddress(setup, wallet, network)
-              case WalletType.SSI     => Subcommand.MnemonicAddress(setup, WalletType.SSI, network)
-              case WalletType.Cardano => Subcommand.MnemonicAddress(setup, WalletType.Cardano, network)
-              case None               => Subcommand.MnemonicAddress(setup, WalletType.Cardano, network) // D
+              case Some(wallet)       => CMD.MnemonicAddress(setup, wallet, network)
+              case WalletType.SSI     => CMD.MnemonicAddress(setup, WalletType.SSI, network)
+              case WalletType.Cardano => CMD.MnemonicAddress(setup, WalletType.Cardano, network)
+              case None               => CMD.MnemonicAddress(setup, WalletType.Cardano, network) // D
           },
       )
 
-  def program(cmd: Subcommand.MnemonicSubcommand): ZIO[Any, PrismCliError, Unit] = cmd match {
-    case Subcommand.MnemonicCreate(setup: Setup, walletType: WalletType) =>
+  def program(cmd: CMD.MnemonicCMD): ZIO[Any, PrismCliError, Unit] = cmd match {
+    case CMD.MnemonicCreate(setup: Setup, walletType: WalletType) =>
       (for {
         words <- ZIO.succeed(MnemonicHelper.Companion.createRandomMnemonics().asScala.toSeq)
         newWallet = CardanoWalletConfig(mnemonic = words, passphrase = "")
@@ -53,7 +53,7 @@ object MnemonicCommand {
         _ <- Console.printLine(words.mkString(" ")).orDie
       } yield ()).provideLayer(setup.layer)
 
-    case Subcommand.MnemonicSeed(setup, mWallet) => {
+    case CMD.MnemonicSeed(setup, mWallet) => {
       val (info, wallet) = mWallet.orElse(setup.mState.flatMap(_.ssiWallet)) match
         case Some(wallet) => (s"Lodding ssi wallet: $wallet", wallet)
         case None         => { val tmp = newWallet; (s"Generateing new wallet: $tmp", tmp) }
@@ -65,7 +65,7 @@ object MnemonicCommand {
       } yield ()).provideLayer(setup.layer)
     }
 
-    case Subcommand.MnemonicAddress(setup, walletOrType, network) =>
+    case CMD.MnemonicAddress(setup, walletOrType, network) =>
       // import com.bloxbean.cardano.client.account.Account
       // import com.bloxbean.cardano.client.common.model.Networks
       (for {

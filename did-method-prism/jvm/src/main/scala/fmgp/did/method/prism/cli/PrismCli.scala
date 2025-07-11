@@ -9,16 +9,20 @@ import fmgp.did.DIDSubject
 import fmgp.did.method.prism.*
 import fmgp.did.method.prism.cardano.CardanoNetwork
 
-/** {{{
+/** cardano-prism CLI
+  *
+  * {{{
   * sbt "didResolverPrismJVM/assembly"
   * java -jar did-method-prism/jvm/target/scala-3.3.6/cardano-prism.jar indexer ../prism-vdr/preprod
   * }}}
+  *
+  * didResolverPrismJVM/runMain fmgp.did.method.prism.cli.PrismCli
   */
 object PrismCli extends ZIOCliDefault {
 
   val version = "0.3.0" // FIXME version MUST come from the build pipeline
 
-  def notCurrentlyImplemented(cmd: Subcommand) = Console.printLine(
+  def notCurrentlyImplemented(cmd: CMD) = Console.printLine(
     s"Command `$cmd` support is not currently implemented. If you are interested in adding support, please open a pull request at https://github.com/FabioPinheiro/scala-did."
   )
 
@@ -29,14 +33,13 @@ object PrismCli extends ZIOCliDefault {
     // command = finalCommand,
     command = Command("cardano-prism", Options.none, Args.none)
       .subcommands(
-        Command("version").map(_ => Subcommand.Version()),
-        Staging.command,
-        MnemonicCommand.command,
-        BlockfrostCommand.command,
-        KeyCommand.command,
         IndexerCommand.command,
+        Command("version").map(_ => CMD.Version()),
+        ConfigCommand.command,
+        MnemonicCommand.command,
+        KeyCommand.command,
         DIDCommand.command,
-        testCommand
+        BlockfrostCommand.command,
       ),
     config = CliConfig(
       caseSensitive = true,
@@ -45,19 +48,17 @@ object PrismCli extends ZIOCliDefault {
       showAllNames = true,
       showTypes = true
     )
-  )(cmd => executeModel[Subcommand](cmd))
+  )(cmd => executeCMD(cmd))
 
-  def executeModel[Model](model: Model): ZIO[Any, Unit, Unit] = {
-    model match {
-      case Subcommand.Version()                 => Console.printLine(version)
-      case cmd: Subcommand.Staging              => Staging.program(cmd)
-      case cmd: Subcommand.Test                 => programTest(cmd)
-      case cmd: Subcommand.MnemonicSubcommand   => MnemonicCommand.program(cmd)
-      case cmd: Subcommand.BlockfrostSubcommand => BlockfrostCommand.program(cmd)
-      case cmd: Subcommand.Mnemonic2Key         => KeyCommand.program(cmd)
-      case cmd: Subcommand.DIDSubcommand        => DIDCommand.program(cmd)
-      case cmd: Subcommand.Indexer              => IndexerCommand.program(cmd)
-      // case input => Console.printLine(s"Args parsed: $input")
+  def executeCMD(command: CMD): ZIO[Any, Unit, Unit] = {
+    command match {
+      case CMD.Version()          => Console.printLine(version)
+      case cmd: CMD.ConfigCMD     => ConfigCommand.program(cmd)
+      case cmd: CMD.MnemonicCMD   => MnemonicCommand.program(cmd)
+      case cmd: CMD.BlockfrostCMD => BlockfrostCommand.program(cmd)
+      case cmd: CMD.Mnemonic2Key  => KeyCommand.program(cmd)
+      case cmd: CMD.DIDCMD        => DIDCommand.program(cmd)
+      case cmd: CMD.Indexer       => IndexerCommand.program(cmd)
     }
   }.catchNonFatalOrDie { case error: java.io.IOException =>
     ZIO.succeed(error.printStackTrace()) *>

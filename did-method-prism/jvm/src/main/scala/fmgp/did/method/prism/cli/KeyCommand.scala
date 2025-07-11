@@ -23,11 +23,11 @@ object KeyCommand {
         + "\n" + "      Or with 'purpose' 26980  ->          01101001 01100100 -> 'id'    (0x6964)"
     )
 
-  val command: Command[Subcommand] =
+  val command: Command[CMD] =
     Command(
       "key",
       Options.none
-        ++ Staging.options
+        ++ ConfigCommand.options
         ++ walletOpt.optional
         ++ derivationPathOpt
         ++ Options.text("label").??("Key label/name. key will be save staging with that name.").optional
@@ -36,11 +36,11 @@ object KeyCommand {
     )
       .withHelp("Make a private Secp256k1 key")
       .map { case (setup, mWallet, derivationPath, keyLabel) =>
-        Subcommand.Mnemonic2Key(setup, mWallet, derivationPath, keyLabel)
+        CMD.Mnemonic2Key(setup, mWallet, derivationPath, keyLabel)
       }
 
-  def program(cmd: Subcommand.Mnemonic2Key): ZIO[Any, Nothing, Unit] = cmd match {
-    case Subcommand.Mnemonic2Key(setup, mWallet, derivationPath, keyLabel) =>
+  def program(cmd: CMD.Mnemonic2Key): ZIO[Any, Nothing, Unit] = cmd match {
+    case CMD.Mnemonic2Key(setup, mWallet, derivationPath, keyLabel) =>
       val (info, wallet) = mWallet.orElse(setup.mState.flatMap(_.ssiWallet)) match
         case Some(wallet) => (s"Lodding wallett: $wallet", wallet)
         case None         => { val tmp = MnemonicCommand.newWallet; (s"Generateing new wallet: $tmp", tmp) }

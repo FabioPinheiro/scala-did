@@ -27,11 +27,11 @@ object DIDCommand {
 
   val createCommand = Command(
     "create",
-    Staging.options
+    ConfigCommand.options
       ++ (Options.text("master").withDefault("master") ++ Options.text("master-raw").optional)
       ++ (Options.text("vdr").withDefault("vdr").optional ++ Options.text("vdr-raw").optional)
   ).map { case (setup, (master, masterRaw), (vdr, vdrRaw)) =>
-    Subcommand.DIDCreate(
+    CMD.DIDCreate(
       /* setup =       */ setup,
       /* masterLabel = */ master,
       /* masterRaw =   */ masterRaw,
@@ -39,26 +39,26 @@ object DIDCommand {
       /* vdrRaw =.     */ vdrRaw
     )
   }
-  val updateCommand = Command("update", didArg).map(Subcommand.DIDUpdate.apply)
-  val deactivateCommand = Command("deactivate", didArg).map(Subcommand.DIDDeactivate.apply)
+  val updateCommand = Command("update", didArg).map(CMD.DIDUpdate.apply)
+  val deactivateCommand = Command("deactivate", didArg).map(CMD.DIDDeactivate.apply)
   val resolveCommand = {
     val c1 = Command("resolve", networkFlag, didArg)
       .withHelp(HelpDoc.p("Resolve DID PRISM (from external storage)"))
-      .map { case (network, did) => Subcommand.DIDResolve(did, network) }
+      .map { case (network, did) => CMD.DIDResolve(did, network) }
     val c2 = Command("resolve", networkFlag, didArg ++ indexerWorkDirAgr)
       .withHelp(HelpDoc.p("Resolve DID PRISM (from indexer FS storage)"))
-      .map { case (network, (did, workdir)) => Subcommand.DIDResolveFromFS(did, workdir, network) }
+      .map { case (network, (did, workdir)) => CMD.DIDResolveFromFS(did, workdir, network) }
 
     c1 | c2 // Command.OrElse(c1, c2)
   }
 
-  val command: Command[Subcommand.DIDSubcommand] =
+  val command: Command[CMD.DIDCMD] =
     Command("did", Options.none)
-      // REPORT SCALA BUG in .map(Subcommand.DID(_)) when Subcommand was no argument
+      // REPORT SCALA BUG in .map(CMD.DID(_)) when CMD was no argument
       .subcommands(createCommand, updateCommand, deactivateCommand, resolveCommand)
 
-  def program(cmd: Subcommand.DIDSubcommand) = cmd match
-    case Subcommand.DIDCreate(setup, masterLabel, masterRaw, vdrLabel, vdrRaw) =>
+  def program(cmd: CMD.DIDCMD) = cmd match
+    case CMD.DIDCreate(setup, masterLabel, masterRaw, vdrLabel, vdrRaw) =>
       (for {
         _ <- ZIO.log(s"Command: $cmd")
         mkAlternative <- stateLen(_.secp256k1PrivateKey.get(masterLabel).map(_.key))
@@ -83,9 +83,9 @@ object DIDCommand {
         _ <- ZIO.log(s"MaybeOperation: ${maybeOperation.toJsonPretty}")
         _ <- Console.printLine(bytes2Hex(signedPrismOperation.toByteArray))
       } yield ()).provideLayer(setup.layer)
-    case Subcommand.DIDUpdate(did)     => PrismCli.notCurrentlyImplemented(cmd)
-    case Subcommand.DIDDeactivate(did) => PrismCli.notCurrentlyImplemented(cmd)
-    case Subcommand.DIDResolve(did, network) =>
+    case CMD.DIDUpdate(did)     => PrismCli.notCurrentlyImplemented(cmd)
+    case CMD.DIDDeactivate(did) => PrismCli.notCurrentlyImplemented(cmd)
+    case CMD.DIDResolve(did, network) =>
       val aux = (Client.default ++ Scope.default >>> HttpUtils.layer) >>>
         DIDPrismResolver.layerDIDPrismResolver(
           s"https://raw.githubusercontent.com/blockfrost/prism-vdr/refs/heads/main/${network.name}/diddoc"
@@ -98,6 +98,6 @@ object DIDCommand {
       } yield ()
       program
         .provideSomeLayer(aux)
-    case Subcommand.DIDResolveFromFS(did, workdir, network) => PrismCli.notCurrentlyImplemented(cmd)
+    case CMD.DIDResolveFromFS(did, workdir, network) => PrismCli.notCurrentlyImplemented(cmd)
 
 }
