@@ -81,7 +81,8 @@ object Setup {
   given decoder: JsonDecoder[Setup] = DeriveJsonDecoder.gen[Setup]
   given encoder: JsonEncoder[Setup] = DeriveJsonEncoder.gen[Setup]
 
-  final val defaultCOnfigPath = "~/.cardano-prism-config.json" // "staging.json"
+  def home = java.lang.System.getProperty("user.home")
+  final val defaultCOnfigPath = s"$home/.cardano-prism-config.json" // "staging.json"
   def acquireRelease(path: String = defaultCOnfigPath, updateStateFile: Boolean = true) =
     ZIO.acquireRelease {
       val ref = ZIO
