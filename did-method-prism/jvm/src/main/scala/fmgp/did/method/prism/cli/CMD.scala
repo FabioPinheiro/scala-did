@@ -52,6 +52,15 @@ object CMD {
   final case class DIDResolve(did: DIDPrism, network: CardanoNetwork) extends DIDCMD
   final case class DIDResolveFromFS(did: DIDPrism, workdir: Path, network: CardanoNetwork) extends DIDCMD
 
+  sealed trait VDRCMD extends CMD
+  final case class VDRCreateBytes(setup: Setup, vdrLabel: Option[String], vdrRaw: Option[String], data: Array[Byte])
+      extends VDRCMD
+  final case class VDRUpdateBytes(did: DIDPrism) extends VDRCMD
+  final case class VDRDeactivate(did: DIDPrism) extends VDRCMD
+
+  sealed trait CommCMD extends CMD
+  final case class CommLogin(did: DIDPrism, key: Array[Byte]) extends CommCMD
+
   // TODO VDR
 
   // TODO Event load PrismState

@@ -58,6 +58,8 @@ object PrismCli extends ZIOCliDefault {
       case cmd: CMD.BlockfrostCMD => BlockfrostCommand.program(cmd)
       case cmd: CMD.Mnemonic2Key  => KeyCommand.program(cmd)
       case cmd: CMD.DIDCMD        => DIDCommand.program(cmd)
+      case cmd: CMD.VDRCMD        => VDRCommand.program(cmd)
+      case cmd: CMD.CommCMD       => CommCommand.program(cmd)
       case cmd: CMD.Indexer       => IndexerCommand.program(cmd)
     }
   }.catchNonFatalOrDie { case error: java.io.IOException =>
