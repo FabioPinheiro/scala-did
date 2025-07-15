@@ -16,7 +16,7 @@ object CardanoTransactionMetadataPrismContent {
       case Right(value) if value.c.forall(_.startsWith("0x")) =>
         val hex = value.c.map(_.drop(2)).mkString
         val bytes = hex.sliding(2, 2).map(Integer.parseInt(_, 16).toByte).toArray
-        Right(PrismObject.parseFrom(bytes))
+        Right(PrismObject.parseFrom(bytes)) // FIXME catch exceptions
       case Right(value) =>
         Left(
           "PRISM Block must the encode in ByteString - https://github.com/input-output-hk/prism-did-method-spec/issues/66"
@@ -26,7 +26,7 @@ object CardanoTransactionMetadataPrismContent {
 }
 
 case class CardanoTransactionMetadataPrismCBOR(version: Int, protoBytes: Array[Byte]) {
-  def toPrismObject = PrismObject.parseFrom(protoBytes)
+  def toPrismObject = PrismObject.parseFrom(protoBytes) // FIXME catch exceptions
 }
 object CardanoTransactionMetadataPrismCBOR {
   given Decoder[CardanoTransactionMetadataPrismCBOR] = Decoder { reader =>

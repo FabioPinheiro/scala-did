@@ -74,7 +74,7 @@ object MySignedPrismOperation {
   given decoder: JsonDecoder[MySignedPrismOperation[OP]] = {
     import fmgp.util.decoderByteArray
     given decoderPrismOperation: JsonDecoder[PrismOperation] = // use mapOrFail
-      decoderByteArray.map(e => PrismOperation.parseFrom(e))
+      decoderByteArray.map(e => PrismOperation.parseFrom(e)) // FIXME catch exceptions
     DeriveJsonDecoder.gen[MySignedPrismOperation[OP]]
   }
   given encoder: JsonEncoder[MySignedPrismOperation[OP]] = {

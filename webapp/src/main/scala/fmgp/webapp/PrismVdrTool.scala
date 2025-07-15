@@ -38,7 +38,7 @@ object PrismVdrTool {
         val htmlElement = rawData.fromJson[MySignedPrismOperation[OP]] match
           case Left(error) =>
             Try {
-              val protobufOP = PrismOperation.parseFrom(hex2bytes(rawData))
+              val protobufOP = PrismOperation.parseFrom(hex2bytes(rawData)) // FIXME catch exceptions
               val op = OP.fromPrismOperation(protobufOP)
               div(
                 pre(code("HASH:"), code(SHA256.digestToHex(protobufOP.toByteArray))),

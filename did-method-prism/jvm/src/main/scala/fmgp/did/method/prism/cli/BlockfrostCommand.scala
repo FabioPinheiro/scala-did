@@ -10,7 +10,13 @@ import fmgp.did.method.prism.CardanoService
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
 import fmgp.did.method.prism.cardano.CardanoNetwork
 import fmgp.did.method.prism.vdr.BlockfrostConfig
+import fmgp.did.method.prism.cli.CMD.BlockfrostSubmitEvents
+import fmgp.did.method.prism.proto.MaybeOperation
+import fmgp.did.method.prism.proto.tryParseFrom
+import proto.prism.PrismOperation
+import proto.prism.SignedPrismOperation
 import fmgp.util.bytes2Hex
+import fmgp.util.hex2bytes
 
 object BlockfrostCommand {
 
@@ -19,6 +25,7 @@ object BlockfrostCommand {
     .subcommands(
       saveTokenCommand,
       addressCommand,
+      submitCommand,
     )
 
   def saveTokenCommand = Command(
@@ -43,6 +50,31 @@ object BlockfrostCommand {
         case WalletType.Cardano => CMD.BlockfrostAddress(setup, network, mBlockfrostConfig, WalletType.Cardano)
         case None               => CMD.BlockfrostAddress(setup, network, mBlockfrostConfig, WalletType.Cardano)
     }
+
+  def eventArg = Args
+    .text("event")
+    .atLeast(1)
+    .??("hex of protobufs of PRISM signed events")
+    .mapOrFail { hexList =>
+      hexList
+        .map { hex => Right(hex2bytes(hex)) }
+        .map { case Right(bytes) => SignedPrismOperation.tryParseFrom(bytes) }
+        .zipWithIndex
+        .foldLeft[Either[HelpDoc, Seq[SignedPrismOperation]]](Right(Seq.empty)) {
+          case (Right(acc), (Right(value), index)) => Right(acc :+ value)
+          case (Right(acc), (Left(errorMsh), index)) =>
+            Left(HelpDoc.p(s"Fail to parse the Signed Prism Event ($index): $errorMsh"))
+          case (Left(acc), (Right(value), index)) => Left(acc)
+          case (Left(acc), (Left(errorMsh), index)) =>
+            Left(acc + HelpDoc.p(s"Fail to parse the Signed Prism Event ($index) : $errorMsh"))
+        }
+    }
+
+  def submitCommand = Command(
+    "submit",
+    ConfigCommand.options ++ networkFlag,
+    eventArg
+  ).map { case ((setup, network), events) => CMD.BlockfrostSubmitEvents(setup, network, events) }
 
   def program(cmd: CMD.BlockfrostCMD): ZIO[Any, Throwable, Unit] = cmd match {
     case CMD.BlockfrostToken(setup, network, mBlockfrostConfig) =>
@@ -93,5 +125,9 @@ object BlockfrostCommand {
           case Some(bfConfig) => CardanoService.addressesTotalAda(addresses).provideEnvironment(ZEnvironment(bfConfig))
         _ <- Console.printLine(totalAda).orDie
       } yield ()).provideLayer(setup.layer)
+    case BlockfrostSubmitEvents(setup, network, events) =>
+      for {
+        _ <- ZIO.logError(s"CMD: $cmd") // TODO
+      } yield ()
   }
 }
