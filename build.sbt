@@ -174,6 +174,8 @@ lazy val V = new {
   val laminar = "16.0.0"
   val waypoint = "7.0.0"
   val upickle = "3.1.3"
+
+  val identusApollo = "1.7.2-rc2" // "1.7.1"
 }
 
 /** NPM Dependencies */
@@ -185,7 +187,7 @@ lazy val NPM = new { // When update the dependencies also update in package.json
   // val ellipticType = "@types/elliptic" -> "6.4.18"
 
   val nobleCurves = "@noble/curves" -> "1.9.2"
-  val appoloJS = "@hyperledger/identus-apollo" -> "^1.4.5"
+  val appoloJS = "@hyperledger/identus-apollo" -> ("^" + V.identusApollo)
 
 }
 
@@ -232,6 +234,8 @@ lazy val D = new {
     Def.setting("org.bouncycastle" % "bcpkix-jdk18on" % V.bouncycastle)
 
   val nimbusJoseJwt = Def.setting("com.nimbusds" % "nimbus-jose-jwt" % V.nimbusJoseJwt)
+
+  val apollo = "org.hyperledger.identus" % "apollo-jvm" % V.identusApollo
 
   // For munit https://scalameta.org/munit/docs/getting-started.html#scalajs-setup
   val munit = Def.setting("org.scalameta" %%% "munit" % V.munit % Test)
@@ -601,11 +605,11 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // https://developers.cardano.org/docs/get-started/cardano-serialization-lib/overview/
   )
   // Apollo
-  .jvmSettings(libraryDependencies += "org.hyperledger.identus.apollo" % "apollo-jvm" % "1.4.5")
-  .jsSettings(
-    Compile / npmDependencies ++= Seq(NPM.appoloJS),
-    stIgnore += "node",
-  )
+  .jvmSettings(libraryDependencies += D.apollo)
+  // .jsSettings(
+  //   Compile / npmDependencies ++= Seq(NPM.appoloJS),
+  //   stIgnore += "node",
+  // )
   .dependsOn(did, multiformats)
   .configure(docConfigure)
 
