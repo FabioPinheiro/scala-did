@@ -116,6 +116,13 @@ object PrismState {
 
 }
 
-trait PrismState extends PrismStateRead {
-  def addEvent(op: MySignedPrismOperation[OP]): PrismState
+trait PrismState extends PrismStateRead { self =>
+  // type This //Type member
+
+  def addEvent(event: MySignedPrismOperation[OP]): PrismState
+
+  def addMaybeEvent(maybeEvent: MaybeOperation[OP]): PrismState = maybeEvent match
+    case _: InvalidPrismObject           => self
+    case _: InvalidSignedPrismOperation  => self
+    case aux: MySignedPrismOperation[OP] => addEvent(aux)
 }

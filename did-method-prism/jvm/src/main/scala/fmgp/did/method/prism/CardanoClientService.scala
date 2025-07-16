@@ -149,15 +149,18 @@ object CardanoService {
   def makeAccount(network: CardanoNetwork, wallet: CardanoWalletConfig): Account =
     new Account(makeBFNetworks(network), wallet.mnemonicPhrase)
 
+  // Return the hash/id of the transaction
   def submitTransaction(tx: Transaction): ZIO[BlockfrostConfig, Throwable, (Int, String)] =
     for {
       _ <- ZIO.log("submitTransaction")
-      backendService: BackendService <- ZIO.service[BlockfrostConfig].map(makeBFBackendService(_))
+      bfConfig <- ZIO.service[BlockfrostConfig]
+      backendService: BackendService = makeBFBackendService(bfConfig)
       txPayload = tx.serialize()
       _ <- ZIO.log(s"submitTransaction txPayload = ${bytes2Hex(tx.serialize())}")
       result <- ZIO.attempt(backendService.getTransactionService().submitTransaction(txPayload))
       _ <- ZIO.log(s"submitTransaction result = ${result.toString}")
-    } yield (result.code(), result.getResponse())
+      _ <- ZIO.log(s"See https://${bfConfig.network.name}.cardanoscan.io/transaction/${result.getValue}?tab=metadata")
+    } yield (result.code(), result.getValue)
 
   def addressesTotalAda(address: String): ZIO[BlockfrostConfig, Throwable, BigDecimal] =
     for {

@@ -17,6 +17,26 @@ class PreprodModelsSuite extends FunSuite {
   test("CardanoMetadata 418") {
     assert(metadata_419_cbor.toCardanoPrismEntry.isRight)
   }
+  test("CardanoMetadata 17137") {
+    assert(metadata_17137_cbor.toCardanoPrismEntry.isRight)
+    metadata_17137_cbor.toCardanoPrismEntry match
+      case Left(value) => fail("Must be CardanoPrismEntry")
+      case Right(cardanoPrismEntry) =>
+        MaybeOperation
+          .fromProto(
+            prismObject = cardanoPrismEntry.content,
+            tx = cardanoPrismEntry.tx,
+            blockIndex = cardanoPrismEntry.index,
+          )
+          .map {
+            case InvalidPrismObject(tx, b, reason) => fail(s"Must be MySignedPrismOperation: fail with $reason")
+            case InvalidSignedPrismOperation(tx, b, o, reason) =>
+              fail(s"Must be MySignedPrismOperation: fail with $reason")
+            case MySignedPrismOperation(tx, b, o, signedWith, signature, operation, protobuf) => // ok
+            // println (operation.toJsonPretty)
+          }
+
+  }
 
   test("WIP") {
 

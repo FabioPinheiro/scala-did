@@ -21,6 +21,12 @@ val networkFlag =
     .enumeration[CardanoNetwork]("network")(CardanoNetwork.values.toSeq.map(e => (e.name, e)): _*)
     .withDefault(CardanoNetwork.Mainnet)
 
+val networkFlagForSubmit =
+  Options
+    .enumeration[CardanoNetwork]("network")(
+      Seq(CardanoNetwork.Mainnet, CardanoNetwork.Preprod, CardanoNetwork.Preview).map(e => (e.name, e)): _*
+    )
+
 val networkArgs =
   Args.enumeration[CardanoNetwork]("network")(
     CardanoNetwork.values.filterNot(_ == CardanoNetwork.Testnet).toSeq.map(e => (e.name, e)): _*
