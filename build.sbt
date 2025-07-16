@@ -772,6 +772,7 @@ ThisBuild / assemblyMergeStrategy := {
   case "META-INF/versions/9/OSGI-INF/MANIFEST.MF" => MergeStrategy.first
   case "META-INF/okio.kotlin_module"              => MergeStrategy.first
   case webjarsPattern(file)                       => MergeStrategy.discard
+  case "module-info.class"        => MergeStrategy.first // jackson-annotations-2.16.0.jar & checker-qual-3.43.0.jar
   case bouncycastlePattern1(file) => MergeStrategy.preferProject // because of a Apollo is using very old version
   case bouncycastlePattern2(file) => MergeStrategy.preferProject // because of a Apollo is using very old version
   case bouncycastlePattern3(file) => MergeStrategy.preferProject // because of a Apollo is using very old version
