@@ -74,7 +74,7 @@ object BlockfrostCommand {
     "submit",
     ConfigCommand.options ++ networkFlagForSubmit,
     eventArg
-  ).map { case ((setup, network), events) => CMD.BlockfrostSubmitEvents(setup, network, events) }
+  ).map { case ((setup, network), events) => CMD.BlockfrostSubmitEvents(setup, network, events, dryrun = false) }
 
   def program(cmd: CMD.BlockfrostCMD): ZIO[Any, Throwable, Unit] = cmd match {
     case CMD.BlockfrostToken(setup, network, mBlockfrostConfig) =>
@@ -125,32 +125,47 @@ object BlockfrostCommand {
           case Some(bfConfig) => CardanoService.addressesTotalAda(addresses).provideEnvironment(ZEnvironment(bfConfig))
         _ <- Console.printLine(totalAda).orDie
       } yield ()).provideLayer(setup.layer)
-    case BlockfrostSubmitEvents(setup, network, events) =>
-      (for {
-        _ <- ZIO.logError(s"CMD: $cmd") // TODO
-        bfConfig <- {
-          network match
-            case CardanoNetwork.Mainnet => stateLen(_.blockfrostMainnet)
-            case CardanoNetwork.Testnet => ZIO.fail(PrismCliError("Testnet is no longer available"))
-            case CardanoNetwork.Preprod => stateLen(_.blockfrostPreprod)
-            case CardanoNetwork.Preview => stateLen(_.blockfrostPreview)
-        }.flatMap {
-          case None    => ZIO.fail(PrismCliError(s"BlockFrost config is not available for the $network network"))
-          case Some(e) => ZIO.succeed(e)
-        }
-        wallet <- stateLen(e => e.cardanoWallet).flatMap {
-          case None    => ZIO.fail(PrismCliError(s"Cardano Wallet is not setup"))
-          case Some(e) => ZIO.succeed(e)
-        }
-        tx = CardanoService.makeTrasation(
-          bfConfig = bfConfig,
-          wallet = wallet,
-          prismEvents = events,
-          maybeMsgCIP20 = Some("cardano-prism cli"),
-        )
-        ret <- CardanoService.submitTransaction(tx).provideEnvironment(ZEnvironment(bfConfig))
-        (retCode, txId) = ret
+    case cmd: BlockfrostSubmitEvents =>
+      for {
+        txId <- submitProgram(cmd).provideLayer(cmd.setup.layer)
         _ <- Console.printLine(txId)
-      } yield ()).provideLayer(setup.layer)
+      } yield ()
+  }
+
+  def submitProgram(cmd: BlockfrostSubmitEvents): ZIO[Ref[Setup], Throwable, String] = {
+    cmd match
+      case BlockfrostSubmitEvents(setup, network, events, dryrun) =>
+        for {
+          _ <- ZIO.logError(s"CMD: $cmd") // TODO
+          bfConfig <- {
+            network match
+              case CardanoNetwork.Mainnet => stateLen(_.blockfrostMainnet)
+              case CardanoNetwork.Testnet => ZIO.fail(PrismCliError("Testnet is no longer available"))
+              case CardanoNetwork.Preprod => stateLen(_.blockfrostPreprod)
+              case CardanoNetwork.Preview => stateLen(_.blockfrostPreview)
+          }.flatMap {
+            case None    => ZIO.fail(PrismCliError(s"BlockFrost config is not available for the $network network"))
+            case Some(e) => ZIO.succeed(e)
+          }
+          wallet <- stateLen(e => e.cardanoWallet)
+            .flatMap {
+              case None    => ZIO.fail(PrismCliError(s"Cardano Wallet is not setup"))
+              case Some(e) => ZIO.succeed(e)
+            }
+          tx = CardanoService.makeTrasation(
+            bfConfig = bfConfig,
+            wallet = wallet,
+            prismEvents = events,
+            maybeMsgCIP20 = Some("cardano-prism cli"),
+          )
+          txIdOrTx <-
+            if (dryrun)
+              CardanoService
+                .submitTransaction(tx)
+                .provideEnvironment(ZEnvironment(bfConfig))
+                .map((retCode, txId) => txId)
+            else ZIO.succeed(bytes2Hex(tx.serialize))
+
+        } yield (txIdOrTx)
   }
 }

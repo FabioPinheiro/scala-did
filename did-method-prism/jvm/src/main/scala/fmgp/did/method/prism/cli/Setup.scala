@@ -74,6 +74,9 @@ case class Setup(
   def layer = ZLayer.scoped { acquireRelease }
 
   def mState = staging.toOption
+
+  def stateLen[T](f: (StagingState) => Option[T]): Option[T] = staging.toOption.flatMap(f(_))
+
 }
 object Setup {
   given decoderPath: JsonDecoder[Path] = JsonDecoder.string.map(s => Path.of(s))
@@ -116,4 +119,4 @@ def forceStateUpdateAtEnd: ZIO[Ref[Setup], Nothing, Unit] =
   ZIO.serviceWithZIO[Ref[Setup]](_.update(_.copy(updateStateFile = true)))
 
 def stateLen[T](f: (StagingState) => Option[T]): ZIO[Ref[Setup], Nothing, Option[T]] =
-  ZIO.serviceWithZIO[Ref[Setup]](_.get.map(_.staging.toOption.flatMap(f(_))))
+  ZIO.serviceWithZIO[Ref[Setup]](_.get.map(_.stateLen(f(_))))

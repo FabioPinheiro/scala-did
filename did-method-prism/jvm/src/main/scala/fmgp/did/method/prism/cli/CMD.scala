@@ -38,6 +38,7 @@ object CMD {
       setup: Setup,
       network: CardanoNetwork,
       events: Seq[SignedPrismOperation], // MaybeOperation[OP], // [MySignedPrismOperation]
+      dryrun: Boolean,
   ) extends BlockfrostCMD
 
   // sealed trait KeyCMD extends CMD
@@ -77,4 +78,6 @@ object CMD {
   // TODO Event validate Events
   // TODO Event validate Block
 
+  sealed trait ServicesCMD extends CMD
+  final case class SubmitDID(setup: Setup) extends ServicesCMD
 }

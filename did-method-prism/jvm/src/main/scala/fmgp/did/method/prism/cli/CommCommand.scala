@@ -3,7 +3,6 @@ package fmgp.did.method.prism.cli
 import zio.*
 import zio.cli.*
 import zio.json.*
-import zio.cli.*
 
 object CommCommand {
 

@@ -14,13 +14,14 @@ import fmgp.did.method.prism.cardano.CardanoNetwork
   * {{{
   * sbt "didResolverPrismJVM/assembly"
   * java -jar did-method-prism/jvm/target/scala-3.3.6/cardano-prism.jar indexer ../prism-vdr/preprod
+  * shasum -a 256 did-method-prism/jvm/target/scala-3.3.6/cardano-prism.jar
   * }}}
   *
   * didResolverPrismJVM/runMain fmgp.did.method.prism.cli.PrismCli
   */
 object PrismCli extends ZIOCliDefault {
 
-  val version = "0.3.0" // FIXME version MUST come from the build pipeline
+  val version = "0.4.0" // FIXME version MUST come from the build pipeline
 
   def notCurrentlyImplemented(cmd: CMD) = Console.printLine(
     s"Command `$cmd` support is not currently implemented. If you are interested in adding support, please open a pull request at https://github.com/FabioPinheiro/scala-did."
@@ -40,6 +41,7 @@ object PrismCli extends ZIOCliDefault {
         KeyCommand.command,
         DIDCommand.command,
         BlockfrostCommand.command,
+        ServicesCommand.command,
       ),
     config = CliConfig(
       caseSensitive = true,
@@ -61,6 +63,7 @@ object PrismCli extends ZIOCliDefault {
       case cmd: CMD.VDRCMD        => VDRCommand.program(cmd)
       case cmd: CMD.CommCMD       => CommCommand.program(cmd)
       case cmd: CMD.Indexer       => IndexerCommand.program(cmd)
+      case cmd: CMD.ServicesCMD   => ServicesCommand.program(cmd)
     }
   }.catchNonFatalOrDie { case error: java.io.IOException =>
     ZIO.succeed(error.printStackTrace()) *>

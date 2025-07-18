@@ -640,7 +640,7 @@ lazy val didPrismNode = project
     ),
     assembly / mainClass := Some("fmgp.prism.Node"), // TODO Move to a new repo
     assembly / assemblyJarName := "prism-node.jar", // TODO Move to a new repo
-    run / fork := true
+    run / fork := false
   )
   .dependsOn(didResolverPrism.jvm)
 
