@@ -7,7 +7,7 @@ addSbtPlugin("org.scala-js" % "sbt-jsdependencies" % "1.0.2")
 
 libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
 
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.4")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.5")
 
 // addSbtPlugin("com.vmunier" % "sbt-web-scalajs" % "1.1.0") //we can now update 1.2.0!
 // [error] (update) found version conflict(s) in library dependencies; some are suspected to be binary incompatible:
@@ -64,7 +64,7 @@ addSbtPlugin("io.spray" % "sbt-revolver" % "0.10.0")
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.3")
 
 // mdoc - https://github.com/scalameta/mdoc/tags
-addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.7.1")
+addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.7.2")
 addSbtPlugin("org.typelevel" % "laika-sbt" % "1.3.2") // https://typelevel.org/Laika/
 addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.5.0") // https://github.com/sbt/sbt-unidoc
 // addSbtPlugin("org.typelevel" % "sbt-typelevel-site" % "0.6.2") // https://typelevel.org/sbt-typelevel/site.html

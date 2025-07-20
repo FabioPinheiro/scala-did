@@ -167,7 +167,7 @@ lazy val V = new {
   val scalaLogging = "3.9.4"
 
   val bouncycastle = "1.80"
-  val nimbusJoseJwt = "10.3"
+  val nimbusJoseJwt = "10.3.1"
 
   val laika = "1.0.0"
 
@@ -620,7 +620,7 @@ lazy val didPrismNode = project
     name := "prism-node",
     libraryDependencies += D.munit.value,
     libraryDependencies += D.zioMunitTest.value,
-    libraryDependencies += "dev.zio" %% "zio-logging-slf4j2-bridge" % "2.5.0"
+    libraryDependencies += "dev.zio" %% "zio-logging-slf4j2-bridge" % "2.5.1"
   )
   .settings(
     Compile / PB.targets := Seq(
@@ -632,7 +632,7 @@ lazy val didPrismNode = project
     ),
     libraryDependencies ++= Seq(
       "io.grpc" % "grpc-netty" % "1.73.0", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
-      "io.netty" % "netty-handler" % "4.2.2.Final", // This is to forces a update in from "io.grpc" % "grpc-netty" % "1.73.0" -> https://mvnrepository.com/artifact/io.netty/netty-handler/4.1.110.Final
+      "io.netty" % "netty-handler" % "4.2.3.Final", // This is to forces a update in from "io.grpc" % "grpc-netty" % "1.73.0" -> https://mvnrepository.com/artifact/io.netty/netty-handler/4.1.110.Final
       // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion,
       // REMOVE // The following needed only if you include scalapb/scalapb.proto:
       // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
