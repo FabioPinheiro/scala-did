@@ -15,22 +15,26 @@ opaque type DIDSubject = String
 object DIDSubject {
 
   /** @throws AssertionError if not a valid DIDSubject */
-  inline def parseString(id: String) = id match {
-    case DID.regex(namespace, specificId) => (namespace, specificId)
-    case _                                => throw new java.lang.AssertionError(s"Fail to parse DIDSubject: '$id'")
+  inline def unsafeParseString(id: String) = parseString(id) match
+    case Right(value) => value // (namespace, specificId)
+    case Left(error)  => throw new java.lang.AssertionError(error)
+
+  inline def parseString(id: String): Either[String, (String, String)] = id match {
+    case DID.regex(namespace, specificId) => Right(namespace, specificId)
+    case _                                => Left(s"Fail to parse DIDSubject: '$id'")
   }
 
   extension (id: DIDSubject)
     private inline def value: String = id
-    // inline def inline_namespace: String = parseString(id)._1
-    // inline def inline_specificId: String = parseString(id)._2
-    inline def subject: String = parseString(id)._2
+    // inline def inline_namespace: String = unsafeParseString(id)._1
+    // inline def inline_specificId: String = unsafeParseString(id)._2
+    inline def subject: String = unsafeParseString(id)._2
     // inline def asTO = fmgp.did.comm.TO.unsafe_apply(id)
     // inline def asFROM = fmgp.did.comm.FROM.unsafe_apply(id)
     // inline def asFROMTO = fmgp.did.comm.FROMTO.unsafe_apply(id)
 
     def toDID: DID = new {
-      val (namespace, specificId) = parseString(id) // FIXME unsafe
+      val (namespace, specificId) = unsafeParseString(id) // FIXME unsafe
     }
 
     def sameSubject(that: DIDSubject): Boolean =
@@ -49,7 +53,7 @@ object DIDSubject {
     * @throws AssertionError
     *   if not a valid DIDSubject
     */
-  def apply(s: String): DIDSubject = s.tap(e => parseString(e)) // 'tap' is to throws as soon as possible
+  def apply(s: String): DIDSubject = s.tap(e => unsafeParseString(e)) // 'tap' is to throws as soon as possible
   def either(s: String): Either[FailToParse, DIDSubject] =
     if (DID.regex.matches(s)) Right(DIDSubject(s)) else Left(FailToParse(s"NOT a DID subject '$s'"))
 
@@ -100,20 +104,25 @@ object DIDSubjectQ {
   val pattern = """^did:([^\s:]+):([^\?\#\s]+)(\?[^\#\s:]*)?(?!\#.*)$""".r
 
   /** @throws AssertionError if not a valid DIDSubjectQ */
-  inline def parseString(id: String) = id match {
-    case pattern(namespace, subject, null)  => (namespace, subject, "") // same as a DIDSubject
-    case pattern(namespace, subject, query) => (namespace, subject, query.drop(1)) // drop '?' you can on a emply string
-    case _                                  => throw new java.lang.AssertionError(s"Fail to parse DIDSubjectQ: '$id'")
+  inline def unsafeParseString(id: String) = parseString(id) match
+    case Right(value) => value // (namespace, subject, query)
+    case Left(error)  => throw new java.lang.AssertionError(error)
+
+  inline def parseString(id: String): Either[String, (String, String, String)] = id match {
+    case pattern(namespace, subject, null) => Right((namespace, subject, "")) // same as a DIDSubject
+    case pattern(namespace, subject, query) =>
+      Right((namespace, subject, query.drop(1))) // drop '?' you can on a emply string
+    case _ => Left(s"Fail to parse DIDSubjectQ: '$id'")
   }
 
   extension (id: DIDSubjectQ)
     private inline def value: String = id
-    inline def inline_namespace: String = parseString(id)._1
-    inline def subject: String = parseString(id)._2
-    inline def query: String = parseString(id)._3
+    inline def inline_namespace: String = unsafeParseString(id)._1
+    inline def subject: String = unsafeParseString(id)._2
+    inline def query: String = unsafeParseString(id)._3
     def toDID: DID = new { // FIXME unsafe
-      val namespace = parseString(id)._1
-      val specificId = parseString(id).pipe { e =>
+      val namespace = unsafeParseString(id)._1
+      val specificId = unsafeParseString(id).pipe { e =>
         e._2 + (if (!e._3.isEmpty | value.endsWith("?")) "?" + e._3 else "")
       }
     }
@@ -135,7 +144,7 @@ object DIDSubjectQ {
     * @throws AssertionError
     *   if not a valid DIDSubjectQ
     */
-  def apply(s: String): DIDSubjectQ = s.tap(e => parseString(e)) // 'tap' is to throws as soon as possible
+  def apply(s: String): DIDSubjectQ = s.tap(e => unsafeParseString(e)) // 'tap' is to throws as soon as possible
   def either(s: String): Either[FailToParse, DIDSubjectQ] =
     if (pattern.matches(s)) Right(DIDSubjectQ(s)) else Left(FailToParse(s"NOT a DID subject with query '$s'"))
 
