@@ -11,18 +11,6 @@ import fmgp.did.method.prism.proto.MaybeOperation
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
 
-object CliDIDResolve extends ZIOAppDefault {
-  override val run = PrismCli.cliApp.run(
-    List(
-      "did",
-      "resolve",
-      "--network",
-      "preprod",
-      "did:prism:000010053b08fd04a93584176a82fed92e99a053614898dc8409ad3a9c43f435",
-    )
-  )
-}
-
 object DIDCommand {
 
   val createCommand = Command(

@@ -43,7 +43,7 @@ object DIDPrism {
   def regexPrismShortForm = "^did:prism:([0-9a-f]{64})$".r
   def regexPrismLongForm = "^did:prism:([0-9a-f]{64}):([A-Za-z0-9_-]+)$".r
 
-  def namespace: String = "prism"
+  val namespace: String = "prism"
   def applyUnsafe(did: String): DIDPrism = DIDPrism(DIDSubject(did).specificId)
 
   def fromEventHash(hash: Array[Byte]): DIDPrism = DIDPrism(bytes2Hex(hash))

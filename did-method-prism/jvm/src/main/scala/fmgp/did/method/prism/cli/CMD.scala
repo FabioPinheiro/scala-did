@@ -1,11 +1,10 @@
 package fmgp.did.method.prism.cli
 
 import fmgp.did.method.prism.DIDPrism
+import fmgp.did.method.prism.RefVDR
 import fmgp.did.method.prism.vdr.BlockfrostConfig
 import fmgp.did.method.prism.cardano.CardanoNetwork
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
-import fmgp.did.method.prism.proto.MaybeOperation
-import fmgp.did.method.prism.proto.OP
 import java.nio.file.Path
 import proto.prism.SignedPrismOperation
 
@@ -52,10 +51,10 @@ object CMD {
   sealed trait DIDCMD extends CMD
   final case class DIDCreate(
       setup: Setup,
-      masterLabel: String,
-      masterRaw: Option[String],
-      vdrLabel: Option[String],
-      vdrRaw: Option[String]
+      masterKeyLabel: String,
+      masterKeyRaw: Option[String],
+      vdrKeyLabel: Option[String],
+      vdrKeyRaw: Option[String]
   ) extends DIDCMD
   final case class DIDUpdate(did: DIDPrism) extends DIDCMD
   final case class DIDDeactivate(did: DIDPrism) extends DIDCMD
@@ -63,10 +62,36 @@ object CMD {
   final case class DIDResolveFromFS(did: DIDPrism, workdir: Path, network: CardanoNetwork) extends DIDCMD
 
   sealed trait VDRCMD extends CMD
-  final case class VDRCreateBytes(setup: Setup, vdrLabel: Option[String], vdrRaw: Option[String], data: Array[Byte])
-      extends VDRCMD
-  final case class VDRUpdateBytes(did: DIDPrism) extends VDRCMD
-  final case class VDRDeactivate(did: DIDPrism) extends VDRCMD
+  final case class VDRCreateBytes(
+      setup: Setup, // TODO option to get the owner SSI/DID from the state
+      didOwner: DIDPrism, // and make it optional
+      vdrKeyLabel: String,
+      vdrKeyRaw: Option[Array[Byte]],
+      data: Array[Byte],
+  ) extends VDRCMD
+  final case class VDRUpdateBytes(
+      setup: Setup,
+      vdrEntryRef: RefVDR,
+      vdrKeyLabel: String,
+      vdrKeyRaw: Option[Array[Byte]],
+      data: Array[Byte],
+  ) extends VDRCMD
+  final case class VDRDeactivateEntry(
+      setup: Setup,
+      vdrEntryRef: RefVDR,
+      vdrKeyLabel: String,
+      vdrKeyRaw: Option[Array[Byte]],
+  ) extends VDRCMD
+
+  final case class VDRFetchEntry(
+      setup: Setup,
+      vdrEntryRef: RefVDR,
+  ) extends VDRCMD
+
+  final case class VDRProofEntry(
+      setup: Setup,
+      vdrEntryRef: RefVDR,
+  ) extends VDRCMD
 
   sealed trait CommCMD extends CMD
   final case class CommLogin(did: DIDPrism, key: Array[Byte]) extends CommCMD

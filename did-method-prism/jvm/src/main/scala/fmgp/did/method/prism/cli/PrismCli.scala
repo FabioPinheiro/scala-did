@@ -42,6 +42,7 @@ object PrismCli extends ZIOCliDefault {
         DIDCommand.command,
         BlockfrostCommand.command,
         ServicesCommand.command,
+        VDRCommand.command,
       ),
     config = CliConfig(
       caseSensitive = true,
