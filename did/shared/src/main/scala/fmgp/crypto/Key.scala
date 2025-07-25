@@ -53,6 +53,7 @@ object KTY {
 }
 
 enum Curve: // TODO make it type safe!
+  def name = this.toString
   case `P-256` extends Curve
   case `P-384` extends Curve
   case `P-521` extends Curve

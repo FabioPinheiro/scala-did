@@ -82,6 +82,13 @@ class KeySuite extends FunSuite {
     )
   }
 
+  test("Curve P-256 name") { assertEquals(Curve.`P-256`.name, "P-256") }
+  test("Curve P-384 name") { assertEquals(Curve.`P-384`.name, "P-384") }
+  test("Curve P-521 name") { assertEquals(Curve.`P-521`.name, "P-521") }
+  test("Curve secp256k1 name") { assertEquals(Curve.secp256k1.name, "secp256k1") }
+  test("Curve X25519 name") { assertEquals(Curve.X25519.name, "X25519") }
+  test("Curve Ed25519 name") { assertEquals(Curve.Ed25519.name, "Ed25519") }
+
   test("parse & stringify PrivateKey") {
     val ret = JWKExamples.senderKeySecp256k1.fromJson[PrivateKey]
     ret match {
