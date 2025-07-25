@@ -1,6 +1,5 @@
 package fmgp.did.method.prism.vdr
 
-import org.hyperledger.identus.apollo.utils.KMMECSecp256k1PrivateKey
 import fmgp.did.method.prism.*
 // import _root_.proto.prism.*
 import scala.util.Random
@@ -9,13 +8,14 @@ import com.google.protobuf.ByteString
 import fmgp.did.method.prism.proto.getEventHash
 import fmgp.crypto.SHA256
 import _root_.proto.prism.*
+import fmgp.crypto.Secp256k1PrivateKey
 
 //FIXME rename, move to shared src
 object VDRUtils {
 
   def createVDREntryBytes(
       didPrism: DIDPrism,
-      vdrKey: KMMECSecp256k1PrivateKey,
+      vdrKey: Secp256k1PrivateKey,
       keyName: String,
       data: Array[Byte],
       nonce: Array[Byte] = Random.nextBytes(16),
@@ -40,7 +40,7 @@ object VDRUtils {
   def updateVDREntryBytes(
       eventRef: RefVDR,
       previousOperation: SignedPrismOperation,
-      vdrKey: KMMECSecp256k1PrivateKey,
+      vdrKey: Secp256k1PrivateKey,
       keyName: String,
       data: Array[Byte],
   ): (EventHash, SignedPrismOperation) = {
@@ -56,7 +56,7 @@ object VDRUtils {
   def updateVDREntryBytes(
       eventRef: RefVDR,
       previousEventHash: EventHash,
-      vdrKey: KMMECSecp256k1PrivateKey,
+      vdrKey: Secp256k1PrivateKey,
       keyName: String,
       data: Array[Byte],
   ): (EventHash, SignedPrismOperation) = {
@@ -79,7 +79,7 @@ object VDRUtils {
   def deactivateVDREntry(
       eventRef: RefVDR,
       previousEventHash: EventHash,
-      vdrKey: KMMECSecp256k1PrivateKey,
+      vdrKey: Secp256k1PrivateKey,
       keyName: String,
   ): (EventHash, SignedPrismOperation) = {
     def op = PrismOperation(

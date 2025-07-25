@@ -10,10 +10,10 @@ import com.google.protobuf.ByteString
 import _root_.proto.prism._
 import fmgp.util.bytes2Hex
 import fmgp.util.hex2bytes
+import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.did.method.prism._
 import fmgp.did.method.prism.cardano._
 import fmgp.did.method.prism.proto._
-import org.hyperledger.identus.apollo.utils.KMMECSecp256k1PrivateKey
 import fmgp.crypto.SHA256
 import scalapb.UnknownFieldSet
 
@@ -29,17 +29,17 @@ object VDRUtilsTestExtra {
   import KeyConstanceUtils._
 
   def createDID(
-      masterKeys: Seq[(String, KMMECSecp256k1PrivateKey)],
-      vdrKeys: Seq[(String, KMMECSecp256k1PrivateKey)]
+      masterKeys: Seq[(String, Secp256k1PrivateKey)],
+      vdrKeys: Seq[(String, Secp256k1PrivateKey)]
   ) = DIDExtra.createDID(masterKeys = masterKeys, vdrKeys = vdrKeys)
 
   def updateDIDAddKey(
       didPrism: DIDPrism,
       previousOperation: SignedPrismOperation,
       masterKeyName: String,
-      masterKey: KMMECSecp256k1PrivateKey,
+      masterKey: Secp256k1PrivateKey,
       vdrKeyName: String,
-      vdrKey: KMMECSecp256k1PrivateKey,
+      vdrKey: Secp256k1PrivateKey,
   ): SignedPrismOperation = {
     val previousEventHash =
       SHA256.digest(previousOperation.operation.get.toByteArray)
@@ -56,12 +56,7 @@ object VDRUtilsTestExtra {
                     PublicKey(
                       id = vdrKeyName,
                       usage = KeyUsage.VDR_KEY,
-                      keyData = PublicKey.KeyData.CompressedEcKeyData(
-                        value = CompressedECKeyData(
-                          curve = "secp256k1",
-                          data = ByteString.copyFrom(vdrKey.getPublicKey().getCompressed())
-                        )
-                      )
+                      keyData = vdrKey.compressedEcKeyData
                     )
                   )
                 )
@@ -83,7 +78,7 @@ object VDRUtilsTestExtra {
   def updateVDREntryWithUnknownFields(
       eventRef: RefVDR,
       previousOperation: SignedPrismOperation,
-      vdrKey: KMMECSecp256k1PrivateKey,
+      vdrKey: Secp256k1PrivateKey,
       keyName: String,
       data: Array[Byte],
       unknownFieldNumber: Int,

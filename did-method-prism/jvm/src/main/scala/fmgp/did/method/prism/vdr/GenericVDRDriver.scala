@@ -2,10 +2,10 @@ package fmgp.did.method.prism.vdr
 
 import zio._
 import zio.json._
+import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.did.method.prism.*
 import fmgp.did.method.prism.vdr.*
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
-import org.hyperledger.identus.apollo.utils.KMMECSecp256k1PrivateKey
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
 import fmgp.did.method.prism.proto.getEventHash
@@ -16,7 +16,7 @@ class GenericVDRDriver(
     workdir: String = "../../prism-vdr/mainnet",
     didPrism: DIDPrism,
     keyName: String,
-    vdrKey: KMMECSecp256k1PrivateKey,
+    vdrKey: Secp256k1PrivateKey,
     maybeMsgCIP20: Option[String],
 ) {
   var globalState = PrismState.empty

@@ -4,24 +4,24 @@ import zio.*
 import zio.cli.*
 import zio.json.*
 import java.nio.file.Path
+import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
-import org.hyperledger.identus.apollo.utils.KMMECSecp256k1PrivateKey
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
 import fmgp.did.method.prism.vdr.BlockfrostConfig
 import fmgp.did.method.prism.cardano.CardanoNetwork
 
-case class Key(seed: Array[Byte], derivationPath: String, key: KMMECSecp256k1PrivateKey)
+case class Key(seed: Array[Byte], derivationPath: String, key: Secp256k1PrivateKey)
 object Key {
   given decoder: JsonDecoder[Key] = {
     given JsonDecoder[Array[Byte]] = Utils.decoderArrayByte
-    given JsonDecoder[KMMECSecp256k1PrivateKey] =
+    given JsonDecoder[Secp256k1PrivateKey] =
       JsonDecoder.string.map(hex => Utils.secp256k1FromRaw(hex))
     DeriveJsonDecoder.gen[Key]
   }
   given encoder: JsonEncoder[Key] = {
     given JsonEncoder[Array[Byte]] = Utils.encoderArrayByte
-    given JsonEncoder[KMMECSecp256k1PrivateKey] = JsonEncoder.string.contramap(key => bytes2Hex(key.getEncoded()))
+    given JsonEncoder[Secp256k1PrivateKey] = JsonEncoder.string.contramap(key => bytes2Hex(key.rawBytes))
     DeriveJsonEncoder.gen[Key]
   }
 }
@@ -30,7 +30,7 @@ object Utils {
   def decoderArrayByte: JsonDecoder[Array[Byte]] = JsonDecoder.string.map(hex => hex2bytes(hex))
   def encoderArrayByte: JsonEncoder[Array[Byte]] = JsonEncoder.string.contramap(bytes => bytes2Hex(bytes))
 
-  def secp256k1FromRaw(hex: String) = KMMECSecp256k1PrivateKey.Companion.secp256k1FromByteArray(hex2bytes(hex))
+  def secp256k1FromRaw(hex: String) = Secp256k1PrivateKey(hex2bytes(hex))
 }
 case class StagingState(
     loadStateFileByDefault: Boolean = true,

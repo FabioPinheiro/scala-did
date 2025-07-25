@@ -7,6 +7,7 @@ import zio.*
 import zio.cli.*
 
 import fmgp.util.bytes2Hex
+import fmgp.crypto.Secp256k1PrivateKey
 import org.hyperledger.identus.apollo.derivation.MnemonicHelper
 import org.hyperledger.identus.apollo.derivation.HDKey
 
@@ -70,7 +71,7 @@ object KeyCommand {
           val keys = stagingState.secp256k1PrivateKey.+(
             (
               keyLabel.getOrElse(s"key${stagingState.secp256k1PrivateKey.size}"),
-              Key(seed = seed, derivationPath = derivationPath, key = key)
+              Key(seed = seed, derivationPath = derivationPath, key = Secp256k1PrivateKey(key.getEncoded()))
             )
           )
           stagingState.copy(ssiWallet = Some(wallet), seed = Some(seed), secp256k1PrivateKey = keys)

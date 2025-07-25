@@ -2,15 +2,15 @@ package fmgp.did.method.prism.cardano
 
 import proto.prism.*
 import com.google.protobuf.ByteString
+import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.did.method.prism.DIDPrism
 import fmgp.did.method.prism.proto.didPrism
-import org.hyperledger.identus.apollo.utils.KMMECSecp256k1PrivateKey
 
 object DIDExtra {
 
   def createDID(
-      masterKeys: Seq[(String, KMMECSecp256k1PrivateKey)],
-      vdrKeys: Seq[(String, KMMECSecp256k1PrivateKey)]
+      masterKeys: Seq[(String, Secp256k1PrivateKey)],
+      vdrKeys: Seq[(String, Secp256k1PrivateKey)]
   ): (DIDPrism, SignedPrismOperation) = {
     def op = PrismOperation(
       operation = PrismOperation.Operation.CreateDid(
@@ -22,24 +22,14 @@ object DIDExtra {
                   PublicKey(
                     id = keyName,
                     usage = KeyUsage.MASTER_KEY,
-                    keyData = PublicKey.KeyData.CompressedEcKeyData(
-                      value = CompressedECKeyData(
-                        curve = "secp256k1",
-                        data = ByteString.copyFrom(pk.getPublicKey().getCompressed())
-                      )
-                    )
+                    keyData = pk.compressedEcKeyData
                   )
                 } ++
                 vdrKeys.map { (keyName, pk) =>
                   PublicKey(
                     id = keyName,
                     usage = KeyUsage.VDR_KEY,
-                    keyData = PublicKey.KeyData.CompressedEcKeyData(
-                      value = CompressedECKeyData(
-                        curve = "secp256k1",
-                        data = ByteString.copyFrom(pk.getPublicKey().getCompressed())
-                      )
-                    )
+                    keyData = pk.compressedEcKeyData
                   )
                 },
               services = Seq.empty, // Seq[proto.prism.Service],

@@ -4,11 +4,11 @@ import zio.*
 import zio.cli.*
 import zio.json.*
 import fmgp.util.hex2bytes
+import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.did.method.prism.RefVDR
 import fmgp.did.method.prism.DIDPrism
 import fmgp.did.method.prism.vdr.GenericVDRDriver
 import fmgp.did.method.prism.vdr.BlockfrostConfig
-import org.hyperledger.identus.apollo.utils.KMMECSecp256k1PrivateKey
 
 object VDRCommand {
 
@@ -173,7 +173,7 @@ object VDRCommand {
             case Some(aux) => ZIO.succeed(aux)
           }
         vdrKey <- vdrKeyRaw match
-          case Some(raw) => ZIO.succeed(KMMECSecp256k1PrivateKey.Companion.secp256k1FromByteArray(raw))
+          case Some(raw) => ZIO.succeed(Secp256k1PrivateKey(raw))
           case None =>
             stateLen(_.secp256k1PrivateKey.get(vdrKeyLabel))
               .flatMap {
