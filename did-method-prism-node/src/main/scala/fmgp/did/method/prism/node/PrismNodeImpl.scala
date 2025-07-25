@@ -1,6 +1,7 @@
 package fmgp.did.method.prism.node
 
 import zio.*
+import proto.prism.ProtocolVersion
 import proto.prism.node.*
 import fmgp.crypto.SHA256
 import fmgp.util.Base64
@@ -62,13 +63,22 @@ case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletC
       request: GetNodeBuildInfoRequest
   ): IO[io.grpc.StatusException, GetNodeBuildInfoResponse] = for {
     _ <- ZIO.log("getDidDocument")
-  } yield ???
+  } yield GetNodeBuildInfoResponse(
+    version = "0.1.0",
+    scalaVersion = "scalaVersion", // TODO
+    sbtVersion = "sbtVersion", // TODO
+    // unknownFields: scalapb.UnknownFieldSet
+  )
 
   def getNodeNetworkProtocolInfo(
       request: GetNodeNetworkProtocolInfoRequest
   ): IO[io.grpc.StatusException, GetNodeNetworkProtocolInfoResponse] = for {
     _ <- ZIO.log("getNodeNetworkProtocolInfo")
-  } yield ???
+  } yield GetNodeNetworkProtocolInfoResponse(
+    supportedNetworkProtocolVersion = Some(ProtocolVersion(majorVersion = 1, minorVersion = 0)),
+    currentNetworkProtocolVersion = Some(ProtocolVersion(majorVersion = 1, minorVersion = 0)),
+    // unknownFields: scalapb.UnknownFieldSet
+  )
 
   case class OperationInfo(
       txStatus: String,
