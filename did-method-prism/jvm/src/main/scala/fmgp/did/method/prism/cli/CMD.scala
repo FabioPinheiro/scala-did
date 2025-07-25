@@ -64,20 +64,44 @@ object CMD {
   sealed trait VDRCMD extends CMD
   final case class VDRCreateBytes(
       setup: Setup, // TODO option to get the owner SSI/DID from the state
+      network: CardanoNetwork,
+      workdir: Path,
       didOwner: DIDPrism, // and make it optional
       vdrKeyLabel: String,
       vdrKeyRaw: Option[Array[Byte]],
       data: Array[Byte],
   ) extends VDRCMD
+  final case class VDRCreateIPFS(
+      setup: Setup, // TODO option to get the owner SSI/DID from the state
+      network: CardanoNetwork,
+      workdir: Path,
+      didOwner: DIDPrism, // and make it optional
+      vdrKeyLabel: String,
+      vdrKeyRaw: Option[Array[Byte]],
+      cid: String,
+  ) extends VDRCMD
   final case class VDRUpdateBytes(
       setup: Setup,
+      network: CardanoNetwork,
+      workdir: Path,
       vdrEntryRef: RefVDR,
       vdrKeyLabel: String,
       vdrKeyRaw: Option[Array[Byte]],
       data: Array[Byte],
   ) extends VDRCMD
+  final case class VDRUpdateIPFS(
+      setup: Setup,
+      network: CardanoNetwork,
+      workdir: Path,
+      vdrEntryRef: RefVDR,
+      vdrKeyLabel: String,
+      vdrKeyRaw: Option[Array[Byte]],
+      cid: String,
+  ) extends VDRCMD
   final case class VDRDeactivateEntry(
       setup: Setup,
+      network: CardanoNetwork,
+      workdir: Path,
       vdrEntryRef: RefVDR,
       vdrKeyLabel: String,
       vdrKeyRaw: Option[Array[Byte]],
@@ -85,11 +109,15 @@ object CMD {
 
   final case class VDRFetchEntry(
       setup: Setup,
+      network: CardanoNetwork,
+      workdir: Path,
       vdrEntryRef: RefVDR,
   ) extends VDRCMD
 
   final case class VDRProofEntry(
       setup: Setup,
+      network: CardanoNetwork,
+      workdir: Path,
       vdrEntryRef: RefVDR,
   ) extends VDRCMD
 

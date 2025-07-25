@@ -21,7 +21,7 @@ val networkFlag =
     .enumeration[CardanoNetwork]("network")(CardanoNetwork.values.toSeq.map(e => (e.name, e)): _*)
     .withDefault(CardanoNetwork.Mainnet)
 
-val networkFlagForSubmit =
+val networkOnlineFlag =
   Options
     .enumeration[CardanoNetwork]("network")(
       Seq(CardanoNetwork.Mainnet, CardanoNetwork.Preprod, CardanoNetwork.Preview).map(e => (e.name, e)): _*
@@ -59,6 +59,12 @@ val didArg =
         case Left(error)     => Left(HelpDoc.p(s"Fail to parse Arg: $error"))
         case Right(didPrisn) => Right(didPrisn)
     )
+
+val indexerWorkDirOpt =
+  Options
+    .directory("work-directory", exists = Exists.Yes)
+    .??("Indexer file system path to be used as a state storage")
+    .mapOrFail(e => Right(e))
 
 val indexerWorkDirAgr =
   Args

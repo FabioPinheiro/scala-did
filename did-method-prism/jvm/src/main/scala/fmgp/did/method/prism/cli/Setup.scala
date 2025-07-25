@@ -45,6 +45,7 @@ case class StagingState(
     blockfrostPreview: Option[BlockfrostConfig] = None,
     test: String = "",
 ) {
+  secp256k1PrivateKey.get("")
   def blockfrost(network: CardanoNetwork): Option[BlockfrostConfig] = network match
     case CardanoNetwork.Mainnet => this.blockfrostMainnet
     case CardanoNetwork.Testnet => this.blockfrostTestnet

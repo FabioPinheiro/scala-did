@@ -72,7 +72,7 @@ object BlockfrostCommand {
 
   def submitCommand = Command(
     "submit",
-    ConfigCommand.options ++ networkFlagForSubmit,
+    ConfigCommand.options ++ networkOnlineFlag,
     eventArg
   ).map { case ((setup, network), events) => CMD.BlockfrostSubmitEvents(setup, network, events, dryrun = false) }
 

@@ -68,7 +68,7 @@ class GenericVDRDriver(
       //   state <- stateRef.get
       state <- updateState
       vdrEntry <- state.getVDR(eventRef)
-      previousEventHashStr = vdrEntry.latestVDRHash.get // FIXME
+      previousEventHashStr = vdrEntry.latestVDRHash.get // FIXME fix what?
       // TODO check is in of the type bytes
       // TODO check key
       (eventHash, signedPrismOperation) = VDRUtils.updateVDREntryBytes(
@@ -92,9 +92,39 @@ class GenericVDRDriver(
     } yield (eventHash, ret._1, ret._2)
   }
 
-  def read(eventRef: RefVDR): ZIO[Any, Throwable, VDR] = ???
+  def fetchEntry(eventRef: RefVDR): ZIO[Any, Throwable, VDR] =
+    for {
+      _ <- ZIO.log(s"Fetch VDR entry $eventRef")
+      state <- updateState
+      vdrEntry <- state.getVDR(eventRef)
+    } yield vdrEntry
 
-  def deleteBytesEntry(eventRef: RefVDR): ZIO[Any, Throwable, (EventHash, Int, String)] = ???
+  def deactivateEntry(eventRef: RefVDR): ZIO[Any, Throwable, (EventHash, Int, String)] =
+    for {
+      _ <- ZIO.log(s"Deactivate VDR entry $eventRef")
+      state <- updateState
+      vdrEntry <- state.getVDR(eventRef)
+      previousEventHashStr = vdrEntry.latestVDRHash.get // FIXME fix what?
+      // TODO check is in of the type bytes
+      // TODO check key
+      (eventHash, signedPrismOperation) = VDRUtils.deactivateVDREntry(
+        eventRef = eventRef,
+        previousEventHash = previousEventHashStr,
+        vdrKey = vdrKey,
+        keyName = keyName,
+      )
+      _ <- ZIO.log(s"New signedPrismOperation to deactivate $eventRef: ${bytes2Hex(signedPrismOperation.toByteArray)}")
+      tx = CardanoService.makeTrasation(
+        bfConfig = bfConfig,
+        wallet = wallet,
+        prismEvents = Seq(signedPrismOperation),
+        maybeMsgCIP20,
+      )
+      _ <- ZIO.log(s"Transation: ${bytes2Hex(tx.serialize)}")
+      ret <- CardanoService
+        .submitTransaction(tx)
+        .provideEnvironment(ZEnvironment(bfConfig))
+    } yield (eventHash, ret._1, ret._2)
 
 }
 

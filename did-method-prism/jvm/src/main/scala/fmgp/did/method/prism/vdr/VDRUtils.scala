@@ -75,4 +75,25 @@ object VDRUtils {
     )
     (op.getEventHash, signedPrismUpdateEventVDR)
   }
+
+  def deactivateVDREntry(
+      eventRef: RefVDR,
+      previousEventHash: EventHash,
+      vdrKey: KMMECSecp256k1PrivateKey,
+      keyName: String,
+  ): (EventHash, SignedPrismOperation) = {
+    def op = PrismOperation(
+      operation = PrismOperation.Operation.DeactivateStorageEntry(
+        value = ProtoDeactivateStorageEntry(
+          previousEventHash = ByteString.copyFrom(previousEventHash.byteArray),
+        )
+      ),
+    )
+    def signedPrismUpdateEventVDR = SignedPrismOperation(
+      signedWith = keyName,
+      signature = ByteString.copyFrom(vdrKey.sign(op.toByteArray)),
+      operation = Some(op)
+    )
+    (op.getEventHash, signedPrismUpdateEventVDR)
+  }
 }
