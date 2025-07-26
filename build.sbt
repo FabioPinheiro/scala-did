@@ -175,7 +175,7 @@ lazy val V = new {
   val waypoint = "7.0.0"
   val upickle = "3.1.3"
 
-  val identusApollo = "1.7.2-rc2" // "1.7.1"
+  val identusApollo = "1.8.0" // "1.7.1"
 }
 
 /** NPM Dependencies */
