@@ -2,6 +2,7 @@ package fmgp.did.method.prism
 
 import scala.util.chaining._
 import zio.json._
+import fmgp.crypto.{SharedCryto, Secp256k1PrivateKey}
 import fmgp.did._
 import fmgp.did.method.prism._
 import fmgp.did.method.prism.proto._
@@ -33,6 +34,21 @@ final case class SSI(
   private def addKey(k: PrismPublicKey.UncompressedECKey | PrismPublicKey.CompressedECKey): SSI =
     if (keys.exists(_.id == k.id)) self //  ID must be unique
     else self.copy(keys = this.keys :+ k)
+
+  def findVDRKey(pk: Secp256k1PrivateKey) = {
+    import fmgp.did.method.prism.proto.PrismPublicKey.UncompressedECKey
+    import fmgp.did.method.prism.proto.PrismPublicKey.CompressedECKey
+    import fmgp.did.method.prism.proto.PrismKeyUsage
+    val secp256k1 = fmgp.crypto.Curve.secp256k1.name
+    this.keys.find {
+      case UncompressedECKey(id, PrismKeyUsage.VdrKeyUsage, `secp256k1`, x, y) =>
+        val point = pk.curvePoint
+        point._1.sameElements(x) & point._2.sameElements(y)
+      case CompressedECKey(id, PrismKeyUsage.VdrKeyUsage, `secp256k1`, data) =>
+        pk.compressedPublicKey.sameElements(data)
+      case _ => false
+    }
+  }
 
   def append(spo: MySignedPrismOperation[CreateDidOP | UpdateDidOP | DeactivateDidOP]): SSI = {
     if (Ordering[EventCursor].lteq(spo.eventCursor, this.cursor)) self // Ignore if the event its already process

@@ -9,6 +9,7 @@ case class Secp256k1PrivateKey(rawBytes: Array[Byte]) { // TODO
         data = com.google.protobuf.ByteString.copyFrom(this.compressedPublicKey)
       )
     )
+  final def curvePoint: (Array[Byte], Array[Byte]) = (???, ???)
 
   final def sign(data: Array[Byte]): Array[Byte] = ???
   final def verify(signature: Array[Byte], data: Array[Byte]): Boolean = ???

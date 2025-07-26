@@ -1,4 +1,4 @@
-package fmgp.cryto
+package fmgp.crypto
 
 import munit._
 
@@ -21,7 +21,7 @@ class SchnorrSuite extends FunSuite {
     test(s"schnorrFromDEREncoded b${it._2}") {
       val hex = it._1
       val bytes = hex.sliding(2, 2).map(Integer.parseInt(_, 16).toByte).toArray
-      Schnorr.rsValuesFromDEREncoded(bytes = bytes)
+      fmgp.crypto.Schnorr.rsValuesFromDEREncoded(bytes = bytes)
 
     }
   }

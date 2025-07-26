@@ -5,6 +5,7 @@ import zio.json._
 import fmgp.did.DIDDocument
 import fmgp.util.Base64
 
+import fmgp.crypto.CrytoUtil
 import fmgp.util.hex2bytes
 import java.security.PrivateKey
 import java.security.PublicKey

@@ -12,6 +12,11 @@ case class Secp256k1PrivateKey(rawBytes: Array[Byte]) {
         data = com.google.protobuf.ByteString.copyFrom(this.compressedPublicKey)
       )
     )
+  // final def curvePoint: (x: Array[Byte], y: Array[Byte]) = { TODO report BUG in compiler: this does not work in scala JS?
+  final def curvePoint: (Array[Byte], Array[Byte]) = {
+    val point = pk.getPublicKey().getCurvePoint()
+    (point.getX(), point.getY())
+  }
 
   final def sign(data: Array[Byte]): Array[Byte] = pk.sign(data)
   final def verify(signature: Array[Byte], data: Array[Byte]): Boolean = pk.verify(signature, data)

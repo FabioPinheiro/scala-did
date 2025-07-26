@@ -1,4 +1,4 @@
-package fmgp.did.method.prism
+package fmgp.crypto
 
 import scala.util._
 
@@ -19,7 +19,6 @@ import org.bouncycastle.crypto.params.ECPublicKeyParameters
 import fmgp.util.bytes2Hex
 import fmgp.did.method.prism.proto.PrismPublicKey
 
-// TODO MOVE to cryto package
 object CrytoUtil {
   val provider = new org.bouncycastle.jce.provider.BouncyCastleProvider()
 

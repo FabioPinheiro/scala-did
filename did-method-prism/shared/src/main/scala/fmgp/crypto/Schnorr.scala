@@ -1,4 +1,4 @@
-package fmgp.cryto
+package fmgp.crypto
 
 object Schnorr {
   def rsValuesFromDEREncoded(bytes: Array[Byte]): (Array[Byte], Array[Byte]) = {

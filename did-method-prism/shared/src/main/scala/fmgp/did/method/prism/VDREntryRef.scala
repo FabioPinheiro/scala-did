@@ -21,15 +21,15 @@ object RefVDR:
       case _                           => ??? // FIXME
 
   extension (id: RefVDR)
-    def value: String = id
+    def hex: String = id
     def byteArray: Array[Byte] = hex2bytes(id)
     def eventHash: EventHash = EventHash(byteArray)
 
   given decoder: JsonDecoder[RefVDR] = JsonDecoder.string.map(RefVDR(_))
-  given encoder: JsonEncoder[RefVDR] = JsonEncoder.string.contramap[RefVDR](_.value)
+  given encoder: JsonEncoder[RefVDR] = JsonEncoder.string.contramap[RefVDR](_.hex)
   // These given are useful if we use the RefVDR as a Key (ex: Map[RefVDR , Value])
   given JsonFieldDecoder[RefVDR] = JsonFieldDecoder.string.map(s => RefVDR(s)) // TODO use either
-  given JsonFieldEncoder[RefVDR] = JsonFieldEncoder.string.contramap(e => e.value)
+  given JsonFieldEncoder[RefVDR] = JsonFieldEncoder.string.contramap(_.hex)
 
 // object RefVDR:
 //   def apply(hash: String): RefVDR = hash

@@ -8,7 +8,7 @@ import fmgp.did.VerificationMethodReferenced
 import fmgp.did.VerificationMethodEmbeddedJWK
 import fmgp.did.VerificationMethodEmbeddedMultibase
 import fmgp.util.hex2bytes
-import fmgp.did.method.prism.SharedCryto
+import fmgp.crypto.SharedCryto
 
 sealed trait PrismPublicKey { def id: String }
 object PrismPublicKey {

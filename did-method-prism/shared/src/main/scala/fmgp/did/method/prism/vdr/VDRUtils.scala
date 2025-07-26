@@ -1,16 +1,14 @@
 package fmgp.did.method.prism.vdr
 
-import fmgp.did.method.prism.*
-// import _root_.proto.prism.*
-import scala.util.Random
+import proto.prism.*
 import com.google.protobuf.ByteString
-// import fmgp.did.method.prism.proto.eventHash
+import fmgp.did.method.prism.*
+import scala.util.Random
 import fmgp.did.method.prism.proto.getEventHash
 import fmgp.crypto.SHA256
-import _root_.proto.prism.*
+import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.crypto.Secp256k1PrivateKey
 
-//FIXME rename, move to shared src
 object VDRUtils {
 
   def createVDREntryBytes(

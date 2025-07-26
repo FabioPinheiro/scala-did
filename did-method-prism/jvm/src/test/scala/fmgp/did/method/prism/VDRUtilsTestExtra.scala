@@ -15,7 +15,6 @@ import fmgp.did.method.prism._
 import fmgp.did.method.prism.cardano._
 import fmgp.did.method.prism.proto._
 import fmgp.crypto.SHA256
-import scalapb.UnknownFieldSet
 
 object KeyConstanceUtils {
   val wallet = CardanoWalletConfig()
@@ -90,7 +89,7 @@ object VDRUtilsTestExtra {
         value = ProtoUpdateStorageEntry(
           previousEventHash = ByteString.copyFrom(previousEventHash),
           data = ProtoUpdateStorageEntry.Data.Bytes(ByteString.copyFrom(data)),
-          unknownFields = UnknownFieldSet(
+          unknownFields = scalapb.UnknownFieldSet(
             Map(
               (
                 unknownFieldNumber,

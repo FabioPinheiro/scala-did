@@ -1,4 +1,4 @@
-package fmgp.did.method.prism
+package fmgp.crypto
 
 import fmgp.did.method.prism.proto._
 
