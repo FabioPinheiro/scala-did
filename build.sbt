@@ -152,7 +152,7 @@ lazy val V = new {
   // val scalajsLogging = "1.1.2-SNAPSHOT" //"1.1.2"
 
   // https://mvnrepository.com/artifact/dev.zio/zio
-  val zio = "2.1.19"
+  val zio = "2.1.20"
   val zioJson = "0.7.44"
   val zioMunitTest = "0.4.0"
   val zioHttp = "3.3.3" // FIXES CORS https://github.com/zio/zio-http/pull/2490
@@ -167,7 +167,7 @@ lazy val V = new {
   val scalaLogging = "3.9.4"
 
   val bouncycastle = "1.80"
-  val nimbusJoseJwt = "10.3.1"
+  val nimbusJoseJwt = "10.4"
 
   val laika = "1.0.0"
 
@@ -175,7 +175,7 @@ lazy val V = new {
   val waypoint = "7.0.0"
   val upickle = "3.1.3"
 
-  val identusApollo = "1.7.2-rc2" // "1.7.1"
+  val identusApollo = "1.8.0" // "1.7.1"
 }
 
 /** NPM Dependencies */
@@ -631,7 +631,7 @@ lazy val didPrismNode = project
       rootPaths.value.apply("BASE").toFile() / "did-method-prism-node" / "src/main/protobuf"
     ),
     libraryDependencies ++= Seq(
-      "io.grpc" % "grpc-netty" % "1.73.0", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
+      "io.grpc" % "grpc-netty" % "1.74.0", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
       "io.netty" % "netty-handler" % "4.2.3.Final", // This is to forces a update in from "io.grpc" % "grpc-netty" % "1.73.0" -> https://mvnrepository.com/artifact/io.netty/netty-handler/4.1.110.Final
       // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion,
       // REMOVE // The following needed only if you include scalapb/scalapb.proto:
