@@ -5,11 +5,11 @@ import zio.cli.*
 import zio.json.*
 import java.nio.file.Path
 import fmgp.crypto.Secp256k1PrivateKey
+import fmgp.did.method.prism.BlockfrostConfig
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
+import fmgp.did.method.prism.cardano.CardanoNetwork
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
-import fmgp.did.method.prism.vdr.BlockfrostConfig
-import fmgp.did.method.prism.cardano.CardanoNetwork
 
 case class Key(seed: Array[Byte], derivationPath: String, key: Secp256k1PrivateKey)
 object Key {

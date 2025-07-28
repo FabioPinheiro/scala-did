@@ -5,6 +5,7 @@ import zio.json._
 import fmgp.did.DIDDocument
 import fmgp.util.Base64
 import fmgp.did.method.prism.proto._
+import fmgp.crypto.SharedCryto
 
 class SharedCrytoSuite extends FunSuite {
 

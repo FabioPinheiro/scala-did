@@ -150,7 +150,7 @@ object CardanoService {
     new Account(makeBFNetworks(network), wallet.mnemonicPhrase)
 
   // Return the hash/id of the transaction
-  def submitTransaction(tx: Transaction): ZIO[BlockfrostConfig, Throwable, (Int, String)] =
+  def submitTransaction(tx: Transaction): ZIO[BlockfrostConfig, Throwable, TxHash] =
     for {
       _ <- ZIO.log("submitTransaction")
       bfConfig <- ZIO.service[BlockfrostConfig]
@@ -160,7 +160,8 @@ object CardanoService {
       result <- ZIO.attempt(backendService.getTransactionService().submitTransaction(txPayload))
       _ <- ZIO.log(s"submitTransaction result = ${result.toString}")
       _ <- ZIO.log(s"See https://${bfConfig.network.name}.cardanoscan.io/transaction/${result.getValue}?tab=metadata")
-    } yield (result.code(), result.getValue)
+      // TODO If result.code(),  <= 200 < 300 return error
+    } yield TxHash.fromHex(result.getValue)
 
   def addressesTotalAda(address: String): ZIO[BlockfrostConfig, Throwable, BigDecimal] =
     for {

@@ -1,4 +1,4 @@
-package fmgp.did.method.prism.vdr
+package fmgp.did.method.prism
 
 import fmgp.did.method.prism.cardano.CardanoNetwork
 

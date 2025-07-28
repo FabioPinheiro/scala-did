@@ -2,9 +2,9 @@ package fmgp.did.method.prism.cli
 
 import zio.cli.*
 import fmgp.did.method.prism.DIDPrism
+import fmgp.did.method.prism.BlockfrostConfig
 import fmgp.did.method.prism.cardano.CardanoNetwork
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
-import fmgp.did.method.prism.vdr.BlockfrostConfig
 
 // Conventions https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
 // https://www.gnu.org/software/libc/manual/html_node/Argp.html

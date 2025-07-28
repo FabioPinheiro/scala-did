@@ -6,10 +6,11 @@ import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 import org.hyperledger.identus.apollo.derivation.MnemonicHelper
+import fmgp.did.method.prism.BlockfrostConfig
 import fmgp.did.method.prism.CardanoService
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
 import fmgp.did.method.prism.cardano.CardanoNetwork
-import fmgp.did.method.prism.vdr.BlockfrostConfig
+import fmgp.did.method.prism.cardano.TxHash
 import fmgp.did.method.prism.cli.CMD.BlockfrostSubmitEvents
 import fmgp.did.method.prism.proto.MaybeOperation
 import fmgp.did.method.prism.proto.tryParseFrom
@@ -74,7 +75,7 @@ object BlockfrostCommand {
     "submit",
     ConfigCommand.options ++ networkOnlineFlag,
     eventArg
-  ).map { case ((setup, network), events) => CMD.BlockfrostSubmitEvents(setup, network, events, dryrun = false) }
+  ).map { case ((setup, network), events) => CMD.BlockfrostSubmitEvents(setup, network, events) }
 
   def program(cmd: CMD.BlockfrostCMD): ZIO[Any, Throwable, Unit] = cmd match {
     case CMD.BlockfrostToken(setup, network, mBlockfrostConfig) =>
@@ -132,9 +133,9 @@ object BlockfrostCommand {
       } yield ()
   }
 
-  def submitProgram(cmd: BlockfrostSubmitEvents): ZIO[Ref[Setup], Throwable, String] = {
+  def submitProgram(cmd: BlockfrostSubmitEvents): ZIO[Ref[Setup], Throwable, TxHash] = {
     cmd match
-      case BlockfrostSubmitEvents(setup, network, events, dryrun) =>
+      case BlockfrostSubmitEvents(setup, network, events) =>
         for {
           _ <- ZIO.logError(s"CMD: $cmd") // TODO
           bfConfig <- {
@@ -158,14 +159,11 @@ object BlockfrostCommand {
             prismEvents = events,
             maybeMsgCIP20 = Some("cardano-prism cli"),
           )
-          txIdOrTx <-
-            if (dryrun)
-              CardanoService
-                .submitTransaction(tx)
-                .provideEnvironment(ZEnvironment(bfConfig))
-                .map((retCode, txId) => txId)
-            else ZIO.succeed(bytes2Hex(tx.serialize))
-
-        } yield (txIdOrTx)
+          txHash <-
+            CardanoService
+              .submitTransaction(tx)
+              .provideEnvironment(ZEnvironment(bfConfig))
+          // else ZIO.succeed(bytes2Hex(tx.serialize))
+        } yield (txHash)
   }
 }

@@ -5,7 +5,6 @@ import scala.scalajs.js.JSConverters._
 import fmgp.typings.nobleCurves.secp256k1ModAUX
 import fmgp.typings.nobleCurves.esmUtilsMod.Hex
 import fmgp.did.method.prism.proto.PrismPublicKey._
-import fmgp.crypto.Schnorr
 
 object SharedCryto {
   def getXY(com: Array[Byte]): Either[String, (String, String)] = ???

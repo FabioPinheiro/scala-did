@@ -1,7 +1,6 @@
-package fmgp.did.method.prism.vdr
+package fmgp.did.method.prism
 
 import fmgp.did.DIDSubject
-import fmgp.did.method.prism.RefVDR
 
 /** @param mBlockfrostConfig
   *   will contain the blockfrost API key

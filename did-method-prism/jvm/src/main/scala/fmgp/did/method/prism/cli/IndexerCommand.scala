@@ -4,6 +4,7 @@ import zio.*
 import zio.cli.*
 
 import fmgp.did.method.prism.vdr
+import fmgp.did.method.prism.IndexerConfig
 
 object IndexerCommand {
 
@@ -15,7 +16,7 @@ object IndexerCommand {
     case cmd @ CMD.Indexer(workdir, mBlockfrostConfig) =>
       for {
         _ <- vdr.Indexer.indexerLogo
-        indexerConfig = vdr.IndexerConfig(
+        indexerConfig = IndexerConfig(
           mBlockfrostConfig = mBlockfrostConfig,
           workdir = workdir.toAbsolutePath().normalize.toString
         )

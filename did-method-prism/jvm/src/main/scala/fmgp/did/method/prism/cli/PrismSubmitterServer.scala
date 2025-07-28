@@ -85,11 +85,15 @@ object PrismSubmitterServer {
           } yield event
         }
         setup <- ZIO.service[Ref[Setup]].flatMap(_.get)
-        cmd = CMD.BlockfrostSubmitEvents(setup, network = network, events = events, dryrun = dryrun)
+        _ = ZIO.when(dryrun)( // FIXME
+          ZIO.logError("dryrun not implemented anymore") *> ZIO.fail(new RuntimeException("dryrun not implemented "))
+        )
+        cmd = CMD.BlockfrostSubmitEvents(setup, network = network, events = events)
         _ <- ZIO.log(s"Network: $network; dry-run:$dryrun; Events#: ${events.size}")
         blockfrostCommandOut <- {
-          if (dryrun) { BlockfrostCommand.submitProgram(cmd).flatMapError(ex => ZIO.succeed(ex.getMessage()).debug) }
-          else ZIO.succeed("This was a dry-run")
+          if (dryrun) {
+            BlockfrostCommand.submitProgram(cmd).map(_.hex).flatMapError(ex => ZIO.succeed(ex.getMessage()).debug)
+          } else ZIO.succeed("This was a dry-run")
         }
 
       } yield blockfrostCommandOut

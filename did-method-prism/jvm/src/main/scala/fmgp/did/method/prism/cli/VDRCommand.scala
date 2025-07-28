@@ -7,8 +7,8 @@ import fmgp.util.hex2bytes
 import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.did.method.prism.RefVDR
 import fmgp.did.method.prism.DIDPrism
+import fmgp.did.method.prism.BlockfrostConfig
 import fmgp.did.method.prism.vdr.GenericVDRDriver
-import fmgp.did.method.prism.vdr.BlockfrostConfig
 
 object VDRCommand {
 
@@ -190,7 +190,7 @@ object VDRCommand {
           maybeMsgCIP20 = Some("cardano-prism"),
         )
         aux <- driver.createBytesEntry(data)
-        (refVDR, httpCode, txRef) = aux
+        (refVDR, txRef) = aux
         _ <- ZIO.log(s"VDR entry created '$refVDR'. In trasation $txRef")
         _ <- Console.printLine(refVDR)
       } yield ()).provideLayer(setup.layer)

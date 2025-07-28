@@ -3,10 +3,11 @@ package fmgp.did.method.prism.node
 import scalapb.zio_grpc.ServerMain
 import scalapb.zio_grpc.ServiceList
 import zio.*
-import zio.json._
-import zio.stream._
+import zio.json.*
+import zio.stream.*
 import java.nio.file.StandardOpenOption.*
-import fmgp.did.method.prism.vdr._
+import fmgp.did.method.prism.*
+import fmgp.did.method.prism.vdr.*
 
 /** Main PrismNode
   *

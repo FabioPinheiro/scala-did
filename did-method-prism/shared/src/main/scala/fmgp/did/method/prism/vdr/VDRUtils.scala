@@ -9,7 +9,7 @@ import fmgp.crypto.SHA256
 import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.crypto.Secp256k1PrivateKey
 
-object VDRUtils {
+protected[vdr] object VDRUtils {
 
   def createVDREntryBytes(
       didPrism: DIDPrism,

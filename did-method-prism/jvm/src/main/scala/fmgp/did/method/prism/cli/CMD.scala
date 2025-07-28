@@ -2,7 +2,7 @@ package fmgp.did.method.prism.cli
 
 import fmgp.did.method.prism.DIDPrism
 import fmgp.did.method.prism.RefVDR
-import fmgp.did.method.prism.vdr.BlockfrostConfig
+import fmgp.did.method.prism.BlockfrostConfig
 import fmgp.did.method.prism.cardano.CardanoNetwork
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
 import java.nio.file.Path
@@ -36,8 +36,7 @@ object CMD {
   final case class BlockfrostSubmitEvents(
       setup: Setup,
       network: CardanoNetwork,
-      events: Seq[SignedPrismOperation], // MaybeOperation[OP], // [MySignedPrismOperation]
-      dryrun: Boolean,
+      events: Seq[SignedPrismOperation],
   ) extends BlockfrostCMD
 
   // sealed trait KeyCMD extends CMD

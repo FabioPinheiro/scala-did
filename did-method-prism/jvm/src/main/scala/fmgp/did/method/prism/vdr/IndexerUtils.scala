@@ -6,7 +6,6 @@ import zio.stream.*
 import fmgp.did.method.prism._
 import fmgp.did.method.prism.cardano._
 import fmgp.did.method.prism.proto._
-import fmgp.did.method.prism.vdr.IndexerConfig
 
 object IndexerUtils {
 
