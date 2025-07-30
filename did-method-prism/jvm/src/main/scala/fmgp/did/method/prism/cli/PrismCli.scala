@@ -59,7 +59,7 @@ object PrismCli extends ZIOCliDefault {
       case cmd: CMD.ConfigCMD     => ConfigCommand.program(cmd)
       case cmd: CMD.MnemonicCMD   => MnemonicCommand.program(cmd)
       case cmd: CMD.BlockfrostCMD => BlockfrostCommand.program(cmd)
-      case cmd: CMD.Mnemonic2Key  => KeyCommand.program(cmd)
+      case cmd: CMD.KeyCMD        => KeyCommand.program(cmd)
       case cmd: CMD.DIDCMD        => DIDCommand.program(cmd)
       case cmd: CMD.VDRCMD        => VDRCommand.program(cmd)
       case cmd: CMD.CommCMD       => CommCommand.program(cmd)

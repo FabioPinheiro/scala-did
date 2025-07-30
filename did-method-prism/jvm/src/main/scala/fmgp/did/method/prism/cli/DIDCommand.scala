@@ -15,9 +15,11 @@ object DIDCommand {
 
   val createCommand = Command(
     "create",
-    ConfigCommand.options
-      ++ (Options.text("master").withDefault("master") ++ Options.text("master-raw").optional)
-      ++ (Options.text("vdr").withDefault("vdr").optional ++ Options.text("vdr-raw").optional)
+    ConfigCommand.optionsDefualt
+      ++ (Options.text("master").withDefault("master").??("this is the label/name of the master key to be used")
+        ++ Options.text("master-raw").optional)
+      ++ (Options.text("vdr").withDefault("vdr").optional.??("this is the label/name of the vdr key to be used")
+        ++ Options.text("vdr-raw").optional)
   ).map { case (setup, (master, masterRaw), (vdr, vdrRaw)) =>
     CMD.DIDCreate(
       /* setup =       */ setup,

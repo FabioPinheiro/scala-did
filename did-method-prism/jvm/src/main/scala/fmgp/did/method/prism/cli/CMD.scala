@@ -39,13 +39,19 @@ object CMD {
       events: Seq[SignedPrismOperation],
   ) extends BlockfrostCMD
 
-  // sealed trait KeyCMD extends CMD
+  sealed trait KeyCMD extends CMD
   final case class Mnemonic2Key(
       setup: Setup,
       mWallet: Option[CardanoWalletConfig],
       derivationPath: String,
       keyLabel: Option[String]
-  ) extends CMD
+  ) extends KeyCMD
+
+  final case class Mnemonic2Key2SSITestVector(
+      setup: Setup,
+      mWallet: Option[CardanoWalletConfig],
+      index: Int
+  ) extends KeyCMD
 
   sealed trait DIDCMD extends CMD
   final case class DIDCreate(
