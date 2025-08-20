@@ -4,6 +4,7 @@ import zio.json._
 
 import fmgp.did._
 import fmgp.did.comm._
+import java.time.Instant
 
 // RequestVerification VerificationChallenge Prove ConfirmVerification
 extension (msg: PlaintextMessage)
@@ -16,6 +17,8 @@ final case class AuthRequest(
     id: MsgID = MsgID(),
     from: FROM,
     pthid: NotRequired[MsgID] = None,
+    createdTime: NotRequired[UTCEpoch] = None,
+    expiresTime: NotRequired[UTCEpoch] = None,
 ) {
   def `type` = AuthRequest.piuri
 
@@ -24,6 +27,8 @@ final case class AuthRequest(
       id = id,
       `type` = `type`,
       from = Some(from),
+      created_time = createdTime,
+      expires_time = expiresTime,
     )
 
   def replyWithAuth(from: FROM): AuthMsg = AuthMsg.replyToAuthRequest(this, from)
@@ -44,6 +49,8 @@ object AuthRequest {
               id = msg.id,
               from = from,
               pthid = msg.pthid,
+              createdTime = msg.created_time,
+              expiresTime = msg.expires_time,
             )
           )
   }
@@ -56,7 +63,8 @@ final case class AuthMsg(
     thid: Required[MsgID],
     pthid: NotRequired[MsgID] = None,
     // lang: NotRequired[String] = None,
-    created_time: NotRequired[UTCEpoch] = None,
+    createdTime: NotRequired[UTCEpoch] = None,
+    expiresTime: NotRequired[UTCEpoch] = None,
 ) {
   def `type` = AuthMsg.piuri
 
@@ -68,7 +76,8 @@ final case class AuthMsg(
       from = Some(from),
       thid = Some(thid),
       pthid = pthid,
-      created_time = created_time,
+      created_time = createdTime,
+      expires_time = expiresTime,
     )
 
 }
@@ -93,6 +102,8 @@ object AuthMsg {
       from = from,
       thid = msg.id,
       pthid = msg.pthid,
+      createdTime = Some(UTCEpoch.now),
+      expiresTime = msg.expiresTime, // TODO check if it's not already expired
     )
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, AuthMsg] = {
@@ -119,7 +130,8 @@ object AuthMsg {
                       from = from,
                       thid = thid,
                       pthid = msg.pthid,
-                      created_time = msg.created_time,
+                      createdTime = msg.created_time,
+                      expiresTime = msg.expires_time,
                     )
                   )
                 // }
