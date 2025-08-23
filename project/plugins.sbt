@@ -88,5 +88,5 @@ if (sys.env.get("DEPEDABOT").isDefined) {
 
 // ScalaPB for did:prism
 addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.8")
-libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.18"
+libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.20"
 libraryDependencies += "com.thesamet.scalapb.zio-grpc" %% "zio-grpc-codegen" % "0.6.3" //Prism Node https://mvnrepository.com/artifact/com.thesamet.scalapb.zio-grpc/zio-grpc-codegen
