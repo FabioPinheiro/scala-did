@@ -1,6 +1,3 @@
-resolvers ++= Resolver.sonatypeOssRepos("public")
-resolvers ++= Resolver.sonatypeOssRepos("snapshots")
-
 import org.scalajs.linker.interface.{ModuleInitializer, ModuleSplitStyle}
 import scala.sys.process._
 
