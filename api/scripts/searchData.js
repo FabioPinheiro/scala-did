@@ -2571,6 +2571,8 @@ pages = [{"l":"index.html#","e":false,"i":"","n":"scala-did-docs","t":"scala-did
 {"l":"https://doc.did.fmgp.app/api/fmgp/did/comm/TO$.html#toDID(id:TO):DID","e":true,"i":"extension (id: TO)","n":"toDID","t":"toDID: DID","d":"fmgp.did.comm.TO","k":"def","x":""},
 {"l":"https://doc.did.fmgp.app/api/fmgp/did/comm/TO$.html#toDIDSubject(id:TO):DIDSubject","e":true,"i":"extension (id: TO)","n":"toDIDSubject","t":"toDIDSubject: DIDSubject","d":"fmgp.did.comm.TO","k":"def","x":""},
 {"l":"https://doc.did.fmgp.app/api/fmgp/did/comm/TO$.html#value(id:TO):String","e":true,"i":"extension (id: TO)","n":"value","t":"value: String","d":"fmgp.did.comm.TO","k":"def","x":""},
+{"l":"https://doc.did.fmgp.app/api/fmgp/did/comm/UTCEpoch$.html","e":true,"i":"","n":"UTCEpoch","t":"UTCEpoch","d":"fmgp.did.comm","k":"object","x":""},
+{"l":"https://doc.did.fmgp.app/api/fmgp/did/comm/UTCEpoch$.html#now:Long","e":true,"i":"","n":"now","t":"now: Long","d":"fmgp.did.comm.UTCEpoch","k":"def","x":""},
 {"l":"fmgp/did/framework.html#","e":false,"i":"","n":"fmgp.did.framework","t":"fmgp.did.framework","d":"","k":"package","x":""},
 {"l":"fmgp/did/framework.html#TransportDIDComm-0","e":false,"i":"","n":"TransportDIDComm","t":"TransportDIDComm[R] = Transport[R, SignedMessage | EncryptedMessage, SignedMessage | EncryptedMessage]","d":"fmgp.did.framework","k":"type","x":""},
 {"l":"fmgp/did/framework.html#TransportID-0","e":false,"i":"","n":"TransportID","t":"TransportID = String","d":"fmgp.did.framework","k":"type","x":""},
