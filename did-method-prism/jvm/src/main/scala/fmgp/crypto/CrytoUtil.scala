@@ -33,13 +33,20 @@ object CrytoUtil {
     val fact = KeyFactory.getInstance("ECDSA", provider)
     val curve = params.getCurve
     val ellipticCurve = EC5Util.convertCurve(curve, params.getSeed)
-    val point = ECPointUtil.decodePoint(ellipticCurve, com.toArray)
-    val params2 = EC5Util.convertSpec(ellipticCurve, params)
-    val keySpec = new ECPublicKeySpec(point, params2)
-    Try(fact.generatePublic(keySpec)) match
-      case Failure(exception: java.security.spec.InvalidKeySpecException) => Left(exception.getMessage())
-      case Failure(exception)                                             => Left(exception.getMessage())
-      case Success(value)                                                 => Right(value)
+    for {
+      point <- Try(ECPointUtil.decodePoint(ellipticCurve, com.toArray)) match
+        case Failure(exception: java.lang.IllegalArgumentException)
+            if (exception.getMessage().contains("Invalid point encoding")) => // like: Invalid point encoding 0x-72
+          Left(exception.getMessage())
+        case Failure(exception) => Left(exception.getMessage())
+        case Success(value)     => Right(value)
+      params2 = EC5Util.convertSpec(ellipticCurve, params)
+      keySpec = new ECPublicKeySpec(point, params2)
+      publicKey <- Try(fact.generatePublic(keySpec)) match
+        case Failure(exception: java.security.spec.InvalidKeySpecException) => Left(exception.getMessage())
+        case Failure(exception)                                             => Left(exception.getMessage())
+        case Success(value)                                                 => Right(value)
+    } yield publicKey
   }
 
   def unsafeFromByteCoordinates(x: Array[Byte], y: Array[Byte]): Either[String, java.security.PublicKey] = {

@@ -174,6 +174,6 @@ case class PrismStateInMemory(
         case Some(op) => tmpSSI.appendAny(op)
     }
   }.toSeq
-  def didDocuments: Seq[DIDDocument] = makeSSI.map(_.didDocument)
+  def didDocuments: Seq[DIDDocument] = makeSSI.flatMap(_.didDocument)
 
 }

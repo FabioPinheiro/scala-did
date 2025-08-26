@@ -232,16 +232,21 @@ object Indexer extends ZIOAppDefault {
               .contramapChunks[MySignedPrismOperation[OP]](_.flatMap { spo => s"${spo.toJson}\n".getBytes })
           }
           ssi = fmgp.did.method.prism.SSI.make(did, events)
-          _ <- ZStream.from(ssi).run {
-            ZSink
-              .fromFileName(name = indexerConfig.ssiPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
-              .contramapChunks[SSI](_.flatMap { case ssi => s"${ssi.toJsonPretty}\n".getBytes })
-          }
-          _ <- ZStream.from(ssi).run {
-            ZSink
-              .fromFileName(name = indexerConfig.diddocPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
-              .contramapChunks[SSI](_.flatMap { case ssi => s"${ssi.didDocument.toJsonPretty}\n".getBytes })
-          }
+          _ <- ZIO.when(ssi.latestHash.isDefined)(for {
+            _ <- ZStream.from(ssi).filter(_.latestHash.isEmpty).run {
+              ZSink
+                .fromFileName(name = indexerConfig.ssiPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
+                .contramapChunks[SSI](_.flatMap { case ssi => s"${ssi.toJsonPretty}\n".getBytes })
+            }
+            _ <- ZStream.from(ssi).filter(_.latestHash.isEmpty).run {
+              ZSink
+                .fromFileName(name = indexerConfig.diddocPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
+                .contramapChunks[SSI](
+                  _.flatMap(_.didDocument)
+                    .flatMap { case doc => s"${doc.toJsonPretty}\n".getBytes }
+                )
+            }
+          } yield ())
         } yield ()
       }
       .run(ZSink.count)

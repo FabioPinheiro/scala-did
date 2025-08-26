@@ -110,7 +110,7 @@ final case class SSI(
       .find(k => k.usage == PrismKeyUsage.VdrKeyUsage & k.id == spo.signedWith)
       .exists(key => SharedCryto.checkECDSASignature(msg = spo.protobuf.toByteArray, sig = spo.signature, pubKey = key))
 
-  def didDocument: DIDDocument = {
+  def didDocument: Option[DIDDocument] = latestHash.map { _ =>
     val authentication = keys
       .filter(_.usage == PrismKeyUsage.AuthenticationKeyUsage)
       .map(k => k.getVerificationMethod(id = s"$did#${k.id}", controller = did.string))
