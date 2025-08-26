@@ -3346,7 +3346,7 @@ pages = [{"l":"index.html#","e":false,"i":"","n":"scala-did-docs","t":"scala-did
 {"l":"fmgp/did/method/prism/SSI.html#appendAny-fffff53b","e":false,"i":"","n":"appendAny","t":"appendAny(spo: MySignedPrismOperation[OP]): SSI","d":"fmgp.did.method.prism.SSI","k":"def","x":""},
 {"l":"fmgp/did/method/prism/SSI.html#checkMasterSignature-fffff15f","e":false,"i":"","n":"checkMasterSignature","t":"checkMasterSignature(spo: MySignedPrismOperation[OP]): Boolean","d":"fmgp.did.method.prism.SSI","k":"def","x":""},
 {"l":"fmgp/did/method/prism/SSI.html#checkVdrSignature-fffff15f","e":false,"i":"","n":"checkVdrSignature","t":"checkVdrSignature(spo: MySignedPrismOperation[OP]): Boolean","d":"fmgp.did.method.prism.SSI","k":"def","x":""},
-{"l":"fmgp/did/method/prism/SSI.html#didDocument-0","e":false,"i":"","n":"didDocument","t":"didDocument: DIDDocument","d":"fmgp.did.method.prism.SSI","k":"def","x":""},
+{"l":"fmgp/did/method/prism/SSI.html#didDocument-0","e":false,"i":"","n":"didDocument","t":"didDocument: Option[DIDDocument]","d":"fmgp.did.method.prism.SSI","k":"def","x":""},
 {"l":"fmgp/did/method/prism/SSI.html#didPrism-0","e":false,"i":"","n":"didPrism","t":"didPrism: DIDPrism","d":"fmgp.did.method.prism.SSI","k":"def","x":""},
 {"l":"fmgp/did/method/prism/SSI.html#findVDRKey-fffff904","e":false,"i":"","n":"findVDRKey","t":"findVDRKey(pk: Secp256k1PrivateKey): Option[UncompressedECKey | CompressedECKey]","d":"fmgp.did.method.prism.SSI","k":"def","x":""},
 {"l":"fmgp/did/method/prism/SSI$.html#","e":false,"i":"","n":"SSI","t":"SSI","d":"fmgp.did.method.prism","k":"object","x":""},
