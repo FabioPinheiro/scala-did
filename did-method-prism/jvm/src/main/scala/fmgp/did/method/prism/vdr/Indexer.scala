@@ -233,12 +233,12 @@ object Indexer extends ZIOAppDefault {
           }
           ssi = fmgp.did.method.prism.SSI.make(did, events)
           _ <- ZIO.when(ssi.latestHash.isDefined)(for {
-            _ <- ZStream.from(ssi).filter(_.latestHash.isEmpty).run {
+            _ <- ZStream.from(ssi).run {
               ZSink
                 .fromFileName(name = indexerConfig.ssiPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
                 .contramapChunks[SSI](_.flatMap { case ssi => s"${ssi.toJsonPretty}\n".getBytes })
             }
-            _ <- ZStream.from(ssi).filter(_.latestHash.isEmpty).run {
+            _ <- ZStream.from(ssi).run {
               ZSink
                 .fromFileName(name = indexerConfig.diddocPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
                 .contramapChunks[SSI](
