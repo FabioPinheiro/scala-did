@@ -41,14 +41,14 @@ case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletC
           .asException()
       )
     state <- refState.get
-    didDataEffect = state.ssi2eventsId.get(did).map { operations =>
-      val ops = operations.map(op => state.getEventsByHash(op.eventHash)).flatten
+    didDataEffect = state.ssi2eventsId.get(did).map { events =>
+      val ops = events.map(op => state.getEventsByHash(op.eventHash)).flatten
       SSI.make(did, ops).didData
     }
     ret = GetDidDocumentResponse(
       document = didDataEffect,
       lastSyncedBlockTimestamp = Some(state.lastSyncedBlockTimestamp),
-      lastUpdateOperation = com.google.protobuf.ByteString.EMPTY // FIXME
+      lastUpdateEvent = com.google.protobuf.ByteString.EMPTY // FIXME
     )
 
     // ZIO.fail(
@@ -80,16 +80,16 @@ case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletC
     // unknownFields: scalapb.UnknownFieldSet
   )
 
-  case class OperationInfo(
+  case class EventInfo(
       txStatus: String,
       statusDetails: String,
       transactionId: Option[String]
   )
 
-  def getOperationInfo(
-      request: GetOperationInfoRequest
-  ): IO[io.grpc.StatusException, GetOperationInfoResponse] = for {
-    _ <- ZIO.log("getOperationInfo")
+  def getEventInfo(
+      request: GetEventInfoRequest
+  ): IO[io.grpc.StatusException, GetEventInfoResponse] = for {
+    _ <- ZIO.log("getEventInfo")
     state <- refState.get
     // TODO make enum map from cardano java client
     ///    SUBMITTED,
@@ -99,30 +99,30 @@ case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletC
     ///    CONFIRMED
     // lastSyncedBlockTimestamp
 
-    operationHashEffect = ZIO
+    eventHashEffect = ZIO
       .attempt {
-        // SHA256.digestToHex(request.operationId.toByteArray) //???? what? is this
-        EventHash(request.operationId.toByteArray)
+        // SHA256.digestToHex(request.eventId.toByteArray) //???? what? is this
+        EventHash(request.eventId.toByteArray)
       }
       .mapError(ex =>
         io.grpc.Status.INTERNAL
-          .withDescription(s"Error computing operation hash: ${ex.getMessage}")
+          .withDescription(s"Error computing event hash: ${ex.getMessage}")
           .asException()
       )
 
-    operationEffect = operationHashEffect.map { eventHash =>
+    eventEffect = eventHashEffect.map { eventHash =>
       state.getEventsByHash(eventHash).map { op =>
-        assert(op.opHash == eventHash.hex, s"Operation hash mismatch: ${op.opHash} != ${eventHash.hex}")
+        assert(op.opHash == eventHash.hex, s"Event hash mismatch: ${op.opHash} != ${eventHash.hex}")
 
-        OperationInfo(
-          txStatus = "CONFIRMED", // if we find the operation in the state, it is confirmed
-          statusDetails = s"Operation found with hash: ${op.opHash}",
+        EventInfo(
+          txStatus = "CONFIRMED", // if we find the event in the state, it is confirmed
+          statusDetails = s"Event found with hash: ${op.opHash}",
           transactionId = Some(op.tx)
         )
       }
     }
 
-    ret <- operationEffect.map { maybeOpInfo =>
+    ret <- eventEffect.map { maybeOpInfo =>
       // Create timestamp for last synced block TODO FIX ME
       val now = java.time.Instant.now
       val timestamp = com.google.protobuf.timestamp.Timestamp(now.getEpochSecond, now.getNano)
@@ -131,23 +131,23 @@ case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletC
         .map { opInfo =>
           val status = opInfo.txStatus match {
             case "PENDING" =>
-              OperationStatus.PENDING_SUBMISSION
+              EventStatus.PENDING_SUBMISSION
             case "FAILED" =>
-              OperationStatus.PENDING_SUBMISSION
+              EventStatus.PENDING_SUBMISSION
             case "TIMEOUT" =>
-              OperationStatus.PENDING_SUBMISSION
+              EventStatus.PENDING_SUBMISSION
             case "SUBMITTED" =>
-              OperationStatus.AWAIT_CONFIRMATION
+              EventStatus.AWAIT_CONFIRMATION
             case "CONFIRMED" =>
-              OperationStatus.CONFIRMED_AND_APPLIED
+              EventStatus.CONFIRMED_AND_APPLIED
             case _ =>
-              OperationStatus.UNKNOWN_OPERATION
+              EventStatus.UNKNOWN_EVENT
           }
           (status, opInfo.statusDetails, opInfo.transactionId.getOrElse(""))
         }
-        .getOrElse((OperationStatus.UNKNOWN_OPERATION, "Operation not found", ""))
-      GetOperationInfoResponse(
-        operationStatus = status,
+        .getOrElse((EventStatus.UNKNOWN_EVENT, "Event not found", ""))
+      GetEventInfoResponse(
+        eventStatus = status,
         transactionId = txId,
         lastSyncedBlockTimestamp = Some(timestamp),
         details = details
@@ -168,14 +168,14 @@ case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletC
 
   } yield ret
 
-  def scheduleOperations(
-      request: ScheduleOperationsRequest
-  ): IO[io.grpc.StatusException, ScheduleOperationsResponse] = for {
-    _ <- ZIO.log(s"scheduleOperations with ${request.signedOperations.size} signed operations")
-    _ <- ZIO.foreach(request.signedOperations.toSeq.zipWithIndex) { case (sp, index) =>
-      ZIO.log(s"Operation $index to '${sp.toProtoString}'")
+  def scheduleEvents(
+      request: ScheduleEventsRequest
+  ): IO[io.grpc.StatusException, ScheduleEventsResponse] = for {
+    _ <- ZIO.log(s"scheduleEvents with ${request.signedEvents.size} signed events")
+    _ <- ZIO.foreach(request.signedEvents.toSeq.zipWithIndex) { case (sp, index) =>
+      ZIO.log(s"Event $index to '${sp.toProtoString}'")
     }
-  } yield ScheduleOperationsResponse(
+  } yield ScheduleEventsResponse(
     outputs = Seq.empty
   )
 }

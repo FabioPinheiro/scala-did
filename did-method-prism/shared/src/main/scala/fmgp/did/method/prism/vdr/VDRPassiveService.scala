@@ -6,7 +6,7 @@ import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.did.method.prism.{RefVDR, DIDPrism, PrismState, VDR, EventHash}
 import fmgp.did.method.prism.cardano.TxHash
 import proto.prism.PrismBlock
-import proto.prism.SignedPrismOperation
+import proto.prism.SignedPrismEvent
 
 case class VDRPassiveServiceImpl(protected val refPrismState: Ref[PrismState]) extends VDRPassoveService
 
@@ -23,18 +23,18 @@ trait VDRPassoveService {
       didPrism: DIDPrism,
       vdrKey: Secp256k1PrivateKey,
       data: Array[Byte]
-  ): ZIO[Any, Throwable, (RefVDR, SignedPrismOperation)] =
+  ): ZIO[Any, Throwable, (RefVDR, SignedPrismEvent)] =
     VDRPassoveService.dryCreateBytes(didPrism, vdrKey, data).provideEnvironment(ZEnvironment(refPrismState))
   def dryUpdateBytes(
       eventRef: RefVDR,
       vdrKey: Secp256k1PrivateKey,
       data: Array[Byte]
-  ): ZIO[Any, Throwable, (EventHash, SignedPrismOperation)] =
+  ): ZIO[Any, Throwable, (EventHash, SignedPrismEvent)] =
     VDRPassoveService.dryUpdateBytes(eventRef, vdrKey, data).provideEnvironment(ZEnvironment(refPrismState))
   def dryDeactivate(
       eventRef: RefVDR,
       vdrKey: Secp256k1PrivateKey
-  ): ZIO[Any, Throwable, (EventHash, SignedPrismOperation)] =
+  ): ZIO[Any, Throwable, (EventHash, SignedPrismEvent)] =
     VDRPassoveService.dryDeactivate(eventRef, vdrKey).provideEnvironment(ZEnvironment(refPrismState))
 }
 
@@ -56,7 +56,7 @@ object VDRPassoveService {
       didPrism: DIDPrism,
       vdrKey: Secp256k1PrivateKey,
       data: Array[Byte]
-  ): ZIO[Ref[PrismState], Throwable, (RefVDR, SignedPrismOperation)] =
+  ): ZIO[Ref[PrismState], Throwable, (RefVDR, SignedPrismEvent)] =
     for {
       state <- ZIO.serviceWithZIO[Ref[PrismState]](_.get)
       ssi <- state.getSSI(didPrism)
@@ -77,7 +77,7 @@ object VDRPassoveService {
       eventRef: RefVDR,
       vdrKey: Secp256k1PrivateKey,
       data: Array[Byte]
-  ): ZIO[Ref[PrismState], Throwable, (EventHash, SignedPrismOperation)] =
+  ): ZIO[Ref[PrismState], Throwable, (EventHash, SignedPrismEvent)] =
     for {
       state <- ZIO.serviceWithZIO[Ref[PrismState]](_.get)
       oldVDR <- state.getVDR(eventRef)
@@ -103,7 +103,7 @@ object VDRPassoveService {
   def dryDeactivate(
       eventRef: RefVDR,
       vdrKey: Secp256k1PrivateKey
-  ): ZIO[Ref[PrismState], Throwable, (EventHash, SignedPrismOperation)] =
+  ): ZIO[Ref[PrismState], Throwable, (EventHash, SignedPrismEvent)] =
     for {
       state <- ZIO.serviceWithZIO[Ref[PrismState]](_.get)
       oldVDR <- state.getVDR(eventRef)

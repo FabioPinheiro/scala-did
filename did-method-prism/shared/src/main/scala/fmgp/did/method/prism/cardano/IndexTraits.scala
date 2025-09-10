@@ -13,17 +13,17 @@ trait PrismBlockIndex {
   def prismBlockIndex: Int = b
 }
 
-trait PrismOperationIndex extends PrismBlockIndex {
+trait PrismEventIndex extends PrismBlockIndex {
 
   /** Index relative to the PrismBlock */
   def o: Int
 
   /** Index relative to the PrismBlock */
-  def prismOperationIndex: Int = o
+  def prismEventIndex: Int = o
 }
 
 /** Like EventRef */
-case class EventCursor(b: Int, o: Int) extends PrismOperationIndex {
+case class EventCursor(b: Int, o: Int) extends PrismEventIndex {
   def tx = s"EventCursor:$b;$o" // FIXME
 }
 object EventCursor {

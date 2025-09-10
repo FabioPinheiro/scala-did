@@ -34,7 +34,7 @@ import fmgp.crypto.SHA256
   val e3 = updateVDREntry(refVDR, e2, pk1VDR, "vdr1", hex2bytes("3300ffcc"))
   val e4 = updateDIDAddKey(
     didPrism = didPrism,
-    previousOperation = e1,
+    previousEvent = e1,
     masterKeyName = "master1",
     masterKey = pkMaster,
     vdrKeyName = "vdr2",
@@ -46,14 +46,14 @@ import fmgp.crypto.SHA256
   // println("signatureCreateDID: " + bytes2Hex(e1.signature.toByteArray))
   println("signedPrismCreateEventDID (create DID):\n" + bytes2Hex(e1.toByteArray))
   println(didPrism.string)
-  // println("PrismOperation: " + bytes2Hex(PrismTestUtils.createVDR.toByteArray))
+  // println("PrismEvent: " + bytes2Hex(PrismTestUtils.createVDR.toByteArray))
   // println("signature CreateEventVDR: " + bytes2Hex(e2.signature.toByteArray))
-  println("signedPrismOperation (create VDR):\n" + bytes2Hex(e2.toByteArray))
+  println("signedPrismEvent (create VDR):\n" + bytes2Hex(e2.toByteArray))
 
   // println("signature UpdateEventVDR: " + bytes2Hex(e3.signature.toByteArray))
-  println("signedPrismOperation (update VDR):\n" + bytes2Hex(e3.toByteArray))
-  println("signedPrismOperation (add key to DID):\n" + bytes2Hex(e4.toByteArray))
-  println("signedPrismOperation (update VDR with the new key):\n" + bytes2Hex(e5.toByteArray))
+  println("signedPrismEvent (update VDR):\n" + bytes2Hex(e3.toByteArray))
+  println("signedPrismEvent (add key to DID):\n" + bytes2Hex(e4.toByteArray))
+  println("signedPrismEvent (update VDR with the new key):\n" + bytes2Hex(e5.toByteArray))
 
   val program = for {
     _ <- ZIO.log("""### MainVDR program ###""".stripMargin)
