@@ -20,10 +20,10 @@ final case class SSI(
 ) { self =>
   def didPrism: DIDPrism = DIDPrism.fromDID(did).getOrElse(???) // FIXME
 
-  def appendAny(spo: MySignedPrismOperation[OP]): SSI = spo.operation match
-    case _: CreateDidOP     => append(spo.asInstanceOf[MySignedPrismOperation[CreateDidOP]])
-    case _: UpdateDidOP     => append(spo.asInstanceOf[MySignedPrismOperation[UpdateDidOP]])
-    case _: DeactivateDidOP => append(spo.asInstanceOf[MySignedPrismOperation[DeactivateDidOP]])
+  def appendAny(spo: MySignedPrismEvent[OP]): SSI = spo.event match
+    case _: CreateDidOP     => append(spo.asInstanceOf[MySignedPrismEvent[CreateDidOP]])
+    case _: UpdateDidOP     => append(spo.asInstanceOf[MySignedPrismEvent[UpdateDidOP]])
+    case _: DeactivateDidOP => append(spo.asInstanceOf[MySignedPrismEvent[DeactivateDidOP]])
     case _                  => self.copy(cursor = Ordering[EventCursor].max(cursor, spo.eventCursor))
 
   private def addKey(k: PrismPublicKey): SSI = k match
@@ -50,13 +50,13 @@ final case class SSI(
     }
   }
 
-  def append(spo: MySignedPrismOperation[CreateDidOP | UpdateDidOP | DeactivateDidOP]): SSI = {
+  def append(spo: MySignedPrismEvent[CreateDidOP | UpdateDidOP | DeactivateDidOP]): SSI = {
     if (Ordering[EventCursor].lteq(spo.eventCursor, this.cursor)) self // Ignore if the event its already process
     else
       {
         spo match
-          case MySignedPrismOperation(tx, prismBlockIndex, prismOperationIndex, signedWith, signature, pb) =>
-            spo.operation match
+          case MySignedPrismEvent(tx, prismBlockIndex, prismEventIndex, signedWith, signature, pb) =>
+            spo.event match
               case CreateDidOP(publicKeys, services, context) =>
                 latestHash match
                   case Some(value) => self // The Identity already exists
@@ -69,8 +69,8 @@ final case class SSI(
                           case false => self
                           case true  => newSSI
                       )
-              case UpdateDidOP(previousOperationHash, id, actions) =>
-                if (!latestHash.contains(previousOperationHash) & self.checkMasterSignature(spo)) self
+              case UpdateDidOP(previousEventHash, id, actions) =>
+                if (!latestHash.contains(previousEventHash) & self.checkMasterSignature(spo)) self
                 else
                   actions
                     .foldLeft(self) { (tmpSSI, action) =>
@@ -94,18 +94,18 @@ final case class SSI(
                         case UpdateDidOP.PatchContext(context) => copy(context = context) // replace
                     }
                     .copy(latestHash = Some(spo.opHash))
-              case DeactivateDidOP(previousOperationHash, id) =>
-                if (!latestHash.contains(previousOperationHash) & self.checkMasterSignature(spo)) self
+              case DeactivateDidOP(previousEventHash, id) =>
+                if (!latestHash.contains(previousEventHash) & self.checkMasterSignature(spo)) self
                 else self.copy(latestHash = Some(spo.opHash), disabled = true)
       }.copy(cursor = spo.eventCursor)
   }
 
-  def checkMasterSignature(spo: MySignedPrismOperation[OP]): Boolean =
+  def checkMasterSignature(spo: MySignedPrismEvent[OP]): Boolean =
     (!disabled) & keys
       .find(k => k.usage == PrismKeyUsage.MasterKeyUsage & k.id == spo.signedWith)
       .exists(key => SharedCryto.checkECDSASignature(msg = spo.protobuf.toByteArray, sig = spo.signature, pubKey = key))
 
-  def checkVdrSignature(spo: MySignedPrismOperation[OP]): Boolean =
+  def checkVdrSignature(spo: MySignedPrismEvent[OP]): Boolean =
     (!disabled) & keys
       .find(k => k.usage == PrismKeyUsage.VdrKeyUsage & k.id == spo.signedWith)
       .exists(key => SharedCryto.checkECDSASignature(msg = spo.protobuf.toByteArray, sig = spo.signature, pubKey = key))
@@ -165,17 +165,17 @@ object SSI {
       cursor = EventCursor.init
     )
 
-  def make(ssi: DIDSubject, ops: Seq[MySignedPrismOperation[OP]]): SSI =
+  def make(ssi: DIDSubject, ops: Seq[MySignedPrismEvent[OP]]): SSI =
     ops.foldLeft(SSI.init(ssi)) { case (tmpSSI, op) => tmpSSI.appendAny(op) }
 
-  def makeSSIHistory(ssi: DIDSubject, ops: Seq[MySignedPrismOperation[OP]]): SSIHistory =
+  def makeSSIHistory(ssi: DIDSubject, ops: Seq[MySignedPrismEvent[OP]]): SSIHistory =
     ops.foldLeft(SSIHistory.init(ssi)) { case (history, op) => history.appendAny(op) }
 }
 
 case class SSIHistory(did: DIDSubject, versions: Seq[SSI]) {
   def didPrism: DIDPrism = DIDPrism.fromDID(did).getOrElse(???) // FIXME
 
-  def appendAny(spo: MySignedPrismOperation[OP]): SSIHistory =
+  def appendAny(spo: MySignedPrismEvent[OP]): SSIHistory =
     copy(versions = versions :+ latestVersion.appendAny(spo))
 
   def latestVersion: SSI = versions.lastOption match

@@ -10,8 +10,8 @@ import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
 import fmgp.did.method.prism.*
 import fmgp.did.method.prism.vdr.*
-import fmgp.did.method.prism.proto.MaybeOperation
-import fmgp.did.method.prism.proto.MySignedPrismOperation
+import fmgp.did.method.prism.proto.MaybeEvent
+import fmgp.did.method.prism.proto.MySignedPrismEvent
 import fmgp.crypto.SHA256
 
 /** didResolverPrismJVM/testOnly fmgp.did.method.prism.vdr.VDRSuite
@@ -22,8 +22,8 @@ class VDRSuite extends ZSuite {
   import fmgp.did.method.prism.vdr.VDRUtilsTestExtra._
   import fmgp.did.method.prism.vdr.VDRUtils._
 
-  private def getSignedPrismOperationFromHex(hex: String) =
-    SignedPrismOperation.parseFrom(hex2bytes(hex))
+  private def getSignedPrismEventFromHex(hex: String) =
+    SignedPrismEvent.parseFrom(hex2bytes(hex))
 
   test("create SSI") {
     val (did, e1) = createDID(Seq(("master1", pkMaster)), Seq(("vdr1", pk1VDR)))
@@ -33,7 +33,7 @@ class VDRSuite extends ZSuite {
   test("update SSI") {
     val e4 = updateDIDAddKey(
       didPrism = didPrism,
-      previousOperation = getSignedPrismOperationFromHex(createSSI),
+      previousEvent = getSignedPrismEventFromHex(createSSI),
       masterKeyName = "master1",
       masterKey = pkMaster,
       vdrKeyName = "vdr2",
@@ -48,14 +48,14 @@ class VDRSuite extends ZSuite {
   }
   test("update VDR") {
     val (e3EventHash, e3) =
-      updateVDREntryBytes(refVDR, getSignedPrismOperationFromHex(createVDR), pk1VDR, "vdr1", data2)
+      updateVDREntryBytes(refVDR, getSignedPrismEventFromHex(createVDR), pk1VDR, "vdr1", data2)
     assertEquals(bytes2Hex(e3.toByteArray), updateVDR)
   }
 
   test("update VDR WithUnknownFields 49") {
     val e3x = updateVDREntryWithUnknownFields(
       refVDR,
-      getSignedPrismOperationFromHex(createVDR),
+      getSignedPrismEventFromHex(createVDR),
       pk1VDR,
       "vdr1",
       data2,
@@ -67,7 +67,7 @@ class VDRSuite extends ZSuite {
   test("update VDR WithUnknownFields 99") {
     val e3x = updateVDREntryWithUnknownFields(
       refVDR,
-      getSignedPrismOperationFromHex(createVDR),
+      getSignedPrismEventFromHex(createVDR),
       pk1VDR,
       "vdr1",
       data2,
@@ -78,7 +78,7 @@ class VDRSuite extends ZSuite {
 
   test("update VDR after add key in the SSI") {
     val (e5EventHash, e5) =
-      updateVDREntryBytes(refVDR, getSignedPrismOperationFromHex(updateVDR), pk2VDR, "vdr2", data3)
+      updateVDREntryBytes(refVDR, getSignedPrismEventFromHex(updateVDR), pk2VDR, "vdr2", data3)
     assertEquals(bytes2Hex(e5.toByteArray), updateVDR_withTheNewKey)
   }
 

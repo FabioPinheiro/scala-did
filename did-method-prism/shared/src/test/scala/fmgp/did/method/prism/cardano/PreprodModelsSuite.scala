@@ -23,18 +23,17 @@ class PreprodModelsSuite extends FunSuite {
     metadata_17137_cbor.toCardanoPrismEntry match
       case Left(value) => fail("Must be CardanoPrismEntry")
       case Right(cardanoPrismEntry) =>
-        MaybeOperation
+        MaybeEvent
           .fromProto(
             prismObject = cardanoPrismEntry.content,
             tx = cardanoPrismEntry.tx,
             blockIndex = cardanoPrismEntry.index,
           )
           .map {
-            case InvalidPrismObject(tx, b, reason) => fail(s"Must be MySignedPrismOperation: fail with $reason")
-            case InvalidSignedPrismOperation(tx, b, o, reason) =>
-              fail(s"Must be MySignedPrismOperation: fail with $reason")
-            case MySignedPrismOperation(tx, b, o, signedWith, signature, protobuf) => // ok
-            // println (operation.toJsonPretty)
+            case InvalidPrismObject(tx, b, reason) => fail(s"Must be MySignedPrismEvent: fail with $reason")
+            case InvalidSignedPrismEvent(tx, b, o, reason) =>
+              fail(s"Must be MySignedPrismEvent: fail with $reason")
+            case MySignedPrismEvent(tx, b, o, signedWith, signature, protobuf) => // ok
           }
 
   }
@@ -44,29 +43,29 @@ class PreprodModelsSuite extends FunSuite {
     val seq = Seq(metadata_416_cbor, metadata_417_cbor, metadata_419_cbor).map(_.toCardanoPrismEntry.getOrElse(???))
 
     val aux1 = seq.map(cardanoPrismEntry =>
-      MaybeOperation.fromProto(
+      MaybeEvent.fromProto(
         prismObject = cardanoPrismEntry.content,
         tx = cardanoPrismEntry.tx,
         blockIndex = cardanoPrismEntry.index,
       )
     )
 
-    val aux2 = aux1.map(_.map(_.asInstanceOf[MySignedPrismOperation[OP]]).map { op =>
+    val aux2 = aux1.map(_.map(_.asInstanceOf[MySignedPrismEvent[OP]]).map { op =>
       // println(op.opHash)
       // println(op.toJsonPretty)
       op
     })
 
     aux2(0).head match
-      case MySignedPrismOperation(tx, b, o, signedWith, signature, protobuf) =>
+      case MySignedPrismEvent(tx, b, o, signedWith, signature, protobuf) =>
 
-    val op0 = aux2(0).head.asInstanceOf[MySignedPrismOperation[CreateDidOP]]
-    val op1 = aux2(1).head.asInstanceOf[MySignedPrismOperation[UpdateDidOP]]
-    val op2 = aux2(2).head.asInstanceOf[MySignedPrismOperation[UpdateDidOP]]
+    val op0 = aux2(0).head.asInstanceOf[MySignedPrismEvent[CreateDidOP]]
+    val op1 = aux2(1).head.asInstanceOf[MySignedPrismEvent[UpdateDidOP]]
+    val op2 = aux2(2).head.asInstanceOf[MySignedPrismEvent[UpdateDidOP]]
 
     // println(s"CreateDidOP ${op0.opHash}")
-    // println(s"UpdateDidOP ${op1.opHash} -- ${op1.operation.previousOperationHash}")
-    // println(s"CreateDidOP ${op2.opHash} -- ${op2.operation.previousOperationHash}")
+    // println(s"UpdateDidOP ${op1.opHash} -- ${op1.event.previousEventHash}")
+    // println(s"CreateDidOP ${op2.opHash} -- ${op2.event.previousEventHash}")
 
     val s0 = PrismStateInMemory.empty
     // println("State 0")

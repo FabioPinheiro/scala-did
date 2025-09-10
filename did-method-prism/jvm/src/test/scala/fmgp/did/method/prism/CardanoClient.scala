@@ -13,8 +13,8 @@ import fmgp.util._
 import fmgp.did.method.prism.cardano._
 import fmgp.did.method.prism.vdr._
 import _root_.proto.prism.PrismBlock
-import _root_.proto.prism.PrismOperation
-import _root_.proto.prism.SignedPrismOperation
+import _root_.proto.prism.PrismEvent
+import _root_.proto.prism.SignedPrismEvent
 import _root_.proto.prism.PrismObject
 
 /** https://cardano-client.dev/docs/gettingstarted/simple-transfer
@@ -49,7 +49,7 @@ object CardanoClient extends ZIOAppDefault {
       // https://preprod.cardanoscan.io/transaction/51dd7dd271396775d1d210935a6a01e664fcda92a780226be8e183ef70e325f7
       // https://preprod.cardanoscan.io/address/000a53930fc08a96c804f29a2fd47c9f4685bce6f0dddbd43f8e9379d954da2e2e92b55ae605ea9916d298d300da4817f11231b02745a5f333
 
-      prismEvents: Seq[SignedPrismOperation] =
+      prismEvents: Seq[SignedPrismEvent] =
         Seq( // IndexerSuite
           // Create DID - DIDPrism("51d47b13393a7cc5c1afc47099dcbecccf0c8a70828c072ac82f55225b42d4f4")
           "0a076d61737465723112473045022100fd1f2ea66ea9e7f37861dbe1599fb12b7ca3297e9efa872504bfc54f1daebec502205f0152d45b266b5524d2fe8eb38aaa1d3e78dc053b4f50d98fe4564f50c4c0da1a7b0a790a77123b0a076d61737465723110014a2e0a09736563703235366b311221028210fd4c42b148df2b908eb6a5c507822f63c440facc283b30c84859fde2e30f12380a047664723110084a2e0a09736563703235366b311221028210fd4c42b148df2b908eb6a5c507822f63c440facc283b30c84859fde2e30f",
@@ -59,7 +59,7 @@ object CardanoClient extends ZIOAppDefault {
           "0a047664723112473045022100d07451415fecbe92f270ecd0371ee181cabd198e781759287e5122d688a9c97102202273b49e43a1f2022940f48012b5e9839f99eaacf7429c417ff67ec64e58b51b1a2a422812202a0d49ff70f6403cab5bba090478300369ff4875f849dd42c9c59ca4272a9a7ba20603020304",
         )
           .map(hex2bytes(_))
-          .map(protoBytes => SignedPrismOperation.parseFrom(protoBytes))
+          .map(protoBytes => SignedPrismEvent.parseFrom(protoBytes))
 
       signedTransaction = CardanoService.makeTrasation(
         blockfrostConfig,

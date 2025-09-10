@@ -17,9 +17,9 @@ protected[vdr] object VDRUtils {
       keyName: String,
       data: Array[Byte],
       nonce: Array[Byte] = Random.nextBytes(16),
-  ): (RefVDR, SignedPrismOperation) = {
-    def op = PrismOperation(
-      operation = PrismOperation.Operation.CreateStorageEntry(
+  ): (RefVDR, SignedPrismEvent) = {
+    def op = PrismEvent(
+      event = PrismEvent.Event.CreateStorageEntry(
         value = ProtoCreateStorageEntry(
           didPrismHash = ByteString.copyFrom(didPrism.hashRef),
           nonce = ByteString.copyFrom(nonce),
@@ -27,24 +27,24 @@ protected[vdr] object VDRUtils {
         )
       )
     )
-    def signedPrismCreateEventVDR = SignedPrismOperation(
+    def signedPrismCreateEventVDR = SignedPrismEvent(
       signedWith = keyName,
       signature = ByteString.copyFrom(vdrKey.sign(op.toByteArray)),
-      operation = Some(op)
+      event = Some(op)
     )
     (RefVDR.fromEventHash(op.getEventHash), signedPrismCreateEventVDR)
   }
 
   def updateVDREntryBytes(
       eventRef: RefVDR,
-      previousOperation: SignedPrismOperation,
+      previousEvent: SignedPrismEvent,
       vdrKey: Secp256k1PrivateKey,
       keyName: String,
       data: Array[Byte],
-  ): (EventHash, SignedPrismOperation) = {
+  ): (EventHash, SignedPrismEvent) = {
     updateVDREntryBytes(
       eventRef = eventRef,
-      previousEventHash = previousOperation.operation.get.getEventHash,
+      previousEventHash = previousEvent.event.get.getEventHash,
       vdrKey = vdrKey,
       keyName = keyName,
       data = data,
@@ -57,19 +57,19 @@ protected[vdr] object VDRUtils {
       vdrKey: Secp256k1PrivateKey,
       keyName: String,
       data: Array[Byte],
-  ): (EventHash, SignedPrismOperation) = {
-    def op = PrismOperation(
-      operation = PrismOperation.Operation.UpdateStorageEntry(
+  ): (EventHash, SignedPrismEvent) = {
+    def op = PrismEvent(
+      event = PrismEvent.Event.UpdateStorageEntry(
         value = ProtoUpdateStorageEntry(
           previousEventHash = ByteString.copyFrom(previousEventHash.byteArray),
           data = ProtoUpdateStorageEntry.Data.Bytes(ByteString.copyFrom(data)),
         )
       ),
     )
-    def signedPrismUpdateEventVDR = SignedPrismOperation(
+    def signedPrismUpdateEventVDR = SignedPrismEvent(
       signedWith = keyName,
       signature = ByteString.copyFrom(vdrKey.sign(op.toByteArray)),
-      operation = Some(op)
+      event = Some(op)
     )
     (op.getEventHash, signedPrismUpdateEventVDR)
   }
@@ -79,18 +79,18 @@ protected[vdr] object VDRUtils {
       previousEventHash: EventHash,
       vdrKey: Secp256k1PrivateKey,
       keyName: String,
-  ): (EventHash, SignedPrismOperation) = {
-    def op = PrismOperation(
-      operation = PrismOperation.Operation.DeactivateStorageEntry(
+  ): (EventHash, SignedPrismEvent) = {
+    def op = PrismEvent(
+      event = PrismEvent.Event.DeactivateStorageEntry(
         value = ProtoDeactivateStorageEntry(
           previousEventHash = ByteString.copyFrom(previousEventHash.byteArray),
         )
       ),
     )
-    def signedPrismUpdateEventVDR = SignedPrismOperation(
+    def signedPrismUpdateEventVDR = SignedPrismEvent(
       signedWith = keyName,
       signature = ByteString.copyFrom(vdrKey.sign(op.toByteArray)),
-      operation = Some(op)
+      event = Some(op)
     )
     (op.getEventHash, signedPrismUpdateEventVDR)
   }

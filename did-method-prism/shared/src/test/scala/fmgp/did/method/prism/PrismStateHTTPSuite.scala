@@ -61,7 +61,7 @@ class PrismStateHTTPSuite extends ZSuite {
             |  "signature" : "3045022100931b1a758cb7a34e7a159de8acb4e52751323e37aadeee2d33d121696ccb29b402204e54027e3ee1b6f38e511b9cf85865c45980e696686ad7548d810d2df05e8ed7",
             |  "operation" : {
             |    "UpdateDidOP" : {
-            |      "previousOperationHash" : "00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae",
+            |      "previousEventHash" : "00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae",
             |      "id" : "00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae",
             |      "actions" : [
             |        {

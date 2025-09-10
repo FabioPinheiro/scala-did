@@ -8,10 +8,6 @@ import fmgp.did.method.prism.cardano.CardanoWalletConfig
 
 object ConfigCommand {
 
-  // def stagingPath: Options[Path] = Options.none
-  //   .file("staging-path")
-  //   .??("Staging file (to build complex operations)")
-
   def overrideFlag = Options
     .boolean("s")
     .??("Override the staging file")

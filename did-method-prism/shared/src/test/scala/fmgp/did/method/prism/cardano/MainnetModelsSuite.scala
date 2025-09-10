@@ -19,10 +19,10 @@ class MainnetModelsSuite extends FunSuite {
           .filterNot(_ == 127.toByte)
       ),
       """block_content {
-        |  operations {
+        |  events {
         |    signed_with: "master0"
         |    signature: "0D\002 z\304\027\336kV\017\200\370\227\242\212\315\024\352\206\206\372t\267\241~\271\016\034\273R\274,%\252\261\002 \0321\375\026\315\214T\333\037\022A\316\262X\376\025\034\022:\355\2100\325\316\325W\350{\210\227\312h"
-        |    operation {
+        |    event {
         |      create_did {
         |        did_data {
         |          public_keys {
@@ -62,10 +62,10 @@ class MainnetModelsSuite extends FunSuite {
     assertNoDiff(
       tmp.getOrElse(???).content.toProtoString,
       """block_content {
-        |  operations {
+        |  events {
         |    signed_with: "master0"
         |    signature: "0D\002 ?\202\261\335\"\357\274\ti\225RZ\2368Jn3\223\306_`&`\345\347\257\210e\357}t\275\002 Q\242~\270\033\243\r\243\342(aB\321x\351\333\362>\203\376\032f\334\206X\353\267\251\233n\210U"
-        |    operation {
+        |    event {
         |      create_did {
         |        did_data {
         |          public_keys {

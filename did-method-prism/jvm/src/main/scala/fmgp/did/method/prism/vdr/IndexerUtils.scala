@@ -9,8 +9,8 @@ import fmgp.did.method.prism.proto._
 
 object IndexerUtils {
 
-  def pipelineTransformCardanoMetadata2SeqEvents: ZPipeline[Any, Nothing, CardanoMetadata, Seq[MaybeOperation[OP]]] =
-    ZPipeline.map[CardanoMetadata, Seq[MaybeOperation[OP]]](cardanoMetadata =>
+  def pipelineTransformCardanoMetadata2SeqEvents: ZPipeline[Any, Nothing, CardanoMetadata, Seq[MaybeEvent[OP]]] =
+    ZPipeline.map[CardanoMetadata, Seq[MaybeEvent[OP]]](cardanoMetadata =>
       cardanoMetadata.toCardanoPrismEntry match
         case Left(error) =>
           Seq(
@@ -21,7 +21,7 @@ object IndexerUtils {
             )
           )
         case Right(cardanoPrismEntry) =>
-          MaybeOperation.fromProto(
+          MaybeEvent.fromProto(
             prismObject = cardanoPrismEntry.content,
             tx = cardanoPrismEntry.tx,
             blockIndex = cardanoPrismEntry.index,
@@ -29,34 +29,32 @@ object IndexerUtils {
     )
 
   /** pipeline to load/initiate the PrismState from stream of all events */
-  def pipelinePrismState = ZPipeline.mapZIO[Ref[PrismState], Nothing, MaybeOperation[OP], MaybeOperation[OP]] {
-    maybeOperation =>
-      maybeOperation match
-        case InvalidPrismObject(tx, b, reason)             => ZIO.succeed(maybeOperation)
-        case InvalidSignedPrismOperation(tx, b, o, reason) => ZIO.succeed(maybeOperation)
-        case op: MySignedPrismOperation[OP] =>
-          for {
-            refState <- ZIO.service[Ref[PrismState]]
-            _ <- refState.update(_.addEvent(op))
-          } yield (maybeOperation)
+  def pipelinePrismState = ZPipeline.mapZIO[Ref[PrismState], Nothing, MaybeEvent[OP], MaybeEvent[OP]] { maybeEvent =>
+    maybeEvent match
+      case InvalidPrismObject(tx, b, reason)         => ZIO.succeed(maybeEvent)
+      case InvalidSignedPrismEvent(tx, b, o, reason) => ZIO.succeed(maybeEvent)
+      case op: MySignedPrismEvent[OP] =>
+        for {
+          refState <- ZIO.service[Ref[PrismState]]
+          _ <- refState.update(_.addEvent(op))
+        } yield (maybeEvent)
   }
 
   case class EventCounter(
       invalidPrismObject: Int = 0,
-      invalidSignedPrismOperation: Int = 0,
-      signedPrismOperation: Int = 0
+      invalidSignedPrismEvent: Int = 0,
+      signedPrismEvent: Int = 0
   )
-  def countEvents(implicit trace: Trace): ZSink[Any, Nothing, MaybeOperation[OP], Nothing, EventCounter] =
+  def countEvents(implicit trace: Trace): ZSink[Any, Nothing, MaybeEvent[OP], Nothing, EventCounter] =
     ZSink.foldLeft(EventCounter())((ec, event) => {
       event match
         case InvalidPrismObject(tx, b, reason) =>
           println(reason)
           ec.copy(invalidPrismObject = ec.invalidPrismObject + 1)
-        case InvalidSignedPrismOperation(tx, b, o, reason) =>
-          ec.copy(invalidSignedPrismOperation = ec.invalidSignedPrismOperation + 1)
-        case MySignedPrismOperation(tx, b, o, signedWith, signature, protobuf) =>
-          ec.copy(signedPrismOperation = ec.signedPrismOperation + 1)
-
+        case InvalidSignedPrismEvent(tx, b, o, reason) =>
+          ec.copy(invalidSignedPrismEvent = ec.invalidSignedPrismEvent + 1)
+        case MySignedPrismEvent(tx, b, o, signedWith, signature, protobuf) =>
+          ec.copy(signedPrismEvent = ec.signedPrismEvent + 1)
     })
 
   def loadPrismStateFromChunkFiles: ZIO[IndexerConfig, Throwable, Ref[PrismState]] = for {
@@ -64,7 +62,7 @@ object IndexerUtils {
     chunkFilesAfter <- fmgp.did.method.prism.vdr.Indexer
       .findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath)
     _ <- ZIO.log(s"Read chunkFiles")
-    streamAllMaybeOperationFromChunkFiles = ZStream.fromIterable {
+    streamAllMaybeEventFromChunkFiles = ZStream.fromIterable {
       chunkFilesAfter.map { fileName =>
         ZStream
           .fromFile(fileName)
@@ -76,7 +74,7 @@ object IndexerUtils {
     }.flatten
     _ <- ZIO.log(s"Init PrismState")
     stateRef <- Ref.make(PrismState.empty)
-    countEvents <- streamAllMaybeOperationFromChunkFiles
+    countEvents <- streamAllMaybeEventFromChunkFiles
       .via(IndexerUtils.pipelinePrismState)
       .run(countEvents) // (ZSink.count)
       .provideEnvironment(ZEnvironment(stateRef))

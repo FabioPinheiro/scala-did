@@ -82,10 +82,10 @@ object PrismVdrEditTool {
     )
   }
 
-  val prismOperationVar: Var[Option[PrismOperation]] =
+  val prismEventVar: Var[Option[PrismEvent]] =
     Var(initial =
       Some(
-        PrismOperation.parseFrom(
+        PrismEvent.parseFrom(
           hex2bytes(
             "12eb010a2000592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae1240303035393261313431613463326263623761366161363931373530353131653265396230343832333138323031323565313561623730623132613231306161651a400a3e0a3c0a0869737375696e673010024a2e0a09736563703235366b31122102a680f17d9b683a9043b45a89989d37fed7a2de8a025eb19790933f59412b64f31a430a410a3f0a0b7265766f636174696f6e3010054a2e0a09736563703235366b3112210384cdd12ac3cf34f241a75281e755e97b35984845b0b7b922df14790b2a9a2266"
           )
@@ -93,46 +93,46 @@ object PrismVdrEditTool {
       )
     )
 
-  val companionVar: Var[Option[scalapb.GeneratedMessageCompanion[PrismOperation]]] =
-    Var(initial = Some(PrismOperation.messageCompanion))
+  val companionVar: Var[Option[scalapb.GeneratedMessageCompanion[PrismEvent]]] =
+    Var(initial = Some(PrismEvent.messageCompanion))
 
   def htmlInputFromCompanionProto(
-      companion: GeneratedMessageCompanion[PrismOperation],
-      // maybeOP: Option[PrismOperation]
+      companion: GeneratedMessageCompanion[PrismEvent],
+      // maybeOP: Option[PrismEvent]
   ): ReactiveHtmlElement[dom.html.Element] = {
     val mb = ProtoHTML.MessageBuilder(companion)
 
     val signalPValue = mb.signalPMessage
-    def signalPrismOperation = signalPValue
+    def signalPrismEvent = signalPValue
       .map(pv => companion.messageReads.read(pv))
-    def signalSignedPrismOperation = signalPrismOperation
-      .map(prismOperation =>
-        SignedPrismOperation(
+    def signedPrismEvent = signalPrismEvent
+      .map(prismEvent =>
+        SignedPrismEvent(
           signedWith = "vdr-key-id",
           signature = ByteString.copyFrom("fixme".getBytes()),
-          operation = Some(prismOperation)
+          event = Some(prismEvent)
         )
       )
 
     div(
       mb.html,
       hr(),
-      h2("PrismOperation:"),
+      h2("PrismEvent:"),
       pre(
         code(
-          child <-- signalPrismOperation.map(op => bytes2Hex(op.toByteArray))
+          child <-- signalPrismEvent.map(op => bytes2Hex(op.toByteArray))
         )
       ),
       hr(),
       p(child <-- signalPValue.map(pv => pv).map(e => e.toString())),
       hr(),
-      p(child <-- signalPrismOperation.map(e => e.toString())),
+      p(child <-- signalPrismEvent.map(e => e.toString())),
       hr(),
-      h2("SignedPrismOperation:"),
+      h2("SignedPrismEvent:"),
       pre(
         code(
-          child <-- signalPrismOperation
-            .map(prismOperation => OP.fromPrismOperation(prismOperation))
+          child <-- signalPrismEvent
+            .map(prismEvent => OP.fromPrismEvent(prismEvent))
             .map(op => op.toJson)
         )
       ),
@@ -140,8 +140,8 @@ object PrismVdrEditTool {
       h2("PrismBlock:"),
       pre(
         code(
-          child <-- signalSignedPrismOperation
-            .map(signedPrismOperation => PrismBlock(Seq(signedPrismOperation)))
+          child <-- signedPrismEvent
+            .map(signedPrismEvent => PrismBlock(Seq(signedPrismEvent)))
             .map(op => bytes2Hex(op.toByteArray))
         )
       )
@@ -159,7 +159,7 @@ object PrismVdrEditTool {
           htmlInputFromCompanionProto(
             descriptor,
             // Some(
-            //   PrismOperation.parseFrom(
+            //   PrismEvent.parseFrom(
             //     hex2bytes(
             //       "0a3f0a3d123b0a076d61737465723010014a2e0a09736563703235366b311221021456f5dd7bcddca7a3e48edad8cc68d0ce6a7a5991492cb48bac817c2e4d9adc"
             //     )

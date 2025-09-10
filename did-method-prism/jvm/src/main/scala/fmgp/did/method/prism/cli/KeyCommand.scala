@@ -133,12 +133,12 @@ object KeyCommand {
             Console.printLine(s"derivationPath=$vdr0derivationPath") *>
               Console.printLine("PrivateKey=" + bytes2Hex(k.getKMMSecp256k1PrivateKey().getRaw()))
           }
-        (didPrism, signedPrismOperation) = DIDExtra.createDID(
+        (didPrism, signedPrismEvent) = DIDExtra.createDID(
           masterKeys = Seq(("master", Secp256k1PrivateKey(key.getRaw()))),
           vdrKeys = Seq.empty,
         )
         _ <- Console.printLine(s"SSI: ${didPrism.string}")
-        _ <- Console.printLine(s"Protobuf: ${bytes2Hex(signedPrismOperation.toByteArray)}")
+        _ <- Console.printLine(s"Protobuf: ${bytes2Hex(signedPrismEvent.toByteArray)}")
         _ <- Console.printLine("You can you inspect the Protobuf in https://protobuf-decoder.netlify.app/")
       } yield ()).orDie
   }

@@ -12,18 +12,18 @@ class SharedCrytoSuite extends FunSuite {
   test("Metadata 6418 checkECDSASignature".ignore) {
     val cardanoPrismEntry =
       fmgp.did.method.prism.cardano.MainnetExamples.metadata_6418.toCardanoPrismEntry.getOrElse(???)
-    val tmp = MaybeOperation.fromProto(cardanoPrismEntry.content, "tx", -1)
-    val mySignedPrismOperation = tmp.head.asInstanceOf[MySignedPrismOperation[OP]]
+    val tmp = MaybeEvent.fromProto(cardanoPrismEntry.content, "tx", -1)
+    val mySignedPrismEvent = tmp.head.asInstanceOf[MySignedPrismEvent[OP]]
 
     PrismPublicKey
-      .filterECKey(mySignedPrismOperation.operation.asInstanceOf[CreateDidOP].publicKeys)
+      .filterECKey(mySignedPrismEvent.event.asInstanceOf[CreateDidOP].publicKeys)
       .find(_.usage == PrismKeyUsage.MasterKeyUsage) match
       case None                                                           => fail("Missing MASTER_KEY")
       case Some(PrismPublicKey.UncompressedECKey(id, usage, curve, x, y)) => fail("Expeting CompressedEcKeyData")
       case Some(key @ PrismPublicKey.CompressedECKey(id, usage, curve, data)) =>
         SharedCryto.checkECDSASignature(
-          msg = mySignedPrismOperation.protobuf.toByteArray,
-          sig = mySignedPrismOperation.signature,
+          msg = mySignedPrismEvent.protobuf.toByteArray,
+          sig = mySignedPrismEvent.signature,
           pubKey = key
         ) match
           case false => fail("invalid")

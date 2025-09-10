@@ -57,18 +57,18 @@ object VDRUtilsTestExtra {
 
   def updateDIDAddKey(
       didPrism: DIDPrism,
-      previousOperation: SignedPrismOperation,
+      previousEvent: SignedPrismEvent,
       masterKeyName: String,
       masterKey: Secp256k1PrivateKey,
       vdrKeyName: String,
       vdrKey: Secp256k1PrivateKey,
-  ): SignedPrismOperation = {
+  ): SignedPrismEvent = {
     val previousEventHash =
-      SHA256.digest(previousOperation.operation.get.toByteArray)
-    def op = PrismOperation(
-      operation = PrismOperation.Operation.UpdateDid(
+      SHA256.digest(previousEvent.event.get.toByteArray)
+    def op = PrismEvent(
+      event = PrismEvent.Event.UpdateDid(
         value = ProtoUpdateDID(
-          previousOperationHash = ByteString.copyFrom(previousEventHash),
+          previousEventHash = ByteString.copyFrom(previousEventHash),
           id = didPrism.did,
           actions = Seq(
             UpdateDIDAction(
@@ -88,10 +88,10 @@ object VDRUtilsTestExtra {
         )
       )
     )
-    def signedPrismCreateEventDID = SignedPrismOperation(
+    def signedPrismCreateEventDID = SignedPrismEvent(
       signedWith = masterKeyName,
       signature = ByteString.copyFrom(masterKey.sign(op.toByteArray)),
-      operation = Some(op)
+      event = Some(op)
     )
     signedPrismCreateEventDID
   }
@@ -99,16 +99,16 @@ object VDRUtilsTestExtra {
   /** just for testing purpos */
   def updateVDREntryWithUnknownFields(
       eventRef: RefVDR,
-      previousOperation: SignedPrismOperation,
+      previousEvent: SignedPrismEvent,
       vdrKey: Secp256k1PrivateKey,
       keyName: String,
       data: Array[Byte],
       unknownFieldNumber: Int,
-  ): SignedPrismOperation = {
+  ): SignedPrismEvent = {
     val previousEventHash =
-      SHA256.digest(previousOperation.operation.get.toByteArray)
-    def op = PrismOperation(
-      operation = PrismOperation.Operation.UpdateStorageEntry(
+      SHA256.digest(previousEvent.event.get.toByteArray)
+    def op = PrismEvent(
+      event = PrismEvent.Event.UpdateStorageEntry(
         value = ProtoUpdateStorageEntry(
           previousEventHash = ByteString.copyFrom(previousEventHash),
           data = ProtoUpdateStorageEntry.Data.Bytes(ByteString.copyFrom(data)),
@@ -123,10 +123,10 @@ object VDRUtilsTestExtra {
         ),
       ),
     )
-    def signedPrismUpdateEventVDR = SignedPrismOperation(
+    def signedPrismUpdateEventVDR = SignedPrismEvent(
       signedWith = keyName,
       signature = ByteString.copyFrom(KeyConstanceUtils.pk1VDR.sign(op.toByteArray)),
-      operation = Some(op)
+      event = Some(op)
     )
     signedPrismUpdateEventVDR
   }

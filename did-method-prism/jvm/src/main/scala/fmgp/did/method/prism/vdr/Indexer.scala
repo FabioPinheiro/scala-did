@@ -101,15 +101,15 @@ object Indexer extends ZIOAppDefault {
     }
     .provideSomeLayer(Client.default ++ Scope.default)
 
-  def sinkLog: ZSink[Any, java.io.IOException, MaybeOperation[OP], Nothing, Unit] = ZSink.foreach {
-    case InvalidPrismObject(tx, b, reason)             => Console.printLineError(s"$b - tx:$tx - $reason")
-    case InvalidSignedPrismOperation(tx, b, o, reason) => Console.printLineError(s"$b - tx:$tx op:$o - $reason")
-    case op @ MySignedPrismOperation(tx, b, o, signedWith, signature, pb) =>
-      val str = op.operation match
+  def sinkLog: ZSink[Any, java.io.IOException, MaybeEvent[OP], Nothing, Unit] = ZSink.foreach {
+    case InvalidPrismObject(tx, b, reason)         => Console.printLineError(s"$b - tx:$tx - $reason")
+    case InvalidSignedPrismEvent(tx, b, o, reason) => Console.printLineError(s"$b - tx:$tx op:$o - $reason")
+    case op @ MySignedPrismEvent(tx, b, o, signedWith, signature, pb) =>
+      val str = op.event match
         case CreateDidOP(publicKeys, services, context) => s"CreateDidOP: did:prism:${op.opHash}"
-        case UpdateDidOP(previousOperationHash, id, actions) =>
-          s"UpdateDidOP: previousOperationHash=$previousOperationHash}"
-        case _ => op.operation.getClass.getName
+        case UpdateDidOP(previousEventHash, id, actions) =>
+          s"UpdateDidOP: previousEventHash=$previousEventHash}"
+        case _ => op.event.getClass.getName
       Console.printLine(s"$b - tx:$tx op:$o - $str")
   }
 
@@ -229,7 +229,7 @@ object Indexer extends ZIOAppDefault {
                 name = indexerConfig.ssiEventsPath(did),
                 options = Set(WRITE, TRUNCATE_EXISTING, CREATE)
               )
-              .contramapChunks[MySignedPrismOperation[OP]](_.flatMap { spo => s"${spo.toJson}\n".getBytes })
+              .contramapChunks[MySignedPrismEvent[OP]](_.flatMap { spo => s"${spo.toJson}\n".getBytes })
           }
           ssi = fmgp.did.method.prism.SSI.make(did, events)
           _ <- ZIO.when(ssi.latestHash.isDefined)(for {
@@ -262,7 +262,7 @@ object Indexer extends ZIOAppDefault {
                 name = indexerConfig.vdrEventsPath(ref),
                 options = Set(WRITE, TRUNCATE_EXISTING, CREATE)
               )
-              .contramapChunks[MySignedPrismOperation[OP]](_.flatMap { spo => s"${spo.toJson}\n".getBytes })
+              .contramapChunks[MySignedPrismEvent[OP]](_.flatMap { spo => s"${spo.toJson}\n".getBytes })
           }
           vdr <- state.getVDR(ref)
           _ <- ZStream.from(vdr).run {
