@@ -12,7 +12,12 @@ import fmgp.did.method.prism._
   * didResolverPrismJS/testOnly fmgp.prism.PrismStateHTTPSuite
   */
 class PrismStateHTTPSuite extends ZSuite {
-  testZ("Get events for did:prism:00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae") {
+
+  val intregrationTest = new munit.Tag("IntregrationTest")
+
+  testZ(
+    "Get events for did:prism:00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae".tag(intregrationTest)
+  ) {
     {
       for {
         httpUtils <- ZIO.service[HttpUtils]
