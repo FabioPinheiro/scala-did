@@ -60,9 +60,9 @@ service NodeService {
   /**
     * PUBLIC
     *
-    * Retrieves the status of an operation.
+    * Retrieves the status of an event.
     */
-  rpc GetOperationInfo(GetOperationInfoRequest) returns (GetOperationInfoResponse) {}
+  rpc GetEventInfo(GetEventInfoRequest) returns (GetEventInfoResponse) {}
 
   /**
     * PUBLIC
@@ -74,9 +74,9 @@ service NodeService {
   /**
     * PUBLIC
     *
-    * Schedules a list of operations for further publication.
+    * Schedules a list of events for further publication.
     */
-  rpc ScheduleOperations(ScheduleOperationsRequest) returns (ScheduleOperationsResponse) {}
+  rpc ScheduleEvents(ScheduleEventsRequest) returns (ScheduleEventsResponse) {}
 }
 
 
@@ -94,7 +94,7 @@ message GetDidDocumentRequest {
 message GetDidDocumentResponse {
   DIDData document = 1; // The DID Document.
   google.protobuf.Timestamp last_synced_block_timestamp = 5; // Timestamp of the latest synchronized block.
-  bytes last_update_operation = 6; // The hash of the last did update operation.
+  bytes last_update_event = 6; // The hash of the last did update event.
 }
 
 // The DID Document's data.
@@ -139,21 +139,21 @@ message GetNodeNetworkProtocolInfoResponse {
 }
 
 /**
- * Request to get the operation status.
- * See NodeService.GetOperationInfo for more information.
+ * Request to get the event status.
+ * See NodeService.GetEventInfo for more information.
  */
-message GetOperationInfoRequest {
-  bytes operation_id = 1; // Operation identifier. The identifier is returned to the corresponding operation request.
+message GetEventInfoRequest {
+  bytes event_id = 1; // Event identifier. The identifier is returned to the corresponding event request.
 }
 /**
- * Response with the current operation status.
- *  See NodeService.GetOperationInfo for more information.
+ * Response with the current event status.
+ *  See NodeService.GetEventInfo for more information.
  */
-message GetOperationInfoResponse {
-  OperationStatus operation_status = 1; // Contains the status of this operation.
-  string transaction_id = 3; // Transaction identifier containing the operation. Presented only when operation was approved by the ledger.
+message GetEventInfoResponse {
+  EventStatus event_status = 1; // Contains the status of this event.
+  string transaction_id = 3; // Transaction identifier containing the event. Presented only when event was approved by the ledger.
   google.protobuf.Timestamp last_synced_block_timestamp = 2; // Timestamp of the latest synchronized block.
-  string details = 4; // Contains additional information about the operation state. For example, error descriptions. Can be empty.
+  string details = 4; // Contains additional information about the event state. For example, error descriptions. Can be empty.
 }
 
 /**
@@ -174,41 +174,41 @@ message GetLastSyncedBlockTimestampResponse {
 }
 
 /**
- * Request to retrieve transaction info and operations outputs.
+ * Request to retrieve transaction info and events outputs.
  */
-message ScheduleOperationsRequest {
+message ScheduleEventsRequest {
   /**
-  * List of signed operations to apply. The operations will be applied in the order specified here.
+  * List of signed events to apply. The events will be applied in the order specified here.
   */
-  repeated SignedPrismOperation signed_operations = 1; // a list of signed operations
+  repeated SignedPrismEvent signed_events = 1; // a list of signed events
 }
 
 /**
- * Response with the transaction info and operations outputs.
+ * Response with the transaction info and events outputs.
  */
-message ScheduleOperationsResponse {
+message ScheduleEventsResponse {
   /**
-    * The responses for scheduled operations, ordered the same as the operations sent in ScheduleOperationsRequest.
+    * The responses for scheduled events, ordered the same as the events sent in ScheduleEventsRequest.
     */
-  repeated OperationOutput outputs = 1;
+  repeated EventOutput outputs = 1;
 }
 
 
 
-// Used to encode the responses of the operations issued in an AtalaBlock.
-message OperationOutput {
+// Used to encode the responses of the events issued in an AtalaBlock.
+message EventOutput {
   oneof result {
-    // Represents the response provided by IssueCredentialBatchOperation.
+    // Represents the response provided by IssueCredentialBatchEvent.
     CreateDIDOutput create_did_output = 2;
-    // Represents the response provided by UpdateDIDOperation.
+    // Represents the response provided by UpdateDIDEvent.
     UpdateDIDOutput update_did_output = 3;
-    // Represents the response provided by ProtocolVersionUpdateOperation.
+    // Represents the response provided by ProtocolVersionUpdateEvent.
     ProtocolVersionUpdateOutput protocol_version_update_output = 7;
     DeactivateDIDOutput deactivate_did_output = 8;
   }
-  oneof operation_maybe {
-    bytes operation_id = 5; // Operation identifier.
-    string error = 6; // Error description if PRISM Node service haven't scheduled the operation.
+  oneof event_maybe {
+    bytes event_id = 5; // Event identifier.
+    string error = 6; // Error description if PRISM Node service haven't scheduled the event.
   }
 }
 
@@ -272,12 +272,12 @@ message DeactivateDIDOutput {}
  }
  
  /**
-  * The status of an Atala operation.
+  * The status of an Atala event.
   */
- enum OperationStatus {
-     UNKNOWN_OPERATION = 0; // The operation hasn't been received by the node service yet.
-     PENDING_SUBMISSION = 1; // The transaction containing this operation hasn't been published to the chain yet.
-     AWAIT_CONFIRMATION = 2; // The transaction containing this operation has been published to the chain, but hasn't been processed by PRISM yet.
-     CONFIRMED_AND_APPLIED = 3; // The operation has been successfully applied to the PRISM.
-     CONFIRMED_AND_REJECTED = 4; // The operation has been processed by PRISM, but rejected because of some error.
+ enum EventStatus {
+     UNKNOWN_EVENT = 0; // The event hasn't been received by the node service yet.
+     PENDING_SUBMISSION = 1; // The transaction containing this event hasn't been published to the chain yet.
+     AWAIT_CONFIRMATION = 2; // The transaction containing this event has been published to the chain, but hasn't been processed by PRISM yet.
+     CONFIRMED_AND_APPLIED = 3; // The event has been successfully applied to the PRISM.
+     CONFIRMED_AND_REJECTED = 4; // The event has been processed by PRISM, but rejected because of some error.
  }
