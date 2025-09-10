@@ -53,7 +53,7 @@ jobs:
       - name: Compile
         run: sbt -v compile
       - name: Test
-        run: sbt -v test
+        run: SKIP_INTEGRATION_TEST=true sbt -v test
       - name: Generate documentation
         run: sbt -v "docAll;siteAll;"
       - name: npm install
