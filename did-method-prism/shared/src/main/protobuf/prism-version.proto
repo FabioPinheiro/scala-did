@@ -31,7 +31,7 @@ message ProtocolVersionInfo {
   int32 effective_since = 4; // Cardano block number that tells since which block the update is enforced
 
   // New major and minor version to be announced,
-  // If major value changes, the node MUST stop issuing and reading events/operations, and upgrade before `effective_since` because the new protocol version.
+  // If major value changes, the node MUST stop issuing and reading events, and upgrade before `effective_since` because the new protocol version.
   // If minor value changes, the node can opt to not update. All events _published_ by this node would be also
   // understood by other nodes with the same major version. However, there may be new events that this node won't _read_
   ProtocolVersion protocol_version = 5;

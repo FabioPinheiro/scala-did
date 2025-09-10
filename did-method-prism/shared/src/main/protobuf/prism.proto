@@ -34,34 +34,34 @@ import "prism-storage.proto";
 message PrismObject {
   reserved 1, 2, 3; 
   reserved "block_hash";
-  reserved "block_operation_count"; // Number of operations in the block.
+  reserved "block_event_count"; // Number of events in the block.
   reserved "block_byte_length"; // Byte length of the block.
   
   PrismBlock block_content = 4; // The block content.
 }
 
 /**
- * Represent a block that holds evetns/operations.
+ * Represent a block that holds events.
  */
  message PrismBlock {
   reserved 1; // Represents the version of the block. Deprecated
-  repeated SignedPrismOperation operations = 2; // A signed operation, necessary to post anything on the blockchain.
+  repeated SignedPrismEvent events = 2; // A signed event, necessary to post anything on the blockchain.
   }
   
-// A signed operation, necessary to post anything on the blockchain.
-message SignedPrismOperation {
-  string signed_with = 1; // The key ID used to sign the operation, it must belong to the DID that signs the operation.
+// A signed event, necessary to post anything on the blockchain.
+message SignedPrismEvent {
+  string signed_with = 1; // The key ID used to sign the event, it must belong to the DID that signs the event.
   bytes signature = 2; // The actual signature.
-  PrismOperation operation = 3; // The operation that was signed.
+  PrismEvent event = 3; // The event that was signed.
 }
 
 
-// The possible events/operations affecting the blockchain.
-message PrismOperation {
+// The possible events affecting the blockchain.
+message PrismEvent {
   // https://github.com/input-output-hk/atala-prism-sdk/blob/master/protosLib/src/main/proto/node_models.proto
   //  reserved 3, 4; // fields used by an extension of the protocol. Not relevant for the DID method
-   // The actual operation.
-  oneof operation {
+  // The actual event.
+  oneof event {
     // Used to create a public DID.
     ProtoCreateDID create_did = 1;
 
