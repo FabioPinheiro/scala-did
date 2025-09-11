@@ -31,34 +31,82 @@ case class InvalidSignedPrismOperation(
 ) extends MaybeOperation[Nothing]
     with PrismOperationIndex
 
-case class MySignedPrismOperation[+T <: OP](
+// sealed trait SignedPrismOperationTrait[+T <: OP] extends MaybeOperation[T] {
+//   val tx: String
+//   val b: Int
+//   val o: Int
+//   val signedWith: String
+//   val signature: Array[Byte]
+//   val operation: OP
+//   val protobuf: PrismOperation
+
+//   def expandedView: SignedPrismOperationView[OP] = this match
+//     case obj: SignedPrismOperationView[OP] => obj
+//     case obj: MySignedPrismOperation[OP] =>
+//       SignedPrismOperationView(tx, b, o, signedWith, signature, operation, protobuf)
+
+//   def compressView = this match
+//     case obj: MySignedPrismOperation[OP]   => obj
+//     case obj: SignedPrismOperationView[OP] => MySignedPrismOperation[T](tx, b, o, signedWith, signature, protobuf)
+
+//     // MySignedPrismOperation(tx, b, o, signedWith, signature, protobuf)
+// }
+// object SignedPrismOperationTrait {
+//   given decoder: JsonDecoder[SignedPrismOperationTrait[OP]] = MySignedPrismOperation.decoder.widen
+//   given encoder: JsonEncoder[SignedPrismOperationTrait[OP]] =
+//     SignedPrismOperationView.encoder.contramap[SignedPrismOperationTrait[OP]](e => e.expandedView)
+//   given encoderTypeDidEvent: JsonEncoder[SignedPrismOperationTrait[OP.TypeDidEvent]] =
+//     encoder.contramap(e => e)
+//   given encoderTypeStorageEntryEvent: JsonEncoder[SignedPrismOperationTrait[OP.TypeStorageEntryEvent]] =
+//     encoder.contramap(e => e)
+// }
+
+case class MySignedPrismOperation[+T <: OP] private (
     tx: String,
     b: Int,
     o: Int,
     signedWith: String,
     signature: Array[Byte],
-    operation: T, // TODO REMOVE when encoding
     protobuf: PrismOperation
-) extends MaybeOperation[T]
+) extends MaybeOperation[T] // SignedPrismOperationTrait[T]
     with PrismOperationIndex {
   def opHash = protobuf.eventHashStr // TODO REMOVE method
   def eventHash: EventHash = protobuf.getEventHash
   def eventRef = EventRef(b = b, o = o, eventHash = protobuf.getEventHash)
   def eventCursor = EventCursor(b = b, o = o)
+  val operation: T = OP.fromPrismOperation(protobuf).asInstanceOf[T] // UNSAFE? //TODO maybe make it lazy val
+  def view = SignedPrismOperationView[T](tx, b, o, signedWith, signature, operation, protobuf)
 }
 
-// TODO replace MySignedPrismOperation
-// case class CompresedSignedPrismOperation[+T <: OP](
-//     tx: String,
-//     b: Int,
-//     o: Int,
-//     signedWith: String,
-//     signature: Array[Byte],
-//     protobuf: PrismOperation,
-// ) extends MaybeOperation[OP]
-//     with PrismOperationIndex {
-//   lazy val operation: T = OP.fromPrismOperation(protobuf).asInstanceOf[T] //FIXME
-// }
+case class SignedPrismOperationView[+T <: OP](
+    tx: String,
+    b: Int,
+    o: Int,
+    signedWith: String,
+    signature: Array[Byte],
+    operation: OP,
+    protobuf: PrismOperation
+) //extends SignedPrismOperationTrait
+
+object SignedPrismOperationView {
+  given decoder: JsonDecoder[SignedPrismOperationView[OP]] = {
+    import fmgp.util.decoderByteArray
+    given decoderPrismOperation: JsonDecoder[PrismOperation] = // use mapOrFail
+      decoderByteArray.map(e => PrismOperation.parseFrom(e)) // FIXME catch exceptions
+    DeriveJsonDecoder.gen[SignedPrismOperationView[OP]]
+  }
+  given encoder: JsonEncoder[SignedPrismOperationView[OP]] = {
+    import fmgp.util.encoderByteArray
+    given encoderPrismOperation: JsonEncoder[PrismOperation] =
+      encoderByteArray.contramap((e: PrismOperation) => e.toByteArray)
+    DeriveJsonEncoder.gen[SignedPrismOperationView[OP]]
+  }
+
+  given encoderTypeDidEvent: JsonEncoder[SignedPrismOperationView[OP.TypeDidEvent]] =
+    encoder.contramap(e => e)
+  given encoderTypeStorageEntryEvent: JsonEncoder[SignedPrismOperationView[OP.TypeStorageEntryEvent]] =
+    encoder.contramap(e => e)
+}
 
 object InvalidPrismObject {
   given decoder: JsonDecoder[InvalidPrismObject] = DeriveJsonDecoder.gen[InvalidPrismObject]
@@ -70,6 +118,27 @@ object InvalidSignedPrismOperation {
 }
 
 object MySignedPrismOperation {
+
+  def apply[T <: OP](
+      tx: String,
+      b: Int,
+      o: Int,
+      signedWith: String,
+      signature: Array[Byte],
+      // operation: T,
+      protobuf: PrismOperation
+  ) = new MySignedPrismOperation(
+    tx = tx,
+    b = b,
+    o = o,
+    signedWith = signedWith,
+    signature = signature,
+    // operation = operation,
+    protobuf = protobuf,
+  ).asInstanceOf[MySignedPrismOperation[T]]
+
+  type SignedPrismEventSSI = MySignedPrismOperation[OP.TypeDidEvent]
+  type SignedPrismEventStorage = MySignedPrismOperation[OP.TypeStorageEntryEvent]
 
   given decoder: JsonDecoder[MySignedPrismOperation[OP]] = {
     import fmgp.util.decoderByteArray
@@ -133,13 +202,14 @@ object MaybeOperation {
         operation match
           case None => InvalidSignedPrismOperation(tx = tx, b = blockIndex, o = opIndex, "operation is missing")
           case Some(prismOperation) =>
+            // FIXME OP.fromPrismOperation(prismOperation) is UNSAFE ! So the apply method is unsafe
             MySignedPrismOperation(
               tx = tx,
               b = blockIndex,
               o = opIndex,
               signedWith = signedWith,
               signature = signature.toByteArray(),
-              operation = OP.fromPrismOperation(prismOperation),
+              // operation = OP.fromPrismOperation(prismOperation),
               protobuf = prismOperation,
             )
 }

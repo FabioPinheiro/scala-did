@@ -65,7 +65,7 @@ case class PrismStateInMemory(
     * Validation is then when it's been resolved.
     */
   override def addEvent(op: MySignedPrismOperation[OP]): PrismState = op match
-    case MySignedPrismOperation(tx, prismBlockIndex, prismOperationIndex, signedWith, signature, operation, pb) =>
+    case MySignedPrismOperation(tx, prismBlockIndex, prismOperationIndex, signedWith, signature, pb) =>
       val opId = op.eventRef // rename to eventRef
       val newOpHash2op = opHash2op.updatedWith(opId.eventHash.hex) {
         case Some(value) =>
@@ -77,7 +77,7 @@ case class PrismStateInMemory(
         case None      => Some(Seq(opId))
         case Some(seq) => Some(seq :+ opId)
       }
-      operation match {
+      op.operation match {
         case VoidOP(reason)                 => this
         case IssueCredentialBatchOP(value)  => this
         case RevokeCredentialsOP(value)     => this
