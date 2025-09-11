@@ -164,7 +164,7 @@ lazy val V = new {
   val scalaLogging = "3.9.4"
 
   val bouncycastle = "1.80"
-  val nimbusJoseJwt = "10.4"
+  val nimbusJoseJwt = "10.5"
 
   val laika = "1.0.0"
 
