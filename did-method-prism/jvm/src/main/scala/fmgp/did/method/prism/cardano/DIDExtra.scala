@@ -11,9 +11,9 @@ object DIDExtra {
   def createDID(
       masterKeys: Seq[(String, Secp256k1PrivateKey)],
       vdrKeys: Seq[(String, Secp256k1PrivateKey)]
-  ): (DIDPrism, SignedPrismOperation) = {
-    def op = PrismOperation(
-      operation = PrismOperation.Operation.CreateDid(
+  ): (DIDPrism, SignedPrismEvent) = {
+    def op = PrismEvent(
+      event = PrismEvent.Event.CreateDid(
         value = ProtoCreateDID(
           didData = Some(
             ProtoCreateDID.DIDCreationData(
@@ -39,10 +39,10 @@ object DIDExtra {
         )
       )
     )
-    def signedPrismCreateEventDID = SignedPrismOperation(
+    def signedPrismCreateEventDID = SignedPrismEvent(
       signedWith = masterKeys.head._1,
       signature = ByteString.copyFrom(masterKeys.head._2.sign(op.toByteArray)),
-      operation = Some(op)
+      event = Some(op)
     )
     def didPrism: DIDPrism = op.didPrism.getOrElse(???)
     (didPrism, signedPrismCreateEventDID)

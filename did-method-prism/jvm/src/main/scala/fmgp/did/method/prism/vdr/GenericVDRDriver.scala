@@ -44,18 +44,18 @@ class GenericVDRDriver(
       state <- updateState
       ssi <- state.getSSI(didPrism)
       _ <- ZIO.log("SSI: " + ssi.toJsonPretty)
-      (refVDR, signedPrismOperation) =
+      (refVDR, signedPrismEvent) =
         VDRUtils.createVDREntryBytes(
           didPrism = didPrism,
           vdrKey = vdrKey,
           keyName = keyName,
           data = data,
         )
-      _ <- ZIO.log(s"New signedPrismOperation to create $refVDR: ${bytes2Hex(signedPrismOperation.toByteArray)}")
+      _ <- ZIO.log(s"New signedPrismEvent to create $refVDR: ${bytes2Hex(signedPrismEvent.toByteArray)}")
       tx = CardanoService.makeTrasation(
         bfConfig = bfConfig,
         wallet = wallet,
-        prismEvents = Seq(signedPrismOperation),
+        prismEvents = Seq(signedPrismEvent),
         maybeMsgCIP20,
       )
       _ <- ZIO.log(s"Transation: ${bytes2Hex(tx.serialize)}")
@@ -73,18 +73,18 @@ class GenericVDRDriver(
       previousEventHashStr = vdrEntry.latestVDRHash.get // FIXME fix what?
       // TODO check is in of the type bytes
       // TODO check key
-      (eventHash, signedPrismOperation) = VDRUtils.updateVDREntryBytes(
+      (eventHash, signedPrismEvent) = VDRUtils.updateVDREntryBytes(
         eventRef = eventRef,
         previousEventHash = previousEventHashStr,
         vdrKey = vdrKey,
         keyName = keyName,
         data = data,
       )
-      _ <- ZIO.log(s"New signedPrismOperation to update $eventRef: ${bytes2Hex(signedPrismOperation.toByteArray)}")
+      _ <- ZIO.log(s"New signedPrismEvent to update $eventRef: ${bytes2Hex(signedPrismEvent.toByteArray)}")
       tx = CardanoService.makeTrasation(
         bfConfig = bfConfig,
         wallet = wallet,
-        prismEvents = Seq(signedPrismOperation),
+        prismEvents = Seq(signedPrismEvent),
         maybeMsgCIP20,
       )
       _ <- ZIO.log(s"Transation: ${bytes2Hex(tx.serialize)}")
@@ -109,17 +109,17 @@ class GenericVDRDriver(
       previousEventHashStr = vdrEntry.latestVDRHash.get // FIXME fix what?
       // TODO check is in of the type bytes
       // TODO check key
-      (eventHash, signedPrismOperation) = VDRUtils.deactivateVDREntry(
+      (eventHash, signedPrismEvent) = VDRUtils.deactivateVDREntry(
         eventRef = eventRef,
         previousEventHash = previousEventHashStr,
         vdrKey = vdrKey,
         keyName = keyName,
       )
-      _ <- ZIO.log(s"New signedPrismOperation to deactivate $eventRef: ${bytes2Hex(signedPrismOperation.toByteArray)}")
+      _ <- ZIO.log(s"New signedPrismEvent to deactivate $eventRef: ${bytes2Hex(signedPrismEvent.toByteArray)}")
       tx = CardanoService.makeTrasation(
         bfConfig = bfConfig,
         wallet = wallet,
-        prismEvents = Seq(signedPrismOperation),
+        prismEvents = Seq(signedPrismEvent),
         maybeMsgCIP20,
       )
       _ <- ZIO.log(s"Transation: ${bytes2Hex(tx.serialize)}")

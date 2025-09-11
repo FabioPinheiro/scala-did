@@ -9,7 +9,7 @@ import com.google.protobuf.InvalidProtocolBufferException
 
 // TODO Catch Exceptions from proto parseFrom
 // PrismObject.parseFrom(protoBytes)
-//SignedPrismOperation.parseFrom(
+//SignedPrismEvent.parseFrom(
 
 extension [A <: GeneratedMessage](proto: GeneratedMessageCompanion[A]) {
 

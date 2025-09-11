@@ -47,9 +47,9 @@ object DIDPrism {
   def applyUnsafe(did: String): DIDPrism = DIDPrism(DIDSubject(did).specificId)
 
   def fromEventHash(hash: Array[Byte]): DIDPrism = DIDPrism(bytes2Hex(hash))
-  def fromEvent(event: MySignedPrismOperation[OP]): DIDPrism = // Either[String, DIDPrism]
-    event.operation match
-      case CreateDidOP(publicKeys, services, context) => applyUnsafe(event.eventHash.hex)
+  def fromEvent(sEvent: MySignedPrismEvent[OP]): DIDPrism = // Either[String, DIDPrism]
+    sEvent.event match
+      case CreateDidOP(publicKeys, services, context) => applyUnsafe(sEvent.eventHash.hex)
       case _                                          => ??? // FIXME
 
   def fromString(string: String): Either[String, DIDPrism] = string match {
@@ -66,7 +66,7 @@ object DIDPrism {
 
   def fromDID(did: DID): Either[String, DIDPrism] = fromString(did.string)
   def fromSSI(ssi: SSI): DIDPrism = ssi.didPrism
-  // // def fromCreateEvent(op: MySignedPrismOperation[CreateDidOP | UpdateDidOP | DeactivateDidOP]) =
-  // def fromCreateEvent(op: MySignedPrismOperation[CreateDidOP]) =
+  // // def fromCreateEvent(op: MySignedPrismEvent[CreateDidOP | UpdateDidOP | DeactivateDidOP]) =
+  // def fromCreateEvent(op: MySignedPrismEvent[CreateDidOP]) =
   //   SSI.init(DIDPrism(op.opHash)).append(op).didDocument
 }

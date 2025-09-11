@@ -91,11 +91,11 @@ class CrytoUtilSuite extends FunSuite {
 
   test("Metadata 6418 (CompressedECKey)") {
     val cardanoPrismEntry = MainnetExamples.metadata_6418.toCardanoPrismEntry.getOrElse(???)
-    val tmp = MaybeOperation.fromProto(cardanoPrismEntry.content, "tx", -1)
-    val mySignedPrismOperation = tmp.head.asInstanceOf[MySignedPrismOperation[OP]]
+    val tmp = MaybeEvent.fromProto(cardanoPrismEntry.content, "tx", -1)
+    val mySignedPrismEvent = tmp.head.asInstanceOf[MySignedPrismEvent[OP]]
 
     PrismPublicKey
-      .filterECKey(mySignedPrismOperation.operation.asInstanceOf[CreateDidOP].publicKeys)
+      .filterECKey(mySignedPrismEvent.event.asInstanceOf[CreateDidOP].publicKeys)
       .find(_.usage == PrismKeyUsage.MasterKeyUsage) match
       case None                                                           => fail("Missing MASTER_KEY")
       case Some(PrismPublicKey.UncompressedECKey(id, usage, curve, x, y)) => fail("Expeting CompressedEcKeyData")
@@ -106,8 +106,8 @@ class CrytoUtilSuite extends FunSuite {
             val p = key.asInstanceOf[java.security.interfaces.ECPublicKey]
 
             CrytoUtil.checkECDSASignature(
-              msg = mySignedPrismOperation.protobuf.toByteArray,
-              sig = mySignedPrismOperation.signature,
+              msg = mySignedPrismEvent.protobuf.toByteArray,
+              sig = mySignedPrismEvent.signature,
               pubKey = key
             ) match
               case Left(ex)     => fail(ex)
@@ -117,11 +117,11 @@ class CrytoUtilSuite extends FunSuite {
 
   test("Metadata 6451 (CompressedECKey)") {
     val cardanoPrismEntry = MainnetExamples.metadata_6451.toCardanoPrismEntry.getOrElse(???)
-    val tmp = MaybeOperation.fromProto(cardanoPrismEntry.content, "tx", -1)
-    val mySignedPrismOperation = tmp.head.asInstanceOf[MySignedPrismOperation[OP]]
+    val tmp = MaybeEvent.fromProto(cardanoPrismEntry.content, "tx", -1)
+    val mySignedPrismEvent = tmp.head.asInstanceOf[MySignedPrismEvent[OP]]
 
     PrismPublicKey
-      .filterECKey(mySignedPrismOperation.operation.asInstanceOf[CreateDidOP].publicKeys)
+      .filterECKey(mySignedPrismEvent.event.asInstanceOf[CreateDidOP].publicKeys)
       .find(_.usage == PrismKeyUsage.MasterKeyUsage) match
       case None                                                           => fail("Missing MASTER_KEY")
       case Some(PrismPublicKey.UncompressedECKey(id, usage, curve, x, y)) => fail("Expeting CompressedEcKeyData")
@@ -130,8 +130,8 @@ class CrytoUtilSuite extends FunSuite {
           case Left(error) => fail("No key: error")
           case Right(key) =>
             CrytoUtil.checkECDSASignature(
-              msg = mySignedPrismOperation.protobuf.toByteArray,
-              sig = mySignedPrismOperation.signature,
+              msg = mySignedPrismEvent.protobuf.toByteArray,
+              sig = mySignedPrismEvent.signature,
               pubKey = key
             ) match
               case Left(ex)     => fail(ex)
@@ -141,10 +141,10 @@ class CrytoUtilSuite extends FunSuite {
 
   // test("Metadata 6452 (UncompressedECKey)") {
   //   val cardanoPrismEntry = MainnetExamples.metadata_6452.toCardanoPrismEntry.getOrElse(???)
-  //   val tmp = MaybeOperation.fromProto("tx", -1, cardanoPrismEntry.content)
-  //   val mySignedPrismOperation = tmp.head.asInstanceOf[MySignedPrismOperation[OP]]
+  //   val tmp = MaybeEvent.fromProto("tx", -1, cardanoPrismEntry.content)
+  //   val mySignedPrismEvent = tmp.head.asInstanceOf[MySignedPrismEvent[OP]]
   //   PrismPublicKey
-  //     .filterECKey(mySignedPrismOperation.operation.asInstanceOf[CreateDidOP].publicKeys)
+  //     .filterECKey(mySignedPrismEvent.event.asInstanceOf[CreateDidOP].publicKeys)
   //     .find(_.usage == PrismKeyUsage.MasterKeyUsage) match
   //     case None                                          => fail("Missing MASTER_KEY")
   //     case Some(CompressedECKey(id, usage, curve, data)) => fail("Expeting UncompressedECKey")
@@ -153,8 +153,8 @@ class CrytoUtilSuite extends FunSuite {
   //         case Left(error) => fail("No key: error")
   //         case Right(key) =>
   //           CrytoUtil.checkECDSASignature(
-  //             msg = mySignedPrismOperation.protobuf.toByteArray,
-  //             sig = mySignedPrismOperation.signature,
+  //             msg = mySignedPrismEvent.protobuf.toByteArray,
+  //             sig = mySignedPrismEvent.signature,
   //             pubKey = key
   //           ) match
   //             case Left(ex)     => fail(ex)

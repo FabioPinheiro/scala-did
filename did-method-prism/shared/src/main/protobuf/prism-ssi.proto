@@ -12,7 +12,7 @@ option (scalapb.options) = {
   scala3_sources: true
 };
 
-// The operation to create a public DID.
+// The event to create a public DID.
 message ProtoCreateDID {
   DIDCreationData did_data = 1; // DIDCreationData with public keys and services
 
@@ -27,13 +27,13 @@ message ProtoCreateDID {
 
 // Specifies the necessary data to update a public DID.
 message ProtoUpdateDID {
-  bytes previous_operation_hash = 1; // The hash of the most recent operation that was used to create or update the DID.
-  string id = 2; // @exclude TODO: To be redefined after we start using this operation.
+  bytes previous_event_hash = 1; // The hash of the most recent event that was used to create or update the DID.
+  string id = 2; // @exclude TODO: To be redefined after we start using this event.
   repeated UpdateDIDAction actions = 3; // The actual updates to perform on the DID.
 }
 
 message ProtoDeactivateDID {
-  bytes previous_operation_hash = 1; // The hash of the most recent operation that was used to create or update the DID.
+  bytes previous_event_hash = 1; // The hash of the most recent event that was used to create or update the DID.
   string id = 2; // DID Suffix of the DID to be deactivated
 }
 
@@ -65,10 +65,7 @@ enum KeyUsage {
   REVOCATION_KEY = 5;
   CAPABILITY_INVOCATION_KEY = 6;
   CAPABILITY_DELEGATION_KEY = 7;
-
-
-  // !!!!!!!!!!!!!!!!!!!!!!
-  VDR_KEY = 8; // Create, Update, Remove - VDR entries. This key does not appear in the document.
+  VDR_KEY = 8; // Create, Update, Remove - VDR entries. This key does not appear in the DID document.
 }
 
 /**
@@ -88,15 +85,11 @@ message CompressedECKeyData {
   bytes data = 2; // compressed Elliptic Curve (EC) public key data.
 }
 
-// ##########
-
 message Service {
   string id = 1;
   string type = 2;
   string service_endpoint = 3;
 }
-
-// ##########
 
 // The potential details that can be updated in a DID.
 message UpdateDIDAction {
@@ -111,7 +104,6 @@ message UpdateDIDAction {
     PatchContextAction patch_context = 6; // Used to Update a list of `@context` strings used during resolution for a given DID.
   }
 }
-
 
 // The necessary data to add a key to a DID.
 message AddKeyAction {

@@ -13,14 +13,14 @@ case class PrismStateFS() extends PrismStateRead {
   override def getEventsIdByVDR(ref: RefVDR): Seq[EventRef] = ???
 
   override def getEventsForSSI(ssi: DIDSubject): ZIO[Any, Throwable, Seq[
-    MySignedPrismOperation[CreateDidOP | UpdateDidOP | DeactivateDidOP]
+    MySignedPrismEvent[CreateDidOP | UpdateDidOP | DeactivateDidOP]
   ]] = ???
 
   override def getEventsForVDR(refVDR: RefVDR): ZIO[Any, Throwable, Seq[
-    MySignedPrismOperation[CreateStorageEntryOP | UpdateStorageEntryOP | DeactivateStorageEntryOP]
+    MySignedPrismEvent[CreateStorageEntryOP | UpdateStorageEntryOP | DeactivateStorageEntryOP]
   ]] = ???
 
-  override def getEventsByHash(refHash: EventHash): Option[MySignedPrismOperation[OP]] = ???
+  override def getEventsByHash(refHash: EventHash): Option[MySignedPrismEvent[OP]] = ???
 
   override def ssi2eventsId: Map[DIDSubject, Seq[EventRef]] = ???
 

@@ -32,7 +32,7 @@ class PrismStateHTTPSuite extends ZSuite {
             |  "o" : 0,
             |  "signedWith" : "master0",
             |  "signature" : "304502210088333a3046528671e651afda2975546a9ecfa9e5c953a649b8d5b6d8f84507bd02203d9c4f7930c6cf99d37c592b316bf0c2b1563a8525309478a7b9b4e6318d03eb",
-            |  "operation" : {
+            |  "event" : {
             |    "CreateDidOP" : {
             |      "publicKeys" : [
             |        {
@@ -59,9 +59,9 @@ class PrismStateHTTPSuite extends ZSuite {
             |  "o" : 1,
             |  "signedWith" : "master0",
             |  "signature" : "3045022100931b1a758cb7a34e7a159de8acb4e52751323e37aadeee2d33d121696ccb29b402204e54027e3ee1b6f38e511b9cf85865c45980e696686ad7548d810d2df05e8ed7",
-            |  "operation" : {
+            |  "event" : {
             |    "UpdateDidOP" : {
-            |      "previousOperationHash" : "00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae",
+            |      "previousEventHash" : "00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae",
             |      "id" : "00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae",
             |      "actions" : [
             |        {

@@ -33,8 +33,8 @@ import fmgp.util._
 import fmgp.did.method.prism.cardano._
 import fmgp.did.method.prism.vdr._
 import _root_.proto.prism.PrismBlock
-import _root_.proto.prism.PrismOperation
-import _root_.proto.prism.SignedPrismOperation
+// import _root_.proto.prism.PrismEvent
+import _root_.proto.prism.SignedPrismEvent
 import _root_.proto.prism.PrismObject
 
 object CardanoService {
@@ -106,20 +106,20 @@ object CardanoService {
   def makeTxBuilder(
       bfConfig: BlockfrostConfig,
       wallet: CardanoWalletConfig,
-      prismEvents: Seq[SignedPrismOperation],
+      prismEvents: Seq[SignedPrismEvent],
       maybeMsgCIP20: Option[String],
   ): TxBuilder =
     makeTxBuilder(
       bfConfig,
       wallet,
-      PrismObject(blockContent = Some(PrismBlock(operations = prismEvents))),
+      PrismObject(blockContent = Some(PrismBlock(events = prismEvents))),
       maybeMsgCIP20
     )
 
   def makeTrasation(
       bfConfig: BlockfrostConfig,
       wallet: CardanoWalletConfig,
-      prismEvents: Seq[SignedPrismOperation],
+      prismEvents: Seq[SignedPrismEvent],
       maybeMsgCIP20: Option[String],
   ): Transaction = {
 
