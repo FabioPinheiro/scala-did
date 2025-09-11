@@ -43,8 +43,8 @@ final case class VDR(
         if (!ssi.checkVdrSignature(spo)) self
         else {
           spo match
-            case MySignedPrismOperation(tx, b, o, signedWith, signature, operation, protobuf) =>
-              operation match
+            case MySignedPrismOperation(tx, b, o, signedWith, signature, protobuf) =>
+              spo.operation match
                 case event @ CreateStorageEntryOP(didPrism, nonce, newData, unknownFields) =>
                   if (latestVDRHash.isDefined) self
                   else

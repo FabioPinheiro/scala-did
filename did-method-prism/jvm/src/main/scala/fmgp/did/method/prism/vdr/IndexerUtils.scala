@@ -54,7 +54,7 @@ object IndexerUtils {
           ec.copy(invalidPrismObject = ec.invalidPrismObject + 1)
         case InvalidSignedPrismOperation(tx, b, o, reason) =>
           ec.copy(invalidSignedPrismOperation = ec.invalidSignedPrismOperation + 1)
-        case MySignedPrismOperation(tx, b, o, signedWith, signature, operation, protobuf) =>
+        case MySignedPrismOperation(tx, b, o, signedWith, signature, protobuf) =>
           ec.copy(signedPrismOperation = ec.signedPrismOperation + 1)
 
     })
