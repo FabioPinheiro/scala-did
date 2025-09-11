@@ -7,6 +7,7 @@ import fmgp.did.method.prism.PrismStateInMemory
 import fmgp.did.method.prism.proto._
 import PreprodExamples._
 
+/** didResolverPrismJVM/testOnly fmgp.did.method.prism.cardano.PreprodModelsSuite */
 class PreprodModelsSuite extends FunSuite {
   test("CardanoMetadata 416") {
     assert(metadata_416_cbor.toCardanoPrismEntry.isRight)
@@ -32,7 +33,7 @@ class PreprodModelsSuite extends FunSuite {
             case InvalidPrismObject(tx, b, reason) => fail(s"Must be MySignedPrismOperation: fail with $reason")
             case InvalidSignedPrismOperation(tx, b, o, reason) =>
               fail(s"Must be MySignedPrismOperation: fail with $reason")
-            case MySignedPrismOperation(tx, b, o, signedWith, signature, operation, protobuf) => // ok
+            case MySignedPrismOperation(tx, b, o, signedWith, signature, protobuf) => // ok
             // println (operation.toJsonPretty)
           }
 
@@ -57,7 +58,7 @@ class PreprodModelsSuite extends FunSuite {
     })
 
     aux2(0).head match
-      case MySignedPrismOperation(tx, b, o, signedWith, signature, operation, protobuf) =>
+      case MySignedPrismOperation(tx, b, o, signedWith, signature, protobuf) =>
 
     val op0 = aux2(0).head.asInstanceOf[MySignedPrismOperation[CreateDidOP]]
     val op1 = aux2(1).head.asInstanceOf[MySignedPrismOperation[UpdateDidOP]]
