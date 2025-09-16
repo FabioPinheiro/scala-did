@@ -104,12 +104,12 @@ object Indexer extends ZIOAppDefault {
   def sinkLog: ZSink[Any, java.io.IOException, MaybeOperation[OP], Nothing, Unit] = ZSink.foreach {
     case InvalidPrismObject(tx, b, reason)             => Console.printLineError(s"$b - tx:$tx - $reason")
     case InvalidSignedPrismOperation(tx, b, o, reason) => Console.printLineError(s"$b - tx:$tx op:$o - $reason")
-    case op @ MySignedPrismOperation(tx, b, o, signedWith, signature, operation, pb) =>
-      val str = operation match
+    case op @ MySignedPrismOperation(tx, b, o, signedWith, signature, pb) =>
+      val str = op.operation match
         case CreateDidOP(publicKeys, services, context) => s"CreateDidOP: did:prism:${op.opHash}"
         case UpdateDidOP(previousOperationHash, id, actions) =>
           s"UpdateDidOP: previousOperationHash=$previousOperationHash}"
-        case _ => operation.getClass.getName
+        case _ => op.operation.getClass.getName
       Console.printLine(s"$b - tx:$tx op:$o - $str")
   }
 

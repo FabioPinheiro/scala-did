@@ -55,8 +55,8 @@ final case class SSI(
     else
       {
         spo match
-          case MySignedPrismOperation(tx, prismBlockIndex, prismOperationIndex, signedWith, signature, operation, pb) =>
-            operation match
+          case MySignedPrismOperation(tx, prismBlockIndex, prismOperationIndex, signedWith, signature, pb) =>
+            spo.operation match
               case CreateDidOP(publicKeys, services, context) =>
                 latestHash match
                   case Some(value) => self // The Identity already exists

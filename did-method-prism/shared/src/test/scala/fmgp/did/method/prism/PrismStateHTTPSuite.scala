@@ -7,9 +7,9 @@ import fmgp.did.method.prism._
 
 /** PrismStateHTTPSuite
   *
-  * didResolverPrismJVM/testOnly fmgp.prism.PrismStateHTTPSuite
+  * didResolverPrismJVM/testOnly fmgp.did.method.prism.PrismStateHTTPSuite
   *
-  * didResolverPrismJS/testOnly fmgp.prism.PrismStateHTTPSuite
+  * didResolverPrismJS/testOnly fmgp.did.method.prism.PrismStateHTTPSuite
   */
 class PrismStateHTTPSuite extends ZSuite {
 
@@ -25,7 +25,7 @@ class PrismStateHTTPSuite extends ZSuite {
         events <- state.getEventsForSSI(DIDPrism("00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae"))
         _ = assertEquals(events.size, 2)
         _ = assertEquals(
-          events.head.toJsonPretty,
+          events.head.view.toJsonPretty,
           """{
             |  "tx" : "bc688c8d7b1588a0fb10b307b6e975998eb0aedf039440580ddcec1cc51bb66d",
             |  "b" : 89,
@@ -52,7 +52,7 @@ class PrismStateHTTPSuite extends ZSuite {
             |}""".stripMargin
         )
         _ = assertEquals(
-          events.tail.head.toJsonPretty,
+          events.tail.head.view.toJsonPretty,
           """{
             |  "tx" : "bc688c8d7b1588a0fb10b307b6e975998eb0aedf039440580ddcec1cc51bb66d",
             |  "b" : 89,
