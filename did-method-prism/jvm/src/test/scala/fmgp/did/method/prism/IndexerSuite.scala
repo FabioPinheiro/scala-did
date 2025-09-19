@@ -6,11 +6,11 @@ import zio.json._
 import zio.stream._
 
 import fmgp.did.method.prism.vdr.IndexerUtils
-import fmgp.did.method.prism.proto.MaybeOperation
+import fmgp.did.method.prism.proto.MaybeEvent
 import _root_.proto.prism._
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
-import fmgp.did.method.prism.proto.MySignedPrismOperation
+import fmgp.did.method.prism.proto.MySignedPrismEvent
 import fmgp.crypto.SHA256
 
 /** didResolverPrismJVM/testOnly fmgp.did.method.prism.IndexerSuite
@@ -26,9 +26,9 @@ class IndexerSuite extends ZSuite {
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR)
           .map(e => hex2bytes(e))
-          .map(protoBytes => SignedPrismOperation.parseFrom(protoBytes))
+          .map(protoBytes => SignedPrismEvent.parseFrom(protoBytes))
           .zipWithIndex
-          .map((proto, index) => MaybeOperation.fromProto(proto, "tx", 0, index))
+          .map((proto, index) => MaybeEvent.fromProto(proto, "tx", 0, index))
       )
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)
@@ -52,9 +52,9 @@ class IndexerSuite extends ZSuite {
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR, updateVDR)
           .map(e => hex2bytes(e))
-          .map(protoBytes => SignedPrismOperation.parseFrom(protoBytes))
+          .map(protoBytes => SignedPrismEvent.parseFrom(protoBytes))
           .zipWithIndex
-          .map((proto, index) => MaybeOperation.fromProto(proto, "tx", 0, index))
+          .map((proto, index) => MaybeEvent.fromProto(proto, "tx", 0, index))
       )
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)
@@ -79,9 +79,9 @@ class IndexerSuite extends ZSuite {
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR, updateVDR_withUnknownField49)
           .map(e => hex2bytes(e))
-          .map(protoBytes => SignedPrismOperation.parseFrom(protoBytes))
+          .map(protoBytes => SignedPrismEvent.parseFrom(protoBytes))
           .zipWithIndex
-          .map((proto, index) => MaybeOperation.fromProto(proto, "tx", 0, index))
+          .map((proto, index) => MaybeEvent.fromProto(proto, "tx", 0, index))
       )
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)
@@ -106,9 +106,9 @@ class IndexerSuite extends ZSuite {
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR, updateVDR_withUnknownField99)
           .map(e => hex2bytes(e))
-          .map(protoBytes => SignedPrismOperation.parseFrom(protoBytes))
+          .map(protoBytes => SignedPrismEvent.parseFrom(protoBytes))
           .zipWithIndex
-          .map((proto, index) => MaybeOperation.fromProto(proto, "tx", 0, index))
+          .map((proto, index) => MaybeEvent.fromProto(proto, "tx", 0, index))
       )
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)
@@ -133,9 +133,9 @@ class IndexerSuite extends ZSuite {
       stream = ZStream.fromIterable(
         Seq(createSSI, updateVDR, createVDR)
           .map(e => hex2bytes(e))
-          .map(protoBytes => SignedPrismOperation.parseFrom(protoBytes))
+          .map(protoBytes => SignedPrismEvent.parseFrom(protoBytes))
           .zipWithIndex
-          .map((proto, index) => MaybeOperation.fromProto(proto, "tx", 0, index))
+          .map((proto, index) => MaybeEvent.fromProto(proto, "tx", 0, index))
       )
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)
@@ -159,9 +159,9 @@ class IndexerSuite extends ZSuite {
       stream = ZStream.fromIterable(
         Seq(createSSI, updateSSI_addKey)
           .map(e => hex2bytes(e))
-          .map(protoBytes => SignedPrismOperation.parseFrom(protoBytes))
+          .map(protoBytes => SignedPrismEvent.parseFrom(protoBytes))
           .zipWithIndex
-          .map((proto, index) => MaybeOperation.fromProto(proto, "tx", 0, index))
+          .map((proto, index) => MaybeEvent.fromProto(proto, "tx", 0, index))
       )
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)
@@ -183,9 +183,9 @@ class IndexerSuite extends ZSuite {
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR, updateVDR, updateSSI_addKey, updateVDR_withTheNewKey)
           .map(e => hex2bytes(e))
-          .map(protoBytes => SignedPrismOperation.parseFrom(protoBytes))
+          .map(protoBytes => SignedPrismEvent.parseFrom(protoBytes))
           .zipWithIndex
-          .map((proto, index) => MaybeOperation.fromProto(proto, "tx", 0, index))
+          .map((proto, index) => MaybeEvent.fromProto(proto, "tx", 0, index))
       )
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)
@@ -212,9 +212,9 @@ class IndexerSuite extends ZSuite {
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR, updateVDR, updateVDR_withTheNewKey, updateSSI_addKey)
           .map(e => hex2bytes(e))
-          .map(protoBytes => SignedPrismOperation.parseFrom(protoBytes))
+          .map(protoBytes => SignedPrismEvent.parseFrom(protoBytes))
           .zipWithIndex
-          .map((proto, index) => MaybeOperation.fromProto(proto, "tx", 0, index))
+          .map((proto, index) => MaybeEvent.fromProto(proto, "tx", 0, index))
       )
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)

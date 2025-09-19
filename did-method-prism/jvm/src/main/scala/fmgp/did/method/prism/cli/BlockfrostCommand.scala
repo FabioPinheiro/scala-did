@@ -12,10 +12,9 @@ import fmgp.did.method.prism.cardano.CardanoWalletConfig
 import fmgp.did.method.prism.cardano.CardanoNetwork
 import fmgp.did.method.prism.cardano.TxHash
 import fmgp.did.method.prism.cli.CMD.BlockfrostSubmitEvents
-import fmgp.did.method.prism.proto.MaybeOperation
 import fmgp.did.method.prism.proto.tryParseFrom
-import proto.prism.PrismOperation
-import proto.prism.SignedPrismOperation
+import proto.prism.PrismEvent
+import proto.prism.SignedPrismEvent
 import fmgp.util.bytes2Hex
 import fmgp.util.hex2bytes
 
@@ -59,9 +58,9 @@ object BlockfrostCommand {
     .mapOrFail { hexList =>
       hexList
         .map { hex => Right(hex2bytes(hex)) }
-        .map { case Right(bytes) => SignedPrismOperation.tryParseFrom(bytes) }
+        .map { case Right(bytes) => SignedPrismEvent.tryParseFrom(bytes) }
         .zipWithIndex
-        .foldLeft[Either[HelpDoc, Seq[SignedPrismOperation]]](Right(Seq.empty)) {
+        .foldLeft[Either[HelpDoc, Seq[SignedPrismEvent]]](Right(Seq.empty)) {
           case (Right(acc), (Right(value), index)) => Right(acc :+ value)
           case (Right(acc), (Left(errorMsh), index)) =>
             Left(HelpDoc.p(s"Fail to parse the Signed Prism Event ($index): $errorMsh"))

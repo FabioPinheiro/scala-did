@@ -6,7 +6,7 @@ import fmgp.did.method.prism.BlockfrostConfig
 import fmgp.did.method.prism.cardano.CardanoNetwork
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
 import java.nio.file.Path
-import proto.prism.SignedPrismOperation
+import proto.prism.SignedPrismEvent
 
 sealed trait CMD extends Product with Serializable
 object CMD {
@@ -36,7 +36,7 @@ object CMD {
   final case class BlockfrostSubmitEvents(
       setup: Setup,
       network: CardanoNetwork,
-      events: Seq[SignedPrismOperation],
+      events: Seq[SignedPrismEvent],
   ) extends BlockfrostCMD
 
   sealed trait KeyCMD extends CMD

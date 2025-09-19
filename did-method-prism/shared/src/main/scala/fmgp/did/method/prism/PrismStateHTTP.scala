@@ -15,16 +15,16 @@ case class PrismStateHTTP(
 
   override def getEventsForSSI(
       ssi: DIDSubject
-  ): ZIO[Any, Throwable, Seq[MySignedPrismOperation[CreateDidOP | UpdateDidOP | DeactivateDidOP]]] = {
+  ): ZIO[Any, Throwable, Seq[MySignedPrismEvent[CreateDidOP | UpdateDidOP | DeactivateDidOP]]] = {
     val destination = s"$pathEventsByDID/${ssi.specificId}"
     for {
       proxy <- ZIO.service[HttpUtils]
-      ret <- proxy.getSeqT[MySignedPrismOperation[OP]](destination)
+      ret <- proxy.getSeqT[MySignedPrismEvent[OP]](destination)
       retTyped <- PrismState.forceType2DidEvent(ret)
     } yield retTyped
   }.provideEnvironment(ZEnvironment(httpUtils))
 
-  override def getEventsByHash(refHash: EventHash): Option[MySignedPrismOperation[OP]] = ???
+  override def getEventsByHash(refHash: EventHash): Option[MySignedPrismEvent[OP]] = ???
   override def getEventsIdBySSI(ssi: DIDSubject): Seq[EventRef] = ???
   override def getEventsIdByVDR(ref: RefVDR): Seq[EventRef] = ???
   override def ssi2eventsId: Map[DIDSubject, Seq[EventRef]] = ???

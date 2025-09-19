@@ -17,7 +17,7 @@ object PrismStateInMemory {
 }
 
 case class PrismStateInMemory(
-    opHash2op: Map[String, MySignedPrismOperation[OP]], // TODO type EventHash
+    opHash2op: Map[String, MySignedPrismEvent[OP]], // TODO type EventHash
     tx2eventRef: Map[String, Seq[EventRef]],
     ssi2eventRef: Map[DIDSubject, Seq[EventRef]],
     vdr2eventRef: Map[RefVDR, Seq[EventRef]],
@@ -31,10 +31,10 @@ case class PrismStateInMemory(
     opHash2op.get(previousHash) match
       case None => None
       case Some(previousOp) =>
-        previousOp.operation match
+        previousOp.event match
           case CreateDidOP(publicKeys, services, context)     => Some(previousOp.opHash)
           case UpdateDidOP(previousPreviousHash, id, actions) => ssiFromPreviousEventHash(previousPreviousHash)
-          case DeactivateDidOP(previousOperationHash, id)     => None
+          case DeactivateDidOP(previousEventHash, id)         => None
           case _                                              => None
   }
 
@@ -43,7 +43,7 @@ case class PrismStateInMemory(
     opHash2op.get(previousHash) match
       case None => None
       case Some(previousOp) =>
-        previousOp.operation match
+        previousOp.event match
           case CreateStorageEntryOP(didPrism, nonce, data, _)   => Some(RefVDR.fromEvent(previousOp))
           case UpdateStorageEntryOP(previousEventHash, data, _) => vdrFromPreviousEventHash(previousEventHash)
           case DeactivateStorageEntryOP(previousEventHash, _)   => None
@@ -55,7 +55,7 @@ case class PrismStateInMemory(
       case None      => Seq.empty
       case Some(seq) => seq
 
-  override def getEventsByHash(refHash: EventHash): Option[MySignedPrismOperation[OP]] =
+  override def getEventsByHash(refHash: EventHash): Option[MySignedPrismEvent[OP]] =
     this.opHash2op.get(refHash.hex) match
       case None              => None
       case Some(signedEvent) => Some(signedEvent)
@@ -64,20 +64,20 @@ case class PrismStateInMemory(
     *
     * Validation is then when it's been resolved.
     */
-  override def addEvent(op: MySignedPrismOperation[OP]): PrismState = op match
-    case MySignedPrismOperation(tx, prismBlockIndex, prismOperationIndex, signedWith, signature, pb) =>
+  override def addEvent(op: MySignedPrismEvent[OP]): PrismState = op match
+    case MySignedPrismEvent(tx, prismBlockIndex, prismEventIndex, signedWith, signature, pb) =>
       val opId = op.eventRef // rename to eventRef
       val newOpHash2op = opHash2op.updatedWith(opId.eventHash.hex) {
         case Some(value) =>
           if (value.opHash == opId.eventHash.hex) Some(op)
-          else throw new RuntimeException("impossible state: duplicated operation but with different hash?")
+          else throw new RuntimeException("impossible state: duplicated event but with different hash?")
         case None => Some(op)
       }
       val newTx2eventRef = tx2eventRef.updatedWith(tx) {
         case None      => Some(Seq(opId))
         case Some(seq) => Some(seq :+ opId)
       }
-      op.operation match {
+      op.event match {
         case VoidOP(reason)                 => this
         case IssueCredentialBatchOP(value)  => this
         case RevokeCredentialsOP(value)     => this
@@ -95,8 +95,8 @@ case class PrismStateInMemory(
             ssi2eventRef = newSSI2eventRef,
             vdr2eventRef = this.vdr2eventRef,
           )
-        case UpdateDidOP(previousOperationHash, id, actions) =>
-          ssiFromPreviousEventHash(previousOperationHash) match
+        case UpdateDidOP(previousEventHash, id, actions) =>
+          ssiFromPreviousEventHash(previousEventHash) match
             case None => this // TODO add to the void
             case Some(ssiHash) =>
               val did = DIDPrism(ssiHash)
@@ -110,8 +110,8 @@ case class PrismStateInMemory(
                 ssi2eventRef = newSSI2eventRef,
                 vdr2eventRef = this.vdr2eventRef,
               )
-        case DeactivateDidOP(previousOperationHash, id) =>
-          ssiFromPreviousEventHash(previousOperationHash) match
+        case DeactivateDidOP(previousEventHash, id) =>
+          ssiFromPreviousEventHash(previousEventHash) match
             case None => this // TODO add to the void
             case Some(ssiHash) =>
               val did = DIDPrism(ssiHash)
@@ -137,8 +137,8 @@ case class PrismStateInMemory(
             ssi2eventRef = this.ssi2eventRef,
             vdr2eventRef = newVDR2eventRef,
           )
-        case UpdateStorageEntryOP(previousOperationHash, data, unknownFields) =>
-          vdrFromPreviousEventHash(previousOperationHash) match
+        case UpdateStorageEntryOP(previousEventHash, data, unknownFields) =>
+          vdrFromPreviousEventHash(previousEventHash) match
             case None => this
             case Some(vdrRef) =>
               val newVDR2eventRef = vdr2eventRef.updatedWith(vdrRef) {
@@ -151,8 +151,8 @@ case class PrismStateInMemory(
                 ssi2eventRef = this.ssi2eventRef,
                 vdr2eventRef = newVDR2eventRef,
               )
-        case DeactivateStorageEntryOP(previousOperationHash, unknownFields) =>
-          vdrFromPreviousEventHash(previousOperationHash) match
+        case DeactivateStorageEntryOP(previousEventHash, unknownFields) =>
+          vdrFromPreviousEventHash(previousEventHash) match
             case None => this
             case Some(vdrRef) =>
               val newVDR2eventRef = vdr2eventRef.updatedWith(vdrRef) {

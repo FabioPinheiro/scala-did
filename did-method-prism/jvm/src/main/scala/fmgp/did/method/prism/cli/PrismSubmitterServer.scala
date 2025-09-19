@@ -10,8 +10,8 @@ import fmgp.did.method.prism.DIDPrism
 import fmgp.util.safeValueOf
 import fmgp.util.hex2bytes
 import fmgp.util.Base64
-import proto.prism.SignedPrismOperation
-import proto.prism.PrismOperation
+import proto.prism.SignedPrismEvent
+import proto.prism.PrismEvent
 import fmgp.did.method.prism.proto.tryParseFrom
 import zio.http.codec.HttpCodec
 
@@ -78,9 +78,9 @@ object PrismSubmitterServer {
             //   case Left(error)   => ZIO.fail(s"Invalid Base64url (event index=$index) '$error'")
             //   case Right(base64) => ZIO.succeed(base64)
             // _ <- ZIO.log(protoBase64.decodeToHex)
-            // prismEvent <- PrismOperation.tryParseFrom(protoBase64.decode) match
-            event <- SignedPrismOperation.tryParseFrom(hex2bytes(proto)) match
-              case Left(error)  => ZIO.fail(s"Invalid SignedPrismOperation (event index=$index):'$error'")
+            // prismEvent <- PrismEvent.tryParseFrom(protoBase64.decode) match
+            event <- SignedPrismEvent.tryParseFrom(hex2bytes(proto)) match
+              case Left(error)  => ZIO.fail(s"Invalid SignedPrismEvent (event index=$index):'$error'")
               case Right(value) => ZIO.succeed(value)
           } yield event
         }
