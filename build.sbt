@@ -129,6 +129,7 @@ lazy val docs = project
         multiformats.jvm,
         didResolverPeer.jvm,
         didResolverPrism.jvm,
+        cardanoPrismCli,
         didPrismNode,
         didResolverWeb.jvm,
         didUniresolver.jvm,
@@ -334,13 +335,14 @@ addCommandAlias(
   "testJVM",
   ";didJVM/test; didCommProtocolsJVM/test; didFrameworkJVM/test; didImpJVM/test; " +
     "didResolverPeerJVM/test; didResolverPrismJVM/test; didResolverWebJVM/test; didUniresolverJVM/test; " +
-    "multiformatsJVM/test"
+    "multiformatsJVM/test; " +
+    "didPrismNode/test; cardanoPrismCli/test; "
 )
 addCommandAlias(
   "testJS",
   ";didJS/test;  didCommProtocolsJS/test;  didFrameworkJS/test;  didImpJS/test;  " +
     "didResolverPeerJS/test;  didResolverPrismJS/test;  didResolverWebJS/test;  didUniresolverJS/test;  " +
-    "multiformatsJS/test"
+    "multiformatsJS/test; "
 )
 addCommandAlias("testAll", ";testJVM;testJS")
 addCommandAlias("docAll", "doc;docs/unidoc")
@@ -380,6 +382,7 @@ lazy val root = project
   .aggregate(multiformats.js, multiformats.jvm) // publish
   .aggregate(didResolverPeer.js, didResolverPeer.jvm) // publish
   .aggregate(didResolverPrism.js, didResolverPrism.jvm) // publish
+  .aggregate(cardanoPrismCli) // NOT publish (yet)
   .aggregate(didPrismNode) // NOT publish
   .aggregate(didResolverWeb.js, didResolverWeb.jvm) // publish
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
@@ -567,16 +570,6 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.6.6",
     libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.6.6",
   )
-  .jvmSettings( // PoC for a prism-cli tooling // TODO Move to a new repo
-    // assembly / mainClass := Some("fmgp.did.method.prism.vdr.Indexer"),
-    // assembly / assemblyJarName := "prism-Indexer.jar",
-
-    // run / fork := true,
-    // run / connectInput := true,
-    libraryDependencies += "dev.zio" %% "zio-cli" % "0.7.2",
-    assembly / mainClass := Some("fmgp.did.method.prism.cli.PrismCli"),
-    assembly / assemblyJarName := "cardano-prism.jar",
-  )
   .settings(
     Compile / PB.targets := Seq(scalapb.gen() -> (Compile / sourceManaged).value / "scalapb"),
     // Compile / PB.protoSources := Seq(file("did-method-prism/shared/src/main/protobuf")), // to avoid the https://github.com/epfl-lara/smart/blob/master/.sbtopts (line 1)
@@ -609,6 +602,20 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
   // )
   .dependsOn(did, multiformats)
   .configure(docConfigure)
+
+lazy val cardanoPrismCli = project
+  .in(file("cardano-prism-cli"))
+  .configure(notYetPublishedConfigure)
+  .settings(
+    name := "cardano-prism-cli",
+    libraryDependencies += D.zioMunitTest.value,
+  )
+  .settings( // PoC for a prism-cli tooling // TODO Move to a new repo
+    libraryDependencies += "dev.zio" %% "zio-cli" % "0.7.2",
+    assembly / mainClass := Some("fmgp.did.method.prism.cli.PrismCli"),
+    assembly / assemblyJarName := "cardano-prism.jar",
+  )
+  .dependsOn(did.jvm, didResolverPrism.jvm, didResolverPeer.jvm, didUniresolver.jvm)
 
 lazy val didPrismNode = project
   .in(file("did-method-prism-node"))

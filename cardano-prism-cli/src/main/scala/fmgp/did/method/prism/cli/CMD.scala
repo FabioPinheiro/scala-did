@@ -7,6 +7,8 @@ import fmgp.did.method.prism.cardano.CardanoNetwork
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
 import java.nio.file.Path
 import proto.prism.SignedPrismEvent
+import zio.http.URL
+import fmgp.did.DID
 
 sealed trait CMD extends Product with Serializable
 object CMD {
@@ -65,6 +67,8 @@ object CMD {
   final case class DIDDeactivate(did: DIDPrism) extends DIDCMD
   final case class DIDResolve(did: DIDPrism, network: CardanoNetwork) extends DIDCMD
   final case class DIDResolveFromFS(did: DIDPrism, workdir: Path, network: CardanoNetwork) extends DIDCMD
+  final case class DIDResolveFromEndpoint(did: DID, resolverEndpoint: URL) extends DIDCMD
+  final case class DIDResolveFromUniresolver(did: DID, baseEndpoint: Option[String]) extends DIDCMD
 
   sealed trait VDRCMD extends CMD
   final case class VDRCreateBytes(

@@ -10,6 +10,8 @@ import fmgp.did.method.prism.cardano.DIDExtra
 import fmgp.did.method.prism.proto.MaybeEvent
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
+import fmgp.did.uniresolver.Uniresolver
+import fmgp.did.Resolver
 
 object DIDCommand {
 
@@ -29,17 +31,42 @@ object DIDCommand {
       /* vdrRaw =.     */ vdrRaw
     )
   }
-  val updateCommand = Command("update", didArg).map(CMD.DIDUpdate.apply)
-  val deactivateCommand = Command("deactivate", didArg).map(CMD.DIDDeactivate.apply)
+  val updateCommand = Command("update", didPrismArg).map(CMD.DIDUpdate.apply)
+  val deactivateCommand = Command("deactivate", didPrismArg).map(CMD.DIDDeactivate.apply)
   val resolveCommand = {
-    val c1 = Command("resolve", networkFlag, didArg)
+    val c1 = Command("resolve-prism", networkFlag, didPrismArg)
       .withHelp(HelpDoc.p("Resolve DID PRISM (from external storage)"))
       .map { case (network, did) => CMD.DIDResolve(did, network) }
-    val c2 = Command("resolve", networkFlag, didArg ++ indexerWorkDirAgr)
+    val c2 = Command("resolve-prism", networkFlag, didPrismArg ++ indexerWorkDirAgr)
       .withHelp(HelpDoc.p("Resolve DID PRISM (from indexer FS storage)"))
       .map { case (network, (did, workdir)) => CMD.DIDResolveFromFS(did, workdir, network) }
 
-    c1 | c2 // Command.OrElse(c1, c2)
+    val resolverEndpoint =
+      Args
+        .text("endpoint")
+        .??("Endpoint of external resolver")
+        .mapOrFail(e => Right(e))
+
+    val c3 = Command("resolve", didPrismArg ++ resolverEndpoint)
+      .withHelp(HelpDoc.p("Resolve DID PRISM (from endpoint)"))
+      .map { case (did, endpointValue) =>
+        val tmp = URL.decode(endpointValue).getOrElse(???) // FIXME
+        CMD.DIDResolveFromEndpoint(did, tmp)
+      }
+
+    val c4 = Command(
+      "resolve-universal",
+      Options
+        .text("endpoint")
+        .optional
+        // .withDefault("https://dev.uniresolver.io/")
+        .??("Endpoint to get the DID Document"),
+      didArg
+    )
+      .withHelp(HelpDoc.p("Resolve DIDs (using the 'https://dev.uniresolver.io/')"))
+      .map { case (endpointValue, did) => CMD.DIDResolveFromUniresolver(did, endpointValue) }
+
+    c1 | c2 | c3 | c4
   }
 
   val command: Command[CMD.DIDCMD] =
@@ -82,16 +109,36 @@ object DIDCommand {
     case CMD.DIDResolve(did, network) =>
       val aux = (Client.default ++ Scope.default >>> HttpUtils.layer) >>>
         DIDPrismResolver.layerDIDPrismResolver(
-          s"https://raw.githubusercontent.com/blockfrost/prism-vdr/refs/heads/main/${network.name}/diddoc"
+          // s"https://raw.githubusercontent.com/blockfrost/prism-vdr/refs/heads/main/${network.name}/diddoc"
+          s"https://raw.githubusercontent.com/FabioPinheiro/prism-vdr/refs/heads/main/${network.name}/diddoc"
         )
       val program = for {
-        _ <- ZIO.log(s"Resolve ${did.string}")
+        _ <- ZIO.log(s"Resolve ${did.string} on $network network")
         resolver <- ZIO.service[DIDPrismResolver]
         diddoc <- resolver.didDocument(did.asFROMTO).orDieWith(error => new RuntimeException(error.toString()))
         _ <- Console.printLine(diddoc.toJsonPretty) // .mapError(error => SomeThrowable(error))
       } yield ()
-      program
-        .provideSomeLayer(aux)
+      program.provideSomeLayer(aux)
     case CMD.DIDResolveFromFS(did, workdir, network) => PrismCli.notCurrentlyImplemented(cmd)
+    case CMD.DIDResolveFromEndpoint(did, resolverEndpoint) =>
+      val aux = (Client.default ++ Scope.default >>> HttpUtils.layer) >>>
+        DIDResolverProxy.layer(resolverEndpoint.toString)
+      val program = for {
+        _ <- ZIO.log(s"Resolve ${did.string} on ${resolverEndpoint.toString}")
+        resolver <- ZIO.service[Resolver]
+        diddoc <- resolver.didDocument(did.asFROMTO).orDieWith(error => new RuntimeException(error.toString()))
+        _ <- Console.printLine(diddoc.toJsonPretty) // .mapError(error => SomeThrowable(error))
+      } yield ()
+      program.provideSomeLayer(aux)
+    case CMD.DIDResolveFromUniresolver(did, baseEndpoint) =>
+      val aux = (Client.default ++ Scope.default) >>>
+        baseEndpoint.map(url => Uniresolver.layer(url)).getOrElse(Uniresolver.layer())
+      val program = for {
+        _ <- ZIO.log(s"Universal-Resolve ${did.string} on ${baseEndpoint.toString}")
+        resolver <- ZIO.service[Resolver]
+        diddoc <- resolver.didDocument(did.asFROMTO).orDieWith(error => new RuntimeException(error.toString()))
+        _ <- Console.printLine(diddoc.toJsonPretty) // .mapError(error => SomeThrowable(error))
+      } yield ()
+      program.provideSomeLayer(aux)
 
 }

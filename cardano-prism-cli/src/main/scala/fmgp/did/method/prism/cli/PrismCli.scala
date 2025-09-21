@@ -17,7 +17,7 @@ import fmgp.did.method.prism.cardano.CardanoNetwork
   * shasum -a 256 did-method-prism/jvm/target/scala-3.3.6/cardano-prism.jar
   * }}}
   *
-  * didResolverPrismJVM/runMain fmgp.did.method.prism.cli.PrismCli
+  * cardanoPrismCliJVM/runMain fmgp.did.method.prism.cli.PrismCli
   */
 object PrismCli extends ZIOCliDefault {
 

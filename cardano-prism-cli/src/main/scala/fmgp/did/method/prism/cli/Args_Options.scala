@@ -5,6 +5,8 @@ import fmgp.did.method.prism.DIDPrism
 import fmgp.did.method.prism.BlockfrostConfig
 import fmgp.did.method.prism.cardano.CardanoNetwork
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
+import fmgp.did.DID
+import fmgp.did.DIDSubject
 
 // Conventions https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
 // https://www.gnu.org/software/libc/manual/html_node/Argp.html
@@ -51,13 +53,22 @@ enum WalletType { case SSI extends WalletType; case Cardano extends WalletType }
 val walletTypeOpt: Options[WalletType] = Options
   .enumeration[WalletType]("wallet-type")(("ssi", WalletType.SSI), ("cardano", WalletType.Cardano))
 
-val didArg =
+val didPrismArg: Args[DIDPrism] =
   Args
-    .text("DID")
+    .text("DID:PRISM")
     .mapOrFail(str =>
       DIDPrism.fromString(str) match
         case Left(error)     => Left(HelpDoc.p(s"Fail to parse Arg: $error"))
         case Right(didPrisn) => Right(didPrisn)
+    )
+
+val didArg: Args[DID] =
+  Args
+    .text("DID")
+    .mapOrFail(str =>
+      DIDSubject.either(str) match
+        case Left(error) => Left(HelpDoc.p(s"Fail to parse Arg: $error"))
+        case Right(did)  => Right(did.toDID)
     )
 
 val indexerWorkDirOpt =
