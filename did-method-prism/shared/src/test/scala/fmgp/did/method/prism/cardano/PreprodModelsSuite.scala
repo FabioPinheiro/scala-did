@@ -6,9 +6,10 @@ import zio.json._
 import fmgp.did.method.prism.PrismStateInMemory
 import fmgp.did.method.prism.proto._
 import PreprodExamples._
+import zio.ZEnvironment
 
 /** didResolverPrismJVM/testOnly fmgp.did.method.prism.cardano.PreprodModelsSuite */
-class PreprodModelsSuite extends FunSuite {
+class PreprodModelsSuite extends ZSuite {
   test("CardanoMetadata 416") {
     assert(metadata_416_cbor.toCardanoPrismEntry.isRight)
   }
@@ -38,7 +39,7 @@ class PreprodModelsSuite extends FunSuite {
 
   }
 
-  test("WIP") {
+  testZ("WIP") {
 
     val seq = Seq(metadata_416_cbor, metadata_417_cbor, metadata_419_cbor).map(_.toCardanoPrismEntry.getOrElse(???))
 
@@ -67,14 +68,16 @@ class PreprodModelsSuite extends FunSuite {
     // println(s"UpdateDidOP ${op1.opHash} -- ${op1.event.previousEventHash}")
     // println(s"CreateDidOP ${op2.opHash} -- ${op2.event.previousEventHash}")
 
-    val s0 = PrismStateInMemory.empty
-    // println("State 0")
-    val s1 = s0.addEvent(op0)
-    // println("State 1")
-    val s2 = s1.addEvent(op1)
-    // println("State 2")
-    val s3 = s2.addEvent(op2)
-    // println("State 3")
-    // println(s3.toJsonPretty)
+    for {
+      state <- PrismStateInMemory.empty
+      // println("State 0")
+      _ <- state.addEvent(op0)
+      // println("State 1")
+      _ <- state.addEvent(op1)
+      // println("State 2")
+      _ <- state.addEvent(op2)
+      // println("State 3")
+      // println(s3.toJsonPretty)
+    } yield ()
   }
 }

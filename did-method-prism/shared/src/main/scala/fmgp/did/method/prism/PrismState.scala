@@ -13,28 +13,31 @@ trait PrismStateRead {
     (now.getEpochSecond, now.getNano)
   }
 
-  // TODO REMOVE
-  def ssi2eventsId: Map[DIDSubject, Seq[EventRef]]
-  // TODO REMOVE
-  def ssiCount: Int = ssi2eventsId.size
+  // TODO make it a Stream of (DIDSubject, Seq[EventRef]])
+  def ssi2eventsRef: ZIO[Any, Nothing, Map[DIDSubject, Seq[EventRef]]] // : Map[DIDSubject, Seq[EventRef]]
+  // TODO make it a Stream of (RefVDR, Seq[EventRef]])
+  def vdr2eventsRef: ZIO[Any, Nothing, Map[RefVDR, Seq[EventRef]]] // : Map[DIDSubject, Seq[EventRef]]
 
-  def getEventsIdBySSI(ssi: DIDSubject): Seq[EventRef]
-  def getEventsIdByVDR(id: RefVDR): Seq[EventRef]
+  def ssiCount: ZIO[Any, Nothing, Int] = ssi2eventsRef.map(_.size) // TODO improve in the specific implementation
+  def vdrCount: ZIO[Any, Nothing, Int] = vdr2eventsRef.map(_.size) // TODO improve in the specific implementation
+
+  def getEventsIdBySSI(ssi: DIDSubject): ZIO[Any, Nothing, Seq[EventRef]]
+  def getEventsIdByVDR(id: RefVDR): ZIO[Any, Nothing, Seq[EventRef]]
 
   def getEventsForSSI(ssi: DIDSubject): ZIO[Any, Throwable, Seq[MySignedPrismEvent[
     CreateDidOP | UpdateDidOP | DeactivateDidOP
   ]]] =
-    getEventsIdBySSI(ssi)
-      .foldLeft(Right(Seq.empty): Either[String, Seq[MySignedPrismEvent[OP]]])((acc, eventRef) =>
-        acc match
-          case Left(errors) => Left(errors)
-          case Right(seq) =>
-            getEventsByHash(eventRef.eventHash) match
-              case None                   => Left(s"impossible state: missing Event hash '${eventRef.eventHash}'")
-              case Some(signedPrismEvent) => Right(seq :+ signedPrismEvent)
-      ) match {
-      case Left(error) => ZIO.fail(new RuntimeException(error))
-      case Right(seq)  => PrismState.forceType2DidEvent(seq)
+    getEventsIdBySSI(ssi).flatMap { seqEventRef =>
+      for {
+        events <- ZIO.foreach(seqEventRef) { eventRef =>
+          getEventsByHash(eventRef.eventHash).flatMap {
+            case None =>
+              ZIO.fail(new RuntimeException(s"impossible state: missing Event hash '${eventRef.eventHash}'"))
+            case Some(value) => ZIO.succeed(value)
+          }
+        }
+        didEvents <- PrismState.forceType2DidEvent(events)
+      } yield didEvents
     }
 
   def getEventsForVDR(
@@ -42,20 +45,20 @@ trait PrismStateRead {
   ): ZIO[Any, Throwable, Seq[MySignedPrismEvent[
     CreateStorageEntryOP | UpdateStorageEntryOP | DeactivateStorageEntryOP
   ]]] =
-    getEventsIdByVDR(refVDR)
-      .foldLeft(Right(Seq.empty): Either[String, Seq[MySignedPrismEvent[OP]]])((acc, eventRef) =>
-        acc match
-          case Left(errors) => Left(errors)
-          case Right(seq) =>
-            getEventsByHash(eventRef.eventHash) match
-              case None                   => Left(s"impossible state: missing Event hash '${eventRef.eventHash}'")
-              case Some(signedPrismEvent) => Right(seq :+ signedPrismEvent)
-      ) match {
-      case Left(error) => ZIO.fail(new RuntimeException(error))
-      case Right(seq)  => PrismState.forceType2StorageEvent(seq)
+    getEventsIdByVDR(refVDR).flatMap { seqEventRef =>
+      for {
+        events <- ZIO.foreach(seqEventRef) { eventRef =>
+          getEventsByHash(eventRef.eventHash).flatMap {
+            case None =>
+              ZIO.fail(new RuntimeException(s"impossible state: missing Event hash '${eventRef.eventHash}'"))
+            case Some(value) => ZIO.succeed(value)
+          }
+        }
+        storageEvents <- PrismState.forceType2StorageEvent(events)
+      } yield storageEvents
     }
 
-  def getEventsByHash(refHash: EventHash): Option[MySignedPrismEvent[OP]]
+  def getEventsByHash(refHash: EventHash): ZIO[Any, Nothing, Option[MySignedPrismEvent[OP]]]
 
   def getSSI(ssi: DIDSubject): ZIO[Any, Throwable, SSI] =
     getSSIHistory(ssi).map(_.latestVersion) // getEventsForSSI(ssi).map { events => SSI.make(ssi, events) }
@@ -82,7 +85,6 @@ trait PrismStateRead {
 }
 
 object PrismState {
-  def empty: PrismState = PrismStateInMemory.empty
 
   def forceType2DidEvent(seq: Seq[MySignedPrismEvent[OP]]): ZIO[Any, RuntimeException, Seq[
     MySignedPrismEvent[CreateDidOP | UpdateDidOP | DeactivateDidOP]
@@ -119,10 +121,10 @@ object PrismState {
 trait PrismState extends PrismStateRead { self =>
   // type This //Type member
 
-  def addEvent(event: MySignedPrismEvent[OP]): PrismState
+  def addEvent(event: MySignedPrismEvent[OP]): ZIO[Any, Exception, Unit]
 
-  def addMaybeEvent(maybeEvent: MaybeEvent[OP]): PrismState = maybeEvent match
-    case _: InvalidPrismObject       => self
-    case _: InvalidSignedPrismEvent  => self
+  def addMaybeEvent(maybeEvent: MaybeEvent[OP]): ZIO[Any, Exception, Unit] = maybeEvent match
+    case _: InvalidPrismObject       => ZIO.unit // self
+    case _: InvalidSignedPrismEvent  => ZIO.unit // self
     case aux: MySignedPrismEvent[OP] => addEvent(aux)
 }

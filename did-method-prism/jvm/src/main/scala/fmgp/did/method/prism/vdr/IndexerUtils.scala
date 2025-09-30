@@ -29,14 +29,14 @@ object IndexerUtils {
     )
 
   /** pipeline to load/initiate the PrismState from stream of all events */
-  def pipelinePrismState = ZPipeline.mapZIO[Ref[PrismState], Nothing, MaybeEvent[OP], MaybeEvent[OP]] { maybeEvent =>
+  def pipelinePrismState = ZPipeline.mapZIO[PrismState, Nothing, MaybeEvent[OP], MaybeEvent[OP]] { maybeEvent =>
     maybeEvent match
       case InvalidPrismObject(tx, b, reason)         => ZIO.succeed(maybeEvent)
       case InvalidSignedPrismEvent(tx, b, o, reason) => ZIO.succeed(maybeEvent)
       case op: MySignedPrismEvent[OP] =>
         for {
-          refState <- ZIO.service[Ref[PrismState]]
-          _ <- refState.update(_.addEvent(op))
+          state <- ZIO.service[PrismState]
+          _ <- state.addEvent(op).orDie // TODO die
         } yield (maybeEvent)
   }
 
@@ -57,7 +57,7 @@ object IndexerUtils {
           ec.copy(signedPrismEvent = ec.signedPrismEvent + 1)
     })
 
-  def loadPrismStateFromChunkFiles: ZIO[IndexerConfig, Throwable, Ref[PrismState]] = for {
+  def loadPrismStateFromChunkFiles: ZIO[IndexerConfig & PrismState, Throwable, PrismState] = for {
     indexerConfig <- ZIO.service[IndexerConfig]
     chunkFilesAfter <- fmgp.did.method.prism.vdr.Indexer
       .findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath)
@@ -73,17 +73,17 @@ object IndexerUtils {
       }
     }.flatten
     _ <- ZIO.log(s"Init PrismState")
-    stateRef <- Ref.make(PrismState.empty)
+    state <- ZIO.service[PrismState]
     countEvents <- streamAllMaybeEventFromChunkFiles
       .via(IndexerUtils.pipelinePrismState)
       .run(countEvents) // (ZSink.count)
-      .provideEnvironment(ZEnvironment(stateRef))
+      .provideEnvironment(ZEnvironment(state: PrismState))
     _ <- ZIO.log(s"Finish Init PrismState: $countEvents")
-    state <- stateRef.get
-    _ <- ZIO.log(
-      s"PrismState was ${state.ssiCount} SSI and ${state.asInstanceOf[PrismStateInMemory].vdr2eventRef.count(_ => true)} VDR"
-    )
+    // aa <- state.ref.get.map(_.vdr2eventRef.count(_ => true))
+    //   ZIO.log(
+    //   s"PrismState was ${state.ssiCount} SSI and ${state.asInstanceOf[PrismStateInMemory].vdr2eventRef.count(_ => true)} VDR"
+    // )
     // _ <- ZIO.log(s"PrismState was ${state.asInstanceOf[PrismStateInMemory].toJsonPretty}")
-  } yield stateRef
+  } yield state
 
 }

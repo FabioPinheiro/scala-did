@@ -5,6 +5,7 @@ import zio.cli.*
 
 import fmgp.did.method.prism.vdr
 import fmgp.did.method.prism.IndexerConfig
+import fmgp.did.method.prism.PrismStateInMemory
 
 object IndexerCommand {
 
@@ -22,7 +23,8 @@ object IndexerCommand {
         )
         _ <- ZIO.log(s"IndexerConfig: `${indexerConfig}`")
         indexerConfigZLayer = ZLayer.succeed(indexerConfig) // vdr.Indexer.makeIndexerConfigZLayerFromArgs
-        _ <- vdr.Indexer.indexerJob.provideLayer(indexerConfigZLayer)
+        prismStateZLayer = ZLayer(PrismStateInMemory.empty)
+        _ <- vdr.Indexer.indexerJob.provideLayer(indexerConfigZLayer ++ prismStateZLayer)
       } yield ()
   }
 }

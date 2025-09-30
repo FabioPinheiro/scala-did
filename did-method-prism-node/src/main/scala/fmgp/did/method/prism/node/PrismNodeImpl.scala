@@ -11,16 +11,15 @@ import fmgp.did.method.prism.cardano._
 
 object PrismNodeImpl {
   def make = for {
-    state <- ZIO.service[Ref[PrismState]]
-    ssiCount <- state.get.map(_.ssiCount)
+    state <- ZIO.service[PrismState]
+    ssiCount <- state.ssiCount
     _ <- ZIO.log(s"Init PrismNodeImpl Service with PrismState (with $ssiCount SSI)")
     walletConfig = CardanoWalletConfig()
     node = PrismNodeImpl(state, walletConfig)
   } yield node
 }
 
-case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletConfig)
-    extends ZioPrismNodeApi.NodeService {
+case class PrismNodeImpl(state: PrismState, walletConfig: CardanoWalletConfig) extends ZioPrismNodeApi.NodeService {
 
   def healthCheck(
       request: HealthCheckRequest
@@ -40,13 +39,15 @@ case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletC
           .withDescription(s"Fail to parse '${request.did}': ${exFailToParse.error}")
           .asException()
       )
-    state <- refState.get
-    didDataEffect = state.ssi2eventsId.get(did).map { events =>
-      val ops = events.map(op => state.getEventsByHash(op.eventHash)).flatten
-      SSI.make(did, ops).didData
-    }
+    ssi <- state
+      .getSSI(did)
+      .mapError(ex =>
+        io.grpc.Status.INTERNAL
+          .withDescription(ex.getMessage())
+          .asException()
+      )
     ret = GetDidDocumentResponse(
-      document = didDataEffect,
+      document = ssi.didData,
       lastSyncedBlockTimestamp = Some(state.lastSyncedBlockTimestamp),
       lastUpdateEvent = com.google.protobuf.ByteString.EMPTY // FIXME
     )
@@ -90,7 +91,6 @@ case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletC
       request: GetEventInfoRequest
   ): IO[io.grpc.StatusException, GetEventInfoResponse] = for {
     _ <- ZIO.log("getEventInfo")
-    state <- refState.get
     // TODO make enum map from cardano java client
     ///    SUBMITTED,
     ///    FAILED,
@@ -110,15 +110,16 @@ case class PrismNodeImpl(refState: Ref[PrismState], walletConfig: CardanoWalletC
           .asException()
       )
 
-    eventEffect = eventHashEffect.map { eventHash =>
-      state.getEventsByHash(eventHash).map { op =>
-        assert(op.opHash == eventHash.hex, s"Event hash mismatch: ${op.opHash} != ${eventHash.hex}")
-
-        EventInfo(
-          txStatus = "CONFIRMED", // if we find the event in the state, it is confirmed
-          statusDetails = s"Event found with hash: ${op.opHash}",
-          transactionId = Some(op.tx)
-        )
+    eventEffect = eventHashEffect.flatMap { eventHash =>
+      state.getEventsByHash(eventHash).map {
+        _.map { op =>
+          assert(op.opHash == eventHash.hex, s"Event hash mismatch: ${op.opHash} != ${eventHash.hex}")
+          EventInfo(
+            txStatus = "CONFIRMED", // if we find the event in the state, it is confirmed
+            statusDetails = s"Event found with hash: ${op.opHash}",
+            transactionId = Some(op.tx)
+          )
+        }
       }
     }
 

@@ -20,9 +20,12 @@ class IndexerSuite extends ZSuite {
   import fmgp.did.method.prism.vdr.KeyConstanceUtils._
   import fmgp.did.method.prism.vdr.VDRUtilsTestExtra._
 
-  testZ("Index SSI and the VDR create event") {
+  val prismStateFixture: FunFixture[ULayer[PrismState]] =
+    ZTestLocalFixture { _ => PrismStateInMemory.empty.map(s => ZLayer.succeed(s)) }(_ => ZIO.unit)
+
+  prismStateFixture.testZLayered("Index SSI and the VDR create event") {
     for {
-      stateRef <- Ref.make(PrismState.empty)
+      _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR)
           .map(e => hex2bytes(e))
@@ -33,8 +36,7 @@ class IndexerSuite extends ZSuite {
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)
         .run(ZSink.count)
-        .provideEnvironment(ZEnvironment(stateRef))
-      state <- stateRef.get
+      state <- ZIO.service[PrismState]
       _ <- state.getEventsForVDR(refVDR).map(e => assertEquals(e.size, 1))
       vdr <- state.getVDR(refVDR)
       _ = vdr.data match
@@ -46,9 +48,9 @@ class IndexerSuite extends ZSuite {
     } yield ()
   }
 
-  testZ("Index SSI and a create and update VDR Events") {
+  prismStateFixture.testZLayered("Index SSI and a create and update VDR Events") {
     for {
-      stateRef <- Ref.make(PrismState.empty)
+      _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR, updateVDR)
           .map(e => hex2bytes(e))
@@ -59,8 +61,7 @@ class IndexerSuite extends ZSuite {
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)
         .run(ZSink.count)
-        .provideEnvironment(ZEnvironment(stateRef))
-      state <- stateRef.get
+      state <- ZIO.service[PrismState]
       _ <- state.getEventsForVDR(refVDR).map(e => assertEquals(e.size, 2))
       vdr <- state.getVDR(refVDR)
       _ = assertEquals(vdr.unsupportedValidationField, false)
@@ -73,9 +74,9 @@ class IndexerSuite extends ZSuite {
     } yield ()
   }
 
-  testZ("Index SSI and a create and update (with UnknownField 49) VDR Events") {
+  prismStateFixture.testZLayered("Index SSI and a create and update (with UnknownField 49) VDR Events") {
     for {
-      stateRef <- Ref.make(PrismState.empty)
+      _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR, updateVDR_withUnknownField49)
           .map(e => hex2bytes(e))
@@ -86,8 +87,7 @@ class IndexerSuite extends ZSuite {
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)
         .run(ZSink.count)
-        .provideEnvironment(ZEnvironment(stateRef))
-      state <- stateRef.get
+      state <- ZIO.service[PrismState]
       _ <- state.getEventsForVDR(refVDR).map(e => assertEquals(e.size, 2))
       vdr <- state.getVDR(refVDR)
       _ = assertEquals(vdr.unsupportedValidationField, true) // Because of field 49 (3 <= _ <= 49)
@@ -100,9 +100,9 @@ class IndexerSuite extends ZSuite {
     } yield ()
   }
 
-  testZ("Index SSI and a create and update (with UnknownField 99) VDR Events") {
+  prismStateFixture.testZLayered("Index SSI and a create and update (with UnknownField 99) VDR Events") {
     for {
-      stateRef <- Ref.make(PrismState.empty)
+      _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR, updateVDR_withUnknownField99)
           .map(e => hex2bytes(e))
@@ -113,8 +113,7 @@ class IndexerSuite extends ZSuite {
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)
         .run(ZSink.count)
-        .provideEnvironment(ZEnvironment(stateRef))
-      state <- stateRef.get
+      state <- ZIO.service[PrismState]
       _ <- state.getEventsForVDR(refVDR).map(e => assertEquals(e.size, 2))
       vdr <- state.getVDR(refVDR)
       _ = assertEquals(vdr.unsupportedValidationField, false)
@@ -127,9 +126,9 @@ class IndexerSuite extends ZSuite {
     } yield ()
   }
 
-  testZ("Index SSI and two VDR Events out of order") {
+  prismStateFixture.testZLayered("Index SSI and two VDR Events out of order") {
     for {
-      stateRef <- Ref.make(PrismState.empty)
+      _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, updateVDR, createVDR)
           .map(e => hex2bytes(e))
@@ -140,8 +139,7 @@ class IndexerSuite extends ZSuite {
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)
         .run(ZSink.count)
-        .provideEnvironment(ZEnvironment(stateRef))
-      state <- stateRef.get
+      state <- ZIO.service[PrismState]
       _ <- state.getEventsForVDR(refVDR).map(e => assertEquals(e.size, 1))
       vdr <- state.getVDR(refVDR)
       _ = vdr.data match
@@ -153,9 +151,9 @@ class IndexerSuite extends ZSuite {
     } yield ()
   }
 
-  testZ("Index SSI (with a create and update events)") {
+  prismStateFixture.testZLayered("Index SSI (with a create and update events)") {
     for {
-      stateRef <- Ref.make(PrismState.empty)
+      _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, updateSSI_addKey)
           .map(e => hex2bytes(e))
@@ -166,8 +164,7 @@ class IndexerSuite extends ZSuite {
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)
         .run(ZSink.count)
-        .provideEnvironment(ZEnvironment(stateRef))
-      state <- stateRef.get
+      state <- ZIO.service[PrismState]
       // _ = println(state.asInstanceOf[PrismStateInMemory].toJsonPretty)
       _ <- state.getSSIHistory(didPrism).map { didHistory =>
         // println(didHistory.toJsonPretty)
@@ -177,9 +174,9 @@ class IndexerSuite extends ZSuite {
     } yield ()
   }
 
-  testZ("Index SSI (create and add new key) and three VDR events (using the new key)") {
+  prismStateFixture.testZLayered("Index SSI (create and add new key) and three VDR events (using the new key)") {
     for {
-      stateRef <- Ref.make(PrismState.empty)
+      _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR, updateVDR, updateSSI_addKey, updateVDR_withTheNewKey)
           .map(e => hex2bytes(e))
@@ -190,8 +187,7 @@ class IndexerSuite extends ZSuite {
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)
         .run(ZSink.count)
-        .provideEnvironment(ZEnvironment(stateRef))
-      state <- stateRef.get
+      state <- ZIO.service[PrismState]
       _ <- state.getSSIHistory(didPrism).map { didHistory =>
         assertEquals(didHistory.versions.size, 2)
       }
@@ -206,9 +202,11 @@ class IndexerSuite extends ZSuite {
     } yield ()
   }
 
-  testZ("Index SSI (create and add new key) and three VDR events (using the new key before adding the key)") {
+  prismStateFixture.testZLayered(
+    "Index SSI (create and add new key) and three VDR events (using the new key before adding the key)"
+  ) {
     for {
-      stateRef <- Ref.make(PrismState.empty)
+      _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR, updateVDR, updateVDR_withTheNewKey, updateSSI_addKey)
           .map(e => hex2bytes(e))
@@ -219,8 +217,7 @@ class IndexerSuite extends ZSuite {
       _ <- stream
         .via(IndexerUtils.pipelinePrismState)
         .run(ZSink.count)
-        .provideEnvironment(ZEnvironment(stateRef))
-      state <- stateRef.get
+      state <- ZIO.service[PrismState]
       _ <- state.getSSIHistory(didPrism).map { didHistory =>
         assertEquals(didHistory.versions.size, 2)
       }
