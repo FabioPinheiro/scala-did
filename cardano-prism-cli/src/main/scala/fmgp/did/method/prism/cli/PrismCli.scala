@@ -13,8 +13,8 @@ import fmgp.did.method.prism.cardano.CardanoNetwork
   *
   * {{{
   * sbt "didResolverPrismJVM/assembly"
-  * java -jar did-method-prism/jvm/target/scala-3.3.6/cardano-prism.jar indexer ../prism-vdr/preprod
-  * shasum -a 256 did-method-prism/jvm/target/scala-3.3.6/cardano-prism.jar
+  * java -jar did-method-prism/jvm/target/scala-3.3.7/cardano-prism.jar indexer ../prism-vdr/preprod
+  * shasum -a 256 did-method-prism/jvm/target/scala-3.3.7/cardano-prism.jar
   * }}}
   *
   * cardanoPrismCliJVM/runMain fmgp.did.method.prism.cli.PrismCli
