@@ -471,7 +471,7 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.nimbusJoseJwt.value,
 
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
-    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.18.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
+    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.19.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
     libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.32.1",
   )
@@ -563,7 +563,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.bouncycastle_bcpkix.value,
     libraryDependencies += D.nimbusJoseJwt.value,
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
-    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.18.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
+    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.19.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
     libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.5",
     // https://oss.sonatype.org/#nexus-search;quick~com.bloxbean.cardano
