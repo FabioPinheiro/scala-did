@@ -7,7 +7,7 @@ import zio.http._
 
 import fmgp.did.DIDSubject
 import fmgp.did.method.prism.*
-import fmgp.did.method.prism.cardano.CardanoNetwork
+import fmgp.did.method.prism.cardano.PublicCardanoNetwork
 
 /** cardano-prism CLI
   *

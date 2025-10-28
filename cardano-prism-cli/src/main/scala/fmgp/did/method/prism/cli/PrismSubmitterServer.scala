@@ -5,7 +5,7 @@ import zio.cli.*
 import zio.http.*
 import zio.json.*
 import zio.http.endpoint.Endpoint
-import fmgp.did.method.prism.cardano.CardanoNetwork
+import fmgp.did.method.prism.cardano.PublicCardanoNetwork
 import fmgp.did.method.prism.DIDPrism
 import fmgp.util.safeValueOf
 import fmgp.util.hex2bytes
@@ -65,7 +65,7 @@ object PrismSubmitterServer {
       for {
         _ <- ZIO.log(s"dryrun = $dryrun, networkInput = $networkInput") // ; didInput = $didInput")
         network <- safeValueOf(
-          CardanoNetwork.valueOf(networkInput.take(1).toUpperCase + networkInput.drop(1))
+          PublicCardanoNetwork.valueOf(networkInput.take(1).toUpperCase + networkInput.drop(1))
         ) match
           case Left(someNetwork) => ZIO.fail(s"Invalid network '$someNetwork'")
           case Right(network)    => ZIO.succeed(network)
