@@ -5,7 +5,7 @@ addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.3.2")
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % scalaJSVersion)
 addSbtPlugin("org.scala-js" % "sbt-jsdependencies" % "1.0.2")
 
-libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
+libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.1"
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.5")
 
@@ -61,10 +61,10 @@ addSbtPlugin("io.spray" % "sbt-revolver" % "0.10.0")
 
 // https://zio.dev/howto/migrate/zio-2.x-migration-guide%20v0.9.31
 //sbt "scalafixEnable; scalafixAll github:zio/zio/Zio2Upgrade?sha=series/2.x"
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.3")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.4")
 
 // mdoc - https://github.com/scalameta/mdoc/tags
-addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.7.2")
+addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.8.0")
 addSbtPlugin("org.typelevel" % "laika-sbt" % "1.3.2") // https://typelevel.org/Laika/
 addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.6.0") // https://github.com/sbt/sbt-unidoc
 // addSbtPlugin("org.typelevel" % "sbt-typelevel-site" % "0.6.2") // https://typelevel.org/sbt-typelevel/site.html

@@ -143,7 +143,7 @@ lazy val V = new {
   val scalajsJavaSecureRandom = "1.0.0"
 
   // FIXME another bug in the test framework https://github.com/scalameta/munit/issues/554
-  val munit = "1.1.1" // "0.7.29"
+  val munit = "1.2.1" // "0.7.29"
 
   // https://mvnrepository.com/artifact/org.scala-js/scalajs-dom
   val scalajsDom = "2.8.0"
@@ -635,7 +635,7 @@ lazy val didPrismNode = project
       rootPaths.value.apply("BASE").toFile() / "did-method-prism-node" / "src/main/protobuf"
     ),
     libraryDependencies ++= Seq(
-      "io.grpc" % "grpc-netty" % "1.75.0", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
+      "io.grpc" % "grpc-netty" % "1.76.0", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
       "io.netty" % "netty-handler" % "4.2.7.Final", // This is to forces a update in from "io.grpc" % "grpc-netty" % "1.73.0" -> https://mvnrepository.com/artifact/io.netty/netty-handler/4.1.110.Final
       // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion,
       // REMOVE // The following needed only if you include scalapb/scalapb.proto:
