@@ -137,9 +137,9 @@
   </span><span class="identifier">from</span><span> = </span><span class="type-name">Some</span><span>(</span><span class="type-name">FROM</span><span>(</span><span class="string-literal">&quot;did:example:456&quot;</span><span>)), 
 )
 </span><span class="comment">// message: BasicMessage = BasicMessage(
-//   id = &quot;36e68527-43e9-417a-8621-ebd152dfe3f2&quot;,
+//   id = &quot;e1fdd57f-7f26-46c0-9630-5330c9329cbc&quot;,
 //   to = Set(&quot;did:example:123&quot;),
-//   from = Some(value = &quot;did:example:456&quot;),
+//   from = Some(&quot;did:example:456&quot;),
 //   lang = None,
 //   created_time = None,
 //   content = &quot;Hello, World!&quot;
@@ -148,7 +148,7 @@
 
 </span><span class="identifier">message</span><span>.</span><span class="identifier">toPlaintextMessage</span><span>.</span><span class="identifier">toJsonPretty</span><span>
 </span><span class="comment">// res0: String = &quot;&quot;&quot;{
-//   &quot;id&quot; : &quot;36e68527-43e9-417a-8621-ebd152dfe3f2&quot;,
+//   &quot;id&quot; : &quot;e1fdd57f-7f26-46c0-9630-5330c9329cbc&quot;,
 //   &quot;type&quot; : &quot;https://didcomm.org/basicmessage/2.0/message&quot;,
 //   &quot;to&quot; : [
 //     &quot;did:example:123&quot;
