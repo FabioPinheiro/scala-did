@@ -567,8 +567,8 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
     libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.5",
     // https://oss.sonatype.org/#nexus-search;quick~com.bloxbean.cardano
-    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.6.6",
-    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.6.6",
+    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.6.7",
+    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.6.7",
   )
   .settings(
     Compile / PB.targets := Seq(scalapb.gen() -> (Compile / sourceManaged).value / "scalapb"),
