@@ -18,3 +18,5 @@ e86bb37228b178d58ee2259b034d358f2dfb1a91
 
 # did-method-prism: rename operation to event
 33ae2dfea19da99ac2bc6fc005ba937599e37744
+# Scala Steward: Reformat with scalafmt 3.9.10
+5a84ebf34c88ff67e5a56834c8ee4997ebf51f6a
