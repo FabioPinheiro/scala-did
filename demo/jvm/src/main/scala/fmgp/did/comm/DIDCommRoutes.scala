@@ -56,7 +56,7 @@ object DIDCommRoutes {
               .timeout(AppConfig.timeout)
               .tap(e => ZIO.logDebug("Request Timeout").when(e.isEmpty))
               .map {
-                case None => Response.status(Status.Accepted)
+                case None                     => Response.status(Status.Accepted)
                 case Some(msg: SignedMessage) =>
                   Response(Status.Ok, Headers(MediaTypes.SIGNED.asContentType), Body.fromCharSequence(msg.toJson))
                 case Some(msg: EncryptedMessage) =>

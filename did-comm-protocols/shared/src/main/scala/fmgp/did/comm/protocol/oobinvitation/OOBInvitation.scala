@@ -74,7 +74,7 @@ object OOBInvitation {
       Left(s"No able to create OOB-Invitation from a Message of the type '${msg.`type`}'")
     else
       msg.from match
-        case None => Left(s"'$piuri' MUST have field 'from'")
+        case None       => Left(s"'$piuri' MUST have field 'from'")
         case Some(from) =>
           msg.body.map(_.as[Body]) match
             case None              => Left(s"'$piuri' MUST have a 'body'")

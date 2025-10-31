@@ -48,14 +48,14 @@ object AskIntroduction {
     if (msg.`type` != piuri) Left(s"No able to create AskIntroduction from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
-        case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+        case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from'")
+            case None       => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.attachments match
-                case None        => Left(s"'$piuri' MUST have 'attachments'")
-                case Some(Seq()) => Left(s"'$piuri' MUST have one 'attachments'")
+                case None                           => Left(s"'$piuri' MUST have 'attachments'")
+                case Some(Seq())                    => Left(s"'$piuri' MUST have one 'attachments'")
                 case Some(firstAttachment +: Seq()) => {
                   firstAttachment.getAsMessage
                     .flatMap {
@@ -123,21 +123,21 @@ object IntroductionStatus {
     if (msg.`type` != piuri) Left(s"No able to create IntroductionStatus from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
-        case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+        case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from'")
+            case None       => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.thid match
-                case None => Left(s"'$piuri' MUST have field 'thid'")
+                case None       => Left(s"'$piuri' MUST have field 'thid'")
                 case Some(thid) =>
                   msg.body match
-                    case None => Left(s"'$piuri' MUST have field 'body'")
+                    case None    => Left(s"'$piuri' MUST have field 'body'")
                     case Some(b) =>
                       b.as[Body].flatMap { body =>
                         msg.attachments match
-                          case None        => Left(s"'$piuri' MUST have 'attachments'")
-                          case Some(Seq()) => Left(s"'$piuri' MUST have one 'attachments'")
+                          case None                           => Left(s"'$piuri' MUST have 'attachments'")
+                          case Some(Seq())                    => Left(s"'$piuri' MUST have one 'attachments'")
                           case Some(firstAttachment +: Seq()) => {
                             firstAttachment.getAsMessage
                               .flatMap {
@@ -203,21 +203,21 @@ object ForwardRequest {
     if (msg.`type` != piuri) Left(s"No able to create ForwardRequest from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
-        case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+        case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from'")
+            case None       => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.thid match
-                case None => Left(s"'$piuri' MUST have field 'thid'")
+                case None       => Left(s"'$piuri' MUST have field 'thid'")
                 case Some(thid) =>
                   msg.body match
-                    case None => Left(s"'$piuri' MUST have field 'body'")
+                    case None    => Left(s"'$piuri' MUST have field 'body'")
                     case Some(b) =>
                       b.as[Body].flatMap { body =>
                         msg.attachments match
-                          case None        => Left(s"'$piuri' MUST have 'attachments'")
-                          case Some(Seq()) => Left(s"'$piuri' MUST have one 'attachments'")
+                          case None                           => Left(s"'$piuri' MUST have 'attachments'")
+                          case Some(Seq())                    => Left(s"'$piuri' MUST have one 'attachments'")
                           case Some(firstAttachment +: Seq()) => {
                             firstAttachment.getAsMessage
                               .flatMap {
@@ -367,16 +367,16 @@ object Answer {
     if (msg.`type` != piuri) Left(s"No able to create Answer from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
-        case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+        case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from'")
+            case None       => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.thid match
-                case None => Left(s"'$piuri' MUST have field 'thid'")
+                case None       => Left(s"'$piuri' MUST have field 'thid'")
                 case Some(thid) =>
                   msg.body match
-                    case None => Left(s"'$piuri' MUST have field 'body'")
+                    case None    => Left(s"'$piuri' MUST have field 'body'")
                     case Some(b) =>
                       b.as[Body].flatMap { body =>
                         Right(
@@ -417,13 +417,13 @@ object Handshake {
     if (msg.`type` != piuri) Left(s"No able to create Handshake from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
-        case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+        case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from'")
+            case None       => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.thid match
-                case None => Left(s"'$piuri' MUST have field 'thid'")
+                case None       => Left(s"'$piuri' MUST have field 'thid'")
                 case Some(thid) =>
                   Right(
                     Handshake(

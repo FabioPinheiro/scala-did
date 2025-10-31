@@ -60,7 +60,7 @@ final case class SSI(
               case CreateDidOP(publicKeys, services, context) =>
                 latestHash match
                   case Some(value) => self // The Identity already exists
-                  case None =>
+                  case None        =>
                     publicKeys
                       .foldLeft(this) { (tmpSSI, key) => tmpSSI.addKey(key) }
                       .copy(latestHash = Some(spo.opHash), services = services, context = context)
@@ -76,7 +76,7 @@ final case class SSI(
                     .foldLeft(self) { (tmpSSI, action) =>
                       action match
                         case UpdateDidOP.VoidAction(reason) => tmpSSI
-                        case UpdateDidOP.AddKey(key) =>
+                        case UpdateDidOP.AddKey(key)        =>
                           key match
                             case PrismPublicKey.VoidKey(id, reason)                           => tmpSSI
                             case k @ PrismPublicKey.UncompressedECKey(id, usage, curve, x, y) => tmpSSI.addKey(k)
@@ -87,7 +87,7 @@ final case class SSI(
                         case UpdateDidOP.UpdateService(sId, newType, newServiceEndpoints) =>
                           copy(services = services.map {
                             case s @ MyService(id, type_, serviceEndpoint) if id != sId => s
-                            case MyService(id, type_, serviceEndpoint) =>
+                            case MyService(id, type_, serviceEndpoint)                  =>
                               if (newType.isEmpty) MyService(id = id, `type` = type_, newServiceEndpoints)
                               else MyService(id = id, `type` = type_, newServiceEndpoints)
                           })

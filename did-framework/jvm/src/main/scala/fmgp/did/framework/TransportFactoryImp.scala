@@ -14,7 +14,7 @@ object TransportFactoryImp {
       override def openTransport(uri: String): UIO[TransportDIDComm[Any]] = {
         uri match {
           case p if p.startsWith("https:") => openTransportHTTP(client, scope, p)
-          case p if p.startsWith("http:") =>
+          case p if p.startsWith("http:")  =>
             ZIO.logWarning(s"The transport to ${p} may not be secure") *> openTransportHTTP(client, scope, p)
           // case p if p.startsWith("wss:")   => openTransportWS(p).orDie //TODO
           // case p if p.startsWith("ws:") => //TODO

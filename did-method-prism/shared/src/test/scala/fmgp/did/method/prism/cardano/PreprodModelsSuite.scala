@@ -22,7 +22,7 @@ class PreprodModelsSuite extends ZSuite {
   test("CardanoMetadata 17137") {
     assert(metadata_17137_cbor.toCardanoPrismEntry.isRight)
     metadata_17137_cbor.toCardanoPrismEntry match
-      case Left(value) => fail("Must be CardanoPrismEntry")
+      case Left(value)              => fail("Must be CardanoPrismEntry")
       case Right(cardanoPrismEntry) =>
         MaybeEvent
           .fromProto(
@@ -31,7 +31,7 @@ class PreprodModelsSuite extends ZSuite {
             blockIndex = cardanoPrismEntry.index,
           )
           .map {
-            case InvalidPrismObject(tx, b, reason) => fail(s"Must be MySignedPrismEvent: fail with $reason")
+            case InvalidPrismObject(tx, b, reason)         => fail(s"Must be MySignedPrismEvent: fail with $reason")
             case InvalidSignedPrismEvent(tx, b, o, reason) =>
               fail(s"Must be MySignedPrismEvent: fail with $reason")
             case MySignedPrismEvent(tx, b, o, signedWith, signature, protobuf) => // ok

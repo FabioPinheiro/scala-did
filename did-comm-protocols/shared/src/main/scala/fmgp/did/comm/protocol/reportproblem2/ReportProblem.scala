@@ -87,8 +87,8 @@ case class ProblemReport(
     )
 
   def commentWithArgs = (comment, args) match
-    case (None, _)       => None
-    case (Some(c), None) => Some(c)
+    case (None, _)          => None
+    case (Some(c), None)    => Some(c)
     case (Some(c), Some(a)) =>
       Some(a.zipWithIndex.foldLeft(c) { case (text, (arg, index)) => text.replaceAll(s"\\{${index + 1}\\}", arg) })
 }
@@ -115,13 +115,13 @@ object ProblemReport {
     if (msg.`type` != piuri) Left(s"No able to create ProblemReport from a Message of the type '${msg.`type`}'")
     else
       msg.from match
-        case None => Left(s"'$piuri' MUST have field 'from'")
+        case None       => Left(s"'$piuri' MUST have field 'from'")
         case Some(from) =>
           msg.pthid match
-            case None => Left(s"'$piuri' MUST have field 'pthid'")
+            case None        => Left(s"'$piuri' MUST have field 'pthid'")
             case Some(pthid) =>
               msg.body match
-                case None => Left(s"'$piuri' MUST have field 'body'")
+                case None    => Left(s"'$piuri' MUST have field 'body'")
                 case Some(b) =>
                   b.as[Body].map { body =>
                     ProblemReport(

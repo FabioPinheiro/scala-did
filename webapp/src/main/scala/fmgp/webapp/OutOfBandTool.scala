@@ -58,7 +58,7 @@ object OutOfBandTool {
                   p("Message:"),
                   pre(code(msg.toJsonPretty)),
                   msg.toOOBInvitation match
-                    case Left(value) => p(s"The OBB is not a invitation due to: $value")
+                    case Left(value)          => p(s"The OBB is not a invitation due to: $value")
                     case Right(oobInvitation) =>
                       Seq(
                         p(
@@ -77,7 +77,7 @@ object OutOfBandTool {
                           "."
                         ),
                         oobInvitation.goal match
-                          case None => p("goal code is missing")
+                          case None       => p("goal code is missing")
                           case Some(goal) =>
                             if (OOBInvitation.wellKnowGoal(goal))
                               p("'", code(goal), "' is a well know goal")

@@ -145,7 +145,7 @@ object UtilsJVM {
     val verifier = new ECDSAVerifier(_key.toPublicJWK)
     verifier.getJCAContext().setProvider(CryptoProvider.provider)
     val signatureObjs: Seq[JWMSignatureObj] = maybeKeyID match
-      case None => jwm.signatures // Try all signatures
+      case None        => jwm.signatures // Try all signatures
       case Some(keyId) =>
         jwm.signatures
           .filter(_.`protected`.obj.kid match {
@@ -265,7 +265,7 @@ object UtilsJVM {
     verifier.getJCAContext().setProvider(CryptoProvider.provider)
 
     val signatureObjs: Seq[JWMSignatureObj] = maybeKeyID match
-      case None => jwm.signatures // Try all signatures
+      case None        => jwm.signatures // Try all signatures
       case Some(keyId) =>
         jwm.signatures
           .filter(_.`protected`.obj.kid match {

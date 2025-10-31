@@ -151,7 +151,7 @@ class TrustPingExecuter extends ProtocolExecuterWithServices[ProtocolExecuter.Se
         TrustPing.fromPlaintextMessage(plaintextMessage) match
           case Left(error)                                    => ZIO.fail(FailToParse(error))
           case Right(ping: TrustPingWithOutRequestedResponse) => ZIO.logInfo(ping.toString()) *> ZIO.succeed(NoReply)
-          case Right(ping: TrustPingWithRequestedResponse) =>
+          case Right(ping: TrustPingWithRequestedResponse)    =>
             for {
               _ <- ZIO.logInfo(ping.toString())
               ret = ping.makeRespond

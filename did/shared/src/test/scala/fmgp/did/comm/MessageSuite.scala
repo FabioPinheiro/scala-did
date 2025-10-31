@@ -15,7 +15,7 @@ class MessageSuite extends ZSuite {
   test("Parse PlaintextMessage") {
     EncryptedMessageExamples.plaintextMessage.fromJson[Message] match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assert(obj.isInstanceOf[PlaintextMessage])
         assert(!obj.isInstanceOf[SignedMessage])
         assert(!obj.isInstanceOf[EncryptedMessage])
@@ -26,7 +26,7 @@ class MessageSuite extends ZSuite {
     SignedMessageExamples.allSignedMessage_json.map { str =>
       str.fromJson[Message] match {
         case Left(error) => fail(error)
-        case Right(obj) =>
+        case Right(obj)  =>
           assert(!obj.isInstanceOf[PlaintextMessage])
           assert(obj.isInstanceOf[SignedMessage])
           assert(!obj.isInstanceOf[EncryptedMessage])
@@ -38,7 +38,7 @@ class MessageSuite extends ZSuite {
     EncryptedMessageExamples.allEncryptedMessage.map { str =>
       str.fromJson[Message] match {
         case Left(error) => fail(error)
-        case Right(obj) =>
+        case Right(obj)  =>
           assert(!obj.isInstanceOf[PlaintextMessage])
           assert(!obj.isInstanceOf[SignedMessage])
           assert(obj.isInstanceOf[EncryptedMessage])

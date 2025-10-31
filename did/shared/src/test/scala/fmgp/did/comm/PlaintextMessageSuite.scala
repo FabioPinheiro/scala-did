@@ -12,7 +12,7 @@ class PlaintextMessageSuite extends FunSuite {
     val ret = EncryptedMessageExamples.plaintextMessage.fromJson[PlaintextMessageClass]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(obj.`type`, PIURI("https://example.com/protocols/lets_do_lunch/1.0/proposal"))
     }
   }
@@ -21,7 +21,7 @@ class PlaintextMessageSuite extends FunSuite {
     val ret = EncryptedMessageExamples.plaintextMessage.fromJson[PlaintextMessage]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(obj.`type`, PIURI("https://example.com/protocols/lets_do_lunch/1.0/proposal"))
     }
   }
@@ -37,7 +37,7 @@ class PlaintextMessageSuite extends FunSuite {
       |}""".stripMargin.fromJson[PlaintextMessage]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         obj.return_route match
           case None        => fail("Missing the return_route")
           case Some(value) => assertEquals(value, ReturnRoute.all)

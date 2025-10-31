@@ -61,10 +61,10 @@ object BlockfrostCommand {
         .map { case Right(bytes) => SignedPrismEvent.tryParseFrom(bytes) }
         .zipWithIndex
         .foldLeft[Either[HelpDoc, Seq[SignedPrismEvent]]](Right(Seq.empty)) {
-          case (Right(acc), (Right(value), index)) => Right(acc :+ value)
+          case (Right(acc), (Right(value), index))   => Right(acc :+ value)
           case (Right(acc), (Left(errorMsh), index)) =>
             Left(HelpDoc.p(s"Fail to parse the Signed Prism Event ($index): $errorMsh"))
-          case (Left(acc), (Right(value), index)) => Left(acc)
+          case (Left(acc), (Right(value), index))   => Left(acc)
           case (Left(acc), (Left(errorMsh), index)) =>
             Left(acc + HelpDoc.p(s"Fail to parse the Signed Prism Event ($index) : $errorMsh"))
         }
@@ -80,7 +80,7 @@ object BlockfrostCommand {
     case CMD.BlockfrostToken(setup, network, mBlockfrostConfig) =>
       (for {
         _ <- mBlockfrostConfig match
-          case None => ZIO.logWarning("No efect")
+          case None         => ZIO.logWarning("No efect")
           case Some(config) =>
             network match
               case CardanoNetwork.Mainnet => updateState(s => s.copy(blockfrostMainnet = Some(config)))
@@ -103,7 +103,7 @@ object BlockfrostCommand {
         _ <- ZIO.log(cmd.toString)
         wallet <- walletOrType match {
           case w: CardanoWalletConfig => ZIO.succeed(w)
-          case WalletType.SSI =>
+          case WalletType.SSI         =>
             setup.mState.flatMap(_.ssiWallet) match
               case None => ZIO.logError("SSI Wallet not found.") *> ZIO.fail(PrismCliError("SSI Wallet not found"))
               case Some(ssiWallet) => ZIO.log(s"Lodding ssi wallet") *> ZIO.succeed(ssiWallet)

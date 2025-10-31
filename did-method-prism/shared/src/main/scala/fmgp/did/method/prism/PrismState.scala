@@ -69,7 +69,7 @@ trait PrismStateRead {
   def getVDR(ref: RefVDR): zio.ZIO[Any, Throwable, VDR] = getEventsForVDR(ref)
     .flatMap { events =>
       events.headOption match
-        case None => ZIO.succeed(VDR.init(ref)) // owner is missing
+        case None            => ZIO.succeed(VDR.init(ref)) // owner is missing
         case Some(headEvent) =>
           headEvent.event match {
             case _: CreateStorageEntryOP =>

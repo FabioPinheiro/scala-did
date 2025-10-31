@@ -89,10 +89,10 @@ object KeylistUpdate {
     if (msg.`type` != piuri) Left(s"No able to create KeylistUpdate from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
-        case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+        case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from'")
+            case None       => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.body.map(_.as[Body]) match
                 case None              => Left(s"'$piuri' MUST have a 'body'")
@@ -168,13 +168,13 @@ object KeylistResponse {
     if (msg.`type` != piuri) Left(s"No able to create KeylistResponse from a Message of type '${msg.`type`}'")
     else
       msg.thid match
-        case None => Left(s"'$piuri' MUST have field 'thid'")
+        case None       => Left(s"'$piuri' MUST have field 'thid'")
         case Some(thid) =>
           msg.to.toSeq.flatten match // Note: toSeq is from the match
-            case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+            case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
             case firstTo +: Seq() =>
               msg.from match
-                case None => Left(s"'$piuri' MUST have field 'from'")
+                case None       => Left(s"'$piuri' MUST have field 'from'")
                 case Some(from) =>
                   msg.body.map(_.as[Body]) match
                     case None              => Left(s"'$piuri' MUST have a 'body'")
@@ -254,10 +254,10 @@ object KeylistQuery {
     if (msg.`type` != piuri) Left(s"No able to create KeylistQuery from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
-        case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+        case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from'")
+            case None       => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.body.map(_.as[Body]) match
                 case None              => Left(s"'$piuri' MUST have a 'body'")
@@ -360,13 +360,13 @@ object Keylist {
     if (msg.`type` != piuri) Left(s"No able to create Keylist from a Message of type '${msg.`type`}'")
     else
       msg.thid match
-        case None => Left(s"'$piuri' MUST have field 'thid'")
+        case None       => Left(s"'$piuri' MUST have field 'thid'")
         case Some(thid) =>
           msg.to.toSeq.flatten match // Note: toSeq is from the match
-            case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+            case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
             case firstTo +: Seq() =>
               msg.from match
-                case None => Left(s"'$piuri' MUST have field 'from'")
+                case None       => Left(s"'$piuri' MUST have field 'from'")
                 case Some(from) =>
                   msg.body.map(_.as[Body]) match
                     case None              => Left(s"'$piuri' MUST have a 'body'")

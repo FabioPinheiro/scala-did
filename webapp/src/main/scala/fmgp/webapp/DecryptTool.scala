@@ -64,7 +64,7 @@ object DecryptTool {
                     ZIO.succeed(Global.messageRecive(eMsg, plaintext)) // side effect!
                   case (eMsg: EncryptedMessage, sMsg: SignedMessage) =>
                     sMsg.payload.content.fromJson[Message] match
-                      case Left(value) => ZIO.fail(FailToParse(value))
+                      case Left(value)                        => ZIO.fail(FailToParse(value))
                       case Right(plaintext: PlaintextMessage) =>
                         ZIO.succeed(Global.messageRecive(eMsg, plaintext)) // side effect!
                       case Right(value: SignedMessage)    => ZIO.fail(FailDecryptDoubleSign(sMsg, value))
@@ -108,7 +108,7 @@ object DecryptTool {
             case sMsg: SignedMessage =>
               sMsg.signatures.flatMap { e =>
                 e.`protected`.obj.kid match
-                  case None => Seq(pre(code("'kid' is missing from Protected Header!"))) // TODO REMOVE case
+                  case None      => Seq(pre(code("'kid' is missing from Protected Header!"))) // TODO REMOVE case
                   case Some(vmr) =>
                     Seq(
                       pre(

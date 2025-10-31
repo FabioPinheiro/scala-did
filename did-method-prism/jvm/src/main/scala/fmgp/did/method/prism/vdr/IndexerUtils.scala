@@ -33,7 +33,7 @@ object IndexerUtils {
     maybeEvent match
       case InvalidPrismObject(tx, b, reason)         => ZIO.succeed(maybeEvent)
       case InvalidSignedPrismEvent(tx, b, o, reason) => ZIO.succeed(maybeEvent)
-      case op: MySignedPrismEvent[OP] =>
+      case op: MySignedPrismEvent[OP]                =>
         for {
           state <- ZIO.service[PrismState]
           _ <- state.addEvent(op).orDie // TODO die

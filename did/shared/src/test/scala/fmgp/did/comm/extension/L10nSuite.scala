@@ -33,9 +33,9 @@ class L10nSuite extends ZSuite {
   test("Parse PlaintextMessage with field l10n") {
     ex1.fromJson[PlaintextMessage] match
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         obj.l10n match
-          case None => fail("Message MUST have the field 'l10n'")
+          case None        => fail("Message MUST have the field 'l10n'")
           case Some(value) =>
             value match
               case L10n(Some(inline), None, None) => assertEquals(`inline`, expeted)

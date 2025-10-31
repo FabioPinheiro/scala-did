@@ -346,9 +346,9 @@ object OKP_EC_Key {
               y <- obj.get(yCursor).map(_.value)
               crv <- obj.get(crvCursor).flatMap(_.as[ECCurveOpaque])
               ret = (maybeD, maybeKid) match
-                case (None, None)      => ECPublicKeyWithoutKid(kty = ktyEC, crv = crv.curve, x = x, y = y)
-                case (None, Some(kid)) => ECPublicKeyWithKid(kty = ktyEC, crv = crv.curve, x = x, y = y, kid = kid)
-                case (Some(d), None)   => ECPrivateKeyWithoutKid(kty = ktyEC, crv = crv.curve, d = d, x = x, y = y)
+                case (None, None)         => ECPublicKeyWithoutKid(kty = ktyEC, crv = crv.curve, x = x, y = y)
+                case (None, Some(kid))    => ECPublicKeyWithKid(kty = ktyEC, crv = crv.curve, x = x, y = y, kid = kid)
+                case (Some(d), None)      => ECPrivateKeyWithoutKid(kty = ktyEC, crv = crv.curve, d = d, x = x, y = y)
                 case (Some(d), Some(kid)) =>
                   ECPrivateKeyWithKid(kty = ktyEC, crv = crv.curve, d = d, x = x, y = y, kid = kid)
             } yield ret
@@ -356,9 +356,9 @@ object OKP_EC_Key {
             for {
               crv <- obj.get(crvCursor).flatMap(_.as[OKPCurveOpaque])
               ret = (maybeD, maybeKid) match
-                case (None, None)      => OKPPublicKeyWithoutKid(kty = ktyOKP, crv = crv.curve, x = x)
-                case (None, Some(kid)) => OKPPublicKeyWithKid(kty = ktyOKP, crv = crv.curve, x = x, kid = kid)
-                case (Some(d), None)   => OKPPrivateKeyWithoutKid(kty = ktyOKP, crv = crv.curve, d = d, x = x)
+                case (None, None)         => OKPPublicKeyWithoutKid(kty = ktyOKP, crv = crv.curve, x = x)
+                case (None, Some(kid))    => OKPPublicKeyWithKid(kty = ktyOKP, crv = crv.curve, x = x, kid = kid)
+                case (Some(d), None)      => OKPPrivateKeyWithoutKid(kty = ktyOKP, crv = crv.curve, d = d, x = x)
                 case (Some(d), Some(kid)) =>
                   OKPPrivateKeyWithKid(kty = ktyOKP, crv = crv.curve, d = d, x = x, kid = kid)
             } yield ret

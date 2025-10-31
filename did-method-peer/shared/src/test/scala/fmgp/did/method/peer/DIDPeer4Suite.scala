@@ -89,7 +89,7 @@ class DIDPeer4Suite extends ZSuite {
   test("Resolve DID into a DIDDocument") {
     DIDPeer4.fromDID(didpeer4long) match
       case Left(error) => fail(s"Fail to parse DID: $error")
-      case Right(did) =>
+      case Right(did)  =>
         assertEquals(
           did.document.toJsonAST.toOption.flatMap(_.asObject).get,
           DIDPeerExamples.didpeer4docAfterResolveLongForm
@@ -102,7 +102,7 @@ class DIDPeer4Suite extends ZSuite {
   test("Contextualize Document initDoc2") {
     val did2 = DIDPeer4.fromInitDocument(initDoc2)
     DIDPeer4.contextualize(initDoc2, DIDSubject(did2short), DIDSubject(did2long)) match
-      case Left(error) => fail(error)
+      case Left(error)         => fail(error)
       case Right(mDIDDocument) =>
         mDIDDocument.alsoKnownAs match
           case None                       => fail("alsoKnownAs is missing")
@@ -141,7 +141,7 @@ class DIDPeer4Suite extends ZSuite {
           initDoc
         )
       ) match
-      case Left(error) => fail(s"Unable to create agent: $error")
+      case Left(error)  => fail(s"Unable to create agent: $error")
       case Right(agent) =>
         assertEquals(agent.id.document.allKeysTypeKeyAgreement.size, 1)
         assertEquals(agent.id.document.keyAgreement.size, 1)

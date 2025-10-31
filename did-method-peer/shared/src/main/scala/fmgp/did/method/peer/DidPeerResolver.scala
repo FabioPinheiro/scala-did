@@ -9,7 +9,7 @@ import fmgp.crypto._
 // TODO RENAME DIDPeerResolver
 class DidPeerResolver extends Resolver {
   override protected def didDocumentOf(did: FROMTO): IO[UnsupportedMethod, DIDDocument] = did.toDID match {
-    case peer: DIDPeer => DidPeerResolver.didDocument(peer)
+    case peer: DIDPeer                                => DidPeerResolver.didDocument(peer)
     case did if DIDPeer.regexPeer.matches(did.string) =>
       DidPeerResolver.didDocument(DIDPeer(did))
     case did => ZIO.fail(UnsupportedMethod(did.namespace))

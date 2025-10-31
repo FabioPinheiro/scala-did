@@ -32,7 +32,7 @@ final case class VDR(
       ssiHistory: SSIHistory // TODO make it more type safe with a bew opaque type
   ): VDR = {
     did match
-      case None => // ok
+      case None                => // ok
       case Some(valueDIDPrism) =>
         assert(valueDIDPrism == ssiHistory.didPrism, s"$valueDIDPrism != ${ssiHistory.didPrism}") // FIXME
     val ssi = ssiHistory.latestVersionBefore(spo.eventCursor)
@@ -63,7 +63,7 @@ final case class VDR(
                     // unsupportedValidationField
                 case event @ UpdateStorageEntryOP(previousEventHash, newData, unknownFields) =>
                   self.latestVDRHash match
-                    case None => self
+                    case None                                                                  => self
                     case Some(thisLatestVDRHash) if thisLatestVDRHash.hex == previousEventHash =>
                       self.copy(
                         latestVDRHash = Some(spo.eventRef.eventHash),

@@ -12,7 +12,7 @@ object Schnorr {
     val rrStart = rrLength match
       case 0x20 => r_aux + 2
       case 0x21 => r_aux + 2 + 1
-      case _ =>
+      case _    =>
         assert(false, "unexpected length for r-value")
         ???
 
@@ -23,7 +23,7 @@ object Schnorr {
     val ssStart = ssLength match
       case 0x20 => s_aux + 2
       case 0x21 => s_aux + 2 + 1
-      case _ =>
+      case _    =>
         assert(false, "unexpected length for s-value")
         ???
 

@@ -33,7 +33,7 @@ object TrustPingTool {
       .map {
         case (mFrom, None, responseRequested) => Left("Missing the 'TO'")
         case (None, Some(to), true)           => Left("Missing the 'FROM' (since response_requested is true)")
-        case (Some(from), Some(to), true) =>
+        case (Some(from), Some(to), true)     =>
           Right(TrustPingWithRequestedResponse(from = from.id, to = to))
         case (mFrom, Some(to), false) =>
           Right(TrustPingWithOutRequestedResponse(from = mFrom.map(_.id), to = to))

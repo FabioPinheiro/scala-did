@@ -16,7 +16,7 @@ class ForwardMessageSuite extends FunSuite {
     val fMsg1 = ForwardMessage.buildForwardMessage(id = id, next = msg.recipientsSubject.head, msg = msg)
 
     val fMsg2 = msg.toAttachmentJson match
-      case Left(error) => fail(error)
+      case Left(error)       => fail(error)
       case Right(attachment) =>
         val plaintext = PlaintextMessageClass(
           `type` = ForwardMessage.piuri,
@@ -81,7 +81,7 @@ class ForwardMessageSuite extends FunSuite {
 
     val fMsg1 = ForwardMessage.buildForwardMessage(id = id, next = next, msg = sMsg)
     val fMsg2 = sMsg.toAttachmentJson match
-      case Left(error) => fail(error)
+      case Left(error)       => fail(error)
       case Right(attachment) =>
         val plaintext = PlaintextMessageClass(
           `type` = ForwardMessage.piuri,

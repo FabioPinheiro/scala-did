@@ -11,7 +11,7 @@ class DIDCommSuite extends FunSuite {
     val ret = DIDCommExamples.plaintextMessage.fromJson[PlaintextMessageClass]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(obj.id, MsgID("1234567890"))
         assertEquals(obj, DIDCommExamples.plaintextMessageObj)
     }
@@ -22,7 +22,7 @@ class DIDCommSuite extends FunSuite {
     val ret = original.toJson.fromJson[PlaintextMessageClass]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(obj, original)
     }
   }
@@ -31,7 +31,7 @@ class DIDCommSuite extends FunSuite {
     val ret = DIDCommExamples.senderDIDDocument.fromJson[DIDDocument]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(obj.id.did, "did:example:alice")
         assert(obj.authentication.isDefined)
         assertEquals(obj.allKeysTypeKeyAgreement.size, 3)
@@ -44,7 +44,7 @@ class DIDCommSuite extends FunSuite {
     val ret = DIDCommExamples.recipientDIDDocument.fromJson[DIDDocument]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(obj.id.did, "did:example:bob")
         assert(obj.keyAgreement.isDefined)
         assertEquals(obj.keyAgreement.get.size, 9)
@@ -55,7 +55,7 @@ class DIDCommSuite extends FunSuite {
     val ret = DIDCommExamples.senderSecrets.fromJson[Seq[Map[String, String]]]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(obj.size, 6)
     }
   }
@@ -64,7 +64,7 @@ class DIDCommSuite extends FunSuite {
     val ret = DIDCommExamples.recipientSecrets.fromJson[Seq[Map[String, String]]]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(obj.size, 9)
     }
   }

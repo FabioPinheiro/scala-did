@@ -130,7 +130,7 @@ case class DeactivateStorageEntryOP(
 object CreateDidOP {
   import proto.prism.ProtoCreateDID.DIDCreationData
   def fromProto(p: ProtoCreateDID) = p match
-    case ProtoCreateDID(None, unknownFields) => VoidOP("ProtoCreateDID is missing DIDCreationData")
+    case ProtoCreateDID(None, unknownFields)          => VoidOP("ProtoCreateDID is missing DIDCreationData")
     case ProtoCreateDID(Some(didData), unknownFields) =>
       didData match
         case ProtoCreateDID.DIDCreationData(publicKeys, services, context, unknownFields) =>

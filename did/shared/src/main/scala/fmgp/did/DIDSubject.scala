@@ -109,7 +109,7 @@ object DIDSubjectQ {
     case Left(error)  => throw new java.lang.AssertionError(error)
 
   inline def parseString(id: String): Either[String, (String, String, String)] = id match {
-    case pattern(namespace, subject, null) => Right((namespace, subject, "")) // same as a DIDSubject
+    case pattern(namespace, subject, null)  => Right((namespace, subject, "")) // same as a DIDSubject
     case pattern(namespace, subject, query) =>
       Right((namespace, subject, query.drop(1))) // drop '?' you can on a emply string
     case _ => Left(s"Fail to parse DIDSubjectQ: '$id'")

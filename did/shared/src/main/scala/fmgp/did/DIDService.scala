@@ -103,7 +103,7 @@ object DIDServiceDIDCommMessaging {
               arr.elements
                 .foldLeft[Either[String, Seq[DIDCommMessagingServiceEndpoint]]](Right(Seq.empty)) {
                   case (left: Left[_, _], elem) => left
-                  case (Right(acc), elem) =>
+                  case (Right(acc), elem)       =>
                     elem match {
                       case aux: Json.Obj =>
                         DIDCommMessagingServiceEndpoint.decoder.fromJsonAST(aux).map(newObj => acc :+ newObj)
@@ -176,7 +176,7 @@ case class DIDServiceDecentralizedWebNode(
   override def `type`: Required[SetU[String]] = DIDService.TYPE_LinkedDomains
 
   def getNodes: Seq[String] = serviceEndpoint match
-    case Json.Str(str) => Seq.empty
+    case Json.Str(str)      => Seq.empty
     case Json.Arr(elements) =>
       elements.toSeq.flatMap {
         case obj: Json.Obj =>

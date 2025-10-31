@@ -103,7 +103,7 @@ object TransportWSImp {
       override val socketID: String = identifier
       override def onMessage(message: String) =
         inbound.offer(message).flatMap {
-          case true => ZIO.unit
+          case true  => ZIO.unit
           case false =>
             ZIO.logError(s"Message lost in inbound: '$message'") *>
               ZIO.fail(new RuntimeException(s"Message lost in inbound: '$message'"))

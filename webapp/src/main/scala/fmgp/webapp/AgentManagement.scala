@@ -334,7 +334,7 @@ object AgentManagement {
           onClick --> { _ => Global.agentProvider.set(AgentProvider.provider) }
         ),
         child <-- maybeAgentProviderSignal.map {
-          case Left(error) => pre(code(s"Can't import AgentProvider because: $error"))
+          case Left(error)        => pre(code(s"Can't import AgentProvider because: $error"))
           case Right(newProvider) =>
             button("Import AgentProvider", onClick --> { _ => Global.agentProvider.set(newProvider) })
         },

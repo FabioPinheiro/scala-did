@@ -70,9 +70,9 @@ object BasicMessage {
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
-        case tos =>
+        case tos   =>
           msg.body match
-            case None => Left(s"'$piuri' MUST have field 'body'")
+            case None    => Left(s"'$piuri' MUST have field 'body'")
             case Some(b) =>
               b.as[Body].map { body =>
                 BasicMessage(

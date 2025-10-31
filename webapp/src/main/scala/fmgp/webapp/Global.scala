@@ -139,7 +139,7 @@ object Global {
         case eMsg: EncryptedMessage =>
           eMsg.recipientsSubject.toSeq.map { did =>
             tmpAgentProvider.getAgentByDID(did) match
-              case None => ZIO.unit
+              case None        => ZIO.unit
               case Some(agent) =>
                 Utils
                   .decryptProgram(eMsg)

@@ -44,7 +44,7 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
   // @scala.annotation.tailrec // TODO fix Cannot rewrite recursive call (ssiFromPreviousEventHash): it is not in tail positionbloop
   final def ssiFromPreviousEventHash(previousHash: String): ZIO[Any, Nothing, Option[String]] = ref.get.flatMap {
     _.opHash2op.get(previousHash) match
-      case None => ZIO.succeed(None)
+      case None             => ZIO.succeed(None)
       case Some(previousOp) =>
         previousOp.event match
           case CreateDidOP(publicKeys, services, context)     => ZIO.succeed(Some(previousOp.opHash))
@@ -56,7 +56,7 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
   // @scala.annotation.tailrec //TODO
   final def vdrFromPreviousEventHash(previousHash: String): ZIO[Any, Nothing, Option[RefVDR]] = ref.get.flatMap {
     _.opHash2op.get(previousHash) match
-      case None => ZIO.succeed(None)
+      case None             => ZIO.succeed(None)
       case Some(previousOp) =>
         previousOp.event match
           case CreateStorageEntryOP(didPrism, nonce, data, _)   => ZIO.succeed(Some(RefVDR.fromEvent(previousOp)))
@@ -100,10 +100,10 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
       val same = ZIO.unit
 
       op.event match {
-        case VoidOP(reason)                 => same
-        case IssueCredentialBatchOP(value)  => same
-        case RevokeCredentialsOP(value)     => same
-        case ProtocolVersionUpdateOP(value) => same
+        case VoidOP(reason)                             => same
+        case IssueCredentialBatchOP(value)              => same
+        case RevokeCredentialsOP(value)                 => same
+        case ProtocolVersionUpdateOP(value)             => same
         case CreateDidOP(publicKeys, services, context) =>
           ref.updateSome { data =>
             val did = DIDPrism(op.opHash)
@@ -121,7 +121,7 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
           }
         case UpdateDidOP(previousEventHash, id, actions) =>
           ssiFromPreviousEventHash(previousEventHash).flatMap {
-            case None => same // TODO add to the void
+            case None          => same // TODO add to the void
             case Some(ssiHash) =>
               ref.updateSome { data =>
                 val did = DIDPrism(ssiHash)
@@ -139,7 +139,7 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
           }
         case DeactivateDidOP(previousEventHash, id) =>
           ssiFromPreviousEventHash(previousEventHash).flatMap {
-            case None => same // TODO add to the void
+            case None          => same // TODO add to the void
             case Some(ssiHash) =>
               ref.updateSome { data =>
                 val did = DIDPrism(ssiHash)
@@ -171,7 +171,7 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
           }
         case UpdateStorageEntryOP(previousEventHash, data, unknownFields) =>
           vdrFromPreviousEventHash(previousEventHash).flatMap {
-            case None => same
+            case None         => same
             case Some(vdrRef) =>
               ref.updateSome { data =>
                 val newVDR2eventRef = data.vdr2eventRef.updatedWith(vdrRef) {
@@ -188,7 +188,7 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
           }
         case DeactivateStorageEntryOP(previousEventHash, unknownFields) =>
           vdrFromPreviousEventHash(previousEventHash).flatMap {
-            case None => same
+            case None         => same
             case Some(vdrRef) =>
               ref.updateSome { data =>
                 val newVDR2eventRef = data.vdr2eventRef.updatedWith(vdrRef) {

@@ -99,7 +99,7 @@ object Setup {
     } { ref =>
       ref.get.flatMap { setup =>
         setup.staging match {
-          case Left(error) => ZIO.log(s"StagingState parsing error: $error")
+          case Left(error)     => ZIO.log(s"StagingState parsing error: $error")
           case Right(newState) =>
             (setup.updateStateFile || newState.updateStateFileByDefault) match
               case false => ZIO.unit // *> ZIO.log("updateStateFile = false")

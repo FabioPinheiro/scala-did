@@ -72,7 +72,7 @@ object EncryptTool {
         _ <- transport.send(msg)
         _ <- transport.inbound.foreach {
           case eMsg: EncryptedMessage => ZIO.succeed(outputFromCallVar.update(_ :+ Right(eMsg)))
-          case sMsg: SignedMessage =>
+          case sMsg: SignedMessage    =>
             ZIO.succeed(outputFromCallVar.update(_ :+ Left("UI not implemented for SignedMessage"))) // TODO
         }
       } yield ()
@@ -103,7 +103,7 @@ object EncryptTool {
   def jobNextForward(owner: Owner) = {
     def program(pMsg: PlaintextMessage, eMsg: EncryptedMessage): ZIO[Any, DidFail, Option[ForwardMessage]] = {
       pMsg.to.flatMap(_.headOption) match
-        case None => ZIO.none
+        case None             => ZIO.none
         case Some(originalTO) =>
           for {
             resolver <- ZIO.service[Resolver]
@@ -148,7 +148,7 @@ object EncryptTool {
       case (_, Left(_))                                              => cleanupVars
       case (_, Right(pMsg)) if pMsg.to.flatMap(_.headOption).isEmpty => cleanupVars
       case (None, Right(pMsg)) if pMsg.from.isDefined                => cleanupVars
-      case (None, Right(pMsg)) =>
+      case (None, Right(pMsg))                                       =>
         val program = OperationsClientRPC
           // .encrypt(pMsg) // always use the message data (FROM/TO) to Encrypt
           .anonEncrypt(pMsg) // if the agent is not seleted the message is encrypted anonymously
@@ -185,8 +185,8 @@ object EncryptTool {
       plaintextMessage
     )
     .map {
-      case (_, Left(_))        => signMessageVar.set(None)
-      case (None, Right(pMsg)) => signMessageVar.set(None)
+      case (_, Left(_))               => signMessageVar.set(None)
+      case (None, Right(pMsg))        => signMessageVar.set(None)
       case (Some(agent), Right(pMsg)) =>
         val programSign = OperationsClientRPC
           .sign(pMsg)
@@ -523,7 +523,7 @@ object EncryptTool {
     ),
     div(child <-- plaintextMessage.map {
       case Left(error) => pre(code(""))
-      case Right(msg) =>
+      case Right(msg)  =>
         msg.return_route match
           case None =>
             div(
@@ -546,7 +546,7 @@ object EncryptTool {
       h2("Plaintext Message"),
       children <-- plaintextMessage.map {
         case Left(error) => Seq(pre(code(s"Error: $error")))
-        case Right(msg) =>
+        case Right(msg)  =>
           Seq(
             pre(code(msg.toJsonPretty)),
             button(
@@ -560,8 +560,8 @@ object EncryptTool {
     div(
       h2("Encrypted Message"),
       children <-- encryptedMessageVar.signal.map {
-        case None              => Seq(code("None"))
-        case Some(Left(error)) => Seq(code("Error when encrypting " + error.toJsonPretty))
+        case None                           => Seq(code("None"))
+        case Some(Left(error))              => Seq(code("Error when encrypting " + error.toJsonPretty))
         case Some(Right((plaintext, eMsg))) =>
           def sideEffectMessageSend = Global.agentVar
             .now()
@@ -583,8 +583,8 @@ object EncryptTool {
     div(
       h2("Sign Message"),
       children <-- signMessageVar.signal.map {
-        case None              => Seq(code("None"))
-        case Some(Left(error)) => Seq(code("Error when signing " + error.toJsonPretty))
+        case None                           => Seq(code("None"))
+        case Some(Left(error))              => Seq(code("Error when signing " + error.toJsonPretty))
         case Some(Right((plaintext, sMsg))) =>
           def sideEffectMessageSend = Global.agentVar
             .now()
@@ -604,7 +604,7 @@ object EncryptTool {
     h2("DIDCommMessaging"),
     p("DIDCommMessaging is the DID Comm transmission specified by the service endpoint in the DID Document"),
     child <-- forwardMessageVar.signal.map {
-      case None => "No ForwardMessage"
+      case None             => "No ForwardMessage"
       case Some(forwardMsg) =>
         val pMsg = forwardMsg.toPlaintextMessage.toJsonPretty
         div(
@@ -614,18 +614,19 @@ object EncryptTool {
     },
     div(
       children <-- commandSeqVar.signal
-        .map(_.map { case c => //  new CommentNode("")
-          div(
-            p(code(c.command)),
-            div(c.copyButton, c.executeCommandButton)
-          )
+        .map(_.map {
+          case c => //  new CommentNode("")
+            div(
+              p(code(c.command)),
+              div(c.copyButton, c.executeCommandButton)
+            )
         })
     ),
     hr(),
     div(button("Clean output replies", onClick --> { _ => outputFromCallVar.set(Seq.empty) })),
     ul(
       children <-- outputFromCallVar.signal.map(_.map {
-        case Left(value) => li(pre(code(value)))
+        case Left(value)  => li(pre(code(value)))
         case Right(reply) =>
           li(
             title := (reply: Message).toJsonPretty,
