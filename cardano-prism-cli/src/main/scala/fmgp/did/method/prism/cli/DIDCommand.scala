@@ -99,7 +99,8 @@ object DIDCommand {
         maybeEvent = MaybeEvent.fromProto(signedPrismEvent, "tx-create", 0, 0)
         _ <- ZIO.log(s"MaybeEvent: ${maybeEvent.toJsonPretty}")
         _ <- ZIO.log(s"Simulate the PrismState")
-        prismState = PrismStateInMemory.empty.addMaybeEvent(maybeEvent)
+        prismState <- PrismStateInMemory.empty
+        _ <- prismState.addMaybeEvent(maybeEvent)
         ssi <- prismState.getSSI(didPrism)
         _ <- ZIO.log(s"PrismState: ${ssi.toJsonPretty}")
         _ <- Console.printLine(bytes2Hex(signedPrismEvent.toByteArray))

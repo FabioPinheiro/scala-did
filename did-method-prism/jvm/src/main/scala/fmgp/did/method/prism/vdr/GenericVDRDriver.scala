@@ -21,16 +21,15 @@ class GenericVDRDriver(
     vdrKey: Secp256k1PrivateKey,
     maybeMsgCIP20: Option[String],
 ) {
-  var globalState = PrismState.empty
-//   def refState = Ref.make(globalState)
+  var globalState: PrismStateInMemory = throw new RuntimeException(
+    "DRIVER was not initially. You need to run the '.initState' ZIo program first"
+  )
 
   def initState: ZIO[Any, Throwable, Unit] = for {
     // stateRef <- ZIO.service[Ref[PrismState]]
-    stateRef <- IndexerUtils.loadPrismStateFromChunkFiles
-      .provide(
-        ZLayer.succeed(IndexerConfig(mBlockfrostConfig = None, workdir))
-      )
-    state <- stateRef.get
+    state <- PrismStateInMemory.empty
+    _ <- IndexerUtils.loadPrismStateFromChunkFiles
+      .provide(ZLayer.succeed(IndexerConfig(mBlockfrostConfig = None, workdir)) ++ ZLayer.succeed(state))
     _ <- ZIO.log(s"Init GenericVDRDriver Service with PrismState (with ${state.ssiCount} SSI)")
   } yield (globalState = state)
 

@@ -161,6 +161,8 @@ lazy val V = new {
 
   val bullet = "1.16.1"
 
+  val reactivemongo = "1.1.0-RC17"
+
   val logbackClassic = "1.2.10"
   val scalaLogging = "3.9.4"
 
@@ -219,6 +221,9 @@ lazy val D = new {
   val scalaJavaTZ = Def.setting("io.github.cquiroz" %%% "scala-java-time-tzdb" % V.scalaJavaTime)
 
   val bullet = Def.setting("io.bullet" %%% "borer-core" % V.bullet) // CBOR
+
+  // mongoexport --uri=$MONGODB_CONNECTION  --db=sample_mflix --sort='{_id:1}' --type=json --collection=users --out=users.json
+  val reactivemongoProvided = Def.setting("org.reactivemongo" %% "reactivemongo" % V.reactivemongo % Provided)
 
   // Test DID comm
   // val didcomm = Def.setting("org.didcommx" % "didcomm" % "0.3.1")
@@ -569,6 +574,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // https://oss.sonatype.org/#nexus-search;quick~com.bloxbean.cardano
     libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.6.7",
     libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.6.7",
+    libraryDependencies += D.reactivemongoProvided.value,
   )
   .settings(
     Compile / PB.targets := Seq(scalapb.gen() -> (Compile / sourceManaged).value / "scalapb"),

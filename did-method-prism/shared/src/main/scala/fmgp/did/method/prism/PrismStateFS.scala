@@ -9,8 +9,11 @@ import fmgp.did.method.prism.proto._
 
 case class PrismStateFS() extends PrismStateRead {
 
-  override def getEventsIdBySSI(ssi: DIDSubject): Seq[EventRef] = ???
-  override def getEventsIdByVDR(ref: RefVDR): Seq[EventRef] = ???
+  def ssi2eventsRef: ZIO[Any, Nothing, Map[DIDSubject, Seq[EventRef]]] = ???
+  def vdr2eventsRef: ZIO[Any, Nothing, Map[RefVDR, Seq[EventRef]]] = ???
+
+  def getEventsIdBySSI(ssi: DIDSubject): ZIO[Any, Nothing, Seq[EventRef]] = ???
+  def getEventsIdByVDR(id: RefVDR): ZIO[Any, Nothing, Seq[EventRef]] = ???
 
   override def getEventsForSSI(ssi: DIDSubject): ZIO[Any, Throwable, Seq[
     MySignedPrismEvent[CreateDidOP | UpdateDidOP | DeactivateDidOP]
@@ -20,8 +23,6 @@ case class PrismStateFS() extends PrismStateRead {
     MySignedPrismEvent[CreateStorageEntryOP | UpdateStorageEntryOP | DeactivateStorageEntryOP]
   ]] = ???
 
-  override def getEventsByHash(refHash: EventHash): Option[MySignedPrismEvent[OP]] = ???
-
-  override def ssi2eventsId: Map[DIDSubject, Seq[EventRef]] = ???
+  override def getEventsByHash(refHash: EventHash): ZIO[Any, Nothing, Option[MySignedPrismEvent[OP]]] = ???
 
 }

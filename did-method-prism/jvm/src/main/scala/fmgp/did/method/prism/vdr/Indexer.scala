@@ -213,12 +213,13 @@ object Indexer extends ZIOAppDefault {
           *> ZIO.log(s"End updating the raw metadata '${indexerConfig.rawMetadataPath}'")
 
     // Load PRISM State from chunk files
-    refPrismState <- IndexerUtils.loadPrismStateFromChunkFiles // .provideLayer(indexerConfigZLayer)
-    state <- refPrismState.get
+    _ <- IndexerUtils.loadPrismStateFromChunkFiles // .provideLayer(indexerConfigZLayer)
+    state <- ZIO.service[PrismState]
     // ###############################################
 
+    ssiEvetns <- state.ssi2eventsRef
     _ <- ZStream
-      .fromIterable(state.ssi2eventsId)
+      .fromIterable(ssiEvetns)
       .mapZIO { case (did, opidSeq) =>
         for {
           _ <- ZIO.logDebug(s"DID: $did")
@@ -251,8 +252,9 @@ object Indexer extends ZIOAppDefault {
       }
       .run(ZSink.count)
 
+    vdrEvents <- state.vdr2eventsRef
     _ <- ZStream
-      .fromIterable(state.asInstanceOf[PrismStateInMemory].vdr2eventRef) // FIXME
+      .fromIterable(vdrEvents)
       .mapZIO { case (ref, events) =>
         for {
           _ <- ZIO.logDebug(s"VDR: $ref")
@@ -279,7 +281,8 @@ object Indexer extends ZIOAppDefault {
     for {
       _ <- indexerLogo
       indexerConfigZLayer <- makeIndexerConfigZLayerFromArgs
-      _ <- indexerJob.provideLayer(indexerConfigZLayer)
+      prismStateZLayer = ZLayer(PrismStateInMemory.empty)
+      _ <- indexerJob.provideLayer(indexerConfigZLayer ++ prismStateZLayer)
     } yield ()
   }
 

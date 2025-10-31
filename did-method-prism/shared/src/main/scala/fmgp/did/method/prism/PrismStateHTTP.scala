@@ -13,6 +13,12 @@ case class PrismStateHTTP(
       "https://raw.githubusercontent.com/FabioPinheiro/prism-vdr/refs/heads/main/mainnet/events",
 ) extends PrismStateRead {
 
+  def ssi2eventsRef: ZIO[Any, Nothing, Map[DIDSubject, Seq[EventRef]]] = ???
+  def vdr2eventsRef: ZIO[Any, Nothing, Map[RefVDR, Seq[EventRef]]] = ???
+
+  override def getEventsIdBySSI(ssi: DIDSubject): ZIO[Any, Nothing, Seq[EventRef]] = ???
+  override def getEventsIdByVDR(id: RefVDR): ZIO[Any, Nothing, Seq[EventRef]] = ???
+
   override def getEventsForSSI(
       ssi: DIDSubject
   ): ZIO[Any, Throwable, Seq[MySignedPrismEvent[CreateDidOP | UpdateDidOP | DeactivateDidOP]]] = {
@@ -24,9 +30,10 @@ case class PrismStateHTTP(
     } yield retTyped
   }.provideEnvironment(ZEnvironment(httpUtils))
 
-  override def getEventsByHash(refHash: EventHash): Option[MySignedPrismEvent[OP]] = ???
-  override def getEventsIdBySSI(ssi: DIDSubject): Seq[EventRef] = ???
-  override def getEventsIdByVDR(ref: RefVDR): Seq[EventRef] = ???
-  override def ssi2eventsId: Map[DIDSubject, Seq[EventRef]] = ???
+  override def getEventsForVDR(refVDR: RefVDR): ZIO[Any, Throwable, Seq[
+    MySignedPrismEvent[CreateStorageEntryOP | UpdateStorageEntryOP | DeactivateStorageEntryOP]
+  ]] = ???
+
+  override def getEventsByHash(refHash: EventHash): ZIO[Any, Nothing, Option[MySignedPrismEvent[OP]]] = ???
 
 }

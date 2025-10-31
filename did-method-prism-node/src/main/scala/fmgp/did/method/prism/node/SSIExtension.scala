@@ -14,7 +14,7 @@ import fmgp.did.method.prism.cardano._
 import fmgp.did.method.prism.proto._
 
 extension (ssi: SSI) {
-  def didData: DIDData = {
+  def didData: Option[DIDData] = Option.unless(ssi.disabled) {
     DIDData(
       id = ssi.did.string,
       publicKeys = ssi.keys.map(k => SSIExtension.toPublicKey(k)),
