@@ -58,7 +58,7 @@ trait PrismStateRead {
       } yield storageEvents
     }
 
-  def getEventsByHash(refHash: EventHash): ZIO[Any, Nothing, Option[MySignedPrismEvent[OP]]]
+  def getEventsByHash(refHash: EventHash): ZIO[Any, Exception, Option[MySignedPrismEvent[OP]]]
 
   def getSSI(ssi: DIDSubject): ZIO[Any, Throwable, SSI] =
     getSSIHistory(ssi).map(_.latestVersion) // getEventsForSSI(ssi).map { events => SSI.make(ssi, events) }
@@ -89,14 +89,14 @@ object PrismState {
   def forceType2DidEvent(seq: Seq[MySignedPrismEvent[OP]]): ZIO[Any, RuntimeException, Seq[
     MySignedPrismEvent[CreateDidOP | UpdateDidOP | DeactivateDidOP]
   ]] = {
-    ZIO.foldLeft(seq)(Seq.empty[MySignedPrismEvent[OP.TypeDidEvent]]) { (s, sEvent) =>
+    ZIO.foldLeft(seq)(Seq.empty[MySignedPrismEvent[OP.TypeDIDEvent]]) { (s, sEvent) =>
       sEvent.event match
         case _: CreateDidOP =>
-          ZIO.succeed(s :+ sEvent.asInstanceOf[MySignedPrismEvent[OP.TypeDidEvent]])
+          ZIO.succeed(s :+ sEvent.asInstanceOf[MySignedPrismEvent[OP.TypeDIDEvent]])
         case _: UpdateDidOP =>
-          ZIO.succeed(s :+ sEvent.asInstanceOf[MySignedPrismEvent[OP.TypeDidEvent]])
+          ZIO.succeed(s :+ sEvent.asInstanceOf[MySignedPrismEvent[OP.TypeDIDEvent]])
         case _: DeactivateDidOP =>
-          ZIO.succeed(s :+ sEvent.asInstanceOf[MySignedPrismEvent[OP.TypeDidEvent]])
+          ZIO.succeed(s :+ sEvent.asInstanceOf[MySignedPrismEvent[OP.TypeDIDEvent]])
         case sEvent => ZIO.fail(new RuntimeException("This Event is not a DID Event")) // FIXME
     }
   }

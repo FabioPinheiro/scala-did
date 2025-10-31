@@ -6,9 +6,23 @@ import proto.prism._
 import fmgp.did.method.prism.VDR
 import fmgp.did.method.prism.DIDPrism
 
-sealed trait OP
+sealed trait OP {
+  def isDIDEvent: Boolean
+  def isStorageEvent: Boolean
+
+  def asDIDEvent =
+    if (this.isInstanceOf[OP.TypeDIDEvent])
+      Right(this.asInstanceOf[OP.TypeDIDEvent])
+    else Left("OP is not a DIDEvent type")
+
+  def asStorageEntryEvent =
+    if (this.isInstanceOf[OP.TypeStorageEntryEvent])
+      Right(this.asInstanceOf[OP.TypeStorageEntryEvent])
+    else Left("OP is not a DIDEvent type")
+}
+
 object OP {
-  type TypeDidEvent = CreateDidOP | UpdateDidOP | DeactivateDidOP
+  type TypeDIDEvent = CreateDidOP | UpdateDidOP | DeactivateDidOP
   type TypeStorageEntryEvent = CreateStorageEntryOP | UpdateStorageEntryOP | DeactivateStorageEntryOP
 
   given JsonDecoder[OP] = DeriveJsonDecoder.gen[OP]
@@ -30,7 +44,10 @@ object OP {
     }
   }
 }
-case class VoidOP(reason: String) extends OP
+case class VoidOP(reason: String) extends OP {
+  def isDIDEvent: Boolean = false
+  def isStorageEvent: Boolean = false
+}
 
 /** @param publicKeys
   *   (2) The keys that belong to this DID Document.
@@ -43,7 +60,10 @@ case class CreateDidOP( // Like DIDCreationData
     publicKeys: Seq[PrismPublicKey],
     services: Seq[MyService],
     context: Seq[String],
-) extends OP
+) extends OP {
+  def isDIDEvent: Boolean = true
+  def isStorageEvent: Boolean = false
+}
 
 /** @param previous_event_hash
   *   (1) - The hash of the most recent event that was used to create or update the DID.
@@ -54,18 +74,32 @@ case class CreateDidOP( // Like DIDCreationData
   */
 case class UpdateDidOP(previousEventHash: String, id: String, actions: Seq[UpdateDidOP.Action]) extends OP {
   def previousOpHashHex = previousEventHash
+  def isDIDEvent: Boolean = true
+  def isStorageEvent: Boolean = false
 }
 
-case class IssueCredentialBatchOP(value: String) extends OP
-case class RevokeCredentialsOP(value: String) extends OP
-case class ProtocolVersionUpdateOP(value: String) extends OP
+case class IssueCredentialBatchOP(value: String) extends OP {
+  def isDIDEvent: Boolean = false
+  def isStorageEvent: Boolean = false
+}
+case class RevokeCredentialsOP(value: String) extends OP {
+  def isDIDEvent: Boolean = false
+  def isStorageEvent: Boolean = false
+}
+case class ProtocolVersionUpdateOP(value: String) extends OP {
+  def isDIDEvent: Boolean = false
+  def isStorageEvent: Boolean = false
+}
 
 /** @param previous_event_hash
   *   (1) - The hash of the most recent event that was used to create or update the DID.
   * @param id
   *   (2) - DID Suffix of the DID to be deactivated
   */
-case class DeactivateDidOP(previousEventHash: String, id: String) extends OP
+case class DeactivateDidOP(previousEventHash: String, id: String) extends OP {
+  def isDIDEvent: Boolean = true
+  def isStorageEvent: Boolean = false
+}
 
 case class CreateStorageEntryOP(
     didPrism: DIDPrism,
@@ -73,17 +107,25 @@ case class CreateStorageEntryOP(
     data: VDR.DataType,
     unknownFields: Set[Int],
 ) extends OP {
+  def isDIDEvent: Boolean = false
+  def isStorageEvent: Boolean = true
   def nonceInHex = bytes2Hex(nonce)
 }
 case class UpdateStorageEntryOP(
     previousEventHash: String,
     data: VDR.DataUpdateType,
     unknownFields: Set[Int],
-) extends OP
+) extends OP {
+  def isDIDEvent: Boolean = false
+  def isStorageEvent: Boolean = true
+}
 case class DeactivateStorageEntryOP(
     previousEventHash: String,
     unknownFields: Set[Int],
-) extends OP
+) extends OP {
+  def isDIDEvent: Boolean = false
+  def isStorageEvent: Boolean = true
+}
 
 object CreateDidOP {
   import proto.prism.ProtoCreateDID.DIDCreationData

@@ -27,7 +27,6 @@ object DIDPrismResolver {
   def layer(baseUrl: String): URLayer[HttpUtils, Resolver] = layerDIDPrismResolver(baseUrl)
   def layerDIDPrismResolver(baseUrl: String): URLayer[HttpUtils, DIDPrismResolver] = ZLayer.fromZIO(make(baseUrl))
 
-  // /** see https://identity.foundation/peer-did-method-spec/#generation-method */
   def didDocument(baseUrl: String, did: DIDPrism): ZIO[HttpUtils, ResolverError, DIDDocument] = did match {
     case prism: DIDPrism =>
       for {

@@ -12,6 +12,7 @@ object EventHash:
   // TODO Remove assert for optimization
   def fromBytes(hash: Array[Byte]): EventHash = { assert(hash.size == 32, "Hash256 MUST have 32 bytes"); hash }
   def fromHex(hex: String): EventHash = { assert(hex.size == 64, "Hash256 MUST 64 hex characters"); hex2bytes(hex) }
+  def fromPRISM(did: DIDPrism): EventHash = fromHex(did.specificId)
 
   given JsonDecoder[EventHash] = JsonDecoder.string.map(EventHash.fromHex(_))
   given JsonEncoder[EventHash] = JsonEncoder.string.contramap[EventHash](_.hex)

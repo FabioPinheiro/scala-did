@@ -79,11 +79,8 @@ object IndexerUtils {
       .run(countEvents) // (ZSink.count)
       .provideEnvironment(ZEnvironment(state: PrismState))
     _ <- ZIO.log(s"Finish Init PrismState: $countEvents")
-    // aa <- state.ref.get.map(_.vdr2eventRef.count(_ => true))
-    //   ZIO.log(
-    //   s"PrismState was ${state.ssiCount} SSI and ${state.asInstanceOf[PrismStateInMemory].vdr2eventRef.count(_ => true)} VDR"
-    // )
-    // _ <- ZIO.log(s"PrismState was ${state.asInstanceOf[PrismStateInMemory].toJsonPretty}")
+    vdrCount <- state.vdrCount
+    _ <- ZIO.log(s"PrismState was ${state.ssiCount} SSI and ${state.vdrCount} VDR")
   } yield state
 
 }

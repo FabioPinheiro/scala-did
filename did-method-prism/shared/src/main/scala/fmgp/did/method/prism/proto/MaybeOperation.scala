@@ -47,6 +47,11 @@ case class MySignedPrismEvent[+T <: OP] private (
   def eventCursor = EventCursor(b = b, o = o)
   val operation: T = OP.fromPrismEvent(protobuf).asInstanceOf[T] // UNSAFE? //TODO maybe make it lazy val
   def view = SignedPrismEventView[T](tx, b, o, signedWith, signature, operation, protobuf)
+
+  def asSignedPrismDIDEvent: Either[String, MySignedPrismEvent[OP.TypeDIDEvent]] =
+    event.asDIDEvent.map(_ => this.asInstanceOf[MySignedPrismEvent[OP.TypeDIDEvent]])
+  def asSignedPrismStorageEntryEvent: Either[String, MySignedPrismEvent[OP.TypeStorageEntryEvent]] =
+    event.asDIDEvent.map(_ => this.asInstanceOf[MySignedPrismEvent[OP.TypeStorageEntryEvent]])
 }
 
 case class SignedPrismEventView[+T <: OP](
@@ -73,7 +78,7 @@ object SignedPrismEventView {
     DeriveJsonEncoder.gen[SignedPrismEventView[OP]]
   }
 
-  given encoderTypeDidEvent: JsonEncoder[SignedPrismEventView[OP.TypeDidEvent]] =
+  given encoderTypeDIDEvent: JsonEncoder[SignedPrismEventView[OP.TypeDIDEvent]] =
     encoder.contramap(e => e)
   given encoderTypeStorageEntryEvent: JsonEncoder[SignedPrismEventView[OP.TypeStorageEntryEvent]] =
     encoder.contramap(e => e)
@@ -107,7 +112,7 @@ object MySignedPrismEvent {
     protobuf = protobuf,
   ).asInstanceOf[MySignedPrismEvent[T]]
 
-  type SignedPrismEventSSI = MySignedPrismEvent[OP.TypeDidEvent]
+  type SignedPrismEventSSI = MySignedPrismEvent[OP.TypeDIDEvent]
   type SignedPrismEventStorage = MySignedPrismEvent[OP.TypeStorageEntryEvent]
 
   given decoder: JsonDecoder[MySignedPrismEvent[OP]] = {
@@ -123,7 +128,7 @@ object MySignedPrismEvent {
     DeriveJsonEncoder.gen[MySignedPrismEvent[OP]]
   }
 
-  given encoderTypeDidEvent: JsonEncoder[MySignedPrismEvent[OP.TypeDidEvent]] =
+  given encoderTypeDIDEvent: JsonEncoder[MySignedPrismEvent[OP.TypeDIDEvent]] =
     encoder.contramap(e => e)
   given encoderTypeStorageEntryEvent: JsonEncoder[MySignedPrismEvent[OP.TypeStorageEntryEvent]] =
     encoder.contramap(e => e)

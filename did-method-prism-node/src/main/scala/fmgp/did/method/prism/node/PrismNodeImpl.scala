@@ -111,16 +111,23 @@ case class PrismNodeImpl(state: PrismState, walletConfig: CardanoWalletConfig) e
       )
 
     eventEffect = eventHashEffect.flatMap { eventHash =>
-      state.getEventsByHash(eventHash).map {
-        _.map { op =>
-          assert(op.opHash == eventHash.hex, s"Event hash mismatch: ${op.opHash} != ${eventHash.hex}")
-          EventInfo(
-            txStatus = "CONFIRMED", // if we find the event in the state, it is confirmed
-            statusDetails = s"Event found with hash: ${op.opHash}",
-            transactionId = Some(op.tx)
-          )
+      state
+        .getEventsByHash(eventHash)
+        .map {
+          _.map { op =>
+            assert(op.opHash == eventHash.hex, s"Event hash mismatch: ${op.opHash} != ${eventHash.hex}")
+            EventInfo(
+              txStatus = "CONFIRMED", // if we find the event in the state, it is confirmed
+              statusDetails = s"Event found with hash: ${op.opHash}",
+              transactionId = Some(op.tx)
+            )
+          }
         }
-      }
+        .mapError(ex =>
+          io.grpc.Status.INTERNAL
+            .withDescription(s"Error fetching event ($eventHash): ${ex.getMessage}")
+            .asException()
+        )
     }
 
     ret <- eventEffect.map { maybeOpInfo =>

@@ -25,7 +25,7 @@ object Global {
   def urlForUniresolver = Global.urlForUniresolverVar.now() // TODO improve
 
   val baseUrlForDIDPrismResolverVar = // /FabioPinheiro/prism-vdr/
-    Var[String](initial = "https://raw.githubusercontent.com/blockfrost/prism-vdr/refs/heads/main/mainnet/diddoc")
+    Var[String](initial = "https://raw.githubusercontent.com/FabioPinheiro/prism-vdr/refs/heads/main/mainnet/diddoc")
 
   def baseUrlForDIDPrismResolver = Global.baseUrlForDIDPrismResolverVar.now() // TODO improve
 
