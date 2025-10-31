@@ -143,7 +143,7 @@ lazy val V = new {
   val scalajsJavaSecureRandom = "1.0.0"
 
   // FIXME another bug in the test framework https://github.com/scalameta/munit/issues/554
-  val munit = "1.1.1" // "0.7.29"
+  val munit = "1.2.1" // "0.7.29"
 
   // https://mvnrepository.com/artifact/org.scala-js/scalajs-dom
   val scalajsDom = "2.8.0"
@@ -153,7 +153,7 @@ lazy val V = new {
   val zio = "2.1.20"
   val zioJson = "0.7.44"
   val zioMunitTest = "0.4.0"
-  val zioHttp = "3.4.0" // FIXES CORS https://github.com/zio/zio-http/pull/2490
+  val zioHttp = "3.4.1" // FIXES CORS https://github.com/zio/zio-http/pull/2490
   val zioPrelude = "1.0.0-RC21"
 
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time
@@ -476,9 +476,9 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.nimbusJoseJwt.value,
 
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
-    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.18.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
+    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.19.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
-    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.32.1",
+    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.33.0",
   )
   .jsConfigure(scalaJSLibConfigure)
   .jsSettings(
@@ -568,12 +568,12 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.bouncycastle_bcpkix.value,
     libraryDependencies += D.nimbusJoseJwt.value,
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
-    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.18.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
+    libraryDependencies += "com.google.crypto.tink" % "tink" % "1.19.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
     libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.5",
     // https://oss.sonatype.org/#nexus-search;quick~com.bloxbean.cardano
-    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.6.6",
-    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.6.6",
+    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.6.7",
+    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.6.7",
     libraryDependencies += D.reactivemongoProvided.value,
   )
   .settings(
@@ -641,8 +641,8 @@ lazy val didPrismNode = project
       rootPaths.value.apply("BASE").toFile() / "did-method-prism-node" / "src/main/protobuf"
     ),
     libraryDependencies ++= Seq(
-      "io.grpc" % "grpc-netty" % "1.75.0", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
-      "io.netty" % "netty-handler" % "4.2.6.Final", // This is to forces a update in from "io.grpc" % "grpc-netty" % "1.73.0" -> https://mvnrepository.com/artifact/io.netty/netty-handler/4.1.110.Final
+      "io.grpc" % "grpc-netty" % "1.76.0", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
+      "io.netty" % "netty-handler" % "4.2.7.Final", // This is to forces a update in from "io.grpc" % "grpc-netty" % "1.73.0" -> https://mvnrepository.com/artifact/io.netty/netty-handler/4.1.110.Final
       // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion,
       // REMOVE // The following needed only if you include scalapb/scalapb.proto:
       // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
