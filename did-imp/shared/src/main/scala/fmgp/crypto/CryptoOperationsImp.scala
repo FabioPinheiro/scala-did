@@ -150,7 +150,7 @@ object CryptoOperationsImp extends CryptoOperations {
 
     val kids = msg.recipients.map(_.header.kid.value)
     recipientKidsKeys.filterNot(e => kids.contains(e._1)) match
-      case Seq() => ZIO.fail(MissingDecryptionKey(kids*))
+      case Seq()            => ZIO.fail(MissingDecryptionKey(kids*))
       case firstKey +: tail => {
         firstKey._2 match
           case ecKey: ECKey =>

@@ -81,7 +81,7 @@ class DIDPeerSuite extends ZSuite {
     val s = DIDSubject(ex5_peer1)
     DIDPeer.fromDID(s) match
       case Left(value) => fail(value)
-      case Right(did) =>
+      case Right(did)  =>
         assertEquals(did, DIDPeer1("zQmZMygzYqNwU6Uhmewx5Xepf2VLp5S4HLSwwgf2aiKZuwa"))
         assertEquals(did.string, s.string)
   }
@@ -90,7 +90,7 @@ class DIDPeerSuite extends ZSuite {
     val s = DIDSubject(ex4_peer2_did)
     DIDPeer.fromDID(s) match
       case Left(value) => fail(value)
-      case Right(did) =>
+      case Right(did)  =>
         assertEquals(
           did,
           DIDPeer2(
@@ -111,7 +111,7 @@ class DIDPeerSuite extends ZSuite {
     val s = DIDSubject(myExampleDID)
     DIDPeer.fromDID(s) match
       case Left(value) => fail(value)
-      case Right(did) =>
+      case Right(did)  =>
         assertEquals(
           did,
           DIDPeer2(
@@ -136,7 +136,7 @@ class DIDPeerSuite extends ZSuite {
     val s = DIDSubject(rootsid_ex_peer2_did)
     DIDPeer.fromDID(s) match
       case Left(value) => fail(value)
-      case Right(did) =>
+      case Right(did)  =>
         assertEquals(did.string, s.string)
         assertEquals(
           Some(did.document.toJsonPretty),
@@ -185,7 +185,7 @@ class DIDPeerSuite extends ZSuite {
       case DIDPeer3(encnumbasis)          => fail("Wrong DIDPeer type")
       case DIDPeer4LongForm(hash, json)   => fail("Wrong DIDPeer type")
       case DIDPeer4ShortForm(encnumbasis) => fail("Wrong DIDPeer type")
-      case obj @ DIDPeer2(elements) =>
+      case obj @ DIDPeer2(elements)       =>
         assertEquals(obj.did, testDid(service))
         assertNotEquals(obj.did, testDid(defaultService))
   }
@@ -194,11 +194,11 @@ class DIDPeerSuite extends ZSuite {
     val s = DIDSubject(aliceWithMultiService)
     DIDPeer2.fromDID(s) match
       case Left(value) => fail(value)
-      case Right(did) =>
+      case Right(did)  =>
         assertEquals(did.string, s.string)
         assertEquals(did.document.service.toSeq.flatten.size, 4)
         did.document.service.map(_.toSeq) match
-          case None => fail("Must have two servies instated of none")
+          case None                      => fail("Must have two servies instated of none")
           case Some(Seq(s1, s2, s3, s4)) =>
             assertEquals(s1.`type`, "DIDCommMessaging")
             assertEquals(s2.`type`, "DIDCommMessaging")

@@ -59,12 +59,12 @@ object RequestToSubscribe {
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
-        case tos =>
+        case tos   =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from'")
+            case None       => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.body match
-                case None => Left(s"'$piuri' MUST have field 'body'")
+                case None    => Left(s"'$piuri' MUST have field 'body'")
                 case Some(b) =>
                   b.as[Body].map { body =>
                     RequestToSubscribe(
@@ -125,12 +125,12 @@ object SetupToSubscribe {
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
-        case tos =>
+        case tos   =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from'")
+            case None       => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.body match
-                case None => Left(s"'$piuri' MUST have field 'body'")
+                case None    => Left(s"'$piuri' MUST have field 'body'")
                 case Some(b) =>
                   b.as[Body].map { body =>
                     SetupToSubscribe(
@@ -193,12 +193,12 @@ object Subscribe {
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
-        case tos =>
+        case tos   =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from'")
+            case None       => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.body match
-                case None => Left(s"'$piuri' MUST have field 'body'")
+                case None    => Left(s"'$piuri' MUST have field 'body'")
                 case Some(b) =>
                   b.as[Body].map { body =>
                     Subscribe(
@@ -259,16 +259,16 @@ object Subscription {
       Left(s"No able to create Subscription from a Message of the type '${msg.`type`}'")
     else
       msg.thid match
-        case None => Left(s"'$piuri' MUST have field 'thid'")
+        case None       => Left(s"'$piuri' MUST have field 'thid'")
         case Some(thid) =>
           msg.to.toSeq.flatten match // Note: toSeq is from the match
             case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
-            case tos =>
+            case tos   =>
               msg.from match
-                case None => Left(s"'$piuri' MUST have field 'from'")
+                case None       => Left(s"'$piuri' MUST have field 'from'")
                 case Some(from) =>
                   msg.body match
-                    case None => Left(s"'$piuri' MUST have field 'body'")
+                    case None    => Left(s"'$piuri' MUST have field 'body'")
                     case Some(b) =>
                       b.as[Body].map { body =>
                         Subscription(

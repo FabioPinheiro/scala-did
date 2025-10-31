@@ -20,7 +20,7 @@ class AdvancedSequencingSuite extends ZSuite {
 
   test("Parse ReceivedOrdersElement") {
     ex_received_orders.fromJson[Seq[ReceivedOrdersElement]] match
-      case Left(error) => fail(error)
+      case Left(error)            => fail(error)
       case Right(Seq(obj1, obj2)) =>
         assertEquals(obj1, expeted_received_orders_obj1)
         assertEquals(obj2, expeted_received_orders_obj2)

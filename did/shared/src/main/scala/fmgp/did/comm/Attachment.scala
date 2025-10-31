@@ -58,8 +58,8 @@ case class Attachment(
       Left(s"Message from Attachment only support type Base64 or Json (instead of JWS)")
     case AttachmentDataLinks(links, hash) =>
       Left(s"Message from Attachment only support type Base64 or Json (instead of Links)")
-    case AttachmentDataBase64(base64) => base64.decodeToString.fromJson[Message]
-    case AttachmentDataJson(json)     => json.as[Message]
+    case AttachmentDataBase64(base64)                      => base64.decodeToString.fromJson[Message]
+    case AttachmentDataJson(json)                          => json.as[Message]
     case AttachmentDataAny(jws, hash, links, base64, json) =>
       Left(s"Has attachments of unknown type") // TODO shound we still try?
 
@@ -69,7 +69,7 @@ case class Attachment(
     case AttachmentDataLinks(links, hash) =>
       Left(s"JWT from Attachment only support type Base64 (instead of Links)")
     case AttachmentDataBase64(base64) => JWT.fromBase64(base64)
-    case AttachmentDataJson(json) =>
+    case AttachmentDataJson(json)     =>
       Left(s"JWT from Attachment only support type Base64 (instead of JSOM)")
     case AttachmentDataAny(jws, hash, links, base64, json) =>
       Left(s"Has attachments of unknown type") // TODO shound we still try?

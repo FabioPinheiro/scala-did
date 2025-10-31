@@ -174,7 +174,7 @@ object VDRCommand {
           }
         vdrKey <- vdrKeyRaw match
           case Some(raw) => ZIO.succeed(Secp256k1PrivateKey(raw))
-          case None =>
+          case None      =>
             stateLen(_.secp256k1PrivateKey.get(vdrKeyLabel))
               .flatMap {
                 case Some(Key(seed, derivationPath, key)) => ZIO.succeed(key)

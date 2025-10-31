@@ -49,7 +49,7 @@ object Client {
     .flatMap(e => ZIO.fromPromiseJS(e.text()))
     .catchAll(ex => ZIO.fail(SomeThrowable(ex)))
     .flatMap(_.fromJson[OKPPrivateKey] match
-      case Left(error) => ZIO.fail(CryptoFailToParse(error))
+      case Left(error)                           => ZIO.fail(CryptoFailToParse(error))
       case Right(key) if key.crv != Curve.X25519 =>
         ZIO.fail(WrongCurve(obtained = key.crv, expected = Set(Curve.X25519)))
       case Right(key) => ZIO.succeed(key))
@@ -58,7 +58,7 @@ object Client {
     .flatMap(e => ZIO.fromPromiseJS(e.text()))
     .catchAll(ex => ZIO.fail(SomeThrowable(ex)))
     .flatMap(_.fromJson[OKPPrivateKey] match
-      case Left(error) => ZIO.fail(CryptoFailToParse(error))
+      case Left(error)                            => ZIO.fail(CryptoFailToParse(error))
       case Right(key) if key.crv != Curve.Ed25519 =>
         ZIO.fail(WrongCurve(obtained = key.crv, expected = Set(Curve.Ed25519)))
       case Right(key) => ZIO.succeed(key))

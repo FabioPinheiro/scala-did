@@ -54,7 +54,7 @@ class AgentProgramImp(
       agent <- ZIO.service[Agent]
       recipientsSubject <- msg match
         case eMsg: EncryptedMessage => ZIO.succeed(eMsg.recipientsSubject)
-        case sMsg: SignedMessage =>
+        case sMsg: SignedMessage    =>
           ZIO.fromEither(sMsg.payloadAsPlaintextMessage).map(_.to.toSet.flatten.map(_.toDIDSubject))
       _ <- transportManager.get.flatMap { m =>
         ZIO.foreach(recipientsSubject)(subject => m.publish(subject.asTO, msg))
@@ -80,7 +80,7 @@ class AgentProgramImp(
       .program(plaintextMessage)
       .tapError(ex => ZIO.logError(s"Error when execute Protocol: $ex"))
     ret <- action match
-      case NoReply => ZIO.unit // TODO Maybe infor transport of immediately reply
+      case NoReply         => ZIO.unit // TODO Maybe infor transport of immediately reply
       case reply: AnyReply =>
         import fmgp.did.comm.Operations._
         for {
@@ -100,7 +100,7 @@ class AgentProgramImp(
                 transportDispatcher: TransportDispatcher <- transportManager.get
                 _ <- reply.msg.to.toSeq.flatten match {
                   case Seq() => ZIO.logWarning("This reply message will be sented to nobody: " + reply.msg.toJson)
-                  case tos =>
+                  case tos   =>
                     ZIO.foreachParDiscard(tos) { to =>
                       transportDispatcher.send(to = to, msg = message, thid = reply.msg.thid, pthid = reply.msg.pthid)
                     }
@@ -148,7 +148,7 @@ object AgentProgramImp {
         case sm: SignedMessage =>
           ops.verify(sm).flatMap {
             case false => ZIO.fail(ValidationFailed)
-            case true =>
+            case true  =>
               sm.payload.content.fromJson[Message] match
                 case Left(error) => ZIO.fail(FailToParse(error))
                 case Right(msg2) => decrypt(msg2)

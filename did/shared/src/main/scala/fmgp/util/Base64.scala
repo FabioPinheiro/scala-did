@@ -78,7 +78,7 @@ object Base64:
       decodeToString.fromJson[T].map(t => Base64Obj(t, Some(bytes)))
     def unsafeAsObj[T](using jsonDecoder: JsonDecoder[T]): Base64Obj[T] = asObj[T] match
       case Right(value) => value
-      case Left(error) =>
+      case Left(error)  =>
         throw new java.lang.AssertionError("assumption failed: " + s"Base64($urlBase64).unsafeAsObj: $error")
 
 /** Base64Obj keep the original base64 encoder (useful to preserve data for doing MAC checks) */

@@ -42,7 +42,7 @@ object AuthRequest {
       Left(s"No able to create AuthRequest from a Message of the type '${msg.`type`}'")
     else
       msg.from match
-        case None => Left(s"'$piuri' MUST have field 'from'")
+        case None       => Left(s"'$piuri' MUST have field 'from'")
         case Some(from) =>
           Right(
             AuthRequest(
@@ -111,10 +111,10 @@ object AuthMsg {
       Left(s"No able to create AuthMsg from a Message of the type '${msg.`type`}'")
     else
       msg.thid match
-        case None => Left(s"'$piuri' MUST have field 'thid'")
+        case None       => Left(s"'$piuri' MUST have field 'thid'")
         case Some(thid) =>
           msg.to.toSeq.flatten match // Note: toSeq is from the match
-            case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+            case Seq()       => Left(s"'$piuri' MUST have field 'to' with one element")
             case to +: Seq() =>
               msg.from match
                 case None       => Left(s"'$piuri' MUST have field 'from'")

@@ -49,20 +49,20 @@ object Utils {
       eMsg = tmp._2
       maybeResponseData <- Utils.curlProgram(eMsg)
       responseMsg <- maybeResponseData match
-        case None => ZIO.fail("Response not text Data in body")
+        case None       => ZIO.fail("Response not text Data in body")
         case Some(data) =>
           data.fromJson[EncryptedMessage] match {
             case Left(value)        => ZIO.fail(FailToParse(value))
             case Right(responseMsg) => ZIO.succeed(responseMsg)
           }
       response <- OperationsClientRPC.decrypt(responseMsg).flatMap {
-        case value: EncryptedMessage => ZIO.fail(FailDecryptDoubleEncrypted(responseMsg, value))
+        case value: EncryptedMessage     => ZIO.fail(FailDecryptDoubleEncrypted(responseMsg, value))
         case plaintext: PlaintextMessage =>
           ZIO.succeed(Global.messageRecive(eMsg, plaintext)) // side effect!
             *> ZIO.succeed(plaintext)
         case sMsg @ SignedMessage(payload, signatures) =>
           payload.content.fromJson[Message] match
-            case Left(value) => ZIO.fail(FailToParse(value))
+            case Left(value)                        => ZIO.fail(FailToParse(value))
             case Right(plaintext: PlaintextMessage) =>
               ZIO.succeed(Global.messageRecive(eMsg, plaintext)) // side effect!
                 *> ZIO.succeed(plaintext)

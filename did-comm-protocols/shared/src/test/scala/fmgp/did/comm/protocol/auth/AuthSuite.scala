@@ -83,7 +83,7 @@ class AuthSuite extends FunSuite {
       case Right(value) => value
 
     (fMsg.toAuthRequest) match {
-      case Left(error) => fail(s"fMsg MUST be Right but is ${Left(error)}")
+      case Left(error)        => fail(s"fMsg MUST be Right but is ${Left(error)}")
       case Right(authRequest) =>
         val authMsg = authRequest.replyWithAuth(FROM("did:example:bob"))
         assertNotEquals(authMsg.id, MsgID("MsgID-1"))

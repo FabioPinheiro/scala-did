@@ -63,14 +63,14 @@ object PrismVdrEditTool {
       ul(
         d.fields.map { field =>
           val ret = field.scalaType match
-            case ScalaType.Boolean          => code(s"${field.number} ${field.name} - Boolean")
-            case ScalaType.ByteString       => code(s"${field.number} ${field.name} - ByteString")
-            case ScalaType.Double           => code(s"${field.number} ${field.name} - Double")
-            case ScalaType.Float            => code(s"${field.number} ${field.name} - Float")
-            case ScalaType.Int              => code(s"${field.number} ${field.name} - Int")
-            case ScalaType.Long             => code(s"${field.number} ${field.name} - Long")
-            case ScalaType.String           => code(s"${field.number} ${field.name} - String")
-            case ScalaType.Enum(descriptor) => code(s"${field.number} ${field.name} - Enum")
+            case ScalaType.Boolean             => code(s"${field.number} ${field.name} - Boolean")
+            case ScalaType.ByteString          => code(s"${field.number} ${field.name} - ByteString")
+            case ScalaType.Double              => code(s"${field.number} ${field.name} - Double")
+            case ScalaType.Float               => code(s"${field.number} ${field.name} - Float")
+            case ScalaType.Int                 => code(s"${field.number} ${field.name} - Int")
+            case ScalaType.Long                => code(s"${field.number} ${field.name} - Long")
+            case ScalaType.String              => code(s"${field.number} ${field.name} - String")
+            case ScalaType.Enum(descriptor)    => code(s"${field.number} ${field.name} - Enum")
             case ScalaType.Message(descriptor) =>
               div(
                 code(s"${field.number} ${field.name} - ${descriptor.fullName}"),
@@ -154,7 +154,7 @@ object PrismVdrEditTool {
     hr(),
     div(
       child <-- companionVar.signal.map {
-        case None => div()
+        case None             => div()
         case Some(descriptor) =>
           htmlInputFromCompanionProto(
             descriptor,

@@ -90,8 +90,8 @@ object QRcodeTool {
   @js.annotation.JSExport
   def startQrScanner(cameraId: Option[String] = None) = {
     (qrScanner, cameraId) match
-      case (None, _)             =>
-      case (Some(scanner), None) => Utils.runProgram(ZIO.fromPromiseJS(scanner.start()))
+      case (None, _)                 =>
+      case (Some(scanner), None)     => Utils.runProgram(ZIO.fromPromiseJS(scanner.start()))
       case (Some(scanner), Some(id)) =>
         Utils.runProgram(ZIO.fromPromiseJS(scanner.start()) *> ZIO.fromPromiseJS(scanner.setCamera(id)))
 
@@ -138,10 +138,10 @@ object QRcodeTool {
         }
       ),
       div(children <-- qrcodeVar.signal.map {
-        case None => Seq(p("No QRcode detected"))
+        case None       => Seq(p("No QRcode detected"))
         case Some(data) =>
           OutOfBand.oob(data) match
-            case Left(value) => Seq(p(s"Fail to parce OutOfBand Message due to: $value"))
+            case Left(value)   => Seq(p(s"Fail to parce OutOfBand Message due to: $value"))
             case Right(oobMsg) =>
               Seq(
                 pre(code(oobMsg.msg.toJsonPretty)),
@@ -179,7 +179,7 @@ object QRcodeTool {
     children <-- dataVar.signal.combineWith(oobBaseVar.signal).map { (data, oobBase) =>
       data.fromJson[Message] match
         case Left(value) => Seq()
-        case Right(msg) =>
+        case Right(msg)  =>
           val oob = OutOfBand.from(msg)
           val oobStr = oob.makeURI(oobBase)
           val divQRCode = div(width := "90%")
@@ -189,7 +189,7 @@ object QRcodeTool {
               .toCanvas(oobStr, typings.qrcode.mod.QRCodeRenderersOptions())
               .toFuture
               .onComplete {
-                case scala.util.Success(value) => divQRCode.ref.replaceChildren(value)
+                case scala.util.Success(value)                                   => divQRCode.ref.replaceChildren(value)
                 case scala.util.Failure(js.JavaScriptException(error: js.Error)) =>
                   val info = p("Unable to create a QRcode becuase: " + error.message)
                   divQRCode.ref.replaceChildren(info.ref)

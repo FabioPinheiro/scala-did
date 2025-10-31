@@ -19,7 +19,7 @@ class EncryptedMessageSuite extends ZSuite {
     val ret = EncryptedMessageExamples.plaintextMessage.fromJson[PlaintextMessageClass]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(obj.`type`, PIURI("https://example.com/protocols/lets_do_lunch/1.0/proposal"))
     }
   }

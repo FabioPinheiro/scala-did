@@ -21,7 +21,7 @@ object SharedCryto {
         CrytoUtil.unsafeFromCompressed(data)
     key match
       case Left(value) => false
-      case Right(key) =>
+      case Right(key)  =>
         CrytoUtil.checkECDSASignature(msg, sig, key) match
           case Left(value)  => false
           case Right(value) => value

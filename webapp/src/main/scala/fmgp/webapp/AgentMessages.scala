@@ -35,7 +35,7 @@ object AgentMessageStorage {
       //   "TODO WIP",
       // ),
       children <-- Global.agentVar.signal.combineWith(Global.messageStorageVar.signal).map {
-        case (None, messageStorage) => Seq()
+        case (None, messageStorage)        => Seq()
         case (Some(agent), messageStorage) =>
           messageStorage.storageItems.reverse.map {
             case StorageItem(msg, plaintext, from, to, timestamp) if from.contains(agent.id.asFROM) =>
