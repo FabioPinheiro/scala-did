@@ -106,7 +106,7 @@ object Indexer extends ZIOAppDefault {
     case InvalidSignedPrismEvent(tx, b, o, reason) => Console.printLineError(s"$b - tx:$tx op:$o - $reason")
     case op @ MySignedPrismEvent(tx, b, o, signedWith, signature, pb) =>
       val str = op.event match
-        case CreateDidOP(publicKeys, services, context) => s"CreateDidOP: did:prism:${op.opHash}"
+        case CreateDidOP(publicKeys, services, context)  => s"CreateDidOP: did:prism:${op.opHash}"
         case UpdateDidOP(previousEventHash, id, actions) =>
           s"UpdateDidOP: previousEventHash=$previousEventHash}"
         case _ => op.event.getClass.getName
@@ -179,7 +179,7 @@ object Indexer extends ZIOAppDefault {
     _ <- ZIO.log(s"Check the LastTransactionIndexStored")
     chunkFilesBeforeStart <- findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath)
     lastTransactionIndexStored <- chunkFilesBeforeStart.lastOption match
-      case None => ZIO.succeed(None)
+      case None                     => ZIO.succeed(None)
       case Some(lastChunkFilesPath) =>
         ZStream
           .fromFile(lastChunkFilesPath)

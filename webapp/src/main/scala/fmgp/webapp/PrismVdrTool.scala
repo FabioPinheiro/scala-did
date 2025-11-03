@@ -45,7 +45,7 @@ object PrismVdrTool {
                 pre(code(op.toJsonPretty))
               )
             } match
-              case Success(div) => div
+              case Success(div)       => div
               case Failure(exception) =>
                 div(
                   s"Fail parse line $index:",

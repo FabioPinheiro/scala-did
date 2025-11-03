@@ -99,10 +99,10 @@ class CrytoUtilSuite extends FunSuite {
       .find(_.usage == PrismKeyUsage.MasterKeyUsage) match
       case None                                                           => fail("Missing MASTER_KEY")
       case Some(PrismPublicKey.UncompressedECKey(id, usage, curve, x, y)) => fail("Expeting CompressedEcKeyData")
-      case Some(PrismPublicKey.CompressedECKey(id, usage, curve, data)) =>
+      case Some(PrismPublicKey.CompressedECKey(id, usage, curve, data))   =>
         CrytoUtil.unsafeFromCompressed(data) match
           case Left(error) => fail("No key: error")
-          case Right(key) =>
+          case Right(key)  =>
             val p = key.asInstanceOf[java.security.interfaces.ECPublicKey]
 
             CrytoUtil.checkECDSASignature(
@@ -125,10 +125,10 @@ class CrytoUtilSuite extends FunSuite {
       .find(_.usage == PrismKeyUsage.MasterKeyUsage) match
       case None                                                           => fail("Missing MASTER_KEY")
       case Some(PrismPublicKey.UncompressedECKey(id, usage, curve, x, y)) => fail("Expeting CompressedEcKeyData")
-      case Some(PrismPublicKey.CompressedECKey(id, usage, curve, data)) =>
+      case Some(PrismPublicKey.CompressedECKey(id, usage, curve, data))   =>
         CrytoUtil.unsafeFromCompressed(data) match
           case Left(error) => fail("No key: error")
-          case Right(key) =>
+          case Right(key)  =>
             CrytoUtil.checkECDSASignature(
               msg = mySignedPrismEvent.protobuf.toByteArray,
               sig = mySignedPrismEvent.signature,
@@ -186,7 +186,7 @@ class CrytoUtilSuite extends FunSuite {
     val maybeSig = CrytoUtil.signECDSASignature(msg = data, privatekey)
     maybeSig match
       case Left(value) => fail(value)
-      case Right(sig) =>
+      case Right(sig)  =>
         val v = CrytoUtil.checkECDSASignature(msg = data, sig = sig, pubKey = publicKey)
         v match
           case Left(value)  => fail(value)

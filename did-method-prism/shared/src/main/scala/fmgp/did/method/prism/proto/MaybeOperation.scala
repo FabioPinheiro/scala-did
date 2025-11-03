@@ -159,7 +159,7 @@ object MaybeEvent {
       blockIndex: Int,
   ): Seq[MaybeEvent[OP]] =
     prismObject.blockContent match
-      case None => Seq(InvalidPrismObject(tx = tx, b = blockIndex, reason = "blockContent is missing"))
+      case None             => Seq(InvalidPrismObject(tx = tx, b = blockIndex, reason = "blockContent is missing"))
       case Some(prismBlock) =>
         prismBlock.events.zipWithIndex.map { case (signedPrismEvent, opIndex) =>
           fromProto(signedPrismEvent = signedPrismEvent, tx = tx, blockIndex = blockIndex, opIndex = opIndex)

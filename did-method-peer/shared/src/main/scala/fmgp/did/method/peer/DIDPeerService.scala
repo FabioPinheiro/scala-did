@@ -80,13 +80,13 @@ case class DIDPeerServiceEncodedNew(base64: Base64) extends DIDPeerServiceEncode
       case ("type", value) => value
       case ("t", value)    => value // see abbreviation
     } match
-      case None => Left("Field 'type' MUST exist")
+      case None                               => Left("Field 'type' MUST exist")
       case Some(Json.Str(`DIDCommMessaging`)) =>
         json.fields.collectFirst {
           case ("serviceEndpoint", value) => value
           case ("s", value)               => value // see abbreviation
         } match
-          case None => Left("The field 'serviceEndpoint' MUST exist")
+          case None                => Left("The field 'serviceEndpoint' MUST exist")
           case Some(Json.Str(uri)) => // old format
             Right(
               DIDServiceDIDCommMessaging(

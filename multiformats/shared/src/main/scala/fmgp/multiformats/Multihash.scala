@@ -20,7 +20,7 @@ object Multihash {
       case Right(multicodec)
           if (multicodec.codec.tag == CodecTag.HASH || multicodec.codec.tag == CodecTag.MULTIHASH) => {
         Varint(multicodec.dataBytes).decodeInt match
-          case Left(err) => Left(s"Multihash fail parse size: $err")
+          case Left(err)             => Left(s"Multihash fail parse size: $err")
           case Right((size, offset)) =>
             Right(Multihash(multicodec.codec, size, multicodec.dataBytes.drop(offset).take(size)))
       }

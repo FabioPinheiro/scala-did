@@ -54,14 +54,14 @@ object DeliveryRequest {
     if (msg.`type` != piuri) Left(s"No able to create DeliveryRequest from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
-        case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+        case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.body match
-            case None => Left(s"'$piuri' MUST have field 'body'")
+            case None    => Left(s"'$piuri' MUST have field 'body'")
             case Some(b) =>
               b.as[Body].flatMap { body =>
                 msg.from match
-                  case None => Left(s"'$piuri' MUST have field 'from'")
+                  case None       => Left(s"'$piuri' MUST have field 'from'")
                   case Some(from) =>
                     Right(
                       DeliveryRequest(

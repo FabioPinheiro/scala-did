@@ -89,10 +89,10 @@ object RecipientUpdate {
     if (msg.`type` != piuri) Left(s"No able to create RecipientUpdate from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
-        case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+        case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from'")
+            case None       => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.body.map(_.as[Body]) match
                 case None              => Left(s"'$piuri' MUST have a 'body'")
@@ -168,13 +168,13 @@ object RecipientResponse {
     if (msg.`type` != piuri) Left(s"No able to create RecipientResponse from a Message of type '${msg.`type`}'")
     else
       msg.thid match
-        case None => Left(s"'$piuri' MUST have field 'thid'")
+        case None       => Left(s"'$piuri' MUST have field 'thid'")
         case Some(thid) =>
           msg.to.toSeq.flatten match // Note: toSeq is from the match
-            case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+            case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
             case firstTo +: Seq() =>
               msg.from match
-                case None => Left(s"'$piuri' MUST have field 'from'")
+                case None       => Left(s"'$piuri' MUST have field 'from'")
                 case Some(from) =>
                   msg.body.map(_.as[Body]) match
                     case None              => Left(s"'$piuri' MUST have a 'body'")
@@ -254,10 +254,10 @@ object RecipientQuery {
     if (msg.`type` != piuri) Left(s"No able to create RecipientQuery from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
-        case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+        case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from'")
+            case None       => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               msg.body.map(_.as[Body]) match
                 case None              => Left(s"'$piuri' MUST have a 'body'")
@@ -360,13 +360,13 @@ object Recipient {
     if (msg.`type` != piuri) Left(s"No able to create Recipient from a Message of type '${msg.`type`}'")
     else
       msg.thid match
-        case None => Left(s"'$piuri' MUST have field 'thid'")
+        case None       => Left(s"'$piuri' MUST have field 'thid'")
         case Some(thid) =>
           msg.to.toSeq.flatten match // Note: toSeq is from the match
-            case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+            case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
             case firstTo +: Seq() =>
               msg.from match
-                case None => Left(s"'$piuri' MUST have field 'from'")
+                case None       => Left(s"'$piuri' MUST have field 'from'")
                 case Some(from) =>
                   msg.body.map(_.as[Body]) match
                     case None              => Left(s"'$piuri' MUST have a 'body'")

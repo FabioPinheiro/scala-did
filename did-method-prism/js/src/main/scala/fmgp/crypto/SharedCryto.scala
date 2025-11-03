@@ -16,7 +16,7 @@ object SharedCryto {
   ): Boolean = {
     pubKey match
       case UncompressedECKey(id, usage, curve, x, y) => ??? // FIXME
-      case CompressedECKey(id, usage, curve, data) =>
+      case CompressedECKey(id, usage, curve, data)   =>
         val (rValue, sValue) =
           Schnorr.rsValuesFromDEREncoded(sig) // https://b10c.me/blog/006-evolution-of-the-bitcoin-signature-length/
         val signature: Hex = Uint8Array.from((rValue ++ sValue).map(_.toShort).toJSArray)

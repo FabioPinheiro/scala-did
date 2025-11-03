@@ -61,7 +61,7 @@ object ResolverTool {
     ),
     div(child <-- didVar.signal.flatMap {
       case Some(agent) => Signal.fromValue(div())
-      case None =>
+      case None        =>
         resolverPagePageSignal.map(e =>
           div(
             p("Input the custom did"),

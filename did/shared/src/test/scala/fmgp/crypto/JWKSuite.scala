@@ -10,7 +10,7 @@ class JWKSuite extends FunSuite {
     val ret = JWKExamples.senderKeySecp256k1.fromJson[ECPrivateKeyWithKid]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(obj.kid, "did:example:alice#key-3")
         assertEquals(obj.kty, KTY.EC)
         assertEquals(obj.d, "N3Hm1LXA210YVGGsXw_GklMwcLu_bMgnzDese6YQIyA")

@@ -84,7 +84,7 @@ object DIDCommand {
           .orElse(mkAlternative)
           .map(k => (masterLabel, k))
         mVDR <- vdrLabel match
-          case None => ZIO.none
+          case None        => ZIO.none
           case Some(label) =>
             for {
               alternative <- stateLen(_.secp256k1PrivateKey.get(label).map(_.key))
@@ -105,8 +105,8 @@ object DIDCommand {
         _ <- ZIO.log(s"PrismState: ${ssi.toJsonPretty}")
         _ <- Console.printLine(bytes2Hex(signedPrismEvent.toByteArray))
       } yield ()).provideLayer(setup.layer)
-    case CMD.DIDUpdate(did)     => PrismCli.notCurrentlyImplemented(cmd)
-    case CMD.DIDDeactivate(did) => PrismCli.notCurrentlyImplemented(cmd)
+    case CMD.DIDUpdate(did)           => PrismCli.notCurrentlyImplemented(cmd)
+    case CMD.DIDDeactivate(did)       => PrismCli.notCurrentlyImplemented(cmd)
     case CMD.DIDResolve(did, network) =>
       val aux = (Client.default ++ Scope.default >>> HttpUtils.layer) >>>
         DIDPrismResolver.layerDIDPrismResolver(
@@ -120,7 +120,7 @@ object DIDCommand {
         _ <- Console.printLine(diddoc.toJsonPretty) // .mapError(error => SomeThrowable(error))
       } yield ()
       program.provideSomeLayer(aux)
-    case CMD.DIDResolveFromFS(did, workdir, network) => PrismCli.notCurrentlyImplemented(cmd)
+    case CMD.DIDResolveFromFS(did, workdir, network)       => PrismCli.notCurrentlyImplemented(cmd)
     case CMD.DIDResolveFromEndpoint(did, resolverEndpoint) =>
       val aux = (Client.default ++ Scope.default >>> HttpUtils.layer) >>>
         DIDResolverProxy.layer(resolverEndpoint.toString)

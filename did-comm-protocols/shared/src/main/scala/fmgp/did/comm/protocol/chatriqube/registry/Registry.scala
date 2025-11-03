@@ -34,10 +34,10 @@ object Enroll {
     if (msg.`type` != piuri) Left(s"No able to create Enroll from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
-        case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+        case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.from match
-            case None => Left(s"'$piuri' MUST have field 'from'")
+            case None       => Left(s"'$piuri' MUST have field 'from'")
             case Some(from) =>
               Right(
                 Enroll(
@@ -98,17 +98,17 @@ object Account {
     if (msg.`type` != piuri) Left(s"No able to create Account from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
-        case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+        case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.body match
-            case None => Left(s"'$piuri' MUST have field 'body'")
+            case None    => Left(s"'$piuri' MUST have field 'body'")
             case Some(b) =>
               b.as[Body].flatMap { body =>
                 msg.thid match
-                  case None => Left(s"'$piuri' MUST have field 'thid'")
+                  case None       => Left(s"'$piuri' MUST have field 'thid'")
                   case Some(thid) =>
                     msg.from match
-                      case None => Left(s"'$piuri' MUST have field 'from'")
+                      case None       => Left(s"'$piuri' MUST have field 'from'")
                       case Some(from) =>
                         Right(
                           Account(
@@ -164,14 +164,14 @@ object SetId {
     if (msg.`type` != piuri) Left(s"No able to create SetId from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
-        case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+        case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.body match
-            case None => Left(s"'$piuri' MUST have field 'body'")
+            case None    => Left(s"'$piuri' MUST have field 'body'")
             case Some(b) =>
               b.as[Body].flatMap { body =>
                 msg.from match
-                  case None => Left(s"'$piuri' MUST have field 'from'")
+                  case None       => Left(s"'$piuri' MUST have field 'from'")
                   case Some(from) =>
                     Right(
                       SetId(

@@ -76,7 +76,7 @@ object AppServer extends ZIOAppDefault {
             case Left(parseError)     => ZIO.fail(DidException(CryptoFailToParse(parseError)))
             case Right(Curve.X25519)  => KeyGenerator.makeX25519.mapError(e => DidException(e))
             case Right(Curve.Ed25519) => KeyGenerator.makeEd25519.mapError(e => DidException(e))
-            case Right(curve) =>
+            case Right(curve)         =>
               ZIO.fail(DidException(WrongCurve(obtained = curve, expected = Set(Curve.X25519, Curve.Ed25519))))
         )
         .map(e => Response.text(e.toJson))

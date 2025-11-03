@@ -15,11 +15,11 @@ class DIDServiceSuite extends FunSuite {
     val jsonOneService = json.flatMap(_.get(cursor))
     jsonOneService match
       case Left(error) => fail(error)
-      case Right(tmp) =>
+      case Right(tmp)  =>
         val json2 = tmp.toJson
         json2.fromJson[DIDServiceGeneric] match {
           case Left(error) => fail(error)
-          case Right(obj) =>
+          case Right(obj)  =>
             assertEquals(obj, DIDExamples.EX20_DIDServiceGeneric)
             assertEquals(obj.toJson, json2)
         }
@@ -31,11 +31,11 @@ class DIDServiceSuite extends FunSuite {
     val jsonOneService = json.flatMap(_.get(cursor))
     jsonOneService match
       case Left(error) => fail(error)
-      case Right(tmp) =>
+      case Right(tmp)  =>
         val json2 = tmp.toJson
         json2.fromJson[DIDService] match {
           case Left(error) => fail(error)
-          case Right(obj) =>
+          case Right(obj)  =>
             assertEquals(obj, DIDExamples.EX20_DIDService)
             assertEquals(obj.toJson, json2)
         }
@@ -48,7 +48,7 @@ class DIDServiceSuite extends FunSuite {
         |}""".stripMargin
     val ret = service.fromJson[DIDService]
     ret match {
-      case Left(error) => fail(error)
+      case Left(error)                            => fail(error)
       case Right(obj: DIDServiceDIDCommMessaging) =>
         assertEquals(obj.id, "did:example:123#didcomm-1")
         assertEquals(
@@ -67,7 +67,7 @@ class DIDServiceSuite extends FunSuite {
     val ret = service.fromJson[DIDService]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(
           obj,
           DIDServiceDIDCommMessaging(
@@ -106,7 +106,7 @@ class DIDServiceSuite extends FunSuite {
     val ret = service.fromJson[DIDService]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(
           obj,
           DIDServiceDIDCommMessaging(
@@ -135,7 +135,7 @@ class DIDServiceSuite extends FunSuite {
     val ret = service.fromJson[DIDService]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         val serviceExpected = DIDServiceGeneric(
           id = "did:example:123456789abcdefghi#didcomm-1",
           `type` = "DIDCommMessaging",

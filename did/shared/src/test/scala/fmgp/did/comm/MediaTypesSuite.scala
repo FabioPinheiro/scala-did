@@ -26,7 +26,7 @@ class MediaTypesSuite extends ZSuite {
 
     "\"application/didcomm-plain+json\"".fromJson[MediaTypes] match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(obj, PLAINTEXT)
         assertNotEquals(obj, SIGNED)
         assertNotEquals(obj, ENCRYPTED)
@@ -38,7 +38,7 @@ class MediaTypesSuite extends ZSuite {
     }
     "\"application/didcomm-signed+json\"".fromJson[MediaTypes] match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertNotEquals(obj, PLAINTEXT)
         assertEquals(obj, SIGNED)
         assertNotEquals(obj, ENCRYPTED)
@@ -50,7 +50,7 @@ class MediaTypesSuite extends ZSuite {
     }
     "\"application/didcomm-encrypted+json\"".fromJson[MediaTypes] match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertNotEquals(obj, PLAINTEXT)
         assertNotEquals(obj, SIGNED)
         assertEquals(obj, ENCRYPTED)

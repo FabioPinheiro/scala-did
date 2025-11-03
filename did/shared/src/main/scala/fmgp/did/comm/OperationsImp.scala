@@ -108,8 +108,8 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
         .toMap
       data = msg.toJson.getBytes
       msgSeq = curve2SenderRecipientKeys.values.toSeq.map {
-        case (None, b)                      => ZIO.none
-        case (Some(sender), b) if b.isEmpty => ZIO.none
+        case (None, b)                                                                    => ZIO.none
+        case (Some(sender), b) if b.isEmpty                                               => ZIO.none
         case (Some(VerificationMethodReferencedWithKey(senderKid, senderKey)), recipient) =>
           cryptoOperations
             .authEncrypt((VerificationMethodReferenced(senderKid), senderKey), recipient.map(_.pair), data)
@@ -127,8 +127,8 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
       }: Seq[ZIO[Any, CryptoFailed, Option[EncryptedMessage]]]
       ret <- ZIO.foreach(msgSeq)(e => e).map(_.flatten)
       headFixme <- ret match
-        case Seq()         => ZIO.fail(EncryptionFailed) // FIXME HAED
-        case eMsg +: Seq() => ZIO.succeed(eMsg)
+        case Seq()          => ZIO.fail(EncryptionFailed) // FIXME HAED
+        case eMsg +: Seq()  => ZIO.succeed(eMsg)
         case eMsg +: others => // TODO Don't discard other messages
           ZIO.logWarning(s"We are discount other encrypted messages (${others.size})") *>
             ZIO.succeed(eMsg)

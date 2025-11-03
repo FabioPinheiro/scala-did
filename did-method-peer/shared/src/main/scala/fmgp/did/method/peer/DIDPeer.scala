@@ -229,7 +229,7 @@ object DIDPeer4 {
 
   def decodeDocument(multibase: Multibase): Either[String, Json.Obj] = {
     Multicodec.fromBytes(multibase.decode) match
-      case Left(error) => Left(s"DIDPeer4 fail to decode Document part: $error")
+      case Left(error)                              => Left(s"DIDPeer4 fail to decode Document part: $error")
       case Right(Multicodec(Codec.json, dataBytes)) =>
         new String(dataBytes, java.nio.charset.StandardCharsets.UTF_8).fromJson[Json.Obj] match
           case Left(parseError) => Left(s"DIDPeer4 fail to parse Document part as Json: $parseError")
@@ -266,7 +266,7 @@ object DIDPeer4 {
     /** ifMissingAddControllerToVerificationMethodEmbedded */
     def withController(obj: Json): Json = {
       obj match
-        case ref: Json.Str => ref // VerificationMethodReferenced
+        case ref: Json.Str   => ref // VerificationMethodReferenced
         case entry: Json.Obj => // VerificationMethodEmbedded
           entry.get("controller") match
             case None    => entry.add("controller", Json.Str(did.string))
@@ -379,7 +379,7 @@ case class DIDPeer4LongForm(
   def toShortForm: DIDPeer4ShortForm = DIDPeer4ShortForm(shortPart)
 
   def longPartAsJson = Multicodec.fromBytes(longPart.decode) match
-    case Left(value) => Left(value)
+    case Left(value)                              => Left(value)
     case Right(Multicodec(Codec.json, dataBytes)) =>
       println(dataBytes.mkString)
       dataBytes.mkString("_").fromJson[Json]

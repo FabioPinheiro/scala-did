@@ -14,7 +14,7 @@ object OperationsServerRPC {
 
   def ops(input: String): ZIO[Resolver, DidException, String] =
     input.fromJson[OpsInputRPC] match {
-      case Left(error) => ZIO.fail(DidException(FailToParse(error)))
+      case Left(error)  => ZIO.fail(DidException(FailToParse(error)))
       case Right(value) =>
         val tmp = for {
           operations <- ZIO.service[Operations]

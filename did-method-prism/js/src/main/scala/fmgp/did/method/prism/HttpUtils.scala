@@ -40,7 +40,7 @@ case class HttpUtils() {
               rawDataSplitByLines.foldLeft(Right(Seq.empty): Either[String, Seq[T]])((acc, ele) =>
                 acc match
                   case Left(errors) => Left(errors)
-                  case Right(seq) =>
+                  case Right(seq)   =>
                     ele match
                       case Left(error)  => Left(error)
                       case Right(event) => Right(seq :+ event)

@@ -115,7 +115,7 @@ object NFCScannerTool {
             case Right(value) => p("_oob match ", code(value.urlBase64))
           }),
           div(children <-- oobMessage.map {
-            case Left(error) => Seq(p("Parsing error", code(error)))
+            case Left(error)   => Seq(p("Parsing error", code(error)))
             case Right(oobMsg) =>
               Seq(
                 pre(code(oobMsg.msg.toJsonPretty)),

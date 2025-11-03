@@ -58,7 +58,7 @@ object MessageDelivery {
       def auxAttachments = msg.attachments.toSeq.flatten
         .map { attachment =>
           attachment.id match
-            case None => Left(s"'$piuri' MUST have id in all Attachments")
+            case None     => Left(s"'$piuri' MUST have id in all Attachments")
             case Some(id) =>
               attachment.data match
                 case AttachmentDataJWS(jws, links)    => Left(s"'$piuri' MUST have all Attachments in Base64")
@@ -75,17 +75,17 @@ object MessageDelivery {
         }
 
       msg.to.toSeq.flatten match // Note: toSeq is from the match
-        case Seq() => Left(s"'$piuri' MUST have field 'to' with one element")
+        case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
         case firstTo +: Seq() =>
           msg.body match
-            case None => Left(s"'$piuri' MUST have field 'body'")
+            case None    => Left(s"'$piuri' MUST have field 'body'")
             case Some(b) =>
               b.as[Body].flatMap { body =>
                 msg.thid match
-                  case None => Left(s"'$piuri' MUST have field 'thid'")
+                  case None       => Left(s"'$piuri' MUST have field 'thid'")
                   case Some(thid) =>
                     msg.from match
-                      case None => Left(s"'$piuri' MUST have field 'from'")
+                      case None       => Left(s"'$piuri' MUST have field 'from'")
                       case Some(from) =>
                         auxAttachments.map(attachments =>
                           MessageDelivery(

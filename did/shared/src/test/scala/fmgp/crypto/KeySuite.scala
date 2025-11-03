@@ -92,7 +92,7 @@ class KeySuite extends FunSuite {
   test("parse & stringify PrivateKey") {
     val ret = JWKExamples.senderKeySecp256k1.fromJson[PrivateKey]
     ret match {
-      case Left(error) => fail(error)
+      case Left(error)              => fail(error)
       case Right(obj: ECPrivateKey) =>
         assertEquals(obj.maybeKid, Some("did:example:alice#key-3"))
         assertEquals(obj.kty, KTY.EC)
@@ -112,7 +112,7 @@ class KeySuite extends FunSuite {
   test("parse & stringify PublicKey") {
     val ret = JWKExamples.senderKeySecp256k1.fromJson[PublicKey]
     ret match {
-      case Left(error) => fail(error)
+      case Left(error)             => fail(error)
       case Right(obj: ECPublicKey) =>
         assertEquals(obj.maybeKid, Some("did:example:alice#key-3"))
         assertEquals(obj.kty, KTY.EC)

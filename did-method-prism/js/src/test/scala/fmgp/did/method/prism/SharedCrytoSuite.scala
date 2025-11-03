@@ -18,8 +18,8 @@ class SharedCrytoSuite extends FunSuite {
     PrismPublicKey
       .filterECKey(mySignedPrismEvent.event.asInstanceOf[CreateDidOP].publicKeys)
       .find(_.usage == PrismKeyUsage.MasterKeyUsage) match
-      case None                                                           => fail("Missing MASTER_KEY")
-      case Some(PrismPublicKey.UncompressedECKey(id, usage, curve, x, y)) => fail("Expeting CompressedEcKeyData")
+      case None                                                               => fail("Missing MASTER_KEY")
+      case Some(PrismPublicKey.UncompressedECKey(id, usage, curve, x, y))     => fail("Expeting CompressedEcKeyData")
       case Some(key @ PrismPublicKey.CompressedECKey(id, usage, curve, data)) =>
         SharedCryto.checkECDSASignature(
           msg = mySignedPrismEvent.protobuf.toByteArray,

@@ -18,7 +18,7 @@ object L10nInline {
     .seq[String]
     .mapOrFail {
       case Seq(lang, field, translation) => Right(L10nInline(lang, field, translation))
-      case seq =>
+      case seq                           =>
         Left(
           "L10nInline element MUST be a 3-item array" +
             " where each triple is in the form ['lang', 'field', 'translation']"

@@ -53,7 +53,7 @@ object ServiceEndpoint {
       case j: Json.Null => Left("ServiceEndpoint can not be 'null'")
       case j: Json.Bool => Left("ServiceEndpoint can not be Boolean")
       case j: Json.Num  => Left("ServiceEndpoint can not be Numbre")
-      case j: Json.Arr =>
+      case j: Json.Arr  =>
         j match
           case e if e.elements.toVector.forall(_.isInstanceOf[Json.Str]) => Right(j)
           case e if e.elements.toVector.forall(_.isInstanceOf[Json.Obj]) => Right(j)

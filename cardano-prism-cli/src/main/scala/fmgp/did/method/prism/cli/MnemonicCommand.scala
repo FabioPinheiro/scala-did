@@ -72,7 +72,7 @@ object MnemonicCommand {
         _ <- ZIO.log(cmd.toString)
         wallet <- walletOrType match {
           case w: CardanoWalletConfig => ZIO.succeed(w)
-          case WalletType.SSI =>
+          case WalletType.SSI         =>
             setup.mState.flatMap(_.ssiWallet) match
               case None => ZIO.logError("SSI Wallet not found.") *> ZIO.fail(PrismCliError("SSI Wallet not found"))
               case Some(ssiWallet) => ZIO.log(s"Lodding ssi wallet") *> ZIO.succeed(ssiWallet)
@@ -98,8 +98,8 @@ object MnemonicCommand {
         _ <- ZIO.log("Public KeyHash:    " + bytes2Hex(account.hdKeyPair().getPublicKey().getKeyHash()))
         _ <- ZIO.log("Public KeyHash:    " + bytes2Hex(account.hdKeyPair().getPublicKey().getKeyHash()))
         _ <- network match
-          case CardanoNetwork.Mainnet => ZIO.unit
-          case CardanoNetwork.Testnet => ZIO.log(s"Believe the $network network is deprecated")
+          case CardanoNetwork.Mainnet                          => ZIO.unit
+          case CardanoNetwork.Testnet                          => ZIO.log(s"Believe the $network network is deprecated")
           case CardanoNetwork.Preprod | CardanoNetwork.Preview =>
             ZIO.log(
               s"A $network wallet can be popup with tADA using https://docs.cardano.org/cardano-testnets/tools/faucet"

@@ -45,7 +45,7 @@ class AttachmentSuite extends FunSuite {
     val ret = attachmentBase64.fromJson[Attachment]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(obj.id, Some("1"))
         assertEquals(obj.description, Some("example b64 encoded attachment"))
         obj.data match
@@ -60,7 +60,7 @@ class AttachmentSuite extends FunSuite {
     val ret = attachmentLink.fromJson[Attachment]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(obj.id, Some("2"))
         assertEquals(obj.description, Some("example linked attachment"))
         obj.data match
@@ -75,7 +75,7 @@ class AttachmentSuite extends FunSuite {
     val ret = attachmentJson.fromJson[Attachment]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(obj.id, Some("x"))
         assertEquals(obj.description, Some("example encrypted DIDComm message as attachment"))
         assertEquals(obj.media_type, Some("application/didcomm-encrypted+json"))
@@ -98,7 +98,7 @@ class AttachmentSuite extends FunSuite {
     val ret = attachment.fromJson[Attachment]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         obj.data match
           case AttachmentDataJWS(jws, links)                     => fail("Type is ok but the behavior changed")
           case AttachmentDataLinks(links, hash)                  => fail("Type is ok but the behavior changed")
@@ -113,12 +113,12 @@ class AttachmentSuite extends FunSuite {
     val ret = attachment.fromJson[Attachment]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         obj.data match
-          case AttachmentDataJWS(jws, links)    => fail("Wrong AttachmentData type")
-          case AttachmentDataLinks(links, hash) => fail("Wrong AttachmentData type")
-          case AttachmentDataBase64(base64)     => fail("Wrong AttachmentData type")
-          case AttachmentDataJson(json)         => fail("Wrong AttachmentData type")
+          case AttachmentDataJWS(jws, links)                     => fail("Wrong AttachmentData type")
+          case AttachmentDataLinks(links, hash)                  => fail("Wrong AttachmentData type")
+          case AttachmentDataBase64(base64)                      => fail("Wrong AttachmentData type")
+          case AttachmentDataJson(json)                          => fail("Wrong AttachmentData type")
           case AttachmentDataAny(jws, hash, links, base64, json) =>
             assertEquals(json, Some(Json.Obj("a" -> Json.Num(1))))
             assertEquals(links, Some(Seq("a", "b")))
@@ -134,7 +134,7 @@ class AttachmentSuite extends FunSuite {
     val ret = attachment.fromJson[Attachment]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         obj.data match
           case AttachmentDataJson(json) =>
             assertEquals(

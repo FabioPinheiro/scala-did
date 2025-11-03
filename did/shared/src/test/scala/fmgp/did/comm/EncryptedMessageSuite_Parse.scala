@@ -16,7 +16,7 @@ class EncryptedMessageSuite_Parse extends ZSuite {
     val ret = EncryptedMessageExamples.encryptedMessage_ECDHES_X25519_XC20P.fromJson[EncryptedMessage]
     ret match {
       case Left(error) => fail(error)
-      case Right(obj) =>
+      case Right(obj)  =>
         assertEquals(obj, EncryptedMessageExamples.obj_encryptedMessage_ECDHES_X25519_XC20P)
         assertEquals(obj.hashCode, EncryptedMessageExamples.obj_encryptedMessage_ECDHES_X25519_XC20P.hashCode)
     }

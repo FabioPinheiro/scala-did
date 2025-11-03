@@ -108,7 +108,7 @@ object ForwardMessage {
     if (msg.`type` != piuri) Left(s"No able to create ForwardMessage from a Message of the type '${msg.`type`}'")
     else {
       msg.body match
-        case None => Left(s"'$piuri' MUST have field 'body'")
+        case None    => Left(s"'$piuri' MUST have field 'body'")
         case Some(b) =>
           b.as[Body]
             .left
@@ -233,7 +233,7 @@ object ForwardMessage {
       msg: SignedMessage | EncryptedMessage
   ): ZIO[Operations & Resolver, DidFail, EncryptedMessage] =
     buildForwardMessage(next = next, msg = msg, to = Set(to)) match
-      case Left(error1) => ZIO.fail(FailToEncodeMessage(piuri, error1))
+      case Left(error1)          => ZIO.fail(FailToEncodeMessage(piuri, error1))
       case Right(forwardMessage) =>
         for {
           ops <- ZIO.service[Operations]
