@@ -159,7 +159,7 @@ lazy val V = new {
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time
   val scalaJavaTime = "2.5.0"
 
-  val bullet = "1.16.1"
+  val bullet = "1.16.2"
 
   val reactivemongo = "1.1.0-RC17"
 
