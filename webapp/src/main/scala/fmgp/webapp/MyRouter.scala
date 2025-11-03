@@ -118,7 +118,6 @@ object MyRouter {
   // Note: for fragment ('#') URLs this isn't actually needed.
   // See https://github.com/raquo/Waypoint docs for why this modifier is useful in general.
   def navigateTo(page: Page): Binder[HtmlElement] = Binder { el =>
-
     val isLinkElement = el.ref.isInstanceOf[dom.html.Anchor]
 
     if (isLinkElement) {
