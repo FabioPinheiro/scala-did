@@ -10,7 +10,7 @@ import proto.prism.SignedPrismEvent
 
 case class VDRServiceImpl(
     chain: PrismChainService,
-    protected val refPrismState: Ref[PrismState]
+    protected val prismState: PrismState
 ) extends VDRService {
   override def submit(seqSignedPrismEvent: SignedPrismEvent*): ZIO[Any, Throwable, TxHash] =
     chain.commitAndPush(
@@ -19,7 +19,7 @@ case class VDRServiceImpl(
     )
 }
 
-trait VDRService extends VDRPassoveService {
+trait VDRService extends VDRPassiveService {
   def submit(seqSignedPrismEvent: SignedPrismEvent*): ZIO[Any, Throwable, TxHash]
 
   def createBytes(

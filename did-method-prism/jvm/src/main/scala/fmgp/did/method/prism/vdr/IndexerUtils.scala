@@ -61,7 +61,7 @@ object IndexerUtils {
     indexerConfig <- ZIO.service[IndexerConfig]
     chunkFilesAfter <- fmgp.did.method.prism.vdr.Indexer
       .findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath)
-    _ <- ZIO.log(s"Read chunkFiles")
+    _ <- ZIO.log(s"Read chunkFiles (${chunkFilesAfter.length} files)")
     streamAllMaybeEventFromChunkFiles = ZStream.fromIterable {
       chunkFilesAfter.map { fileName =>
         ZStream
@@ -76,11 +76,12 @@ object IndexerUtils {
     state <- ZIO.service[PrismState]
     countEvents <- streamAllMaybeEventFromChunkFiles
       .via(IndexerUtils.pipelinePrismState)
-      .run(countEvents) // (ZSink.count)
+      .run(IndexerUtils.countEvents) // (ZSink.count)
       .provideEnvironment(ZEnvironment(state: PrismState))
     _ <- ZIO.log(s"Finish Init PrismState: $countEvents")
+    ssiCount <- state.ssiCount
     vdrCount <- state.vdrCount
-    _ <- ZIO.log(s"PrismState was ${state.ssiCount} SSI and ${state.vdrCount} VDR")
+    _ <- ZIO.log(s"PrismState was $ssiCount SSI and $vdrCount VDR")
   } yield state
 
 }

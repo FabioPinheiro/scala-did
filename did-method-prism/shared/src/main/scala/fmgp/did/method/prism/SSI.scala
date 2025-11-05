@@ -19,6 +19,7 @@ final case class SSI(
     cursor: EventCursor, // append cursor
 ) { self =>
   def didPrism: DIDPrism = DIDPrism.fromDID(did).getOrElse(???) // FIXME
+  def exists: Boolean = latestHash.isDefined
 
   def appendAny(spo: MySignedPrismEvent[OP]): SSI = spo.event match
     case _: CreateDidOP     => append(spo.asInstanceOf[MySignedPrismEvent[CreateDidOP]])
