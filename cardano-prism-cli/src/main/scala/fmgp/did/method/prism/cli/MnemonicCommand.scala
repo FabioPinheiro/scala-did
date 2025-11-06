@@ -8,7 +8,7 @@ import scala.util.Try
 import org.hyperledger.identus.apollo.derivation.MnemonicHelper
 import fmgp.did.method.prism.CardanoService
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
-import fmgp.did.method.prism.cardano.CardanoNetwork
+import fmgp.did.method.prism.cardano.PublicCardanoNetwork
 import fmgp.util.bytes2Hex
 
 object MnemonicCommand {
@@ -98,9 +98,9 @@ object MnemonicCommand {
         _ <- ZIO.log("Public KeyHash:    " + bytes2Hex(account.hdKeyPair().getPublicKey().getKeyHash()))
         _ <- ZIO.log("Public KeyHash:    " + bytes2Hex(account.hdKeyPair().getPublicKey().getKeyHash()))
         _ <- network match
-          case CardanoNetwork.Mainnet                          => ZIO.unit
-          case CardanoNetwork.Testnet                          => ZIO.log(s"Believe the $network network is deprecated")
-          case CardanoNetwork.Preprod | CardanoNetwork.Preview =>
+          case PublicCardanoNetwork.Mainnet => ZIO.unit
+          case PublicCardanoNetwork.Testnet => ZIO.log(s"Believe the $network network is deprecated")
+          case PublicCardanoNetwork.Preprod | PublicCardanoNetwork.Preview =>
             ZIO.log(
               s"A $network wallet can be popup with tADA using https://docs.cardano.org/cardano-testnets/tools/faucet"
             )

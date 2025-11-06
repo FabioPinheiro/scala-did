@@ -6,8 +6,9 @@ import zio.json.*
 import java.nio.file.Path
 import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.did.method.prism.BlockfrostConfig
+import fmgp.did.method.prism.BlockfrostRyoConfig
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
-import fmgp.did.method.prism.cardano.CardanoNetwork
+import fmgp.did.method.prism.cardano.PublicCardanoNetwork
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
 
@@ -46,22 +47,24 @@ case class StagingState(
     test: String = "",
 ) {
   secp256k1PrivateKey.get("")
-  def blockfrost(network: CardanoNetwork): Option[BlockfrostConfig] = network match
-    case CardanoNetwork.Mainnet => this.blockfrostMainnet
-    case CardanoNetwork.Testnet => this.blockfrostTestnet
-    case CardanoNetwork.Preprod => this.blockfrostPreprod
-    case CardanoNetwork.Preview => this.blockfrostPreview
+  def blockfrost(network: PublicCardanoNetwork): Option[BlockfrostConfig] = network match
+    case PublicCardanoNetwork.Mainnet => this.blockfrostMainnet
+    case PublicCardanoNetwork.Testnet => this.blockfrostTestnet
+    case PublicCardanoNetwork.Preprod => this.blockfrostPreprod
+    case PublicCardanoNetwork.Preview => this.blockfrostPreview
 }
 object StagingState {
 
   given decoder: JsonDecoder[StagingState] = {
     given JsonDecoder[Array[Byte]] = Utils.decoderArrayByte
     given decoder: JsonDecoder[BlockfrostConfig] = DeriveJsonDecoder.gen[BlockfrostConfig]
+    given ryoDecoder: JsonDecoder[BlockfrostRyoConfig] = DeriveJsonDecoder.gen[BlockfrostRyoConfig]
     DeriveJsonDecoder.gen[StagingState]
   }
   given encoder: JsonEncoder[StagingState] = {
     given JsonEncoder[Array[Byte]] = Utils.encoderArrayByte
     given encoder: JsonEncoder[BlockfrostConfig] = DeriveJsonEncoder.gen[BlockfrostConfig]
+    given ryoEncoder: JsonEncoder[BlockfrostRyoConfig] = DeriveJsonEncoder.gen[BlockfrostRyoConfig]
     DeriveJsonEncoder.gen[StagingState]
   }
 }

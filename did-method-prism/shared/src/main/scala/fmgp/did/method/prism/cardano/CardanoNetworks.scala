@@ -1,13 +1,17 @@
 package fmgp.did.method.prism.cardano
 
-enum CardanoNetwork:
+sealed trait CardanoNetwork:
+  def name: String
+  def blockfrostURL: String
+
+enum PublicCardanoNetwork extends CardanoNetwork:
   // "Cardano testnet network has been decommissioned."
   case Mainnet, Testnet, Preprod, Preview
 
-  def name = this.toString.toLowerCase
+  override def name = this.toString.toLowerCase
 
   /** https://blockfrost.dev/docs/start-building#available-networks */
-  def blockfrostURL = {
+  override def blockfrostURL = {
     this match
       case Mainnet => "https://cardano-mainnet.blockfrost.io/api/v0"
       case Testnet => "https://cardano-testnet.blockfrost.io/api/v0"
@@ -18,11 +22,14 @@ enum CardanoNetwork:
       // val milkomedaMTestnet = "https://milkomeda-testnet.blockfrost.io/api/v0"
   }
 
-object CardanoNetwork {
+object PublicCardanoNetwork {
   def fromBlockfrostToken(token: String) = token.slice(0, 7) match {
-    case "mainnet" => CardanoNetwork.Mainnet
-    case "testnet" => CardanoNetwork.Testnet
-    case "preprod" => CardanoNetwork.Preprod
-    case "preview" => CardanoNetwork.Preview
+    case "mainnet" => PublicCardanoNetwork.Mainnet
+    case "testnet" => PublicCardanoNetwork.Testnet
+    case "preprod" => PublicCardanoNetwork.Preprod
+    case "preview" => PublicCardanoNetwork.Preview
   }
 }
+
+final case class PrivateCardanoNetwork(override val blockfrostURL: String, protocolMagic: Long) extends CardanoNetwork:
+  override def name: String = "private"

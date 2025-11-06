@@ -9,7 +9,7 @@ import org.hyperledger.identus.apollo.derivation.MnemonicHelper
 import fmgp.did.method.prism.BlockfrostConfig
 import fmgp.did.method.prism.CardanoService
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
-import fmgp.did.method.prism.cardano.CardanoNetwork
+import fmgp.did.method.prism.cardano.PublicCardanoNetwork
 import fmgp.did.method.prism.cardano.TxHash
 import fmgp.did.method.prism.cli.CMD.BlockfrostSubmitEvents
 import fmgp.did.method.prism.proto.tryParseFrom
@@ -83,19 +83,19 @@ object BlockfrostCommand {
           case None         => ZIO.logWarning("No efect")
           case Some(config) =>
             network match
-              case CardanoNetwork.Mainnet => updateState(s => s.copy(blockfrostMainnet = Some(config)))
-              case CardanoNetwork.Testnet => updateState(s => s.copy(blockfrostTestnet = Some(config)))
-              case CardanoNetwork.Preprod => updateState(s => s.copy(blockfrostPreprod = Some(config)))
-              case CardanoNetwork.Preview => updateState(s => s.copy(blockfrostPreview = Some(config)))
+              case PublicCardanoNetwork.Mainnet => updateState(s => s.copy(blockfrostMainnet = Some(config)))
+              case PublicCardanoNetwork.Testnet => updateState(s => s.copy(blockfrostTestnet = Some(config)))
+              case PublicCardanoNetwork.Preprod => updateState(s => s.copy(blockfrostPreprod = Some(config)))
+              case PublicCardanoNetwork.Preview => updateState(s => s.copy(blockfrostPreview = Some(config)))
         _ <- forceStateUpdateAtEnd
         _ <- network match
-          case CardanoNetwork.Mainnet =>
+          case PublicCardanoNetwork.Mainnet =>
             stateLen(_.blockfrostMainnet).flatMap(t => ZIO.log(s"Token in $network is '$t'"))
-          case CardanoNetwork.Testnet =>
+          case PublicCardanoNetwork.Testnet =>
             stateLen(_.blockfrostTestnet).flatMap(t => ZIO.log(s"Token in $network is '$t'"))
-          case CardanoNetwork.Preprod =>
+          case PublicCardanoNetwork.Preprod =>
             stateLen(_.blockfrostPreprod).flatMap(t => ZIO.log(s"Token in $network is '$t'"))
-          case CardanoNetwork.Preview =>
+          case PublicCardanoNetwork.Preview =>
             stateLen(_.blockfrostPreview).flatMap(t => ZIO.log(s"Token in $network is '$t'"))
       } yield ()).provideLayer(setup.layer)
     case CMD.BlockfrostAddress(setup, network, mBlockfrostConfig, walletOrType) =>
@@ -139,10 +139,10 @@ object BlockfrostCommand {
           _ <- ZIO.logError(s"CMD: $cmd") // TODO
           bfConfig <- {
             network match
-              case CardanoNetwork.Mainnet => stateLen(_.blockfrostMainnet)
-              case CardanoNetwork.Testnet => ZIO.fail(PrismCliError("Testnet is no longer available"))
-              case CardanoNetwork.Preprod => stateLen(_.blockfrostPreprod)
-              case CardanoNetwork.Preview => stateLen(_.blockfrostPreview)
+              case PublicCardanoNetwork.Mainnet => stateLen(_.blockfrostMainnet)
+              case PublicCardanoNetwork.Testnet => ZIO.fail(PrismCliError("Testnet is no longer available"))
+              case PublicCardanoNetwork.Preprod => stateLen(_.blockfrostPreprod)
+              case PublicCardanoNetwork.Preview => stateLen(_.blockfrostPreview)
           }.flatMap {
             case None    => ZIO.fail(PrismCliError(s"BlockFrost config is not available for the $network network"))
             case Some(e) => ZIO.succeed(e)

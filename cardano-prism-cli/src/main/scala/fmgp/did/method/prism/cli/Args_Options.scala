@@ -3,7 +3,7 @@ package fmgp.did.method.prism.cli
 import zio.cli.*
 import fmgp.did.method.prism.DIDPrism
 import fmgp.did.method.prism.BlockfrostConfig
-import fmgp.did.method.prism.cardano.CardanoNetwork
+import fmgp.did.method.prism.cardano.PublicCardanoNetwork
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
 import fmgp.did.DID
 import fmgp.did.DIDSubject
@@ -20,18 +20,20 @@ val blockfrostConfigOpt =
 
 val networkFlag =
   Options
-    .enumeration[CardanoNetwork]("network")(CardanoNetwork.values.toSeq.map(e => (e.name, e)): _*)
-    .withDefault(CardanoNetwork.Mainnet)
+    .enumeration[PublicCardanoNetwork]("network")(PublicCardanoNetwork.values.toSeq.map(e => (e.name, e)): _*)
+    .withDefault(PublicCardanoNetwork.Mainnet)
 
 val networkOnlineFlag =
   Options
-    .enumeration[CardanoNetwork]("network")(
-      Seq(CardanoNetwork.Mainnet, CardanoNetwork.Preprod, CardanoNetwork.Preview).map(e => (e.name, e)): _*
+    .enumeration[PublicCardanoNetwork]("network")(
+      Seq(PublicCardanoNetwork.Mainnet, PublicCardanoNetwork.Preprod, PublicCardanoNetwork.Preview).map(e =>
+        (e.name, e)
+      ): _*
     )
 
 val networkArgs =
-  Args.enumeration[CardanoNetwork]("network")(
-    CardanoNetwork.values.filterNot(_ == CardanoNetwork.Testnet).toSeq.map(e => (e.name, e)): _*
+  Args.enumeration[PublicCardanoNetwork]("network")(
+    PublicCardanoNetwork.values.filterNot(_ == PublicCardanoNetwork.Testnet).toSeq.map(e => (e.name, e)): _*
   )
 
 val mnemonicWords = Options

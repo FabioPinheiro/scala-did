@@ -16,7 +16,7 @@ object DIDURL {
           Option(fragment).getOrElse("")
         )
       )
-    case _ => Left(s"Fail to parse DIDSubjectQ: '$id'")
+    case _ => Left(s"Fail to parse DIDURL: '$id'")
   }
 
   /** @throws AssertionError if not a valid DIDSubject */

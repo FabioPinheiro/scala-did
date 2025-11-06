@@ -36,6 +36,7 @@ import _root_.proto.prism.PrismBlock
 // import _root_.proto.prism.PrismEvent
 import _root_.proto.prism.SignedPrismEvent
 import _root_.proto.prism.PrismObject
+import com.bloxbean.cardano.client.common.model.Network
 
 object CardanoService {
 
@@ -138,15 +139,16 @@ object CardanoService {
   }
 
   private def makeBFNetworks(n: CardanoNetwork) = n match
-    case CardanoNetwork.Mainnet => Networks.mainnet()
-    case CardanoNetwork.Testnet => Networks.testnet()
-    case CardanoNetwork.Preprod => Networks.preprod()
-    case CardanoNetwork.Preview => Networks.preview()
+    case PublicCardanoNetwork.Mainnet    => Networks.mainnet()
+    case PublicCardanoNetwork.Testnet    => Networks.testnet()
+    case PublicCardanoNetwork.Preprod    => Networks.preprod()
+    case PublicCardanoNetwork.Preview    => Networks.preview()
+    case PrivateCardanoNetwork(_, magic) => Network(0x00, magic)
   private def makeBFBackendService(bfConfig: BlockfrostConfig) =
     new BFBackendService(bfConfig.network.blockfrostURL + "/", bfConfig.token)
   def makeAccount(bfConfig: BlockfrostConfig, wallet: CardanoWalletConfig): Account =
     new Account(makeBFNetworks(bfConfig.network), wallet.mnemonicPhrase)
-  def makeAccount(network: CardanoNetwork, wallet: CardanoWalletConfig): Account =
+  def makeAccount(network: PublicCardanoNetwork, wallet: CardanoWalletConfig): Account =
     new Account(makeBFNetworks(network), wallet.mnemonicPhrase)
 
   // Return the hash/id of the transaction

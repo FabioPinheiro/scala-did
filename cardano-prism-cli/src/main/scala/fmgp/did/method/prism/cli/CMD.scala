@@ -3,7 +3,7 @@ package fmgp.did.method.prism.cli
 import fmgp.did.method.prism.DIDPrism
 import fmgp.did.method.prism.RefVDR
 import fmgp.did.method.prism.BlockfrostConfig
-import fmgp.did.method.prism.cardano.CardanoNetwork
+import fmgp.did.method.prism.cardano.PublicCardanoNetwork
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
 import java.nio.file.Path
 import proto.prism.SignedPrismEvent
@@ -22,22 +22,25 @@ object CMD {
   final case class MnemonicAddress(
       setup: Setup,
       walletOrType: CardanoWalletConfig | WalletType.SSI.type | WalletType.Cardano.type,
-      network: CardanoNetwork,
+      network: PublicCardanoNetwork,
   ) extends MnemonicCMD
 
   sealed trait BlockfrostCMD extends CMD
-  final case class BlockfrostToken(setup: Setup, network: CardanoNetwork, mBlockfrostConfig: Option[BlockfrostConfig])
-      extends BlockfrostCMD
+  final case class BlockfrostToken(
+      setup: Setup,
+      network: PublicCardanoNetwork,
+      mBlockfrostConfig: Option[BlockfrostConfig]
+  ) extends BlockfrostCMD
   final case class BlockfrostAddress(
       setup: Setup,
-      network: CardanoNetwork,
+      network: PublicCardanoNetwork,
       mBlockfrostConfig: Option[BlockfrostConfig],
       walletOrType: CardanoWalletConfig | WalletType.SSI.type | WalletType.Cardano.type,
   ) extends BlockfrostCMD
 
   final case class BlockfrostSubmitEvents(
       setup: Setup,
-      network: CardanoNetwork,
+      network: PublicCardanoNetwork,
       events: Seq[SignedPrismEvent],
   ) extends BlockfrostCMD
 
@@ -65,15 +68,15 @@ object CMD {
   ) extends DIDCMD
   final case class DIDUpdate(did: DIDPrism) extends DIDCMD
   final case class DIDDeactivate(did: DIDPrism) extends DIDCMD
-  final case class DIDResolve(did: DIDPrism, network: CardanoNetwork) extends DIDCMD
-  final case class DIDResolveFromFS(did: DIDPrism, workdir: Path, network: CardanoNetwork) extends DIDCMD
+  final case class DIDResolve(did: DIDPrism, network: PublicCardanoNetwork) extends DIDCMD
+  final case class DIDResolveFromFS(did: DIDPrism, workdir: Path, network: PublicCardanoNetwork) extends DIDCMD
   final case class DIDResolveFromEndpoint(did: DID, resolverEndpoint: URL) extends DIDCMD
   final case class DIDResolveFromUniresolver(did: DID, baseEndpoint: Option[String]) extends DIDCMD
 
   sealed trait VDRCMD extends CMD
   final case class VDRCreateBytes(
       setup: Setup, // TODO option to get the owner SSI/DID from the state
-      network: CardanoNetwork,
+      network: PublicCardanoNetwork,
       workdir: Path,
       didOwner: DIDPrism, // and make it optional
       vdrKeyLabel: String,
@@ -82,7 +85,7 @@ object CMD {
   ) extends VDRCMD
   final case class VDRCreateIPFS(
       setup: Setup, // TODO option to get the owner SSI/DID from the state
-      network: CardanoNetwork,
+      network: PublicCardanoNetwork,
       workdir: Path,
       didOwner: DIDPrism, // and make it optional
       vdrKeyLabel: String,
@@ -91,7 +94,7 @@ object CMD {
   ) extends VDRCMD
   final case class VDRUpdateBytes(
       setup: Setup,
-      network: CardanoNetwork,
+      network: PublicCardanoNetwork,
       workdir: Path,
       vdrEntryRef: RefVDR,
       vdrKeyLabel: String,
@@ -100,7 +103,7 @@ object CMD {
   ) extends VDRCMD
   final case class VDRUpdateIPFS(
       setup: Setup,
-      network: CardanoNetwork,
+      network: PublicCardanoNetwork,
       workdir: Path,
       vdrEntryRef: RefVDR,
       vdrKeyLabel: String,
@@ -109,7 +112,7 @@ object CMD {
   ) extends VDRCMD
   final case class VDRDeactivateEntry(
       setup: Setup,
-      network: CardanoNetwork,
+      network: PublicCardanoNetwork,
       workdir: Path,
       vdrEntryRef: RefVDR,
       vdrKeyLabel: String,
@@ -118,14 +121,14 @@ object CMD {
 
   final case class VDRFetchEntry(
       setup: Setup,
-      network: CardanoNetwork,
+      network: PublicCardanoNetwork,
       workdir: Path,
       vdrEntryRef: RefVDR,
   ) extends VDRCMD
 
   final case class VDRProofEntry(
       setup: Setup,
-      network: CardanoNetwork,
+      network: PublicCardanoNetwork,
       workdir: Path,
       vdrEntryRef: RefVDR,
   ) extends VDRCMD
