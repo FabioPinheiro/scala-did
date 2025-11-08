@@ -19,7 +19,7 @@ import _root_.proto.prism.PrismObject
 
 /** https://cardano-client.dev/docs/gettingstarted/simple-transfer
   *
-  * didResolverPrismJVM/runMain fmgp.did.method.prism.CardanoClient
+  * didResolverPrismJVM/Test/runMain fmgp.did.method.prism.CardanoClient
   */
 object CardanoClient extends ZIOAppDefault {
 
@@ -41,7 +41,7 @@ object CardanoClient extends ZIOAppDefault {
         token = "preprod9EGSSMf6oWb81qoi8eW65iWaQuHJ1HwB"
       ) // FIXME recreate my personal IOHK API key
       wallet = CardanoWalletConfig()
-      senderAccount: Account = Account(Networks.preprod(), wallet.mnemonicPhrase)
+      senderAccount: Account = Account.createFromMnemonic(Networks.preprod(), wallet.mnemonicPhrase)
       _ <- ZIO.log("hdKeyPair: " + senderAccount.hdKeyPair())
       _ <- ZIO.log("baseAddress: " + senderAccount.baseAddress)
       // addr_test1qq998yc0cz9fdjqy72dzl4runargt08x7rwah4pl36fhnk25mghzay44ttnqt65ezmff35cqmfyp0ugjxxczw3d97vesgfgdmq

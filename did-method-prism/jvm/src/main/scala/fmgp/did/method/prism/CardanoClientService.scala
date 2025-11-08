@@ -146,8 +146,10 @@ object CardanoService {
     case PrivateCardanoNetwork(_, magic) => Network(0x00, magic)
   private def makeBFBackendService(bfConfig: BlockfrostConfig) =
     new BFBackendService(bfConfig.network.blockfrostURL + "/", bfConfig.token)
+  @annotation.nowarn
   def makeAccount(bfConfig: BlockfrostConfig, wallet: CardanoWalletConfig): Account =
     new Account(makeBFNetworks(bfConfig.network), wallet.mnemonicPhrase)
+  @annotation.nowarn
   def makeAccount(network: PublicCardanoNetwork, wallet: CardanoWalletConfig): Account =
     new Account(makeBFNetworks(network), wallet.mnemonicPhrase)
 
