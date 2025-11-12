@@ -1,7 +1,7 @@
 # SCALA DID
 
 A Scala/ScalaJS library for DID and DIDcomm.
-The one of the main goals of this library is to make DID Comm v2 **type safety** and easy to use.
+One of the main goals of this library is to make DID Comm v2 **type-safe** and easy to use.
 Made for developers by developers.
 
 [**LIVE DEMO (DIDComm's Sandbox)**](https://did.fmgp.app/)
@@ -15,26 +15,43 @@ Made for developers by developers.
 [![did Scala version support](https://index.scala-lang.org/fabiopinheiro/scala-did/did/latest-by-scala-version.svg?platform=jvm)](https://index.scala-lang.org/fabiopinheiro/scala-did/did)
 [![did Scala version support](https://index.scala-lang.org/fabiopinheiro/scala-did/did/latest-by-scala-version.svg?platform=sjs1)](https://index.scala-lang.org/fabiopinheiro/scala-did/did)
 
- - **CI** automate builds and tests all pushes to the master branch also as all PRs created.
- - **Scala Steward** automate the creation of pull requests for libraries with updated dependencies, saving maintainers time and effort. It can also help ensure that libraries are kept up-to-date, improving their reliability and performance.
+ - **CI** automates builds and tests all pushes to the master branch as well as all PRs created.
+ - **Scala Steward** automates the creation of pull requests for libraries with updated dependencies, saving maintainers time and effort. It can also help ensure that libraries are kept up-to-date, improving their reliability and performance.
 
-The future version of [**DID Comm v2.1**](https://identity.foundation/didcomm-messaging/spec/v2.1/) is been track&develop in the branch [`didcomm-v2.1`](https://github.com/FabioPinheiro/scala-did/tree/didcomm-v2.1)
+The future version of [**DID Comm v2.1**](https://identity.foundation/didcomm-messaging/spec/v2.1/) is being tracked & developed in the branch [`didcomm-v2.1`](https://github.com/FabioPinheiro/scala-did/tree/didcomm-v2.1)
+
+## Quick Start
+
+To get started with scala-did, see our [Quick Start Guide](./docs/src/02-quickstart/02-install-dependency.md) which covers:
+- [Setup Environment](./docs/src/02-quickstart/01-setup-environment.md) - Using scala-cli or sbt
+- [Install Dependencies](./docs/src/02-quickstart/02-install-dependency.md) - Adding scala-did to your project
+- [Basic Examples](./docs/src/02-quickstart/04-basic-examples.md) - Your first DIDs and DIDComm messages
+
+**Minimal example:**
+```scala
+libraryDependencies += "app.fmgp" %% "did" % "<version>"
+libraryDependencies += "app.fmgp" %% "did-imp" % "<version>"
+```
+
+For the latest version, check: ![Maven Central](https://img.shields.io/maven-central/v/app.fmgp/did_3)
 
 **More documentation:**
+- [Full Documentation](https://did.fmgp.app/docs/) - Complete documentation website
+- [API Documentation (Scaladoc)](https://doc.did.fmgp.app/api/) - API reference
+- [Maven Central Packages](https://central.sonatype.com/namespace/app.fmgp) - Published artifacts
+- [Documentation Source](./docs/src/01-about/01-scala-did.md) - Raw documentation files
 - [LICENSE](LICENSE) - Apache License, Version 2.0
-- [did implementations](did-imp/README.md) = Notes and TODO list
-- [example](did-example/README.md) - just a set of DIDs for experiments.
-- [demo](demo/README.md) - How to build, test and deploy the Demo. The Demo is a server with (webapp) client.  
-- [webapp module](webapp/README.md) - How to build, develop and run localy.
-- [multiformats module](multiformats/README.md) - Implemente notes and an considerations (of TODOs) if we want to use as the independent Library.
-- [docs](docs/) - Base folder of the library documentation website.
-  - [docs/readme.md - **Scala-DID Documentation**](docs/readme.md)
+- [did implementations](did-imp/README.md) - Notes and TODO list
+- [example](did-example/README.md) - Set of DIDs for experiments
+- [demo](demo/README.md) - How to build, test and deploy the Demo
+- [webapp module](webapp/README.md) - How to build, develop and run locally
+- [multiformats module](multiformats/README.md) - Implementation notes and considerations
 
 ## Adopters
 
-Following is a partial list of companies and project using DID Comm to craft applications.
+Following is a partial list of companies and projects using DID Comm to craft applications.
 
-Want to see your project here? [Submit a PR]
+Want to see your project here? [Submit a PR](https://github.com/FabioPinheiro/scala-did/pulls)
 
 - [DID Comm - Playground](https://did.fmgp.app/)
 - [DID Comm Action - Send messages from Github jobs](https://github.com/fabiopinheiro/did-comm-action)
@@ -82,30 +99,30 @@ flowchart BT
   did --> zio
   zio-json --> zio
   did --> zio-json
-  did-resolver-web ----> zhttp:::JVM
+  did-method-web ----> zhttp:::JVM
 
   subgraph fmgp libraries
-    did-resolver-peer --> multibase
+    did-method-peer --> multiformats
     subgraph platform specific
       did-imp
       did-imp-hw:::Others -.-> did-imp
       did-imp_js:::JS ==>|compiles together| did-imp
       did-imp_jvm:::JVM ==>|compiles together| did-imp
     end
-    did-resolver-web --> did
-    did-resolver-peer --> did
-    did-resolver-prism ---> did
+    did-method-web --> did
+    did-method-peer --> did
+    did-method-prism ---> did
     did-comm-protocols --> did
     did-framework --> did
     did-framework --> did-comm-protocols
     did-imp --> did
   end
 
-  prism-node:::JVM -----> did-resolver-prism
+  prism-node:::JVM -----> did-method-prism
 
   did-example ----> did
   did-example --> did-imp
-  demo --> did-imp 
+  demo --> did-imp
 
   did-imp_jvm:::JVM ----> nimbus-jose-jwt:::JVM --> google-tink:::JVM
   did-imp_jvm:::JVM ---> google-tink
@@ -115,19 +132,19 @@ flowchart BT
   %% subgraph demo/docs
     webapp:::JS --> did-framework
     demo --> did-framework
-    demo --> did-resolver-web
-    demo --> did-resolver-peer
+    demo --> did-method-web
+    demo --> did-method-peer
     webapp:::JS --> did-imp_js
-    webapp:::JS  --> did-resolver-web
-    webapp:::JS  --> did-resolver-peer
+    webapp:::JS  --> did-method-web
+    webapp:::JS  --> did-method-peer
     webapp:::JS  --> did-example
     demo  --> did-example
     demo -.->|uses\serves| webapp
 
     demo_jvm(demo_jvm\nA server):::JVM ==>|compiles together| demo
 
-    did-example  --> did-resolver-peer
-    did-example  --> did-resolver-web
+    did-example  --> did-method-peer
+    did-example  --> did-method-web
   %% end
 
   classDef JVM fill:#141,stroke:#444,stroke-width:2px;
@@ -143,5 +160,5 @@ NOTES:
 - Blue boxes is JavaScript's platform specific.
 - Other boxes are not platform specific.
 - The `did-imp-hw` is a idea how to extend for other implementation. Like a hardware/platform specific or with hardware wallet support.
-- `did-resolver-web` & `did-resolver-peer` & `did-resolver-prism` are implementations of the respective did methods.
+- `did-method-web` & `did-method-peer` & `did-method-prism` are implementations of the respective did methods.
 
