@@ -20,3 +20,6 @@ object EventHash:
   extension (hash: EventHash)
     def hex: String = bytes2Hex(hash)
     def byteArray: Array[Byte] = hash
+
+    /** Custom equality method */
+    def equal(other: EventHash): Boolean = hash.hex == other.hex

@@ -18,7 +18,7 @@ sealed trait OP {
   def asStorageEntryEvent =
     if (this.isInstanceOf[OP.TypeStorageEntryEvent])
       Right(this.asInstanceOf[OP.TypeStorageEntryEvent])
-    else Left("OP is not a DIDEvent type")
+    else Left("OP is not a StorageEntryEvent type")
 }
 
 object OP {

@@ -76,9 +76,10 @@ trait PrismStateRead {
               val didPrismOwner =
                 headEvent.asInstanceOf[MySignedPrismEvent[CreateStorageEntryOP]].event.didPrism
               getSSIHistory(didPrismOwner).map { ssiHistory =>
-                VDR.make(vdrRef = ref, ssiHistory = ssiHistory, ops = events)
+                VDR.make(vdrRef = ref, ssiHistory = ssiHistory, events = events)
               }
-            case event => ???
+            case event => // this should never happen
+              ZIO.fail(new RuntimeException("The first event of the VDR MUST be a CreateStorageEntry"))
           }
     }
 

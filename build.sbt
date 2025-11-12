@@ -591,7 +591,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     )
   )
   .jsConfigure(scalaJSLibConfigure)
-  .jsSettings(
+  .jsSettings( // Add JS-specific settings here
     // stReactEnableTreeShaking := Selection.NoneExcept("@noble/curves"),
     // stFlavour := Flavour.Slinky,
     Compile / npmDependencies ++= Seq(NPM.nobleCurves),
@@ -599,6 +599,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // stMinimize := Selection.All,
     // stMinimizeKeep ++= List(..
     // https://developers.cardano.org/docs/get-started/cardano-serialization-lib/overview/
+    Test / testOptions += Tests.Argument("--exclude-tags=JsUnsupported"),
   )
   // Apollo
   .jvmSettings(libraryDependencies += D.apollo)
@@ -606,7 +607,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
   //   Compile / npmDependencies ++= Seq(NPM.appoloJS),
   //   stIgnore += "node",
   // )
-  .dependsOn(did, multiformats)
+  .dependsOn(did % "compile;test->test", multiformats) // test->test for the fmgp.IntregrationTest
   .configure(docConfigure)
 
 lazy val cardanoPrismCli = project

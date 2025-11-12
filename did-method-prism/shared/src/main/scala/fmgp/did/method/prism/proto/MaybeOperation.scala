@@ -51,7 +51,7 @@ case class MySignedPrismEvent[+T <: OP] private (
   def asSignedPrismDIDEvent: Either[String, MySignedPrismEvent[OP.TypeDIDEvent]] =
     event.asDIDEvent.map(_ => this.asInstanceOf[MySignedPrismEvent[OP.TypeDIDEvent]])
   def asSignedPrismStorageEntryEvent: Either[String, MySignedPrismEvent[OP.TypeStorageEntryEvent]] =
-    event.asDIDEvent.map(_ => this.asInstanceOf[MySignedPrismEvent[OP.TypeStorageEntryEvent]])
+    event.asStorageEntryEvent.map(_ => this.asInstanceOf[MySignedPrismEvent[OP.TypeStorageEntryEvent]])
 }
 
 case class SignedPrismEventView[+T <: OP](
