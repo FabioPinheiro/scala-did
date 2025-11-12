@@ -556,11 +556,10 @@ lazy val didResolverPeer = crossProject(JSPlatform, JVMPlatform)
 lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
   .in(file("did-method-prism"))
   .configure(publishConfigure)
+  .settings((setupTestConfig): _*)
   .settings(
     name := "did-method-prism",
     libraryDependencies += D.bullet.value,
-    libraryDependencies += D.munit.value,
-    libraryDependencies += D.zioMunitTest.value,
   )
   .jvmSettings(libraryDependencies += D.ziohttp.value)
   .jvmSettings( // Add JVM-specific settings here
@@ -599,6 +598,8 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // stMinimize := Selection.All,
     // stMinimizeKeep ++= List(..
     // https://developers.cardano.org/docs/get-started/cardano-serialization-lib/overview/
+  )
+  .jsSettings(
     Test / testOptions += Tests.Argument("--exclude-tags=JsUnsupported"),
   )
   // Apollo
@@ -627,10 +628,9 @@ lazy val cardanoPrismCli = project
 lazy val didPrismNode = project
   .in(file("did-method-prism-node"))
   .settings(publish / skip := true)
+  .settings((setupTestConfig): _*)
   .settings(
     name := "prism-node",
-    libraryDependencies += D.munit.value,
-    libraryDependencies += D.zioMunitTest.value,
     libraryDependencies += "dev.zio" %% "zio-logging-slf4j2-bridge" % "2.5.1"
   )
   .settings(
