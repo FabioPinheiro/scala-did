@@ -41,7 +41,7 @@ jobs:
       - name: Setup Scala.JS
         uses: japgolly/setup-scalajs@v1
       - name: Cache sbt
-        uses: coursier/cache-action@v6.4
+        uses: coursier/cache-action@v7
       ### Compile & Test ###
       # - name: Compile and Test
       #   run: sbt -v -mem 2048 -J-Xmx5120m "ciJobLib"
@@ -86,7 +86,7 @@ jobs:
       - name: Setup Scala.JS
         uses: japgolly/setup-scalajs@v1
       - name: Cache sbt
-        uses: coursier/cache-action@v6.4
+        uses: coursier/cache-action@v7
 
       ### create build deploy gh-pages ###
       - name: sbt "docAll; siteAll"
@@ -127,7 +127,7 @@ jobs:
       - name: Setup Scala.JS
         uses: japgolly/setup-scalajs@v1
       - name: Cache sbt
-        uses: coursier/cache-action@v6.4
+        uses: coursier/cache-action@v7
 
       ### Publish Artifacts ###
       - name: publish

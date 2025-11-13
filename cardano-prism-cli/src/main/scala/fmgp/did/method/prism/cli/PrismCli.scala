@@ -66,7 +66,7 @@ object PrismCli extends ZIOCliDefault {
       case cmd: CMD.Indexer       => IndexerCommand.program(cmd)
       case cmd: CMD.ServicesCMD   => ServicesCommand.program(cmd)
     }
-  }.catchNonFatalOrDie { case error: java.io.IOException =>
+  }.catchAll { case error: java.io.IOException =>
     ZIO.succeed(error.printStackTrace()) *>
       ZIO.logError(error.getMessage()) *>
       exit(ExitCode.failure)

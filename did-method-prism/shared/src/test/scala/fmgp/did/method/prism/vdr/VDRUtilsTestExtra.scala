@@ -3,9 +3,7 @@ package fmgp.did.method.prism.vdr
 import scala.jdk.CollectionConverters._
 import zio._
 import zio.stream._
-import org.hyperledger.identus.apollo.derivation.MnemonicHelper
-import org.hyperledger.identus.apollo.derivation.HDKey
-import io.netty.handler.ssl.ApplicationProtocolConfig.Protocol
+
 import com.google.protobuf.ByteString
 import fmgp.util.bytes2Hex
 import fmgp.util.hex2bytes
@@ -15,14 +13,6 @@ import fmgp.did.method.prism.cardano._
 import fmgp.did.method.prism.proto._
 import fmgp.crypto.SHA256
 import _root_.proto.prism._
-
-object KeyConstanceUtils {
-  val wallet = CardanoWalletConfig()
-  val pkMaster = wallet.secp256k1PrivateKey(0, 0) // HDKey(seed, 0, 0).getKMMSecp256k1PrivateKey()
-  val pk1VDR = wallet.secp256k1PrivateKey(0, 1) // HDKey(seed, 0, 1).getKMMSecp256k1PrivateKey()
-  val pk2VDR = wallet.secp256k1PrivateKey(0, 2) // HDKey(seed, 0, 2).getKMMSecp256k1PrivateKey()
-  val pk3VDR = wallet.secp256k1PrivateKey(0, 3) // HDKey(seed, 0, 3).getKMMSecp256k1PrivateKey()
-}
 
 object VDRUtilsTestExtra {
   import KeyConstanceUtils._
@@ -43,12 +33,28 @@ object VDRUtilsTestExtra {
     "0a04766472311246304402206e6152ba20935eb946e79b4d39cd6cf327b162b25d37b5cc2e4df3ce9e44dd9f0220729a0891b714e6116838cf4dd2dca3e877b6e36a25814e7400fd35cb1da6084a1a2d422b12202a0d49ff70f6403cab5bba090478300369ff4875f849dd42c9c59ca4272a9a7ba206030203048a0300"
   val updateVDR_withUnknownField99 = // Update Bytes data2
     "0a047664723112463044022008ce25d2a5731b5946df3c57c3d4046a499830603680288b7c3c14d0b6e3d12302205c9f064f0a488e86377b0112448316827a6d356884e218a148db3d3198bf7c051a2d422b12202a0d49ff70f6403cab5bba090478300369ff4875f849dd42c9c59ca4272a9a7ba206030203049a0600"
-  val updateVDR_withTheNewKey = // Update Bytes data2
+  val updateVDR_withTheNewKey = // Update Bytes with data3 after frist updateVDR
     "0a047664723212473045022100b33c0b12449eb506c862c98cfbd221d48cbf31ba62e512b4af31170a34a62e2a0220329bbc57107491b62ecfb894cda5757cc221421ecccae61a7404d3d0ae1d01d41a2842261220d7c38f7d8aa4912d0a58ead87b154eed968b949b3bfb54f3f894ab9fc5365f40a2060105"
+  val deactivateVDR_afterUpdate = // after frist updateVDR
+    "0a047664723112463044022012ef278a68a4a04b72c5972d5e3cd72e8c798b9250cff5c52bee78297c06e19002205d267333f7d91bb99f4282de55ba974d6630776059758d918e13caf8b2f34ab01a244a221220d7c38f7d8aa4912d0a58ead87b154eed968b949b3bfb54f3f894ab9fc5365f40"
 
   val data1 = hex2bytes("01")
   val data2 = hex2bytes("020304")
   val data3 = hex2bytes("05")
+
+  def makeSignedPrismEvent(
+      hex: String,
+      opIndex: Int,
+      blockIndex: Int = 0,
+      tx: String = "tx"
+  ): MySignedPrismEvent[OP] = {
+    val protoBytes = hex2bytes(hex)
+    val signedPrismEvent = SignedPrismEvent.parseFrom(protoBytes)
+    MaybeEvent.fromProto(signedPrismEvent, tx, blockIndex = blockIndex, opIndex = opIndex) match
+      case InvalidPrismObject(tx, b, reason)                                   => ???
+      case InvalidSignedPrismEvent(tx, b, o, reason)                           => ???
+      case obj @ MySignedPrismEvent(tx, b, o, signedWith, signature, protobuf) => obj
+  }
 
   def createDID(
       masterKeys: Seq[(String, Secp256k1PrivateKey)],
@@ -125,7 +131,7 @@ object VDRUtilsTestExtra {
     )
     def signedPrismUpdateEventVDR = SignedPrismEvent(
       signedWith = keyName,
-      signature = ByteString.copyFrom(KeyConstanceUtils.pk1VDR.sign(op.toByteArray)),
+      signature = ByteString.copyFrom(vdrKey.sign(op.toByteArray)),
       event = Some(op)
     )
     signedPrismUpdateEventVDR

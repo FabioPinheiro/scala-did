@@ -98,8 +98,8 @@ object VDR {
       unsupportedValidationField = false,
     )
 
-  def make(vdrRef: RefVDR, ssiHistory: SSIHistory, ops: Seq[MySignedPrismEvent[OP]]) =
-    ops.foldLeft(VDR.init(vdrRef)) { case (tmpVDR, op) => tmpVDR.appendAny(op, ssiHistory) }
+  def make(vdrRef: RefVDR, ssiHistory: SSIHistory, events: Seq[MySignedPrismEvent[OP]]) =
+    events.foldLeft(VDR.init(vdrRef)) { case (tmpVDR, op) => tmpVDR.appendAny(op, ssiHistory) }
 
   sealed trait DataType { self =>
     def update(op: DataUpdateType): DataType = (self, op) match

@@ -150,7 +150,7 @@ lazy val V = new {
   // val scalajsLogging = "1.1.2-SNAPSHOT" //"1.1.2"
 
   // https://mvnrepository.com/artifact/dev.zio/zio
-  val zio = "2.1.20"
+  val zio = "2.1.22"
   val zioJson = "0.7.44"
   val zioMunitTest = "0.4.0"
   val zioHttp = "3.4.1" // FIXES CORS https://github.com/zio/zio-http/pull/2490
@@ -167,7 +167,7 @@ lazy val V = new {
   val scalaLogging = "3.9.4"
 
   val bouncycastle = "1.80"
-  val nimbusJoseJwt = "10.5"
+  val nimbusJoseJwt = "10.6"
 
   val laika = "1.0.0"
 
@@ -186,7 +186,7 @@ lazy val NPM = new { // When update the dependencies also update in package.json
   // val elliptic = "elliptic" -> "6.6.1"
   // val ellipticType = "@types/elliptic" -> "6.4.18"
 
-  val nobleCurves = "@noble/curves" -> "1.9.2"
+  val nobleCurves = "@noble/curves" -> "1.9.7"
   val appoloJS = "@hyperledger/identus-apollo" -> ("^" + V.identusApollo)
 
 }
@@ -556,11 +556,10 @@ lazy val didResolverPeer = crossProject(JSPlatform, JVMPlatform)
 lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
   .in(file("did-method-prism"))
   .configure(publishConfigure)
+  .settings((setupTestConfig): _*)
   .settings(
     name := "did-method-prism",
     libraryDependencies += D.bullet.value,
-    libraryDependencies += D.munit.value,
-    libraryDependencies += D.zioMunitTest.value,
   )
   .jvmSettings(libraryDependencies += D.ziohttp.value)
   .jvmSettings( // Add JVM-specific settings here
@@ -591,7 +590,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     )
   )
   .jsConfigure(scalaJSLibConfigure)
-  .jsSettings(
+  .jsSettings( // Add JS-specific settings here
     // stReactEnableTreeShaking := Selection.NoneExcept("@noble/curves"),
     // stFlavour := Flavour.Slinky,
     Compile / npmDependencies ++= Seq(NPM.nobleCurves),
@@ -600,13 +599,16 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // stMinimizeKeep ++= List(..
     // https://developers.cardano.org/docs/get-started/cardano-serialization-lib/overview/
   )
+  .jsSettings(
+    Test / testOptions += Tests.Argument("--exclude-tags=JsUnsupported"),
+  )
   // Apollo
   .jvmSettings(libraryDependencies += D.apollo)
   // .jsSettings(
   //   Compile / npmDependencies ++= Seq(NPM.appoloJS),
   //   stIgnore += "node",
   // )
-  .dependsOn(did, multiformats)
+  .dependsOn(did % "compile;test->test", multiformats) // test->test for the fmgp.IntregrationTest
   .configure(docConfigure)
 
 lazy val cardanoPrismCli = project
@@ -626,10 +628,9 @@ lazy val cardanoPrismCli = project
 lazy val didPrismNode = project
   .in(file("did-method-prism-node"))
   .settings(publish / skip := true)
+  .settings((setupTestConfig): _*)
   .settings(
     name := "prism-node",
-    libraryDependencies += D.munit.value,
-    libraryDependencies += D.zioMunitTest.value,
     libraryDependencies += "dev.zio" %% "zio-logging-slf4j2-bridge" % "2.5.1"
   )
   .settings(

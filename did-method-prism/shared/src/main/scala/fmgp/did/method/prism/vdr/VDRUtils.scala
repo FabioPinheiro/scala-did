@@ -76,6 +76,18 @@ protected[vdr] object VDRUtils {
 
   def deactivateVDREntry(
       eventRef: RefVDR,
+      previousEvent: SignedPrismEvent,
+      vdrKey: Secp256k1PrivateKey,
+      keyName: String,
+  ): (EventHash, SignedPrismEvent) = deactivateVDREntry(
+    eventRef = eventRef,
+    previousEventHash = previousEvent.event.get.getEventHash,
+    vdrKey = vdrKey,
+    keyName = keyName,
+  )
+
+  def deactivateVDREntry(
+      eventRef: RefVDR,
       previousEventHash: EventHash,
       vdrKey: Secp256k1PrivateKey,
       keyName: String,

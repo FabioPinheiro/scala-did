@@ -13,5 +13,3 @@ extension (wallet: CardanoWalletConfig) {
     Secp256k1PrivateKey(HDKey(wallet.seed, depth, childIndex).getKMMSecp256k1PrivateKey().getEncoded())
 
 }
-
-// object CardanoWalletConfigExtension {}
