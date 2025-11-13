@@ -30,7 +30,7 @@ trait PrismStateRead {
     getEventsIdBySSI(ssi).flatMap { seqEventRef =>
       for {
         events <- ZIO.foreach(seqEventRef) { eventRef =>
-          getEventsByHash(eventRef.eventHash).flatMap {
+          getEventByHash(eventRef.eventHash).flatMap {
             case None =>
               ZIO.fail(new RuntimeException(s"impossible state: missing Event hash '${eventRef.eventHash}'"))
             case Some(value) => ZIO.succeed(value)
@@ -48,7 +48,7 @@ trait PrismStateRead {
     getEventsIdByVDR(refVDR).flatMap { seqEventRef =>
       for {
         events <- ZIO.foreach(seqEventRef) { eventRef =>
-          getEventsByHash(eventRef.eventHash).flatMap {
+          getEventByHash(eventRef.eventHash).flatMap {
             case None =>
               ZIO.fail(new RuntimeException(s"impossible state: missing Event hash '${eventRef.eventHash}'"))
             case Some(value) => ZIO.succeed(value)
@@ -58,7 +58,7 @@ trait PrismStateRead {
       } yield storageEvents
     }
 
-  def getEventsByHash(refHash: EventHash): ZIO[Any, Exception, Option[MySignedPrismEvent[OP]]]
+  def getEventByHash(refHash: EventHash): ZIO[Any, Exception, Option[MySignedPrismEvent[OP]]]
 
   def getSSI(ssi: DIDSubject): ZIO[Any, Throwable, SSI] =
     getSSIHistory(ssi).map(_.latestVersion) // getEventsForSSI(ssi).map { events => SSI.make(ssi, events) }

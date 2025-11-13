@@ -71,7 +71,7 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
       case Some(seq) => seq
   }
 
-  override def getEventsByHash(refHash: EventHash): ZIO[Any, Nothing, Option[MySignedPrismEvent[OP]]] = ref.get.map {
+  override def getEventByHash(refHash: EventHash): ZIO[Any, Nothing, Option[MySignedPrismEvent[OP]]] = ref.get.map {
     _.opHash2op.get(refHash.hex) match
       case None              => None
       case Some(signedEvent) => Some(signedEvent)

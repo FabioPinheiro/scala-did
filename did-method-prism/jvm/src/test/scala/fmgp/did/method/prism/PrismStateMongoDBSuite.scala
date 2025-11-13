@@ -75,7 +75,11 @@ class PrismStateMongoDBSuite extends ZSuite {
   // aux(3): UpdateStorageEntryOP -> VDR update with new key
   // aux(4): UpdateDidOP -> DID update (add key)
 
-  prismStateFixture.testZLayered("addEvent: insert CreateDidOP event".tag(fmgp.IntregrationTest)) {
+  prismStateFixture.testZLayered(
+    "addEvent: insert CreateDidOP event"
+      .tag(fmgp.IntregrationTest)
+      .tag(fmgp.DBTest)
+  ) {
     for {
       state <- ZIO.service[PrismState]
       createDidEvent = aux(0) // CreateDidOP
@@ -83,15 +87,20 @@ class PrismStateMongoDBSuite extends ZSuite {
     } yield ()
   }
 
-  prismStateFixture.testZLayered("addEvent CreateDidOP & findEventByHash".tag(fmgp.IntregrationTest)) {
+  prismStateFixture.testZLayered(
+    "addEvent createSSI & findEventByHash & getEventsIdBySSI & getEventsForSSI"
+      .tag(fmgp.IntregrationTest)
+      .tag(fmgp.DBTest)
+  ) {
     for {
       state <- ZIO.service[PrismState]
-      createDidEvent = aux(0)
-      eventHash = createDidEvent.eventHash
+      createSSIEvent = VDRUtilsTestExtra.makeSignedPrismEvent(createSSI, opIndex = 0)
+      // updateSSIEvent = VDRUtilsTestExtra.makeSignedPrismEvent(updateSSI_addKey, opIndex = 1)
+      eventHash = createSSIEvent.eventHash
 
-      _ <- state.addEvent(createDidEvent)
-      retrieved <- state.getEventsByHash(eventHash)
-
+      _ <- state.addEvent(createSSIEvent)
+      // _ <- state.addEvent(updateSSIEvent)
+      retrieved <- state.getEventByHash(eventHash)
       _ = retrieved match
         case None =>
           fail(s"Event ${eventHash.hex} not found after insertion")
@@ -101,17 +110,95 @@ class PrismStateMongoDBSuite extends ZSuite {
             expected = eventHash.hex,
             clue = s"SSI event hash mismatch: ${retrieved.get.eventHash.hex} != ${eventHash.hex}"
           )
+      didSubject = VDRUtilsTestExtra.didPrism.asDIDSubject
+      eventRefs1 <- state.getEventsIdBySSI(didSubject) // Test getEventsIdBySSI
+      eventRefs2 <- state.getEventsForSSI(didSubject) // Test getEventsForSSI
+      ssi <- state.getSSI(didSubject) // Test getSSI
+      _ = assertEquals(eventRefs1.size, 1)
+      _ = assertEquals(eventRefs2.size, 1)
+      _ = assertEquals(ssi.did, didSubject)
+      _ = assertEquals(ssi.keys.size, 2)
     } yield ()
   }
 
-  prismStateFixture.testZLayered("addEvent CreateStorageEntryOP & findEventByHash".tag(fmgp.IntregrationTest)) {
+  prismStateFixture.testZLayered(
+    "addEvent (createSSI & updateSSI) & findEventByHash & getEventsIdBySSI & getEventsForSSI"
+      .tag(fmgp.IntregrationTest)
+      .tag(fmgp.DBTest)
+  ) {
+    for {
+      state <- ZIO.service[PrismState]
+      createSSIEvent = VDRUtilsTestExtra.makeSignedPrismEvent(createSSI, opIndex = 0)
+      updateSSIEvent = VDRUtilsTestExtra.makeSignedPrismEvent(updateSSI_addKey, opIndex = 1)
+      eventHash = createSSIEvent.eventHash
+
+      _ <- state.addEvent(createSSIEvent)
+      _ <- state.addEvent(updateSSIEvent)
+      retrieved <- state.getEventByHash(eventHash)
+      _ = retrieved match
+        case None =>
+          fail(s"Event ${eventHash.hex} not found after insertion")
+        case Some(mySignedPrismEvent) =>
+          assertEquals(
+            obtained = retrieved.get.eventHash.hex,
+            expected = eventHash.hex,
+            clue = s"SSI event hash mismatch: ${retrieved.get.eventHash.hex} != ${eventHash.hex}"
+          )
+      didSubject = VDRUtilsTestExtra.didPrism.asDIDSubject
+      eventRefs1 <- state.getEventsIdBySSI(didSubject) // Test getEventsIdBySSI
+      eventRefs2 <- state.getEventsForSSI(didSubject) // Test getEventsForSSI
+      ssi <- state.getSSI(didSubject) // Test getSSI
+      _ = assertEquals(eventRefs1.size, 2)
+      _ = assertEquals(eventRefs2.size, 2)
+      _ = assertEquals(ssi.did, didSubject)
+      _ = assertEquals(ssi.keys.size, 3)
+    } yield ()
+  }
+
+  prismStateFixture.testZLayered(
+    "getEventsIdBySSI & getEventsForSSI: empty for non-existent SSI"
+      .tag(fmgp.IntregrationTest)
+      .tag(fmgp.DBTest)
+  ) {
+    for {
+      state <- ZIO.service[PrismState]
+      // Query for a non-existent SSI
+      fakeDID = DIDPrism("0000000000000000000000000000000000000000000000000000000000000000").asDIDSubject
+      eventRefs1 <- state.getEventsIdBySSI(fakeDID) // Test getEventsIdBySSI
+      eventRefs2 <- state.getEventsForSSI(fakeDID) // Test getEventsForSSI
+      _ = assertEquals(eventRefs1.size, 0) // Should return empty sequence
+      _ = assertEquals(eventRefs2.size, 0) // Should return empty sequence
+    } yield ()
+  }
+
+  prismStateFixture.testZLayered(
+    "getEventsIdByVDR & getEventsForVDR: empty for non-existent VDR"
+      .tag(fmgp.IntregrationTest)
+      .tag(fmgp.DBTest)
+  ) {
+    for {
+      state <- ZIO.service[PrismState]
+      // Query for a non-existent VDR
+      fakeVDR = RefVDR("0000000000000000000000000000000000000000000000000000000000000000")
+      eventRefs1 <- state.getEventsIdByVDR(fakeVDR) // Test getEventsIdByVDR
+      eventRefs2 <- state.getEventsForVDR(fakeVDR) // Test getEventsForVDR
+      _ = assertEquals(eventRefs1.size, 0) // Should return empty sequence
+      _ = assertEquals(eventRefs2.size, 0) // Should return empty sequence
+    } yield ()
+  }
+
+  prismStateFixture.testZLayered(
+    "addEvent CreateStorageEntryOP & findEventByHash"
+      .tag(fmgp.IntregrationTest)
+      .tag(fmgp.DBTest)
+  ) {
     for {
       state <- ZIO.service[PrismState]
       createVDREvent = aux(1)
       eventHash = createVDREvent.eventHash
 
       _ <- state.addEvent(createVDREvent)
-      retrieved <- state.getEventsByHash(eventHash)
+      retrieved <- state.getEventByHash(eventHash)
 
       _ = retrieved match
         case None =>
@@ -125,7 +212,11 @@ class PrismStateMongoDBSuite extends ZSuite {
     } yield ()
   }
 
-  prismStateFixture.testZLayered("chain of events: Create + Update".tag(fmgp.IntregrationTest)) {
+  prismStateFixture.testZLayered(
+    "chain of events: Create + Update"
+      .tag(fmgp.IntregrationTest)
+      .tag(fmgp.DBTest)
+  ) {
     for {
       state <- ZIO.service[PrismState]
       createDidEvent = aux(0)
@@ -135,8 +226,8 @@ class PrismStateMongoDBSuite extends ZSuite {
       _ <- state.addEvent(updateDidEvent) // Then insert update (should link to create via previousEventHash)
 
       // Verify both events are retrievable
-      createRetrieved <- state.getEventsByHash(createDidEvent.eventHash)
-      updateRetrieved <- state.getEventsByHash(updateDidEvent.eventHash)
+      createRetrieved <- state.getEventByHash(createDidEvent.eventHash)
+      updateRetrieved <- state.getEventByHash(updateDidEvent.eventHash)
 
       _ = createRetrieved match
         case None => fail(s"Event createDidEvent ${createDidEvent.eventHash.hex} not found after insertion")
@@ -160,7 +251,11 @@ class PrismStateMongoDBSuite extends ZSuite {
     } yield ()
   }
 
-  prismStateFixture.testZLayered("chain of events (wrong order): Update + Create".tag(fmgp.IntregrationTest)) {
+  prismStateFixture.testZLayered(
+    "chain of events (wrong order): Update + Create"
+      .tag(fmgp.IntregrationTest)
+      .tag(fmgp.DBTest)
+  ) {
     for {
       state <- ZIO.service[PrismState]
       createDidEvent = aux(0)
@@ -170,8 +265,8 @@ class PrismStateMongoDBSuite extends ZSuite {
       _ <- state.addEvent(createDidEvent) // Then insert create first
 
       // Verify both events are retrievable
-      createRetrieved <- state.getEventsByHash(createDidEvent.eventHash)
-      updateRetrieved <- state.getEventsByHash(updateDidEvent.eventHash)
+      createRetrieved <- state.getEventByHash(createDidEvent.eventHash)
+      updateRetrieved <- state.getEventByHash(updateDidEvent.eventHash)
 
       _ = createRetrieved match
         case None => fail(s"Event createDidEvent ${createDidEvent.eventHash.hex} not found after insertion")
@@ -189,7 +284,11 @@ class PrismStateMongoDBSuite extends ZSuite {
     } yield ()
   }
 
-  prismStateFixture.testZLayered("chain of VDR events: Create + 2 Updates".tag(fmgp.IntregrationTest)) {
+  prismStateFixture.testZLayered(
+    "chain of VDR events: Create + 2 Updates"
+      .tag(fmgp.IntregrationTest)
+      .tag(fmgp.DBTest)
+  ) {
     for {
       state <- ZIO.service[PrismState]
       // createDID = aux(0)
@@ -203,9 +302,9 @@ class PrismStateMongoDBSuite extends ZSuite {
       _ <- state.addEvent(updateVDR2)
 
       // Verify all are retrievable
-      retrieved1 <- state.getEventsByHash(createVDR.eventHash)
-      retrieved2 <- state.getEventsByHash(updateVDR1.eventHash)
-      retrieved3 <- state.getEventsByHash(updateVDR2.eventHash)
+      retrieved1 <- state.getEventByHash(createVDR.eventHash)
+      retrieved2 <- state.getEventByHash(updateVDR1.eventHash)
+      retrieved3 <- state.getEventByHash(updateVDR2.eventHash)
 
       _ = assert(retrieved1.isDefined || retrieved2.isDefined || retrieved3.isDefined, "Not all VDR events found")
 
@@ -225,7 +324,9 @@ class PrismStateMongoDBSuite extends ZSuite {
   }
 
   prismStateFixture.testZLayered(
-    "chain of events: CreateSSI + CreateVDR + UpdatesVDR + UpdatesVDR (with new future key)".tag(fmgp.IntregrationTest)
+    "chain of events: CreateSSI + CreateVDR + UpdatesVDR + UpdatesVDR (with new future key)"
+      .tag(fmgp.IntregrationTest)
+      .tag(fmgp.DBTest)
   ) {
     for {
       state <- ZIO.service[PrismState]
@@ -240,9 +341,9 @@ class PrismStateMongoDBSuite extends ZSuite {
       _ <- state.addEvent(updateVDR2)
 
       // Verify all are retrievable
-      retrieved1 <- state.getEventsByHash(createVDR.eventHash)
-      retrieved2 <- state.getEventsByHash(updateVDR1.eventHash)
-      retrieved3 <- state.getEventsByHash(updateVDR2.eventHash)
+      retrieved1 <- state.getEventByHash(createVDR.eventHash)
+      retrieved2 <- state.getEventByHash(updateVDR1.eventHash)
+      retrieved3 <- state.getEventByHash(updateVDR2.eventHash)
 
       _ = assert(retrieved1.isDefined || retrieved2.isDefined || retrieved3.isDefined, "Not all VDR events found")
 
@@ -265,234 +366,5 @@ class PrismStateMongoDBSuite extends ZSuite {
         case _ => fail("Wrong Data type")
     } yield {}
   }
-
-  // prismStateFixture.testZLayered("addEvent: all 5 events") {
-  //   for {
-  //     state <- ZIO.service[PrismState]
-  //     _ <- ZIO.foreach(aux)(state.addEvent)
-
-  //     // Verify all are retrievable
-  //     allRetrieved <- ZIO.foreach(aux)(event => state.getEventsByHash(event.eventHash))
-
-  //     _ <- ZIO.when(allRetrieved.exists(_.isEmpty))(
-  //       ZIO.fail(new AssertionError("Some events not found after bulk insertion"))
-  //     )
-  //   } yield ()
-  // }
-
-  // // Tests for getEventsIdBySSI
-  // prismStateFixture.testZLayered("getEventsIdBySSI: debug event hash") {
-  //   for {
-  //     state <- ZIO.service[PrismState]
-  //     // Clean database before test
-  //     _ <- state match {
-  //       case mongoState: PrismStateMongoDB =>
-  //         (clearCollection(mongoState.collection) *> clearCollection(mongoState.lostCollection))
-  //           .catchAll(_ => ZIO.unit)
-  //       case _ => ZIO.unit
-  //     }
-
-  //     createDidEvent = aux(0)
-  //     _ <- ZIO.logInfo(s"CreateDID event hash: ${createDidEvent.eventHash.hex}")
-
-  //     didSubject = VDRUtilsTestExtra.didPrism.asDIDSubject
-  //     expectedHash = EventHash.fromPRISM(VDRUtilsTestExtra.didPrism)
-  //     _ <- ZIO.logInfo(s"Expected hash from DID: ${expectedHash.hex}")
-  //     _ <- ZIO.logInfo(s"Hashes match: ${createDidEvent.eventHash.hex == expectedHash.hex}")
-
-  //     // Insert create event
-  //     _ <- state.addEvent(createDidEvent)
-
-  //     // Try to retrieve directly by hash
-  //     retrieved <- state.getEventsByHash(createDidEvent.eventHash)
-  //     _ <- ZIO.logInfo(s"Retrieved by direct hash: ${retrieved.isDefined}")
-
-  //     // Now try getEventsIdBySSI
-  //     eventRefs <- state.getEventsIdBySSI(didSubject)
-  //     _ <- ZIO.logInfo(s"getEventsIdBySSI returned ${eventRefs.length} events")
-  //   } yield ()
-  // }
-
-  // prismStateFixture.testZLayered("getEventsIdBySSI: retrieve event refs for DID") {
-  //   for {
-  //     state <- ZIO.service[PrismState]
-  //     // Clean database before test
-  //     _ <- state match {
-  //       case mongoState: PrismStateMongoDB =>
-  //         (clearCollection(mongoState.collection) *> clearCollection(mongoState.lostCollection))
-  //           .catchAll(_ => ZIO.unit)
-  //       case _ => ZIO.unit
-  //     }
-
-  //     createDidEvent = aux(0)
-  //     updateDidEvent = aux(4)
-
-  //     // Insert create and update DID events
-  //     _ <- state.addEvent(createDidEvent)
-  //     _ <- state.addEvent(updateDidEvent)
-
-  //     // Get EventRefs for the DID
-  //     didSubject = VDRUtilsTestExtra.didPrism.asDIDSubject
-  //     eventRefs <- state.getEventsIdBySSI(didSubject)
-
-  //     // Should return 2 events sorted by (b, o)
-  //     _ <- ZIO.when(eventRefs.length != 2)(
-  //       ZIO.fail(new AssertionError(s"Expected 2 event refs, got ${eventRefs.length}"))
-  //     )
-
-  //     // Verify they're sorted by block and operation index
-  //     _ <- ZIO.when(
-  //       eventRefs(0).b > eventRefs(1).b || (eventRefs(0).b == eventRefs(1).b && eventRefs(0).o > eventRefs(1).o)
-  //     )(
-  //       ZIO.fail(new AssertionError("Event refs not sorted by (b, o)"))
-  //     )
-
-  //     // Verify the event hashes match
-  //     _ <- ZIO.when(eventRefs(0).eventHash.hex != createDidEvent.eventHash.hex)(
-  //       ZIO.fail(new AssertionError("First event hash doesn't match create event"))
-  //     )
-  //     _ <- ZIO.when(eventRefs(1).eventHash.hex != updateDidEvent.eventHash.hex)(
-  //       ZIO.fail(new AssertionError("Second event hash doesn't match update event"))
-  //     )
-  //   } yield ()
-  // }
-
-  // prismStateFixture.testZLayered("getEventsIdBySSI: empty for non-existent DID") {
-  //   for {
-  //     state <- ZIO.service[PrismState]
-
-  //     // Query for a non-existent DID
-  //     fakeDID = DIDPrism("0000000000000000000000000000000000000000000000000000000000000000").asDIDSubject
-  //     eventRefs <- state.getEventsIdBySSI(fakeDID)
-
-  //     // Should return empty sequence
-  //     _ <- ZIO.when(eventRefs.nonEmpty)(
-  //       ZIO.fail(new AssertionError(s"Expected empty sequence, got ${eventRefs.length} events"))
-  //     )
-  //   } yield ()
-  // }
-
-  // // Tests for getEventsIdByVDR
-  // prismStateFixture.testZLayered("getEventsIdByVDR: retrieve event refs for VDR") {
-  //   for {
-  //     state <- ZIO.service[PrismState]
-  //     // Clean database before test
-  //     _ <- state match {
-  //       case mongoState: PrismStateMongoDB =>
-  //         (clearCollection(mongoState.collection) *> clearCollection(mongoState.lostCollection))
-  //           .catchAll(_ => ZIO.unit)
-  //       case _ => ZIO.unit
-  //     }
-
-  //     createVDR = aux(1)
-  //     updateVDR1 = aux(2)
-  //     updateVDR2 = aux(3)
-
-  //     // Insert VDR events
-  //     _ <- state.addEvent(createVDR)
-  //     _ <- state.addEvent(updateVDR1)
-  //     _ <- state.addEvent(updateVDR2)
-
-  //     // Get EventRefs for the VDR
-  //     eventRefs <- state.getEventsIdByVDR(VDRUtilsTestExtra.refVDR)
-
-  //     // Should return 3 events sorted by (b, o)
-  //     _ <- ZIO.when(eventRefs.length != 3)(
-  //       ZIO.fail(new AssertionError(s"Expected 3 event refs, got ${eventRefs.length}"))
-  //     )
-
-  //     // Verify they're sorted
-  //     _ <- ZIO.when(
-  //       eventRefs(0).b > eventRefs(1).b ||
-  //         eventRefs(1).b > eventRefs(2).b ||
-  //         (eventRefs(0).b == eventRefs(1).b && eventRefs(0).o > eventRefs(1).o)
-  //     )(
-  //       ZIO.fail(new AssertionError("Event refs not sorted by (b, o)"))
-  //     )
-
-  //     // Verify the event hashes match
-  //     _ <- ZIO.when(eventRefs(0).eventHash.hex != createVDR.eventHash.hex)(
-  //       ZIO.fail(new AssertionError("First event hash doesn't match create event"))
-  //     )
-  //   } yield ()
-  // }
-
-  // prismStateFixture.testZLayered("getEventsIdByVDR: empty for non-existent VDR") {
-  //   for {
-  //     state <- ZIO.service[PrismState]
-
-  //     // Query for a non-existent VDR
-  //     fakeVDR = RefVDR("0000000000000000000000000000000000000000000000000000000000000000")
-  //     eventRefs <- state.getEventsIdByVDR(fakeVDR)
-
-  //     // Should return empty sequence
-  //     _ <- ZIO.when(eventRefs.nonEmpty)(
-  //       ZIO.fail(new AssertionError(s"Expected empty sequence, got ${eventRefs.length} events"))
-  //     )
-  //   } yield ()
-  // }
-
-  // // Tests for getEventsForVDR
-  // prismStateFixture.testZLayered("getEventsForVDR: retrieve storage events for VDR") {
-  //   for {
-  //     state <- ZIO.service[PrismState]
-  //     // Clean database before test
-  //     _ <- state match {
-  //       case mongoState: PrismStateMongoDB =>
-  //         (clearCollection(mongoState.collection) *> clearCollection(mongoState.lostCollection))
-  //           .catchAll(_ => ZIO.unit)
-  //       case _ => ZIO.unit
-  //     }
-
-  //     createVDR = aux(1)
-  //     updateVDR1 = aux(2)
-  //     updateVDR2 = aux(3)
-
-  //     // Insert VDR events
-  //     _ <- state.addEvent(createVDR)
-  //     _ <- state.addEvent(updateVDR1)
-  //     _ <- state.addEvent(updateVDR2)
-
-  //     // Get full events for the VDR
-  //     events <- state.getEventsForVDR(VDRUtilsTestExtra.refVDR)
-
-  //     // Should return 3 storage events
-  //     _ <- ZIO.when(events.length != 3)(
-  //       ZIO.fail(new AssertionError(s"Expected 3 storage events, got ${events.length}"))
-  //     )
-
-  //     // Verify first event is CreateStorageEntryOP
-  //     _ <- events.headOption match {
-  //       case Some(event) =>
-  //         event.event match {
-  //           case _: CreateStorageEntryOP => ZIO.unit
-  //           case _                       => ZIO.fail(new AssertionError("First event is not CreateStorageEntryOP"))
-  //         }
-  //       case None => ZIO.fail(new AssertionError("No events returned"))
-  //     }
-
-  //     // Verify remaining events are UpdateStorageEntryOP
-  //     _ <- ZIO.foreach(events.tail) { event =>
-  //       event.event match {
-  //         case _: UpdateStorageEntryOP => ZIO.unit
-  //         case _                       => ZIO.fail(new AssertionError("Event is not UpdateStorageEntryOP"))
-  //       }
-  //     }
-  //   } yield ()
-  // }
-
-  // prismStateFixture.testZLayered("getEventsForVDR: fails for non-existent VDR") {
-  //   for {
-  //     state <- ZIO.service[PrismState]
-
-  //     // Query for a non-existent VDR - should return empty sequence
-  //     fakeVDR = RefVDR("0000000000000000000000000000000000000000000000000000000000000000")
-  //     events <- state.getEventsForVDR(fakeVDR)
-
-  //     _ <- ZIO.when(events.nonEmpty)(
-  //       ZIO.fail(new AssertionError(s"Expected empty sequence, got ${events.length} events"))
-  //     )
-  //   } yield ()
-  // }
 
 }

@@ -133,9 +133,9 @@ case class PrismStateMongoDB(reactiveMongoApi: ReactiveMongoApi) extends PrismSt
     } yield (seqSignedPrismEvent)
   }
 
-  override def getEventsByHash(refHash: EventHash): ZIO[Any, Exception, Option[MySignedPrismEvent[OP]]] =
+  override def getEventByHash(refHash: EventHash): ZIO[Any, Exception, Option[MySignedPrismEvent[OP]]] =
     for {
-      _ <- ZIO.logInfo(s"getEventsByHash $refHash")
+      _ <- ZIO.logInfo(s"getEventByHash $refHash")
       ret <- findEventByHash(refHash)
     } yield ret.map(_.event)
 

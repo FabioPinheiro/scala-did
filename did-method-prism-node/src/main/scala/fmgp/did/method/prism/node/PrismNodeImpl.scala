@@ -112,7 +112,7 @@ case class PrismNodeImpl(state: PrismState, walletConfig: CardanoWalletConfig) e
 
     eventEffect = eventHashEffect.flatMap { eventHash =>
       state
-        .getEventsByHash(eventHash)
+        .getEventByHash(eventHash)
         .map {
           _.map { op =>
             assert(op.opHash == eventHash.hex, s"Event hash mismatch: ${op.opHash} != ${eventHash.hex}")
