@@ -11,10 +11,36 @@
  </div>
 </div>
 <div class="cover">
- <div class="doc"></div>
+ <div class="doc">
+  <p>Read-only interface for querying PRISM blockchain state.</p>
+  <p>This trait provides methods to query the state of PRISM DIDs (Decentralized Identifiers) and VDRs (Verifiable Data Registries) from an event-sourced storage backend. Events represent blockchain operations (create, update, deactivate) that form immutable chains tracked through hash references.</p>
+  <p>==Key Concepts==</p>
+  <p>'''SSI (Self-Sovereign Identity):''' A PRISM DID (e.g., <code>did:prism:xxx</code>) managed through <span data-unresolved-link="" title="Problem linking CreateDidOP: No DRI found for query">CreateDidOP</span>, <span data-unresolved-link="" title="Problem linking UpdateDidOP: No DRI found for query">UpdateDidOP</span>, and <span data-unresolved-link="" title="Problem linking DeactivateDidOP: No DRI found for query">DeactivateDidOP</span> events. SSIs represent identity with keys and services.</p>
+  <p>'''VDR (Verifiable Data Registry):''' Storage entries owned by a DID, managed through <span data-unresolved-link="" title="Problem linking CreateStorageEntryOP: No DRI found for query">CreateStorageEntryOP</span>, <span data-unresolved-link="" title="Problem linking UpdateStorageEntryOP: No DRI found for query">UpdateStorageEntryOP</span>, and <span data-unresolved-link="" title="Problem linking DeactivateStorageEntryOP: No DRI found for query">DeactivateStorageEntryOP</span> events. Used for storing arbitrary data on-chain.</p>
+  <p>'''Event Chains:''' Operations form chains via <code>previousEventHash</code> references. Create operations start chains; update/deactivate operations reference previous events. All events in a chain share the same root hash.</p>
+ </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val state: PrismStateRead = ???
+</span><span line-number="2" class=""><span class="tooltip-container"></span>for {
+</span><span line-number="3" class=""><span class="tooltip-container"></span> events &lt;- state.getEventsForSSI(didSubject)
+</span><span line-number="4" class=""><span class="tooltip-container"></span> ssi &lt;- state.getSSI(didSubject)
+</span><span line-number="5" class=""><span class="tooltip-container"></span> history &lt;- state.getSSIHistory(didSubject)
+</span><span line-number="6" class=""><span class="tooltip-container"></span>} yield (events, ssi, history)
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+     </div>
+    </div>
+   </dd>
    <dt class="body-small">
     Graph
    </dt>
@@ -108,47 +134,164 @@ node8 -> node0;
          <button class="icon-button show-content expand"></button>
          <h4 class="groupHeader h200">Abstract methods</h4>
         </div>
-        <div class="documentableElement" id="getEventsByHash-6c0">
+        <div class="documentableElement" id="getEventByHash-6c0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateRead.html#getEventsByHash-6c0" t="n" class="documentableName ">getEventsByHash</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">refHash</span>: <a href="../prism.html#EventHash-0" t="t">EventHash</a>): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Exception" t="t">Exception</a>, <a href="https://www.scala-lang.org/api/2.13.16/scala/Option.html" t="t">Option</a>[<a href="proto/MySignedPrismEvent.html" t="t">MySignedPrismEvent</a>[<a href="proto/OP.html" t="t">OP</a>]]]
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateRead.html#getEventByHash-6c0" t="n" class="documentableName ">getEventByHash</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">refHash</span>: <a href="../prism.html#EventHash-0" t="t">EventHash</a>): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Exception" t="t">Exception</a>, <a href="https://www.scala-lang.org/api/2.13.16/scala/Option.html" t="t">Option</a>[<a href="proto/MySignedPrismEvent.html" t="t">MySignedPrismEvent</a>[<a href="proto/OP.html" t="t">OP</a>]]]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Gets a specific event by its <a href="../prism.html#EventHash-0">EventHash</a>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Gets a specific event by its <a href="../prism.html#EventHash-0">EventHash</a>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
         </div>
         <div class="documentableElement" id="getEventsIdBySSI-92d">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateRead.html#getEventsIdBySSI-92d" t="n" class="documentableName ">getEventsIdBySSI</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">ssi</span>: <a href="https://doc.did.fmgp.app/api/fmgp/did.html#DIDSubject" t="t">DIDSubject</a>): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <span data-unresolved-link="" t="t">Nothing</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala/collection/immutable/Seq.html" t="t">Seq</a>[<a href="EventRef.html" t="t">EventRef</a>]]
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns event references for a specific SSI DID.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Returns event references for a specific SSI DID.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="getEventsIdByVDR-92d">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateRead.html#getEventsIdByVDR-92d" t="n" class="documentableName ">getEventsIdByVDR</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">id</span>: <a href="../prism.html#RefVDR-0" t="t">RefVDR</a>): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <span data-unresolved-link="" t="t">Nothing</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala/collection/immutable/Seq.html" t="t">Seq</a>[<a href="EventRef.html" t="t">EventRef</a>]]
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns event references for a specific VDR.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Returns event references for a specific VDR.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="ssi2eventsRef-0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateRead.html#ssi2eventsRef-0" t="n" class="documentableName ">ssi2eventsRef</a>: <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <span data-unresolved-link="" t="t">Nothing</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala/collection/immutable/Map.html" t="t">Map</a>[<a href="https://doc.did.fmgp.app/api/fmgp/did.html#DIDSubject" t="t">DIDSubject</a>, <a href="https://www.scala-lang.org/api/2.13.16/scala/collection/immutable/Seq.html" t="t">Seq</a>[<a href="EventRef.html" t="t">EventRef</a>]]]
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns mapping of all SSI DIDs to their event references.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Returns mapping of all SSI DIDs to their event references.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>TODO: make it a Stream of (DIDSubject, Seq[EventRef])</p>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="vdr2eventsRef-0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateRead.html#vdr2eventsRef-0" t="n" class="documentableName ">vdr2eventsRef</a>: <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <span data-unresolved-link="" t="t">Nothing</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala/collection/immutable/Map.html" t="t">Map</a>[<a href="../prism.html#RefVDR-0" t="t">RefVDR</a>, <a href="https://www.scala-lang.org/api/2.13.16/scala/collection/immutable/Seq.html" t="t">Seq</a>[<a href="EventRef.html" t="t">EventRef</a>]]]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns mapping of all VDRs to their event references.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Returns mapping of all VDRs to their event references.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>TODO: make it a Stream of (RefVDR, Seq[EventRef])</p>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
            </div>
           </div>
          </div>
@@ -163,72 +306,286 @@ node8 -> node0;
         </div>
         <div class="documentableElement" id="getEventsForSSI-92d">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateRead.html#getEventsForSSI-92d" t="n" class="documentableName ">getEventsForSSI</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">ssi</span>: <a href="https://doc.did.fmgp.app/api/fmgp/did.html#DIDSubject" t="t">DIDSubject</a>): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Throwable" t="t">Throwable</a>, <a href="https://www.scala-lang.org/api/2.13.16/scala/collection/immutable/Seq.html" t="t">Seq</a>[<a href="proto/MySignedPrismEvent.html" t="t">MySignedPrismEvent</a>[<a href="proto/CreateDidOP.html" t="t">CreateDidOP</a><span t="k"> | </span><a href="proto/UpdateDidOP.html" t="t">UpdateDidOP</a><span t="k"> | </span><a href="proto/DeactivateDidOP.html" t="t">DeactivateDidOP</a>]]]
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Fetches all events in the chain for the given DID.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Fetches all events in the chain for the given DID.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>ZIO effect that may fail with <code>Throwable</code> (RuntimeException if event hash missing or type validation fails) and succeeds with sequence of DID-related <span data-unresolved-link="" title="Problem linking MySignedPrismEvent: No DRI found for query">MySignedPrismEvent</span></p>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="getEventsForVDR-92d">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateRead.html#getEventsForVDR-92d" t="n" class="documentableName ">getEventsForVDR</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">refVDR</span>: <a href="../prism.html#RefVDR-0" t="t">RefVDR</a>): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Throwable" t="t">Throwable</a>, <a href="https://www.scala-lang.org/api/2.13.16/scala/collection/immutable/Seq.html" t="t">Seq</a>[<a href="proto/MySignedPrismEvent.html" t="t">MySignedPrismEvent</a>[<a href="proto/CreateStorageEntryOP.html" t="t">CreateStorageEntryOP</a><span t="k"> | </span><a href="proto/UpdateStorageEntryOP.html" t="t">UpdateStorageEntryOP</a><span t="k"> | </span><a href="proto/DeactivateStorageEntryOP.html" t="t">DeactivateStorageEntryOP</a>]]]
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Fetches all events in the chain for the given VDR reference.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Fetches all events in the chain for the given VDR reference.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               refVDR
+              </dt>
+              <dd class="body-medium">
+               <p>The VDR reference to query</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>ZIO effect that may fail with <code>Throwable</code> (RuntimeException if event hash missing or type validation fails) and succeeds with sequence of storage-related <span data-unresolved-link="" title="Problem linking MySignedPrismEvent: No DRI found for query">MySignedPrismEvent</span></p>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="getSSI-92d">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateRead.html#getSSI-92d" t="n" class="documentableName ">getSSI</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">ssi</span>: <a href="https://doc.did.fmgp.app/api/fmgp/did.html#DIDSubject" t="t">DIDSubject</a>): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Throwable" t="t">Throwable</a>, <a href="SSI.html" t="t">SSI</a>]
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Gets the current SSI state.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Gets the current SSI state.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="getSSIHistory-92d">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateRead.html#getSSIHistory-92d" t="n" class="documentableName ">getSSIHistory</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">ssi</span>: <a href="https://doc.did.fmgp.app/api/fmgp/did.html#DIDSubject" t="t">DIDSubject</a>): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Throwable" t="t">Throwable</a>, <a href="SSIHistory.html" t="t">SSIHistory</a>]
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Gets the full <a href="SSIHistory.html">SSIHistory</a> for a SSI.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Gets the full <a href="SSIHistory.html">SSIHistory</a> for a SSI.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="getVDR-92d">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateRead.html#getVDR-92d" t="n" class="documentableName ">getVDR</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">ref</span>: <a href="../prism.html#RefVDR-0" t="t">RefVDR</a>): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Throwable" t="t">Throwable</a>, <a href="VDR.html" t="t">VDR</a>]
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Gets the <a href="VDR.html">VDR</a> state with full ownership validation.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Gets the <a href="VDR.html">VDR</a> state with full ownership validation.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="lastSyncedBlockEpochSecondNano-0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateRead.html#lastSyncedBlockEpochSecondNano-0" t="n" class="documentableName ">lastSyncedBlockEpochSecondNano</a>: (<a href="https://www.scala-lang.org/api/2.13.16/scala/Long.html" t="t">Long</a>, <a href="https://www.scala-lang.org/api/2.13.16/scala/Int.html" t="t">Int</a>)
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns the last synced block timestamp.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Returns the last synced block timestamp.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>Tuple of (epoch seconds, nanoseconds)</p>
+              </dd>
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>Current implementation returns current time (FIXME: should track actual sync state)</p>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="ssiCount-0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateRead.html#ssiCount-0" t="n" class="documentableName ">ssiCount</a>: <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <span data-unresolved-link="" t="t">Nothing</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala/Int.html" t="t">Int</a>]
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns count of SSI DIDs in the state.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Returns count of SSI DIDs in the state.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>TODO: improve in specific implementations for better performance</p>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="vdrCount-0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateRead.html#vdrCount-0" t="n" class="documentableName ">vdrCount</a>: <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <span data-unresolved-link="" t="t">Nothing</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala/Int.html" t="t">Int</a>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns count of VDRs in the state.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Returns count of VDRs in the state.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>TODO: improve in specific implementations for better performance</p>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
            </div>
           </div>
          </div>

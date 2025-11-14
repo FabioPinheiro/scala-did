@@ -14,10 +14,32 @@
  </div>
 </div>
 <div class="cover">
- <div class="doc"></div>
+ <div class="doc">
+  <p>Writable PRISM state interface extending <a href="PrismStateRead.html">PrismStateRead</a> with event storage capabilities.</p>
+  <p>Adds methods to persist blockchain events to the state backend. Events are added without validation, allowing implementations to handle ordering and chain integrity according to their storage strategy.</p>
+ </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val state: PrismState = ???
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val event: MySignedPrismEvent[CreateDidOP] = ???
+</span><span line-number="3" class=""><span class="tooltip-container"></span>for {
+</span><span line-number="4" class=""><span class="tooltip-container"></span> _ &lt;- state.addEvent(event)
+</span><span line-number="5" class=""><span class="tooltip-container"></span> ssi &lt;- state.getSSI(event.event.didPrism)
+</span><span line-number="6" class=""><span class="tooltip-container"></span>} yield ssi
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+     </div>
+    </div>
+   </dd>
    <dt class="body-small">
     Companion
    </dt>
@@ -121,9 +143,29 @@ node6 -> node0;
         </div>
         <div class="documentableElement" id="addEvent-fffff6de">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismState.html#addEvent-fffff6de" t="n" class="documentableName ">addEvent</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">event</span>: <a href="proto/MySignedPrismEvent.html" t="t">MySignedPrismEvent</a>[<a href="proto/OP.html" t="t">OP</a>]): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Exception" t="t">Exception</a>, <a href="https://www.scala-lang.org/api/2.13.16/scala/Unit.html" t="t">Unit</a>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Adds a signed PRISM event to the state.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Adds a signed PRISM event to the state.</p>
+              <p>Events are indexed without validation. Implementations may handle out-of-order events differently.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
@@ -138,9 +180,29 @@ node6 -> node0;
         </div>
         <div class="documentableElement" id="addMaybeEvent-fffff58d">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismState.html#addMaybeEvent-fffff58d" t="n" class="documentableName ">addMaybeEvent</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">maybeEvent</span>: <a href="proto/MaybeEvent.html" t="t">MaybeEvent</a>[<a href="proto/OP.html" t="t">OP</a>]): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Exception" t="t">Exception</a>, <a href="https://www.scala-lang.org/api/2.13.16/scala/Unit.html" t="t">Unit</a>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Adds an event after filtering out invalid ones.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Adds an event after filtering out invalid ones.</p>
+              <p>Only valid <span data-unresolved-link="" title="Problem linking MySignedPrismEvent: No DRI found for query">MySignedPrismEvent</span> instances are added; invalid objects are silently ignored.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
@@ -167,10 +229,21 @@ node6 -> node0;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Fetches all events in the chain for the given DID.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Fetches all events in the chain for the given DID.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>ZIO effect that may fail with <code>Throwable</code> (RuntimeException if event hash missing or type validation fails) and succeeds with sequence of DID-related <span data-unresolved-link="" title="Problem linking MySignedPrismEvent: No DRI found for query">MySignedPrismEvent</span></p>
+              </dd>
               <dt class="body-small">
                Inherited from:
               </dt>
@@ -197,10 +270,30 @@ node6 -> node0;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Fetches all events in the chain for the given VDR reference.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Fetches all events in the chain for the given VDR reference.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               refVDR
+              </dt>
+              <dd class="body-medium">
+               <p>The VDR reference to query</p>
+              </dd>
+             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>ZIO effect that may fail with <code>Throwable</code> (RuntimeException if event hash missing or type validation fails) and succeeds with sequence of storage-related <span data-unresolved-link="" title="Problem linking MySignedPrismEvent: No DRI found for query">MySignedPrismEvent</span></p>
+              </dd>
               <dt class="body-small">
                Inherited from:
               </dt>
@@ -227,8 +320,13 @@ node6 -> node0;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Gets the current SSI state.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Gets the current SSI state.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -257,8 +355,13 @@ node6 -> node0;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Gets the full <a href="SSIHistory.html">SSIHistory</a> for a SSI.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Gets the full <a href="SSIHistory.html">SSIHistory</a> for a SSI.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -287,8 +390,13 @@ node6 -> node0;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Gets the <a href="VDR.html">VDR</a> state with full ownership validation.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Gets the <a href="VDR.html">VDR</a> state with full ownership validation.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -317,10 +425,31 @@ node6 -> node0;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns the last synced block timestamp.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Returns the last synced block timestamp.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>Tuple of (epoch seconds, nanoseconds)</p>
+              </dd>
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>Current implementation returns current time (FIXME: should track actual sync state)</p>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Inherited from:
               </dt>
@@ -347,10 +476,25 @@ node6 -> node0;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns count of SSI DIDs in the state.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Returns count of SSI DIDs in the state.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>TODO: improve in specific implementations for better performance</p>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Inherited from:
               </dt>
@@ -377,10 +521,25 @@ node6 -> node0;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns count of VDRs in the state.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Returns count of VDRs in the state.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>TODO: improve in specific implementations for better performance</p>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Inherited from:
               </dt>
@@ -401,12 +560,12 @@ node6 -> node0;
          <button class="icon-button show-content expand"></button>
          <h4 class="groupHeader h200">Inherited and Abstract methods</h4>
         </div>
-        <div class="documentableElement" id="getEventsByHash-6c0" data-f-inherited="PrismStateRead">
+        <div class="documentableElement" id="getEventByHash-6c0" data-f-inherited="PrismStateRead">
          <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismState.html#getEventsByHash-6c0" t="n" class="documentableName ">getEventsByHash</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">refHash</span>: <a href="../prism.html#EventHash-0" t="t">EventHash</a>): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Exception" t="t">Exception</a>, <a href="https://www.scala-lang.org/api/2.13.16/scala/Option.html" t="t">Option</a>[<a href="proto/MySignedPrismEvent.html" t="t">MySignedPrismEvent</a>[<a href="proto/OP.html" t="t">OP</a>]]]
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismState.html#getEventByHash-6c0" t="n" class="documentableName ">getEventByHash</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">refHash</span>: <a href="../prism.html#EventHash-0" t="t">EventHash</a>): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Exception" t="t">Exception</a>, <a href="https://www.scala-lang.org/api/2.13.16/scala/Option.html" t="t">Option</a>[<a href="proto/MySignedPrismEvent.html" t="t">MySignedPrismEvent</a>[<a href="proto/OP.html" t="t">OP</a>]]]
            </div>
           </div>
          </div>
@@ -415,15 +574,20 @@ node6 -> node0;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Gets a specific event by its <a href="../prism.html#EventHash-0">EventHash</a>.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Gets a specific event by its <a href="../prism.html#EventHash-0">EventHash</a>.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
                Inherited from:
               </dt>
               <dd class="body-medium">
-               <a href="PrismStateRead.html#getEventsByHash-6c0">PrismStateRead</a>
+               <a href="PrismStateRead.html#getEventByHash-6c0">PrismStateRead</a>
               </dd>
              </dl>
             </div>
@@ -445,8 +609,13 @@ node6 -> node0;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns event references for a specific SSI DID.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Returns event references for a specific SSI DID.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -475,8 +644,13 @@ node6 -> node0;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns event references for a specific VDR.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Returns event references for a specific VDR.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -505,10 +679,25 @@ node6 -> node0;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns mapping of all SSI DIDs to their event references.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Returns mapping of all SSI DIDs to their event references.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>TODO: make it a Stream of (DIDSubject, Seq[EventRef])</p>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Inherited from:
               </dt>
@@ -535,10 +724,25 @@ node6 -> node0;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns mapping of all VDRs to their event references.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Returns mapping of all VDRs to their event references.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>TODO: make it a Stream of (RefVDR, Seq[EventRef])</p>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Inherited from:
               </dt>

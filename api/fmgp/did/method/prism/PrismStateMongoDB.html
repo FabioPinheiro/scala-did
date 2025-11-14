@@ -11,10 +11,65 @@
  </div>
 </div>
 <div class="cover">
- <div class="doc"></div>
+ <div class="doc">
+  <p>MongoDB-backed implementation of <a href="PrismState.html">PrismState</a> for production use.</p>
+  <p>This implementation uses a sophisticated two-collection strategy to Debug out-of-order blockchain events:</p>
+  <p>==Collections==</p>
+  <p>'''Main Collection (events):''' Stores events with known parent relationships. Each event is stored with a <code>rootRef</code> field that tracks the root event (Create operation) of its chain. This enables efficient querying of all events for a DID or VDR by querying on the <code>rootRef</code> field.</p>
+  <p>'''Lost Collection (events_lost):''' Stores orphaned events whose parent (referenced via <code>previousEventHash</code>) has not yet been seen. This handles the case where Update or Deactivate operations arrive before their corresponding Create operation.</p>
+  <p>==Event Chain Tracking==</p>
+  <p>Events form chains through <code>previousEventHash</code> references:</p>
+  <ul>
+   <li>Create operations (CreateDidOP, CreateStorageEntryOP) start chains and have no previous hash</li>
+   <li>Update/Deactivate operations reference the previous event's hash</li>
+   <li>All events in a chain share the same <code>rootRef</code> (the hash of the Create event)</li>
+  </ul>
+  <p>When adding an event:</p>
+  <ol>
+   <li>If it has no <code>previousEventHash</code>, it's inserted with <code>rootRef = eventHash</code></li>
+   <li>If it has a <code>previousEventHash</code>, we search for the parent event</li>
+   <li>If parent exists, event is inserted with parent's <code>rootRef</code></li>
+   <li>If parent is missing, event goes to lost collection for potential later recovery</li>
+  </ol>
+ </div>
  <section id="attributes">
+  <h2 class="h500">Value parameters</h2>
+  <dl class="attributes">
+   <dt class="body-small">
+    reactiveMongoApi
+   </dt>
+   <dd class="body-medium">
+    <p>MongoDB connection wrapper using ReactiveMongo driver</p>
+   </dd>
+  </dl>
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    Constructor
+   </dt>
+   <dd class="body-medium">
+    <p>Creates a MongoDB-backed PRISM state</p>
+   </dd>
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val mongoApi: ReactiveMongoApi = ???
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val state = PrismStateMongoDB(mongoApi)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>for {
+</span><span line-number="4" class=""><span class="tooltip-container"></span> _ &lt;- state.addEvent(createEvent)
+</span><span line-number="5" class=""><span class="tooltip-container"></span> _ &lt;- state.addEvent(updateEvent)
+</span><span line-number="6" class=""><span class="tooltip-container"></span> ssi &lt;- state.getSSI(didSubject)
+</span><span line-number="7" class=""><span class="tooltip-container"></span>} yield ssi
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+     </div>
+    </div>
+   </dd>
    <dt class="body-small">
     Graph
    </dt>
@@ -120,10 +175,34 @@ node8 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Adds event to MongoDB with automatic rootRef tracking.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Adds event to MongoDB with automatic rootRef tracking.</p>
+              <p>Implements two-collection strategy:</p>
+              <ul>
+               <li>Events with no <code>previousEventHash</code> (Create ops) go to main collection with <code>rootRef = eventHash</code></li>
+               <li>Events with <code>previousEventHash</code> look up the parent: 
+                <ul>
+                 <li>If parent exists, event goes to main collection with parent's <code>rootRef</code></li>
+                 <li>If parent missing, event goes to lost collection</li>
+                </ul></li>
+              </ul>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>VoidOP operations are not supported and will fail with RuntimeException</p>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Definition Classes
               </dt>
@@ -140,28 +219,10 @@ node8 -> node2;
         </div>
         <div class="documentableElement" id="collection-0">
          <div class="documentableElement-expander">
-          <div class="header monospace mono-medium">
-           <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateMongoDB.html#collection-0" t="n" class="documentableName ">collection</a>: <span data-unresolved-link="" t="t">IO</span>[<a href="mongo/StorageCollection.html" t="t">StorageCollection</a>, <a href="http://reactivemongo.org/release/1.x/api/reactivemongo/api/bson/collection.html#BSONCollection" t="t">BSONCollection</a>]
-           </div>
-          </div>
-         </div>
-        </div>
-        <div class="documentableElement" id="collectionName-0">
-         <div class="documentableElement-expander">
-          <div class="header monospace mono-medium">
-           <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateMongoDB.html#collectionName-0" t="n" class="documentableName ">collectionName</a>: <a href="https://www.scala-lang.org/api/2.13.16/scala/Predef$.html#String" t="t">String</a>
-           </div>
-          </div>
-         </div>
-        </div>
-        <div class="documentableElement" id="getEventsByHash-6c0" data-f-keywords="override">
-         <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">override </span></span><span class="kind"><span t="k">def </span></span><a href="PrismStateMongoDB.html#getEventsByHash-6c0" t="n" class="documentableName ">getEventsByHash</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">refHash</span>: <a href="../prism.html#EventHash-0" t="t">EventHash</a>): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Exception" t="t">Exception</a>, <a href="https://www.scala-lang.org/api/2.13.16/scala/Option.html" t="t">Option</a>[<a href="proto/MySignedPrismEvent.html" t="t">MySignedPrismEvent</a>[<a href="proto/OP.html" t="t">OP</a>]]]
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateMongoDB.html#collection-0" t="n" class="documentableName ">collection</a>: <span data-unresolved-link="" t="t">IO</span>[<a href="mongo/StorageCollection.html" t="t">StorageCollection</a>, <a href="http://reactivemongo.org/release/1.x/api/reactivemongo/api/bson/collection.html#BSONCollection" t="t">BSONCollection</a>]
            </div>
           </div>
          </div>
@@ -170,8 +231,69 @@ node8 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns the main events MongoDB collection.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Returns the main events MongoDB collection.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="collectionName-0">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateMongoDB.html#collectionName-0" t="n" class="documentableName ">collectionName</a>: <a href="https://www.scala-lang.org/api/2.13.16/scala/Predef$.html#String" t="t">String</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Name of the main events collection.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Name of the main events collection.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="getEventByHash-6c0" data-f-keywords="override">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">override </span></span><span class="kind"><span t="k">def </span></span><a href="PrismStateMongoDB.html#getEventByHash-6c0" t="n" class="documentableName ">getEventByHash</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">refHash</span>: <a href="../prism.html#EventHash-0" t="t">EventHash</a>): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Exception" t="t">Exception</a>, <a href="https://www.scala-lang.org/api/2.13.16/scala/Option.html" t="t">Option</a>[<a href="proto/MySignedPrismEvent.html" t="t">MySignedPrismEvent</a>[<a href="proto/OP.html" t="t">OP</a>]]]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Gets a specific event by its <a href="../prism.html#EventHash-0">EventHash</a>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Gets a specific event by its <a href="../prism.html#EventHash-0">EventHash</a>.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -202,10 +324,21 @@ node8 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Fetches all events in the chain for the given DID.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Fetches all events in the chain for the given DID.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>ZIO effect that may fail with <code>Throwable</code> (RuntimeException if event hash missing or type validation fails) and succeeds with sequence of DID-related <span data-unresolved-link="" title="Problem linking MySignedPrismEvent: No DRI found for query">MySignedPrismEvent</span></p>
+              </dd>
               <dt class="body-small">
                Definition Classes
               </dt>
@@ -234,10 +367,30 @@ node8 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Fetches all events in the chain for the given VDR reference.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Fetches all events in the chain for the given VDR reference.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               refVDR
+              </dt>
+              <dd class="body-medium">
+               <p>The VDR reference to query</p>
+              </dd>
+             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>ZIO effect that may fail with <code>Throwable</code> (RuntimeException if event hash missing or type validation fails) and succeeds with sequence of storage-related <span data-unresolved-link="" title="Problem linking MySignedPrismEvent: No DRI found for query">MySignedPrismEvent</span></p>
+              </dd>
               <dt class="body-small">
                Definition Classes
               </dt>
@@ -266,8 +419,13 @@ node8 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns event references for a specific SSI DID.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Returns event references for a specific SSI DID.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -298,8 +456,13 @@ node8 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns event references for a specific VDR.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Returns event references for a specific VDR.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -318,18 +481,56 @@ node8 -> node2;
         </div>
         <div class="documentableElement" id="lostCollection-0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateMongoDB.html#lostCollection-0" t="n" class="documentableName ">lostCollection</a>: <span data-unresolved-link="" t="t">IO</span>[<a href="mongo/StorageCollection.html" t="t">StorageCollection</a>, <a href="http://reactivemongo.org/release/1.x/api/reactivemongo/api/bson/collection.html#BSONCollection" t="t">BSONCollection</a>]
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns the lost events MongoDB collection.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Returns the lost events MongoDB collection.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="lostCollectionName-0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="PrismStateMongoDB.html#lostCollectionName-0" t="n" class="documentableName ">lostCollectionName</a>: <a href="https://www.scala-lang.org/api/2.13.16/scala/Predef$.html#String" t="t">String</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Name of the lost/orphaned events collection.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Name of the lost/orphaned events collection.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
@@ -348,10 +549,25 @@ node8 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns mapping of all SSI DIDs to their event references.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Returns mapping of all SSI DIDs to their event references.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>TODO: make it a Stream of (DIDSubject, Seq[EventRef])</p>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Definition Classes
               </dt>
@@ -380,10 +596,25 @@ node8 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns mapping of all VDRs to their event references.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Returns mapping of all VDRs to their event references.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>TODO: make it a Stream of (RefVDR, Seq[EventRef])</p>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Definition Classes
               </dt>
@@ -420,8 +651,14 @@ node8 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Adds an event after filtering out invalid ones.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Adds an event after filtering out invalid ones.</p>
+              <p>Only valid <span data-unresolved-link="" title="Problem linking MySignedPrismEvent: No DRI found for query">MySignedPrismEvent</span> instances are added; invalid objects are silently ignored.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -450,8 +687,13 @@ node8 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Gets the current SSI state.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Gets the current SSI state.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -480,8 +722,13 @@ node8 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Gets the full <a href="SSIHistory.html">SSIHistory</a> for a SSI.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Gets the full <a href="SSIHistory.html">SSIHistory</a> for a SSI.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -510,8 +757,13 @@ node8 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Gets the <a href="VDR.html">VDR</a> state with full ownership validation.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Gets the <a href="VDR.html">VDR</a> state with full ownership validation.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -540,10 +792,31 @@ node8 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns the last synced block timestamp.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Returns the last synced block timestamp.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>Tuple of (epoch seconds, nanoseconds)</p>
+              </dd>
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>Current implementation returns current time (FIXME: should track actual sync state)</p>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Inherited from:
               </dt>
@@ -630,10 +903,25 @@ node8 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns count of SSI DIDs in the state.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Returns count of SSI DIDs in the state.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>TODO: improve in specific implementations for better performance</p>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Inherited from:
               </dt>
@@ -660,10 +948,25 @@ node8 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns count of VDRs in the state.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Returns count of VDRs in the state.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>TODO: improve in specific implementations for better performance</p>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Inherited from:
               </dt>
@@ -683,4 +986,4 @@ node8 -> node2;
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Concrete-methods">Concrete methods</a></li><li><a href="#Inherited-methods">Inherited methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Value parameters</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Concrete-methods">Concrete methods</a></li><li><a href="#Inherited-methods">Inherited methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
