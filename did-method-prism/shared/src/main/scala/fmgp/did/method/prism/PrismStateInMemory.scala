@@ -16,6 +16,17 @@ object PrismStateInMemoryData {
   given JsonEncoder[PrismStateInMemoryData] = DeriveJsonEncoder.gen[PrismStateInMemoryData]
 }
 
+/** Data container for in-memory PRISM state storage.
+  *
+  * @param opHash2op
+  *   Map of event hash (hex string) to signed events
+  * @param tx2eventRef
+  *   Map of transaction ID to event references
+  * @param ssi2eventRef
+  *   Map of DID subjects to their event references
+  * @param vdr2eventRef
+  *   Map of VDR references to their event references
+  */
 case class PrismStateInMemoryData(
     opHash2op: Map[String, MySignedPrismEvent[OP]], // TODO type EventHash
     tx2eventRef: Map[String, Seq[EventRef]],
@@ -24,12 +35,47 @@ case class PrismStateInMemoryData(
 )
 
 object PrismStateInMemory {
+
+  /** Creates an empty in-memory PRISM state. */
   def empty: ZIO[Any, Nothing, PrismStateInMemory] =
     Ref.make(PrismStateInMemoryData(Map.empty, Map.empty, Map.empty, Map.empty)).map(e => PrismStateInMemory(e))
   // given JsonDecoder[PrismStateInMemory] = DeriveJsonDecoder.gen[PrismStateInMemory]
   // given JsonEncoder[PrismStateInMemory] = DeriveJsonEncoder.gen[PrismStateInMemory]
 }
 
+/** Thread-safe in-memory implementation of [[PrismState]] using ZIO Ref.
+  *
+  * Stores all events and indices in memory using immutable maps. Suitable for testing, development, and small datasets
+  * where persistence is not required. Not recommended for production use with large datasets.
+  *
+  * ==Event Chain Tracking==
+  *
+  * This implementation tracks event chains by recursively following `previousEventHash` references:
+  *   - Create operations establish the root of a chain
+  *   - Update/Deactivate operations reference previous events
+  *   - Helper methods `ssiFromPreviousEventHash` and `vdrFromPreviousEventHash` traverse chains to find roots
+  *
+  * ==Thread Safety==
+  *
+  * All state updates use ZIO [[Ref]] for lock-free, thread-safe mutations. Multiple concurrent operations are safely
+  * handled without explicit locking.
+  *
+  * @constructor
+  *   Creates in-memory state with ZIO Ref
+  * @param ref
+  *   ZIO Ref containing mutable [[PrismStateInMemoryData]]
+  *
+  * @example
+  *   {{{
+  * for {
+  *   state <- PrismStateInMemory.empty
+  *   _ <- state.addEvent(createEvent)
+  *   _ <- state.addEvent(updateEvent)
+  *   ssi <- state.getSSI(didSubject)
+  *   docs <- state.didDocuments
+  * } yield (ssi, docs)
+  *   }}}
+  */
 case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismState {
 
   override def ssi2eventsRef: ZIO[Any, Nothing, Map[DIDSubject, Seq[EventRef]]] =
@@ -41,7 +87,17 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
   override def getEventsIdByVDR(id: RefVDR): ZIO[Any, Nothing, Seq[EventRef]] =
     ref.get.map(_.vdr2eventRef.get(id).getOrElse(Seq.empty))
 
-  // @scala.annotation.tailrec // TODO fix Cannot rewrite recursive call (ssiFromPreviousEventHash): it is not in tail positionbloop
+  /** Recursively traverses event chain to find the root SSI hash.
+    *
+    * Follows `previousEventHash` references backward through Update operations until reaching the Create operation.
+    *
+    * @param previousHash
+    *   The event hash to start traversal from
+    * @return
+    *   ZIO effect with optional root hash (hash of CreateDidOP)
+    * @note
+    *   TODO: @scala.annotation.tailrec - Error 'Cannot rewrite recursive call - not in tail position'
+    */
   final def ssiFromPreviousEventHash(previousHash: String): ZIO[Any, Nothing, Option[String]] = ref.get.flatMap {
     _.opHash2op.get(previousHash) match
       case None             => ZIO.succeed(None)
@@ -53,7 +109,13 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
           case _                                              => ZIO.succeed(None)
   }
 
-  // @scala.annotation.tailrec //TODO
+  /** Recursively traverses event chain to find the root VDR reference.
+    *
+    * Follows `previousEventHash` references backward through Update operations until reaching the Create operation.
+    *
+    * @note
+    *   TODO: @scala.annotation.tailrec - Error 'Cannot rewrite recursive call - not in tail position'
+    */
   final def vdrFromPreviousEventHash(previousHash: String): ZIO[Any, Nothing, Option[RefVDR]] = ref.get.flatMap {
     _.opHash2op.get(previousHash) match
       case None             => ZIO.succeed(None)
@@ -206,6 +268,10 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
       }
     }
 
+  /** Constructs SSI states for all DIDs in memory.
+    *
+    * Builds resolved [[SSI]] objects by folding events for each DID in order.
+    */
   def makeSSI: ZIO[Any, Nothing, Seq[SSI]] = ref.get.map { data =>
     data.ssi2eventRef.map { (ssi, ops) =>
       ops.foldLeft(SSI.init(ssi)) { case (tmpSSI, opId) =>
@@ -216,6 +282,7 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
     }.toSeq
   }
 
+  /** Extracts DID Documents from all SSI states. */
   def didDocuments: ZIO[Any, Nothing, Seq[DIDDocument]] = makeSSI.map(_.flatMap(_.didDocument))
 
 }
