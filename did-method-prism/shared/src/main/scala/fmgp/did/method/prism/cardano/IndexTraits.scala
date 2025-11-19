@@ -22,7 +22,13 @@ trait PrismEventIndex extends PrismBlockIndex {
   def prismEventIndex: Int = o
 }
 
-/** Like EventRef */
+/** Like EventRef
+  *
+  * @param b
+  *   Index relative to the Cardano Trasation with PRISM_LABE
+  * @param o
+  *   Index relative to the PrismBlock
+  */
 case class EventCursor(b: Int, o: Int) extends PrismEventIndex {
   def tx = s"EventCursor:$b;$o" // FIXME
 }

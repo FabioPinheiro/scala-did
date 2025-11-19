@@ -12,7 +12,10 @@ import fmgp.did.DID
 
 sealed trait CMD extends Product with Serializable
 object CMD {
-  final case class Indexer(workdir: Path, mBlockfrostConfig: Option[BlockfrostConfig]) extends CMD
+  sealed trait Indexer extends CMD
+  final case class IndexerInMemory(workdir: Path, mBlockfrostConfig: Option[BlockfrostConfig]) extends CMD.Indexer
+  final case class IndexerMongoDB(utlMongoConnection: String, blockfrostConfig: BlockfrostConfig) extends CMD.Indexer
+
   final case class Version() extends CMD
   final case class ConfigCMD(config: Setup, createFlag: Boolean) extends CMD
 

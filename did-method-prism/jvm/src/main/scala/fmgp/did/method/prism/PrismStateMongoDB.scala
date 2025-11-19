@@ -9,10 +9,28 @@ import fmgp.did.method.prism.proto.*
 import fmgp.did.method.prism.mongo.*
 import fmgp.did.method.prism.mongo.DataModels.given
 
+import reactivemongo.api.{AsyncDriver, Cursor, CursorProducer}
 import reactivemongo.api.bson.*
 import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.api.commands.WriteResult
-import reactivemongo.api.{Cursor, CursorProducer}
+import fmgp.did.method.prism.cardano.EventCursor
+import reactivemongo.core.errors.DatabaseException
+
+object PrismStateMongoDB {
+
+  /** makeLayer create a PrismStateMongoDB from a mongoDBConnection
+    *
+    * {{{
+    * val mongoDBConnection = "mongodb+srv://fabio:ZiT61pB5@cluster0.bgnyyy1.mongodb.net/test"
+    * AsyncDriverResource.layer >>> PrismStateMongoDB.makeLayer(mongoDBConnection)
+    * }}}
+    */
+  def makeLayer(url: String): ZLayer[AsyncDriver, Throwable, PrismState] = {
+    // Z.empty >>>
+    //   AsyncDriverResource.layer >>>
+    ReactiveMongoApi.layer(url) >>> // "mongodb+srv://fabio:ZiT61pB5@cluster0.bgnyyy1.mongodb.net/test"
+      ZLayer.fromZIO(ZIO.service[ReactiveMongoApi].map(reactiveMongoApi => PrismStateMongoDB(reactiveMongoApi)))
+  }
+}
 
 /** MongoDB-backed implementation of [[PrismState]] for production use.
   *
@@ -58,6 +76,33 @@ import reactivemongo.api.{Cursor, CursorProducer}
   *   }}}
   */
 case class PrismStateMongoDB(reactiveMongoApi: ReactiveMongoApi) extends PrismState {
+
+  /** Returns the cursor of the latest event stored in the database.
+    *
+    * Uses MongoDB sort to efficiently find the maximum EventCursor by (b, o) indices. If no events exist, returns
+    * EventCursor.init (-1, -1).
+    */
+  override def cursor: ZIO[Any, Nothing, cardano.EventCursor] = {
+    (for {
+      coll <- collection.mapError(ex => StorageException(ex))
+      mEventCursor <- ZIO
+        .fromFuture(implicit ec =>
+          coll
+            .find(selector = BSONDocument.empty)
+            .sort(BSONDocument("b" -> -1, "o" -> -1)) // Sort by b desc, then o desc
+            .one[EventCursor]
+        )
+      lostColl <- lostCollection.mapError(ex => StorageException(ex))
+      mLostEventCursor <- ZIO
+        .fromFuture(implicit ec =>
+          lostColl
+            .find(selector = BSONDocument.empty)
+            .sort(BSONDocument("b" -> -1, "o" -> -1)) // Sort by b desc, then o desc
+            .one[EventCursor]
+        )
+      latestCursor = (Seq(cardano.EventCursor.init) ++ mEventCursor ++ mLostEventCursor).sorted.last
+    } yield latestCursor).orDie // Convert all errors to defects since return type is Nothing
+  }
 
   /** Name of the main events collection. */
   def collectionName: String = "events"
@@ -200,18 +245,18 @@ case class PrismStateMongoDB(reactiveMongoApi: ReactiveMongoApi) extends PrismSt
     */
   override def addEvent(event: MySignedPrismEvent[OP]): ZIO[Any, Exception, Unit] = {
     for {
-      _ <- ZIO.logInfo(s"inserting event '${event.eventHash}'")
+      _ <- ZIO.logInfo(s"inserting event '${event.eventHash.hex}'")
       coll <- collection
         .mapError(ex => StorageException(ex))
       maybePreviousEventHash <- event.event match
-        case VoidOP(reason)              => ZIO.fail(new RuntimeException(s"VoidOP not supported: $reason"))
-        case e: CreateDidOP              => ZIO.none
+        case VoidOP(reason)              => ZIO.none // ZIO.fail(new RuntimeException(s"VoidOP not supported: $reason"))
+        case e: CreateDidOP              => ZIO.none // Create has no previousEventHash
         case e: UpdateDidOP              => ZIO.some(EventHash.fromHex(e.previousEventHash))
-        case e: IssueCredentialBatchOP   => ZIO.none
-        case e: RevokeCredentialsOP      => ZIO.none
-        case e: ProtocolVersionUpdateOP  => ZIO.none
+        case e: IssueCredentialBatchOP   => ZIO.none // TODO
+        case e: RevokeCredentialsOP      => ZIO.none // TODO
+        case e: ProtocolVersionUpdateOP  => ZIO.none // TODO
         case e: DeactivateDidOP          => ZIO.some(EventHash.fromHex(e.previousEventHash))
-        case e: CreateStorageEntryOP     => ZIO.none
+        case e: CreateStorageEntryOP     => ZIO.none // Create has no previousEventHash
         case e: UpdateStorageEntryOP     => ZIO.some(EventHash.fromHex(e.previousEventHash))
         case e: DeactivateStorageEntryOP => ZIO.some(EventHash.fromHex(e.previousEventHash))
       _ <- maybePreviousEventHash match
@@ -270,12 +315,18 @@ case class PrismStateMongoDB(reactiveMongoApi: ReactiveMongoApi) extends PrismSt
     } yield allRelatedEvents.toSeq
 
   /** Inserts event with rootRef into main collection. */
-  private[prism] def insertEvent(event: EventWithRootRef): ZIO[Any, StorageException, Unit] =
+  private[prism] def insertEvent(eventWithRootRef: EventWithRootRef): ZIO[Any, StorageException, Unit] =
     for {
       coll <- collection.mapError(ex => StorageException(ex))
       insertResult <- ZIO
-        .fromFuture(implicit ec => coll.insert.one(event))
-        .tapError(err => ZIO.logError(s"Fail to insert event:  ${err.getMessage}"))
+        .fromFuture(implicit ec => coll.insert.one(eventWithRootRef))
+        .catchSome {
+          case obj: DatabaseException if obj.code.contains(11000) => // 'E11000 duplicate key error collection
+            ZIO.logWarning(
+              s"E11000 duplicate key when inserting ${eventWithRootRef.event.eventCursor}:'${eventWithRootRef.event.eventHash.hex}'"
+            )
+        }
+        .tapError(err => ZIO.logError(s"Fail to insert event: ${err.getMessage}"))
         .mapError(ex => StorageException(StorageThrowable(ex)))
     } yield ()
 
@@ -288,7 +339,13 @@ case class PrismStateMongoDB(reactiveMongoApi: ReactiveMongoApi) extends PrismSt
       coll <- lostCollection.mapError(ex => StorageException(ex))
       insertResult <- ZIO
         .fromFuture(implicit ec => coll.insert.one(event))
-        .tapError(err => ZIO.logError(s"fail to insert in lost colletion:  ${err.getMessage}"))
+        .catchSome {
+          case obj: DatabaseException if obj.code.contains(11000) => // 'E11000 duplicate key error collection
+            ZIO.logWarning(
+              s"E11000 duplicate key when inserting ${event.eventCursor}:'${event.eventHash.hex}'"
+            )
+        }
+        .tapError(err => ZIO.logError(s"fail to insert in lost colletion: ${err.getMessage}"))
         .mapError(ex => StorageException(StorageThrowable(ex)))
     } yield ()
 }

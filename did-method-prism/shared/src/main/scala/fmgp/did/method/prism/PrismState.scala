@@ -6,6 +6,7 @@ import fmgp.did.method.prism._
 import fmgp.did.DIDSubject
 import fmgp.did.method.prism.RefVDR
 import fmgp.did.method.prism.proto._
+import fmgp.did.method.prism.cardano.EventCursor
 
 /** Read-only interface for querying PRISM blockchain state.
   *
@@ -47,6 +48,9 @@ trait PrismStateRead {
     val now = java.time.Instant.now // FIXME
     (now.getEpochSecond, now.getNano)
   }
+
+  /** @return EventCursor of the latest Event */
+  def cursor: ZIO[Any, Nothing, EventCursor]
 
   /** Returns mapping of all SSI DIDs to their event references.
     *

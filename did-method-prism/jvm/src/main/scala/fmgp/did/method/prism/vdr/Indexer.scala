@@ -12,6 +12,7 @@ import fmgp.did._
 import fmgp.did.method.prism._
 import fmgp.did.method.prism.cardano._
 import fmgp.did.method.prism.proto._
+import fmgp.did.method.prism.vdr.IndexerUtils.EventCounter
 
 /** Indexer
   *
@@ -174,7 +175,7 @@ object Indexer extends ZIOAppDefault {
     }
     .map(ZLayer.succeed _)
 
-  def indexerJob = for {
+  def indexerJobFS = for {
     indexerConfig <- ZIO.service[IndexerConfig]
     _ <- ZIO.log(s"Check the LastTransactionIndexStored")
     chunkFilesBeforeStart <- findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath)
@@ -277,12 +278,33 @@ object Indexer extends ZIOAppDefault {
       .run(ZSink.count)
   } yield ()
 
+  def indexerJobDB: ZIO[BlockfrostConfig & PrismState, Throwable, EventCounter] = for {
+    state <- ZIO.service[PrismState]
+    blockfrostConfig <- ZIO.service[BlockfrostConfig]
+    cursor <- state.cursor
+    nextMetadateIndex = cursor.b + 1
+    cardinalityOfEntries = nextMetadateIndex + 1
+    nextPageIndex = cardinalityOfEntries / 100
+    _ <- ZIO.log(s"API calls start: nextPageIndex=$nextPageIndex; nextMetadateIndex=$nextMetadateIndex")
+
+    streamJob =
+      metadataFromCBORAPI(
+        blockfrostConfig = blockfrostConfig,
+        pageJump = nextPageIndex,
+      )
+        .filter(_.index >= nextMetadateIndex) // .drop(nextItemIndex + 1)
+        .via(IndexerUtils.pipelineTransformCardanoMetadata2Events >>> IndexerUtils.pipelinePrismState)
+        .run(IndexerUtils.countEvents)
+
+    eventCounter <- streamJob.debug
+  } yield eventCounter
+
   override val run = {
     for {
       _ <- indexerLogo
       indexerConfigZLayer <- makeIndexerConfigZLayerFromArgs
       prismStateZLayer = ZLayer(PrismStateInMemory.empty)
-      _ <- indexerJob.provideLayer(indexerConfigZLayer ++ prismStateZLayer)
+      _ <- indexerJobFS.provideLayer(indexerConfigZLayer ++ prismStateZLayer)
     } yield ()
   }
 

@@ -78,6 +78,8 @@ object PrismStateInMemory {
   */
 case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismState {
 
+  def cursor: ZIO[Any, Nothing, cardano.EventCursor] = ??? // TODO
+
   override def ssi2eventsRef: ZIO[Any, Nothing, Map[DIDSubject, Seq[EventRef]]] =
     ref.get.map(_.ssi2eventRef)
 

@@ -13,6 +13,8 @@ case class PrismStateHTTP(
       "https://raw.githubusercontent.com/FabioPinheiro/prism-vdr/refs/heads/main/mainnet/events",
 ) extends PrismStateRead {
 
+  def cursor: ZIO[Any, Nothing, cardano.EventCursor] = ???
+
   def ssi2eventsRef: ZIO[Any, Nothing, Map[DIDSubject, Seq[EventRef]]] = ???
   def vdr2eventsRef: ZIO[Any, Nothing, Map[RefVDR, Seq[EventRef]]] = ???
 

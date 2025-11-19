@@ -2,6 +2,7 @@ package fmgp.did.method.prism.mongo
 
 import fmgp.did.DIDSubject
 import fmgp.did.method.prism.EventHash
+import fmgp.did.method.prism.cardano.EventCursor
 import fmgp.did.method.prism.proto.MySignedPrismEvent
 import fmgp.did.method.prism.proto.OP
 import fmgp.util.bytes2Hex
@@ -97,5 +98,8 @@ object DataModels {
       } yield EventWithRootRef(ref, MySignedPrismEvent[OP](tx, o, b, signedWith, signature, protobuf))
     }
   }
+
+  // given BSONDocumentWriter[EventCursor] = Macros.writer[EventCursor]
+  given BSONDocumentReader[EventCursor] = Macros.reader[EventCursor]
 
 }

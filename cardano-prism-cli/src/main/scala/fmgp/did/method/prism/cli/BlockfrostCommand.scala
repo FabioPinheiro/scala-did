@@ -41,7 +41,7 @@ object BlockfrostCommand {
     ConfigCommand.options ++
       walletOpt.optional.orElse(walletTypeOpt).withDefault(WalletType.Cardano) ++
       networkFlag ++
-      blockfrostConfigOpt
+      blockfrostConfig.optional
   )
     .map { case (setup, walletOrType, network, mBlockfrostConfig) =>
       walletOrType match

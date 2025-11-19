@@ -11,12 +11,11 @@ import fmgp.did.DIDSubject
 // Conventions https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
 // https://www.gnu.org/software/libc/manual/html_node/Argp.html
 
-val blockfrostConfigOpt =
+val blockfrostConfig =
   Options
     .text("token")
-    .optional
     .??("Blockfrost's API token")
-    .map(_.map(token => BlockfrostConfig(token = token)))
+    .map(token => BlockfrostConfig(token = token))
 
 val networkFlag =
   Options
@@ -84,3 +83,11 @@ val indexerWorkDirAgr =
     .directory("work-directory", exists = Exists.Yes)
     .??("Indexer file system path to be used as a state storage")
     .mapOrFail(e => Right(e))
+
+val indexerDBConnectionAgr =
+  Args
+    .text("mongodb-connection")
+    .mapOrFail(e => Right(e))
+    .??(
+      "Indexer MongoDB connection to be used as a state storage. Ex: 'mongodb+srv://fabio:ZiT61pB5@cluster0.bgnyyy1.mongodb.net/indexer'"
+    )

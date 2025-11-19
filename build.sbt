@@ -224,6 +224,7 @@ lazy val D = new {
 
   // mongoexport --uri=$MONGODB_CONNECTION  --db=sample_mflix --sort='{_id:1}' --type=json --collection=users --out=users.json
   val reactivemongoProvided = Def.setting("org.reactivemongo" %% "reactivemongo" % V.reactivemongo % Provided)
+  val reactivemongo = Def.setting("org.reactivemongo" %% "reactivemongo" % V.reactivemongo)
 
   // Test DID comm
   // val didcomm = Def.setting("org.didcommx" % "didcomm" % "0.3.1")
@@ -619,7 +620,8 @@ lazy val cardanoPrismCli = project
     libraryDependencies += D.zioMunitTest.value,
   )
   .settings( // PoC for a prism-cli tooling // TODO Move to a new repo
-    libraryDependencies += "dev.zio" %% "zio-cli" % "0.7.2",
+    libraryDependencies += "dev.zio" %% "zio-cli" % "0.7.4",
+    libraryDependencies += D.reactivemongo.value,
     assembly / mainClass := Some("fmgp.did.method.prism.cli.PrismCli"),
     assembly / assemblyJarName := "cardano-prism.jar",
   )

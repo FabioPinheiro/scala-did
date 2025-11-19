@@ -7,6 +7,13 @@ import fmgp.did.method.prism._
 import fmgp.did.method.prism.cardano._
 import fmgp.did.method.prism.proto._
 
+/** IndexerUtils
+  *
+  * @example
+  *   {{{
+  *     IndexerUtils.pipelineTransformCardanoMetadata2Events >>> IndexerUtils.pipelinePrismState >>> IndexerUtils.countEvents
+  *   }}}
+  */
 object IndexerUtils {
 
   def pipelineTransformCardanoMetadata2SeqEvents: ZPipeline[Any, Nothing, CardanoMetadata, Seq[MaybeEvent[OP]]] =
@@ -27,6 +34,9 @@ object IndexerUtils {
             blockIndex = cardanoPrismEntry.index,
           )
     )
+
+  def pipelineTransformCardanoMetadata2Events: ZPipeline[Any, Nothing, CardanoMetadata, MaybeEvent[OP]] =
+    pipelineTransformCardanoMetadata2SeqEvents.flattenIterables
 
   /** pipeline to load/initiate the PrismState from stream of all events */
   def pipelinePrismState = ZPipeline.mapZIO[PrismState, Nothing, MaybeEvent[OP], MaybeEvent[OP]] { maybeEvent =>
@@ -68,8 +78,7 @@ object IndexerUtils {
           .fromFile(fileName)
           .via(ZPipeline.utf8Decode >>> ZPipeline.splitLines)
           .map { _.fromJson[CardanoMetadataCBOR].getOrElse(???) }
-          .via(IndexerUtils.pipelineTransformCardanoMetadata2SeqEvents)
-          .flatMap(e => ZStream.fromIterable(e))
+          .via(IndexerUtils.pipelineTransformCardanoMetadata2Events)
       }
     }.flatten
     _ <- ZIO.log(s"Init PrismState")

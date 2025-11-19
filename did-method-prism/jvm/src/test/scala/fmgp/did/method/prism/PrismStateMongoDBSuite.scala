@@ -4,7 +4,8 @@ import munit.*
 import zio.*
 import zio.stream.*
 import fmgp.did.method.prism.mongo.*
-import fmgp.util.hex2bytes
+import fmgp.util.{bytes2Hex, hex2bytes}
+
 import _root_.proto.prism.SignedPrismEvent
 import fmgp.did.method.prism.proto.MaybeEvent
 import fmgp.did.method.prism.proto.InvalidPrismObject
@@ -14,10 +15,7 @@ import fmgp.did.method.prism.proto.OP
 import fmgp.did.method.prism.proto.CreateStorageEntryOP
 import fmgp.did.method.prism.proto.UpdateStorageEntryOP
 import fmgp.did.method.prism.vdr.VDRUtilsTestExtra
-import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.api.bson.BSONDocument
-import fmgp.util.bytes2Hex
-
+import fmgp.did.method.prism.cardano.EventCursor
 import fmgp.did.method.prism.vdr.VDRUtilsTestExtra.{
   createSSI,
   createVDR,
@@ -25,24 +23,24 @@ import fmgp.did.method.prism.vdr.VDRUtilsTestExtra.{
   updateVDR_withTheNewKey,
   updateSSI_addKey
 }
+import reactivemongo.api.bson.collection.BSONCollection
+import reactivemongo.api.bson.BSONDocument
 
 /** didResolverPrismJVM/testOnly fmgp.did.method.prism.PrismStateMongoDBSuite
   */
 class PrismStateMongoDBSuite extends ZSuite {
 
-  val makePrismState = ZLayer.fromZIO(
-    for {
-      reactiveMongoApi <- ZIO.service[ReactiveMongoApi]
-      state = PrismStateMongoDB(reactiveMongoApi)
-    } yield state: PrismState
-  )
-  val mongo = AsyncDriverResource.layer >>> ReactiveMongoApi
-    .layer("mongodb+srv://fabio:ZiT61pB5@cluster0.bgnyyy1.mongodb.net/test")
+  val mongoDBConnection = "mongodb+srv://fabio:ZiT61pB5@cluster0.bgnyyy1.mongodb.net/test" // FIXME
 
   val prismStateFixture: FunFixture[ULayer[PrismState]] =
     ZTestLocalFixture { _ =>
       for {
-        prismStateLayer <- ZIO.succeed(mongo.orDie >>> makePrismState)
+        prismStateLayer <- ZIO.succeed(
+          (
+            AsyncDriverResource.layer >>>
+              PrismStateMongoDB.makeLayer(mongoDBConnection)
+          ).orDie
+        )
         cleanJob <- ZIO // Cleanup: clear collections before each test
           .serviceWithZIO[PrismState] { state =>
             state match {
@@ -74,6 +72,77 @@ class PrismStateMongoDBSuite extends ZSuite {
   // aux(2): UpdateStorageEntryOP -> VDR update
   // aux(3): UpdateStorageEntryOP -> VDR update with new key
   // aux(4): UpdateDidOP -> DID update (add key)
+
+  // ### EventCursor ###
+
+  prismStateFixture.testZLayered(
+    "cursor: returns EventCursor.init when no events exist"
+      .tag(fmgp.IntregrationTest)
+      .tag(fmgp.DBTest)
+  ) {
+    for {
+      state <- ZIO.service[PrismState]
+      cursor <- state.cursor
+      _ = assertEquals(cursor, cardano.EventCursor.init)
+    } yield ()
+  }
+
+  prismStateFixture.testZLayered(
+    "cursor: returns correct cursor after adding single event"
+      .tag(fmgp.IntregrationTest)
+      .tag(fmgp.DBTest)
+  ) {
+    for {
+      state <- ZIO.service[PrismState]
+      createDidEvent = aux(0) // CreateDidOP with b=0, o=0
+      _ <- state.addEvent(createDidEvent)
+      cursor <- state.cursor
+      _ = assertEquals(cursor.b, 0)
+      _ = assertEquals(cursor.o, 0)
+    } yield ()
+  }
+
+  prismStateFixture.testZLayered(
+    "cursor: returns maximum cursor after adding multiple events"
+      .tag(fmgp.IntregrationTest)
+      .tag(fmgp.DBTest)
+  ) {
+    for {
+      state <- ZIO.service[PrismState]
+      // aux events have indices: 0, 1, 2, 3, 4
+      _ <- state.addEvent(aux(0)) // b=0, o=0
+      _ <- state.addEvent(aux(1)) // b=0, o=1
+      _ <- state.addEvent(aux(2)) // b=0, o=2
+      cursor <- state.cursor
+      _ = assertEquals(cursor, EventCursor(b = 0, o = 2))
+    } yield ()
+  }
+
+  prismStateFixture.testZLayered(
+    "cursor: considers lost collection when finding maximum"
+      .tag(fmgp.IntregrationTest)
+      .tag(fmgp.DBTest)
+  ) {
+    for {
+      state <- ZIO.service[PrismState]
+      createDidEvent = aux(0)
+      updateDidEvent = aux(4) // Has previousEventHash, will go to lost collection if create not present first
+
+      // Add update first (goes to lost collection since parent doesn't exist)
+      _ <- state.addEvent(updateDidEvent) // b=0, o=4
+      cursor1 <- state.cursor
+      _ = assertEquals(cursor1.b, 0)
+      _ = assertEquals(cursor1.o, 4) // Should find event in lost collection
+
+      // Now add the create event
+      _ <- state.addEvent(createDidEvent) // b=0, o=0
+      cursor2 <- state.cursor
+      _ = assertEquals(cursor2.b, 0)
+      _ = assertEquals(cursor2.o, 4) // Still 4, the maximum
+    } yield ()
+  }
+
+  // ### addEvent ###
 
   prismStateFixture.testZLayered(
     "addEvent: insert CreateDidOP event"
@@ -366,5 +435,7 @@ class PrismStateMongoDBSuite extends ZSuite {
         case _ => fail("Wrong Data type")
     } yield {}
   }
+
+  // TODO add test for duplicated key
 
 }

@@ -2,12 +2,14 @@ package fmgp.did.method.prism
 
 import zio._
 import zio.json._
-import fmgp.did.method.prism._
 import fmgp.did.DIDSubject
+import fmgp.did.method.prism._
 import fmgp.did.method.prism.RefVDR
 import fmgp.did.method.prism.proto._
 
 case class PrismStateFS() extends PrismStateRead {
+
+  def cursor: ZIO[Any, Nothing, cardano.EventCursor] = ???
 
   def ssi2eventsRef: ZIO[Any, Nothing, Map[DIDSubject, Seq[EventRef]]] = ???
   def vdr2eventsRef: ZIO[Any, Nothing, Map[RefVDR, Seq[EventRef]]] = ???
