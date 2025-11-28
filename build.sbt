@@ -93,7 +93,7 @@ inThisBuild {
   */
 lazy val docs = project
   .in(file("docs"))
-  .settings(skip / publish := false) // Docs should not be publish as a jar but rather as a website
+  .settings(publish / skip := true) // Docs should not be publish as a jar but rather as a website
   .enablePlugins(MdocPlugin)
   .settings(
     mdocVariables := Map("VERSION" -> version.value),
@@ -320,6 +320,7 @@ lazy val scalaJSViteConfigure: Project => Project =
       externalNpm := rootPaths.value.apply("BASE").toFile(),
       // ShortModuleNames
       stShortModuleNames := true,
+      // stOutputPackage := "fmgp.typings",
       // TODO REMOVE webpackBundlingMode := BundlingMode.LibraryAndApplication(), // BundlingMode.Application,
       // TODO useYarn := true
     )

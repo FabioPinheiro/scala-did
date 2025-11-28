@@ -27,16 +27,8 @@ addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.6")
   */
 addSbtPlugin("ch.epfl.scala" % "sbt-web-scalajs-bundler" % "0.21.1")
 
-// GRPC
-//resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
-//addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.19")
-//libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.12"
-////https://mvnrepository.com/artifact/com.thesamet.scalapb.grpcweb/scalapb-grpcweb
-//libraryDependencies += "com.thesamet.scalapb.grpcweb" %% "scalapb-grpcweb-code-gen" % "0.6.4"
-
-//https://scalablytyped.org/docs/plugin
-//https://github.com/ScalablyTyped/Converter/tags
-resolvers += Resolver.bintrayRepo("oyvindberg", "converter")
+// scalablytyped - https://scalablytyped.org/docs/plugin - https://github.com/ScalablyTyped/Converter/tags
+// resolvers += Resolver.bintrayRepo("oyvindberg", "converter") //TODO REMOVE  Bintray was shut down
 resolvers += MavenRepository("sonatype-s01-snapshots", "https://s01.oss.sonatype.org/content/repositories/snapshots")
 addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta44")
 
@@ -86,7 +78,7 @@ if (sys.env.get("DEPEDABOT").isDefined) {
   }
 } else libraryDependencies ++= Seq[ModuleID]()
 
-// ScalaPB for did:prism
+// ScalaPB for did:prism & GRPC
 addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.8")
 libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.20"
 libraryDependencies += "com.thesamet.scalapb.zio-grpc" %% "zio-grpc-codegen" % "0.6.3" //Prism Node https://mvnrepository.com/artifact/com.thesamet.scalapb.zio-grpc/zio-grpc-codegen
