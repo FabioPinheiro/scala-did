@@ -3,7 +3,7 @@ package fmgp.did.method.prism.vdr
 import zio._
 import zio.json._
 import fmgp.crypto.Secp256k1PrivateKey
-import fmgp.did.method.prism.{RefVDR, DIDPrism, PrismState, VDR, EventHash}
+import fmgp.did.method.prism.{RefVDR, DIDPrism, PrismState, PrismStateRead, VDR, EventHash}
 import fmgp.did.method.prism.cardano.TxHash
 import proto.prism.PrismBlock
 import proto.prism.SignedPrismEvent
@@ -11,7 +11,7 @@ import proto.prism.SignedPrismEvent
 case class VDRPassiveServiceImpl(protected val prismState: PrismState) extends VDRPassiveService
 
 trait VDRPassiveService {
-  protected def prismState: PrismState
+  protected def prismState: PrismStateRead
 
   def fetch(vdrRef: RefVDR): ZIO[Any, Throwable, VDR] =
     VDRPassiveService.fetch(vdrRef).provideEnvironment(ZEnvironment(prismState))
@@ -39,26 +39,26 @@ trait VDRPassiveService {
 }
 
 object VDRPassiveService {
-  def fetch(vdrRef: RefVDR): ZIO[PrismState, Throwable, VDR] =
+  def fetch(vdrRef: RefVDR): ZIO[PrismStateRead, Throwable, VDR] =
     for {
       _ <- ZIO.log(s"fecth VDR entry '${vdrRef.hex}'")
-      state <- ZIO.service[PrismState]
+      state <- ZIO.service[PrismStateRead]
       vdr <- state.getVDR(vdrRef)
     } yield vdr
 
   /** return a PrismBlock with all event (in order) relative to the vdr */
-  def prove(eventRef: RefVDR): ZIO[PrismState, Throwable, PrismBlock] = ??? // FIXME
+  def prove(eventRef: RefVDR): ZIO[PrismStateRead, Throwable, PrismBlock] = ??? // FIXME
 
   /** return a PrismBlock with all event (in order) relative to the vdr and the owner (did:prism) */
-  def fullProve(eventRef: RefVDR): ZIO[PrismState, Throwable, PrismBlock] = ??? // FIXME
+  def fullProve(eventRef: RefVDR): ZIO[PrismStateRead, Throwable, PrismBlock] = ??? // FIXME
 
   def dryCreateBytes(
       didPrism: DIDPrism,
       vdrKey: Secp256k1PrivateKey,
       data: Array[Byte]
-  ): ZIO[PrismState, Throwable, (RefVDR, SignedPrismEvent)] =
+  ): ZIO[PrismStateRead, Throwable, (RefVDR, SignedPrismEvent)] =
     for {
-      state <- ZIO.service[PrismState]
+      state <- ZIO.service[PrismStateRead]
       ssi <- state.getSSI(didPrism)
       nonce <- Random.nextBytes(16)
       _ <- ZIO.whenDiscard(!ssi.exists) { ZIO.fail(new RuntimeException("The SSI does not exist")) } // TODO error type
@@ -79,9 +79,9 @@ object VDRPassiveService {
       eventRef: RefVDR,
       vdrKey: Secp256k1PrivateKey,
       data: Array[Byte]
-  ): ZIO[PrismState, Throwable, (EventHash, SignedPrismEvent)] =
+  ): ZIO[PrismStateRead, Throwable, (EventHash, SignedPrismEvent)] =
     for {
-      state <- ZIO.service[PrismState]
+      state <- ZIO.service[PrismStateRead]
       oldVDR <- state.getVDR(eventRef)
       didPrism <- oldVDR.did match
         case Some(value) => ZIO.succeed(value)
@@ -107,9 +107,9 @@ object VDRPassiveService {
   def dryDeactivate(
       eventRef: RefVDR,
       vdrKey: Secp256k1PrivateKey
-  ): ZIO[PrismState, Throwable, (EventHash, SignedPrismEvent)] =
+  ): ZIO[PrismStateRead, Throwable, (EventHash, SignedPrismEvent)] =
     for {
-      state <- ZIO.service[PrismState]
+      state <- ZIO.service[PrismStateRead]
       oldVDR <- state.getVDR(eventRef)
       didPrism <- oldVDR.did match
         case Some(value) => ZIO.succeed(value)
