@@ -124,11 +124,11 @@
 
         <h1 id="getting-started-with-didcomm-messaging" class="title">Getting Started with DIDComm Messaging</h1>
         <p>Here&#39;s a basic example of how to send a message using the library:</p>
-        <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">zio</span><span>.</span><span class="identifier">_</span><span>
-</span><span class="keyword">import</span><span> </span><span class="identifier">zio</span><span>.</span><span class="identifier">json</span><span>.</span><span class="identifier">_</span><span>
-</span><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">did</span><span>.</span><span class="identifier">_</span><span>
-</span><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">did</span><span>.</span><span class="identifier">comm</span><span>.</span><span class="identifier">_</span><span>
-</span><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">did</span><span>.</span><span class="identifier">comm</span><span>.</span><span class="identifier">protocol</span><span>.</span><span class="identifier">basicmessage2</span><span>.</span><span class="identifier">_</span><span>
+        <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">zio</span><span>.*
+</span><span class="keyword">import</span><span> </span><span class="identifier">zio</span><span>.</span><span class="identifier">json</span><span>.*
+</span><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">did</span><span>.*
+</span><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">did</span><span>.</span><span class="identifier">comm</span><span>.*
+</span><span class="keyword">import</span><span> </span><span class="identifier">fmgp</span><span>.</span><span class="identifier">did</span><span>.</span><span class="identifier">comm</span><span>.</span><span class="identifier">protocol</span><span>.</span><span class="identifier">basicmessage2</span><span>.*
 
 </span><span class="comment">// Initialize a new message
 </span><span class="keyword">val</span><span> </span><span class="identifier">message</span><span> = </span><span class="keyword">new</span><span> </span><span class="type-name">BasicMessage</span><span>(
@@ -137,7 +137,7 @@
   </span><span class="identifier">from</span><span> = </span><span class="type-name">Some</span><span>(</span><span class="type-name">FROM</span><span>(</span><span class="string-literal">&quot;did:example:456&quot;</span><span>)), 
 )
 </span><span class="comment">// message: BasicMessage = BasicMessage(
-//   id = &quot;a9d0f83d-590b-4890-bb40-8a78f4d0d3f1&quot;,
+//   id = &quot;15cfbd1d-c55a-4e10-abaf-115d1b350b2a&quot;,
 //   to = Set(&quot;did:example:123&quot;),
 //   from = Some(&quot;did:example:456&quot;),
 //   lang = None,
@@ -148,7 +148,7 @@
 
 </span><span class="identifier">message</span><span>.</span><span class="identifier">toPlaintextMessage</span><span>.</span><span class="identifier">toJsonPretty</span><span>
 </span><span class="comment">// res0: String = &quot;&quot;&quot;{
-//   &quot;id&quot; : &quot;a9d0f83d-590b-4890-bb40-8a78f4d0d3f1&quot;,
+//   &quot;id&quot; : &quot;15cfbd1d-c55a-4e10-abaf-115d1b350b2a&quot;,
 //   &quot;type&quot; : &quot;https://didcomm.org/basicmessage/2.0/message&quot;,
 //   &quot;to&quot; : [
 //     &quot;did:example:123&quot;

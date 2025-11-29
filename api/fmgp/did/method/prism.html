@@ -98,7 +98,7 @@
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="prism/BlockfrostConfig.html" t="n" class="documentableName ">BlockfrostConfig</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">token</span>: <a href="https://www.scala-lang.org/api/2.13.16/scala/Predef$.html#String" t="t">String</a>, <span t="k"></span><span data-unresolved-link="" t="n">ryo</span>: <a href="https://www.scala-lang.org/api/2.13.16/scala/Option.html" t="t">Option</a>[<a href="prism/BlockfrostRyoConfig.html" t="t">BlockfrostRyoConfig</a>])
+            <span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="prism/BlockfrostConfig.html" t="n" class="documentableName ">BlockfrostConfig</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">token</span>: <a href="https://www.scala-lang.org/api/2.13.16/scala/Predef$.html#String" t="t">String</a>, <span t="k"></span><span data-unresolved-link="" t="n">ryo</span>: <a href="https://www.scala-lang.org/api/2.13.16/scala/Option.html" t="t">Option</a>[<a href="prism/BlockfrostRyoConfig.html" t="t">BlockfrostRyoConfig</a>] = ...)
            </div>
           </div>
          </div>
@@ -1320,7 +1320,7 @@
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="signature-short"><span class="modifiers"><span t="k">case </span></span><span class="kind"><span t="k">class </span></span><a href="prism/PrismStateHTTP.html" t="n" class="documentableName ">PrismStateHTTP</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">httpUtils</span>: <a href="prism/HttpUtils.html" t="t">HttpUtils</a>, <span t="k"></span><span data-unresolved-link="" t="n">pathEventsByDID</span>: <a href="https://www.scala-lang.org/api/2.13.16/scala/Predef$.html#String" t="t">String</a>)<span t="k"> extends </span><a href="prism/PrismStateRead.html" t="t">PrismStateRead</a></span><span class="signature-long"></span>
+            <span class="signature-short"><span class="modifiers"><span t="k">case </span></span><span class="kind"><span t="k">class </span></span><a href="prism/PrismStateHTTP.html" t="n" class="documentableName ">PrismStateHTTP</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">httpUtils</span>: <a href="prism/HttpUtils.html" t="t">HttpUtils</a>, <span t="k"></span><span data-unresolved-link="" t="n">pathEventsByDID</span>: <a href="https://www.scala-lang.org/api/2.13.16/scala/Predef$.html#String" t="t">String</a> = ...)<span t="k"> extends </span><a href="prism/PrismStateRead.html" t="t">PrismStateRead</a></span><span class="signature-long"></span>
            </div>
           </div>
          </div>
@@ -1459,7 +1459,7 @@
                <li>Helper methods <code>ssiFromPreviousEventHash</code> and <code>vdrFromPreviousEventHash</code> traverse chains to find roots</li>
               </ul>
               <p>==Thread Safety==</p>
-              <p>All state updates use ZIO <span data-unresolved-link="" title="Problem linking Ref: No DRI found for query">Ref</span> for lock-free, thread-safe mutations. Multiple concurrent operations are safely handled without explicit locking.</p>
+              <p>All state updates use ZIO <span data-unresolved-link="" title="Problem linking Ref: Couldn't resolve a member for the given link query">Ref</span> for lock-free, thread-safe mutations. Multiple concurrent operations are safely handled without explicit locking.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -1895,8 +1895,8 @@
               <p>Read-only interface for querying PRISM blockchain state.</p>
               <p>This trait provides methods to query the state of PRISM DIDs (Decentralized Identifiers) and VDRs (Verifiable Data Registries) from an event-sourced storage backend. Events represent blockchain operations (create, update, deactivate) that form immutable chains tracked through hash references.</p>
               <p>==Key Concepts==</p>
-              <p>'''SSI (Self-Sovereign Identity):''' A PRISM DID (e.g., <code>did:prism:xxx</code>) managed through <span data-unresolved-link="" title="Problem linking CreateDidOP: No DRI found for query">CreateDidOP</span>, <span data-unresolved-link="" title="Problem linking UpdateDidOP: No DRI found for query">UpdateDidOP</span>, and <span data-unresolved-link="" title="Problem linking DeactivateDidOP: No DRI found for query">DeactivateDidOP</span> events. SSIs represent identity with keys and services.</p>
-              <p>'''VDR (Verifiable Data Registry):''' Storage entries owned by a DID, managed through <span data-unresolved-link="" title="Problem linking CreateStorageEntryOP: No DRI found for query">CreateStorageEntryOP</span>, <span data-unresolved-link="" title="Problem linking UpdateStorageEntryOP: No DRI found for query">UpdateStorageEntryOP</span>, and <span data-unresolved-link="" title="Problem linking DeactivateStorageEntryOP: No DRI found for query">DeactivateStorageEntryOP</span> events. Used for storing arbitrary data on-chain.</p>
+              <p>'''SSI (Self-Sovereign Identity):''' A PRISM DID (e.g., <code>did:prism:xxx</code>) managed through <span data-unresolved-link="" title="Problem linking CreateDidOP: Couldn't resolve a member for the given link query">CreateDidOP</span>, <span data-unresolved-link="" title="Problem linking UpdateDidOP: Couldn't resolve a member for the given link query">UpdateDidOP</span>, and <span data-unresolved-link="" title="Problem linking DeactivateDidOP: Couldn't resolve a member for the given link query">DeactivateDidOP</span> events. SSIs represent identity with keys and services.</p>
+              <p>'''VDR (Verifiable Data Registry):''' Storage entries owned by a DID, managed through <span data-unresolved-link="" title="Problem linking CreateStorageEntryOP: Couldn't resolve a member for the given link query">CreateStorageEntryOP</span>, <span data-unresolved-link="" title="Problem linking UpdateStorageEntryOP: Couldn't resolve a member for the given link query">UpdateStorageEntryOP</span>, and <span data-unresolved-link="" title="Problem linking DeactivateStorageEntryOP: Couldn't resolve a member for the given link query">DeactivateStorageEntryOP</span> events. Used for storing arbitrary data on-chain.</p>
               <p>'''Event Chains:''' Operations form chains via <code>previousEventHash</code> references. Create operations start chains; update/deactivate operations reference previous events. All events in a chain share the same root hash.</p>
              </div>
              <h2 class="h200">Attributes</h2>

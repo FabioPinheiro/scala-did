@@ -15,8 +15,8 @@
   <p>Read-only interface for querying PRISM blockchain state.</p>
   <p>This trait provides methods to query the state of PRISM DIDs (Decentralized Identifiers) and VDRs (Verifiable Data Registries) from an event-sourced storage backend. Events represent blockchain operations (create, update, deactivate) that form immutable chains tracked through hash references.</p>
   <p>==Key Concepts==</p>
-  <p>'''SSI (Self-Sovereign Identity):''' A PRISM DID (e.g., <code>did:prism:xxx</code>) managed through <span data-unresolved-link="" title="Problem linking CreateDidOP: No DRI found for query">CreateDidOP</span>, <span data-unresolved-link="" title="Problem linking UpdateDidOP: No DRI found for query">UpdateDidOP</span>, and <span data-unresolved-link="" title="Problem linking DeactivateDidOP: No DRI found for query">DeactivateDidOP</span> events. SSIs represent identity with keys and services.</p>
-  <p>'''VDR (Verifiable Data Registry):''' Storage entries owned by a DID, managed through <span data-unresolved-link="" title="Problem linking CreateStorageEntryOP: No DRI found for query">CreateStorageEntryOP</span>, <span data-unresolved-link="" title="Problem linking UpdateStorageEntryOP: No DRI found for query">UpdateStorageEntryOP</span>, and <span data-unresolved-link="" title="Problem linking DeactivateStorageEntryOP: No DRI found for query">DeactivateStorageEntryOP</span> events. Used for storing arbitrary data on-chain.</p>
+  <p>'''SSI (Self-Sovereign Identity):''' A PRISM DID (e.g., <code>did:prism:xxx</code>) managed through <span data-unresolved-link="" title="Problem linking CreateDidOP: Couldn't resolve a member for the given link query">CreateDidOP</span>, <span data-unresolved-link="" title="Problem linking UpdateDidOP: Couldn't resolve a member for the given link query">UpdateDidOP</span>, and <span data-unresolved-link="" title="Problem linking DeactivateDidOP: Couldn't resolve a member for the given link query">DeactivateDidOP</span> events. SSIs represent identity with keys and services.</p>
+  <p>'''VDR (Verifiable Data Registry):''' Storage entries owned by a DID, managed through <span data-unresolved-link="" title="Problem linking CreateStorageEntryOP: Couldn't resolve a member for the given link query">CreateStorageEntryOP</span>, <span data-unresolved-link="" title="Problem linking UpdateStorageEntryOP: Couldn't resolve a member for the given link query">UpdateStorageEntryOP</span>, and <span data-unresolved-link="" title="Problem linking DeactivateStorageEntryOP: Couldn't resolve a member for the given link query">DeactivateStorageEntryOP</span> events. Used for storing arbitrary data on-chain.</p>
   <p>'''Event Chains:''' Operations form chains via <code>previousEventHash</code> references. Create operations start chains; update/deactivate operations reference previous events. All events in a chain share the same root hash.</p>
  </div>
  <section id="attributes">
@@ -361,7 +361,7 @@ node8 -> node0;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>ZIO effect that may fail with <code>Throwable</code> (RuntimeException if event hash missing or type validation fails) and succeeds with sequence of DID-related <span data-unresolved-link="" title="Problem linking MySignedPrismEvent: No DRI found for query">MySignedPrismEvent</span></p>
+               <p>ZIO effect that may fail with <code>Throwable</code> (RuntimeException if event hash missing or type validation fails) and succeeds with sequence of DID-related <span data-unresolved-link="" title="Problem linking MySignedPrismEvent: Couldn't resolve a member for the given link query">MySignedPrismEvent</span></p>
               </dd>
              </dl>
             </div>
@@ -405,7 +405,7 @@ node8 -> node0;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>ZIO effect that may fail with <code>Throwable</code> (RuntimeException if event hash missing or type validation fails) and succeeds with sequence of storage-related <span data-unresolved-link="" title="Problem linking MySignedPrismEvent: No DRI found for query">MySignedPrismEvent</span></p>
+               <p>ZIO effect that may fail with <code>Throwable</code> (RuntimeException if event hash missing or type validation fails) and succeeds with sequence of storage-related <span data-unresolved-link="" title="Problem linking MySignedPrismEvent: Couldn't resolve a member for the given link query">MySignedPrismEvent</span></p>
               </dd>
              </dl>
             </div>
