@@ -258,6 +258,12 @@ inThisBuild(
     // ### https://docs.scala-lang.org/scala3/guides/migration/options-lookup.html
     scalacOptions ++=
       Seq("-encoding", "UTF-8") ++ // source files are in UTF-8
+        // Seq("-explain") ++ // Compile error Explanation
+        Seq(
+          "-source",
+          "future", // TODO user '3.9' // Note 3.10 will start to remove scala 2 logic like implicits
+          "-Wconf:msg=pattern selector should be an instance of Matchable:s" // FIXME REMOVE
+        ) ++ // preparation for scala 3.9
         Seq(
           "-deprecation", // warn about use of deprecated APIs
           "-unchecked", // warn about unchecked type parameters
