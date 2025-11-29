@@ -1,7 +1,7 @@
 package fmgp.did
 
-import zio.json._
-import scala.util.chaining._
+import zio.json.*
+import scala.util.chaining.*
 import zio.json.ast.Json
 import zio.json.ast.Json.Obj
 import zio.json.ast.Json.Arr
@@ -102,7 +102,7 @@ object DIDServiceDIDCommMessaging {
             case arr: Json.Arr =>
               arr.elements
                 .foldLeft[Either[String, Seq[DIDCommMessagingServiceEndpoint]]](Right(Seq.empty)) {
-                  case (left: Left[_, _], elem) => left
+                  case (left: Left[?, ?], elem) => left
                   case (Right(acc), elem)       =>
                     elem match {
                       case aux: Json.Obj =>

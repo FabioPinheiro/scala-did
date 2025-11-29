@@ -1,9 +1,9 @@
 package fmgp.did
 
-import zio.json._
-import fmgp.crypto._
-import fmgp.did._
-import zio.json.ast._
+import zio.json.*
+import fmgp.crypto.*
+import fmgp.did.*
+import zio.json.ast.*
 
 object DidExampleSicpaRustBob {
 

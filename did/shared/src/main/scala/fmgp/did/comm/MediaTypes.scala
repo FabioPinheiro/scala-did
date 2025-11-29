@@ -1,6 +1,6 @@
 package fmgp.did.comm
 
-import zio.json._
+import zio.json.*
 
 /** IANA Media Types
   *

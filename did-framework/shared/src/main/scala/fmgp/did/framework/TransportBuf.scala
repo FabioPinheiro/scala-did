@@ -1,7 +1,7 @@
 package fmgp.did.framework
 
-import zio._
-import zio.stream._
+import zio.*
+import zio.stream.*
 
 trait TransportWS[R, M] extends Transport[R, M, M] {
   def ws: Websocket[Throwable]

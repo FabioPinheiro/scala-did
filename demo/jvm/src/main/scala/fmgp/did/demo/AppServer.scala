@@ -2,22 +2,22 @@ package fmgp.did.demo
 
 import scala.io.Source
 
-import zio._
-import zio.json._
-import zio.stream._
-import zio.http._
+import zio.*
+import zio.json.*
+import zio.stream.*
+import zio.http.*
 import zio.http.Header.ContentType
 
-import fmgp.crypto._
-import fmgp.crypto.error._
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.did.comm.protocol._
+import fmgp.crypto.*
+import fmgp.crypto.error.*
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.did.comm.protocol.*
 import fmgp.did.method.peer.DidPeerResolver
 import fmgp.did.method.hardcode.HardcodeResolver
 import fmgp.did.uniresolver.Uniresolver
 import fmgp.did.framework.Operator
-import fmgp.util._
+import fmgp.util.*
 
 // import zio.http.endpoint.RoutesMiddleware
 
@@ -116,7 +116,7 @@ object AppServer extends ZIOAppDefault {
       .fromResource("webapp.js")
       .map(_.setHeaders(Headers(Header.ContentType(MediaType.application.javascript)))),
     Method.GET / "assets" -> handler { (req: Request) =>
-      import zio.http.template._
+      import zio.http.template.*
       Response
         .html(
           html(
@@ -126,7 +126,7 @@ object AppServer extends ZIOAppDefault {
                   .fromResource("assets")
                   .getLines()
                   .map { file => li(a(href := file, file)): Html }
-                  .toSeq): _*
+                  .toSeq) *
               )
             )
           )

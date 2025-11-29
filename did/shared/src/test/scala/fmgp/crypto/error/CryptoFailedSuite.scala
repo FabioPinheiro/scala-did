@@ -1,7 +1,7 @@
 package fmgp.crypto.error
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 
 import fmgp.did.DIDSubject
 import fmgp.did.comm.PIURI

@@ -1,9 +1,9 @@
 package fmgp.did.method.prism.cli
 
-import zio._
-import zio.cli._
-import zio.json._
-import zio.http._
+import zio.*
+import zio.cli.*
+import zio.json.*
+import zio.http.*
 
 import fmgp.did.DIDSubject
 import fmgp.did.method.prism.*
@@ -13,8 +13,8 @@ import fmgp.did.method.prism.cardano.PublicCardanoNetwork
   *
   * {{{
   * sbt "didResolverPrismJVM/assembly"
-  * java -jar did-method-prism/jvm/target/scala-3.3.6/cardano-prism.jar indexer ../prism-vdr/preprod
-  * shasum -a 256 did-method-prism/jvm/target/scala-3.3.6/cardano-prism.jar
+  * java -jar did-method-prism/jvm/target/scala-3.3.7/cardano-prism.jar indexer ../prism-vdr/preprod
+  * shasum -a 256 did-method-prism/jvm/target/scala-3.3.7/cardano-prism.jar
   * }}}
   *
   * cardanoPrismCliJVM/runMain fmgp.did.method.prism.cli.PrismCli

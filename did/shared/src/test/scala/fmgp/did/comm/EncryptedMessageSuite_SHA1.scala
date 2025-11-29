@@ -1,12 +1,12 @@
 package fmgp.did.comm
 
-import munit._
+import munit.*
 
-import fmgp.did._
-import fmgp.crypto._
+import fmgp.did.*
+import fmgp.crypto.*
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 import zio.json.ast.Json
 
 /** didJVM/testOnly fmgp.did.comm.EncryptedMessageSuite_SHA1 */

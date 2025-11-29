@@ -1,13 +1,13 @@
 package fmgp.did.comm
 
-import munit._
+import munit.*
 
-import fmgp.did._
-import fmgp.crypto._
-import fmgp.crypto.CryptoOperationsImp._
+import fmgp.did.*
+import fmgp.crypto.*
+import fmgp.crypto.CryptoOperationsImp.*
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 import zio.json.ast.JsonCursor
 import zio.json.ast.Json
 import fmgp.crypto.error.MACCheckFailed

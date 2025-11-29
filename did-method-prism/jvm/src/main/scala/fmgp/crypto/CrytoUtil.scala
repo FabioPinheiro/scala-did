@@ -1,6 +1,6 @@
 package fmgp.crypto
 
-import scala.util._
+import scala.util.*
 
 import java.security.KeyFactory
 import java.security.Signature

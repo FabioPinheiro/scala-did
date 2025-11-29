@@ -1,9 +1,9 @@
 package fmgp.serviceworker
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation._
+import scala.scalajs.js.annotation.*
 
-import zio.json._
+import zio.json.*
 
 case class NotificationMessage(title: String, body: String)
 object NotificationMessage {

@@ -1,9 +1,9 @@
 package fmgp.did.method.prism
 
-import munit._
-import zio._
-import zio.json._
-import fmgp.did.method.prism._
+import munit.*
+import zio.*
+import zio.json.*
+import fmgp.did.method.prism.*
 
 /** PrismStateHTTPSuite
   *

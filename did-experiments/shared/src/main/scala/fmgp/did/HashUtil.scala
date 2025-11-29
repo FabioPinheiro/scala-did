@@ -1,12 +1,12 @@
 package fmgp.did
 
-import zio.json._
+import zio.json.*
 import zio.prelude.Equal
 import zio.prelude.Hash
 
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.util._
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.util.*
 
 //Maybe this is a bit offer power
 

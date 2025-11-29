@@ -1,6 +1,6 @@
 package fmgp.did.method.peer
 
-import zio.json._
+import zio.json.*
 import zio.json.ast.Json
 import fmgp.did.DIDSubject
 

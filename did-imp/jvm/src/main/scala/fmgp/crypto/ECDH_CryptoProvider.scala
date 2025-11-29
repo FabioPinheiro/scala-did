@@ -1,7 +1,7 @@
 package fmgp.crypto
 
 import java.util.Collections
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import scala.util.Try
 
 import com.nimbusds.jose.JWEHeader
@@ -14,19 +14,19 @@ import com.nimbusds.jose.crypto.impl.ECDHCryptoProvider
 import com.nimbusds.jose.crypto.impl.ECDH1PU
 import com.nimbusds.jose.crypto.impl.ECDH1PUCryptoProvider
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider
-import com.nimbusds.jose.jwk.{Curve => JWKCurve}
-import com.nimbusds.jose.jwk.{ECKey => JWKECKey}
+import com.nimbusds.jose.jwk.{Curve as JWKCurve}
+import com.nimbusds.jose.jwk.{ECKey as JWKECKey}
 import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator
 import com.nimbusds.jose.util.StandardCharset
 import com.nimbusds.jose.JWECryptoParts
 import javax.crypto.SecretKey
 
-import zio.json._
+import zio.json.*
 import fmgp.did.VerificationMethodReferenced
-import fmgp.did.comm._
-import fmgp.util._
+import fmgp.did.comm.*
+import fmgp.util.*
 import fmgp.crypto.JWERecipient
-import fmgp.crypto.error._
+import fmgp.crypto.error.*
 import com.nimbusds.jose.crypto.impl.JWEHeaderValidation
 
 /** Elliptic-curve Diffie–Hellman */

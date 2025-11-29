@@ -1,11 +1,11 @@
 package fmgp.did.uniresolver
 
-import zio.json._
+import zio.json.*
 import zio.json.ast.Json
 
-import fmgp.crypto._
-import fmgp.did._
-import fmgp.did.comm._
+import fmgp.crypto.*
+import fmgp.did.*
+import fmgp.did.comm.*
 
 object UniresolverExamples {
 

@@ -2,18 +2,18 @@ package fmgp.webapp
 
 import scala.util.Failure
 import scala.util.Success
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
 import org.scalajs.dom
 import scala.scalajs.js
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 
 import fmgp.ServiceWorkerUtils
 import fmgp.SettingsFromHTML
-import fmgp._
-import fmgp.did._
-import fmgp.crypto._
+import fmgp.*
+import fmgp.did.*
+import fmgp.crypto.*
 import fmgp.did.uniresolver.Uniresolver
 import fmgp.did.method.prism.cardano.PRISM_LABEL_CIP_10
 

@@ -61,7 +61,7 @@ object DataModels {
         o <- doc.getAsTry[Int]("o")
         b <- doc.getAsTry[Int]("b")
         signedWith <- doc.getAsTry[String]("signedWith")
-        signature <- doc.getAsTry[String]("signature").map(hex2bytes _)
+        signature <- doc.getAsTry[String]("signature").map(hex2bytes)
         protobuf <- doc.getAsTry[PrismEvent]("protobuf")
       } yield MySignedPrismEvent[OP](tx, o, b, signedWith, signature, protobuf)
     }
@@ -93,7 +93,7 @@ object DataModels {
         o <- doc.getAsTry[Int]("o")
         b <- doc.getAsTry[Int]("b")
         signedWith <- doc.getAsTry[String]("signedWith")
-        signature <- doc.getAsTry[String]("signature").map(hex2bytes _)
+        signature <- doc.getAsTry[String]("signature").map(hex2bytes)
         protobuf <- doc.getAsTry[PrismEvent]("protobuf")
       } yield EventWithRootRef(ref, MySignedPrismEvent[OP](tx, o, b, signedWith, signature, protobuf))
     }

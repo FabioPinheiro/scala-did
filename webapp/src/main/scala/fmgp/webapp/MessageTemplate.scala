@@ -1,16 +1,16 @@
 package fmgp.webapp
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.did.comm.extension._
-import fmgp.did.comm.protocol.basicmessage2._
-import fmgp.did.comm.protocol.routing2._
-import fmgp.did.comm.protocol.trustping2._
-import fmgp.did.comm.protocol.reportproblem2._
-import fmgp.did.comm.protocol.discoverfeatures2._
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.did.comm.extension.*
+import fmgp.did.comm.protocol.basicmessage2.*
+import fmgp.did.comm.protocol.routing2.*
+import fmgp.did.comm.protocol.trustping2.*
+import fmgp.did.comm.protocol.reportproblem2.*
+import fmgp.did.comm.protocol.discoverfeatures2.*
 import fmgp.util.Base64
 import fmgp.*
 
@@ -66,7 +66,7 @@ object MessageTemplate {
   def exBasicMessage = BasicMessage(from = mFrom, to = Set(to), content = "Hello, World!")
 
   object Mediatorcoordination2 {
-    import fmgp.did.comm.protocol.mediatorcoordination2._
+    import fmgp.did.comm.protocol.mediatorcoordination2.*
 
     def exMediateRequest2 = MediateRequest(from = from, to = to)
     def exMediateGrant2 = MediateGrant(from = from, to = to, thid = thid, routing_did = from.asFROMTO)
@@ -93,7 +93,7 @@ object MessageTemplate {
   }
 
   object Mediatorcoordination3 {
-    import fmgp.did.comm.protocol.mediatorcoordination3._
+    import fmgp.did.comm.protocol.mediatorcoordination3.*
 
     def exMediateRequest3 = MediateRequest(from = from, to = to)
     def exMediateGrant3 = MediateGrant(from = from, to = to, thid = thid, routing_did = Seq(from.asFROMTO))
@@ -120,7 +120,7 @@ object MessageTemplate {
   }
 
   object Pickup3 {
-    import fmgp.did.comm.protocol.pickup3._
+    import fmgp.did.comm.protocol.pickup3.*
 
     def exStatusRequest = StatusRequest(from = from, to = to, recipient_did = Some(FROMTO("did:recipient_did:123")))
     def exStatus = Status(
@@ -197,8 +197,8 @@ object MessageTemplate {
     )
   }
 
-  import fmgp.util._
-  import fmgp.crypto._
+  import fmgp.util.*
+  import fmgp.crypto.*
 
   val obj_encryptedMessage_ECDHES_X25519_XC20P = EncryptedMessageGeneric(
     ciphertext = CipherText(

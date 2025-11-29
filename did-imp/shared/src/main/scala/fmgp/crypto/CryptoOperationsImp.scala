@@ -1,15 +1,15 @@
 package fmgp.crypto
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
-import fmgp.crypto.error._
-import fmgp.did._
-import fmgp.did.comm._
+import fmgp.crypto.error.*
+import fmgp.did.*
+import fmgp.did.comm.*
 import fmgp.util.IOR
 import fmgp.util.Base64
 
-import scala.util.chaining._
+import scala.util.chaining.*
 
 /** https://identity.foundation/didcomm-messaging/spec/#key-wrapping-algorithms */
 object CryptoOperationsImp extends CryptoOperations {

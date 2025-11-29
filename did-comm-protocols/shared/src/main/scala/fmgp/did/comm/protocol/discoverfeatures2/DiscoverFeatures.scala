@@ -1,9 +1,9 @@
 package fmgp.did.comm.protocol.discoverfeatures2
 
-import zio.json._
+import zio.json.*
 
-import fmgp.did._
-import fmgp.did.comm._
+import fmgp.did.*
+import fmgp.did.comm.*
 
 /** @see
   *   https://didcomm.org/discover-features/2.0/

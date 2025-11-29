@@ -1,14 +1,14 @@
 package fmgp.did
 
-import munit._
+import munit.*
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 import zio.prelude.{Hash, Equal}
 
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.crypto._
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.crypto.*
 
 /** didFrameworkJVM/testOnly fmgp.did.HashSuite */
 class HashSuite extends ZSuite with AssertionsHash {

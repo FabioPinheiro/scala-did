@@ -1,6 +1,6 @@
 package fmgp.crypto
 
-import fmgp.did.method.prism.proto._
+import fmgp.did.method.prism.proto.*
 
 object SharedCryto {
   def getXY(com: Array[Byte]): Either[String, (String, String)] =

@@ -1,7 +1,7 @@
 package fmgp.did.method.prism.node
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 
 class PrismNodeSuite extends FunSuite {
   test("PrismNodeSuite TODO") {

@@ -1,6 +1,6 @@
 package fmgp.did.comm.protocol.chatriqube
 
-import zio.json._
+import zio.json.*
 
 enum SubjectType:
   case Email extends SubjectType

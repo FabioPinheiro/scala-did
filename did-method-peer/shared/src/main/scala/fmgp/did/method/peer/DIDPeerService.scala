@@ -1,9 +1,9 @@
 package fmgp.did.method.peer
 
-import zio.json._
+import zio.json.*
 import zio.json.ast.Json
-import fmgp.did._
-import scala.util.chaining._
+import fmgp.did.*
+import scala.util.chaining.*
 import fmgp.util.Base64
 import zio.json.ast.Json.Obj
 import zio.json.ast.Json.Arr

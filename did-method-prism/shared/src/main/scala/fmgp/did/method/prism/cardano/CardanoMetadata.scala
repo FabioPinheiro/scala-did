@@ -1,6 +1,6 @@
 package fmgp.did.method.prism.cardano
 
-import zio.json._
+import zio.json.*
 import io.bullet.borer.Decoder
 import io.bullet.borer.Cbor
 

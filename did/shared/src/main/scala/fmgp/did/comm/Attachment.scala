@@ -1,8 +1,8 @@
 package fmgp.did.comm
 
-import fmgp.did._
+import fmgp.did.*
 import fmgp.util.Base64
-import zio.json._
+import zio.json.*
 import zio.json.ast.Json
 import fmgp.crypto.JWT
 

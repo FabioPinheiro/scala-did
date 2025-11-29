@@ -1,10 +1,10 @@
 package fmgp.did.method.web
 
-import zio._
-import zio.json._
-import fmgp.did._
+import zio.*
+import zio.json.*
+import fmgp.did.*
 import fmgp.did.comm.FROMTO
-import fmgp.crypto._
+import fmgp.crypto.*
 
 /** DID web
   *

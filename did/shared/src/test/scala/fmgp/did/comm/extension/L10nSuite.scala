@@ -1,9 +1,9 @@
 package fmgp.did.comm.extension
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 
-import fmgp.did.comm._
+import fmgp.did.comm.*
 
 /** didJVM/testOnly fmgp.did.comm.extension.L10nSuite
   */

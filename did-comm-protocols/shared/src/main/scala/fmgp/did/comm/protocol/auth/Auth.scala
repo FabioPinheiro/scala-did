@@ -1,9 +1,9 @@
 package fmgp.did.comm.protocol.auth
 
-import zio.json._
+import zio.json.*
 
-import fmgp.did._
-import fmgp.did.comm._
+import fmgp.did.*
+import fmgp.did.comm.*
 import java.time.Instant
 
 // RequestVerification VerificationChallenge Prove ConfirmVerification

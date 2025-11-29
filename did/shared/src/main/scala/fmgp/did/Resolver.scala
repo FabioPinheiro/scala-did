@@ -1,6 +1,6 @@
 package fmgp.did
 
-import zio._
+import zio.*
 
 import fmgp.did.comm.{FROM, FROMTO, TO}
 

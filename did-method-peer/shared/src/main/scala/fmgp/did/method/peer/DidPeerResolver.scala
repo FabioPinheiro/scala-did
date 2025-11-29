@@ -1,10 +1,10 @@
 package fmgp.did.method.peer
 
-import zio._
-import zio.json._
-import fmgp.did._
+import zio.*
+import zio.json.*
+import fmgp.did.*
 import fmgp.did.comm.FROMTO
-import fmgp.crypto._
+import fmgp.crypto.*
 
 // TODO RENAME DIDPeerResolver
 class DidPeerResolver extends Resolver {

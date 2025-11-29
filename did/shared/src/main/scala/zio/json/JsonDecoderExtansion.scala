@@ -1,6 +1,6 @@
 package zio.json
 
-import zio.json.internal._
+import zio.json.internal.*
 import zio.json.ast.Json
 
 extension [A](self: JsonDecoder[A])

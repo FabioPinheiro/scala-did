@@ -1,7 +1,7 @@
 package fmgp.did.comm
 
-import fmgp.did.comm._
-import zio._
+import fmgp.did.comm.*
+import zio.*
 
 /*
 sealed trait ZMsg[+F, +T] { self =>

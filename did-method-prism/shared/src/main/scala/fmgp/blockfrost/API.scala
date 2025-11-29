@@ -1,6 +1,6 @@
 package fmgp.blockfrost
 
-import zio.json._
+import zio.json.*
 import fmgp.did.method.prism.cardano.CardanoNetwork
 
 case class BlockfrostErrorResponse(

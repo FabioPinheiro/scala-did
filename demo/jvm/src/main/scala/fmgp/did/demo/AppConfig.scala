@@ -1,6 +1,6 @@
 package fmgp.did.demo
 
-import zio._
+import zio.*
 
 object AppConfig {
   val timeout = 3.seconds

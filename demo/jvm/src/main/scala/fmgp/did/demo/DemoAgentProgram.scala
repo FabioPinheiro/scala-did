@@ -1,9 +1,9 @@
 package fmgp.did.demo
 
-import zio._
-import fmgp.did._
-import fmgp.did.framework._
-import fmgp.did.comm._
+import zio.*
+import fmgp.did.*
+import fmgp.did.framework.*
+import fmgp.did.comm.*
 
 object DemoAgentProgram {}
 

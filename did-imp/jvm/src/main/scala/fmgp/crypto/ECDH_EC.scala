@@ -1,9 +1,9 @@
 package fmgp.crypto
 
 import scala.util.Try
-import scala.util.chaining._
-import scala.collection.convert._
-import scala.jdk.CollectionConverters._
+import scala.util.chaining.*
+import scala.collection.convert.*
+import scala.jdk.CollectionConverters.*
 
 import com.nimbusds.jose.crypto.impl.AAD
 import com.nimbusds.jose.crypto.impl.ECDH
@@ -12,20 +12,20 @@ import com.nimbusds.jose.crypto.impl.ECDH1PUCryptoProvider
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral
 import com.nimbusds.jose.crypto.utils.ECChecks
-import com.nimbusds.jose.jwk.{Curve => JWKCurve}
-import com.nimbusds.jose.jwk.{ECKey => JWKECKey}
+import com.nimbusds.jose.jwk.{Curve as JWKCurve}
+import com.nimbusds.jose.jwk.{ECKey as JWKECKey}
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import javax.crypto.SecretKey
 
 import fmgp.did.VerificationMethodReferenced
-import fmgp.did.comm._
+import fmgp.did.comm.*
 import fmgp.crypto.UtilsJVM.toJWKCurve
 import fmgp.crypto.UtilsJVM.toJWK
 import fmgp.util.Base64
 
 import java.util.Collections
-import zio.json._
-import fmgp.crypto.error._
+import zio.json.*
+import fmgp.crypto.error.*
 import com.nimbusds.jose.jca.JWEJCAContext
 import com.nimbusds.jose.JWEHeader
 import com.nimbusds.jose.util.Base64URL

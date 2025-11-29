@@ -1,7 +1,7 @@
 package fmgp.util
 
-import zio._
-import zio.http._
+import zio.*
+import zio.http.*
 
 extension [Env, Err](r: Routes[Env, Err])
   def logErrorAndRespond(using trace: Trace): Routes[Env, Nothing] =

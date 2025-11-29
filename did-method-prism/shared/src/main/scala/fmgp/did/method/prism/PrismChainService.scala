@@ -1,6 +1,6 @@
 package fmgp.did.method.prism
 
-import zio._
+import zio.*
 import fmgp.did.method.prism.cardano.TxHash
 import _root_.proto.prism.SignedPrismEvent
 

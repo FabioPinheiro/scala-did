@@ -8,11 +8,11 @@ import org.didcommx.peerdid.*
 import com.nimbusds.jose.jwk.*
 import scala.jdk.CollectionConverters.*
 
-import fmgp.did._
-import fmgp.crypto._
-import fmgp.crypto.UtilsJVM._
+import fmgp.did.*
+import fmgp.crypto.*
+import fmgp.crypto.UtilsJVM.*
 
-import zio.json._
+import zio.json.*
 import fmgp.crypto.OKPPrivateKey
 
 final case class DidcommxPeerdid(

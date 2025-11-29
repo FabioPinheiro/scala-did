@@ -9,9 +9,9 @@ import proto.prism.PublicKey.KeyData.CompressedEcKeyData
 import proto.prism.PublicKey.KeyData.EcKeyData
 import proto.prism.Service
 import proto.prism.node.DIDData
-import fmgp.did.method.prism._
-import fmgp.did.method.prism.cardano._
-import fmgp.did.method.prism.proto._
+import fmgp.did.method.prism.*
+import fmgp.did.method.prism.cardano.*
+import fmgp.did.method.prism.proto.*
 
 extension (ssi: SSI) {
   def didData: Option[DIDData] = Option.unless(ssi.disabled) {

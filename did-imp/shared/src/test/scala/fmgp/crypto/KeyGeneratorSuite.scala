@@ -1,9 +1,9 @@
 package fmgp.crypto
 
-import munit._
+import munit.*
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
 /**   - didImpJVM/testOnly fmgp.crypto.KeyGeneratorSuite
   *   - didImpJS/testOnly fmgp.crypto.KeyGeneratorSuite

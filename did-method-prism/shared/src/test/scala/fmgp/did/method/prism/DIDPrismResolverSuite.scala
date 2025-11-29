@@ -1,11 +1,11 @@
 package fmgp.did.method.prism
 
-import munit._
-import fmgp.did._
-import fmgp.did.comm._
+import munit.*
+import fmgp.did.*
+import fmgp.did.comm.*
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
 /** didResolverPrismJVM/testOnly fmgp.did.method.prism.DIDPrismResolverSuite */
 class DIDPrismResolverSuite extends ZSuite {

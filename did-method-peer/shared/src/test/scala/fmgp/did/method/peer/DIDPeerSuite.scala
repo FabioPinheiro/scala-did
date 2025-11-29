@@ -1,14 +1,14 @@
 package fmgp.did.method.peer
 
-import munit._
-import zio._
-import zio.json._
-import fmgp.crypto._
-import fmgp.did._
-import fmgp.did.method.peer._
-import fmgp.multibase._
+import munit.*
+import zio.*
+import zio.json.*
+import fmgp.crypto.*
+import fmgp.did.*
+import fmgp.did.method.peer.*
+import fmgp.multibase.*
 
-import DIDPeerExamples._
+import DIDPeerExamples.*
 import fmgp.did.method.peer.DidPeerResolver
 import zio.json.ast.Json
 import fmgp.util.Base64

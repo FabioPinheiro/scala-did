@@ -1,9 +1,9 @@
 package fmgp.did.comm.protocol.oobinvitation
 
-import zio.json._
+import zio.json.*
 
-import fmgp.did._
-import fmgp.did.comm._
+import fmgp.did.*
+import fmgp.did.comm.*
 
 extension (msg: PlaintextMessage)
   def toOOBInvitation: Either[String, OOBInvitation] =

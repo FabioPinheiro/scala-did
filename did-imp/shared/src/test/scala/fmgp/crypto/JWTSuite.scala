@@ -1,12 +1,12 @@
 package fmgp.crypto
 
-import munit._
-import scala.concurrent.duration._
+import munit.*
+import scala.concurrent.duration.*
 import scala.concurrent.ExecutionContext.Implicits.global
-import zio.json._
+import zio.json.*
 
 import fmgp.did.DIDDocument
-import fmgp.did.comm._
+import fmgp.did.comm.*
 import fmgp.util.Base64
 
 /** didImpJVM/testOnly fmgp.crypto.JWTSuite

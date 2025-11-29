@@ -1,6 +1,6 @@
 package fmgp.did.method.prism.cardano
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import fmgp.crypto.Secp256k1PrivateKey
 //import org.hyperledger.identus.apollo.derivation.MnemonicHelper
 //import org.hyperledger.identus.apollo.derivation.HDKey

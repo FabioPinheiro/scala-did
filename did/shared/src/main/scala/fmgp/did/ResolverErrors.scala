@@ -1,6 +1,6 @@
 package fmgp.did
 
-import zio.json._
+import zio.json.*
 
 sealed trait ResolverError
 object ResolverError {

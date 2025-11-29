@@ -1,7 +1,7 @@
 package fmgp.did.method.prism
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 import fmgp.did.DIDDocument
 import fmgp.util.Base64
 
@@ -13,8 +13,8 @@ import org.bouncycastle.jcajce.provider.asymmetric.util.EC5Util
 import java.security.spec.ECPrivateKeySpec
 import java.security.KeyFactory
 import java.security.spec.ECPublicKeySpec
-import fmgp.did.method.prism.cardano._
-import fmgp.did.method.prism.proto._
+import fmgp.did.method.prism.cardano.*
+import fmgp.did.method.prism.proto.*
 
 /** didResolverPrismJVM/testOnly fmgp.did.method.prism.CrytoUtilSuite */
 class CrytoUtilSuite extends FunSuite {

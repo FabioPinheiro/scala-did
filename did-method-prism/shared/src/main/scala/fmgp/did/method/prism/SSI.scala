@@ -1,12 +1,12 @@
 package fmgp.did.method.prism
 
-import scala.util.chaining._
-import zio.json._
+import scala.util.chaining.*
+import zio.json.*
 import fmgp.crypto.{SharedCryto, Secp256k1PrivateKey}
-import fmgp.did._
-import fmgp.did.method.prism._
-import fmgp.did.method.prism.proto._
-import fmgp.did.method.prism.cardano._
+import fmgp.did.*
+import fmgp.did.method.prism.*
+import fmgp.did.method.prism.proto.*
+import fmgp.did.method.prism.cardano.*
 
 /** This is the SSI representing a DID PRISM */
 final case class SSI(

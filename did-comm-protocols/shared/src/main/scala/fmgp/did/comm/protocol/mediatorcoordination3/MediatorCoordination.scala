@@ -1,9 +1,9 @@
 package fmgp.did.comm.protocol.mediatorcoordination3
 /* https://didcomm.org/mediator-coordination/3.0/ */
 
-import zio.json._
-import fmgp.did._
-import fmgp.did.comm._
+import zio.json.*
+import fmgp.did.*
+import fmgp.did.comm.*
 
 extension (msg: PlaintextMessage)
   def toMediateRequest: Either[String, MediateRequest] = MediateRequest.fromPlaintextMessage(msg)

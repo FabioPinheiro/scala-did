@@ -1,15 +1,15 @@
 package fmgp.did.uniresolver
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.crypto.error._
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.crypto.error.*
 
 import scala.util.chaining.scalaUtilChainingOps
 import scala.scalajs.js
-import org.scalajs.dom._
+import org.scalajs.dom.*
 
 object Uniresolver {
   val defaultEndpoint = "https://dev.uniresolver.io/1.0/identifiers/"

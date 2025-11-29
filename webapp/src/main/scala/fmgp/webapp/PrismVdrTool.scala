@@ -5,19 +5,19 @@ import scala.util.Failure
 import scala.util.Success
 import org.scalajs.dom
 import scala.scalajs.js
-import scala.scalajs.js.timers._
-import js.JSConverters._
+import scala.scalajs.js.timers.*
+import js.JSConverters.*
 
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import com.raquo.laminar.codecs.StringAsIsCodec
-import com.raquo.airstream.ownership._
-import zio.json._
+import com.raquo.airstream.ownership.*
+import zio.json.*
 
 import proto.prism.PrismEvent
 import fmgp.crypto.SHA256
-import fmgp.did.method.prism._
-import fmgp.did.method.prism.proto._
-import fmgp.util._
+import fmgp.did.method.prism.*
+import fmgp.did.method.prism.proto.*
+import fmgp.util.*
 
 @js.annotation.JSExportTopLevel("PrismVdrTool")
 object PrismVdrTool {

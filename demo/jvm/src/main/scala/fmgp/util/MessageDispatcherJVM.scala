@@ -1,14 +1,14 @@
 package fmgp.util
 
-import scala.util.chaining._
+import scala.util.chaining.*
 
-import zio._
-import zio.json._
-import zio.http.{MediaType => ZMediaType, _}
+import zio.*
+import zio.json.*
+import zio.http.{MediaType as ZMediaType, *}
 
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.crypto.error._
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.crypto.error.*
 
 @deprecated
 trait MessageDispatcher {

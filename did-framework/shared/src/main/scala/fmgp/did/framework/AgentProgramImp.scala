@@ -1,12 +1,12 @@
 package fmgp.did.framework
 
-import zio._
-import zio.json._
-import zio.stream._
-import fmgp.crypto.error._
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.did.comm.protocol._
+import zio.*
+import zio.json.*
+import zio.stream.*
+import fmgp.crypto.error.*
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.did.comm.protocol.*
 
 class AgentProgramImp(
     agent: Agent,
@@ -82,7 +82,7 @@ class AgentProgramImp(
     ret <- action match
       case NoReply         => ZIO.unit // TODO Maybe infor transport of immediately reply
       case reply: AnyReply =>
-        import fmgp.did.comm.Operations._
+        import fmgp.did.comm.Operations.*
         for {
           message <- reply.msg.to.toSeq.flatten match {
             case Seq() =>

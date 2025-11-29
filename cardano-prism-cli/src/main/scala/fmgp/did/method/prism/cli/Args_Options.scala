@@ -19,7 +19,7 @@ val blockfrostConfig =
 
 val networkFlag =
   Options
-    .enumeration[PublicCardanoNetwork]("network")(PublicCardanoNetwork.values.toSeq.map(e => (e.name, e)): _*)
+    .enumeration[PublicCardanoNetwork]("network")(PublicCardanoNetwork.values.toSeq.map(e => (e.name, e)) *)
     .withDefault(PublicCardanoNetwork.Mainnet)
 
 val networkOnlineFlag =
@@ -27,12 +27,12 @@ val networkOnlineFlag =
     .enumeration[PublicCardanoNetwork]("network")(
       Seq(PublicCardanoNetwork.Mainnet, PublicCardanoNetwork.Preprod, PublicCardanoNetwork.Preview).map(e =>
         (e.name, e)
-      ): _*
+      ) *
     )
 
 val networkArgs =
   Args.enumeration[PublicCardanoNetwork]("network")(
-    PublicCardanoNetwork.values.filterNot(_ == PublicCardanoNetwork.Testnet).toSeq.map(e => (e.name, e)): _*
+    PublicCardanoNetwork.values.filterNot(_ == PublicCardanoNetwork.Testnet).toSeq.map(e => (e.name, e)) *
   )
 
 val mnemonicWords = Options

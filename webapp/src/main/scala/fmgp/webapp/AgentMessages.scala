@@ -1,20 +1,20 @@
 package fmgp.webapp
 
 import scala.scalajs.js
-import scala.scalajs.js.timers._
-import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.timers.*
+import scala.scalajs.js.JSConverters.*
 import org.scalajs.dom
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
-import fmgp.did._
-import fmgp.did.comm._
+import fmgp.did.*
+import fmgp.did.comm.*
 import fmgp.did.comm.protocol.basicmessage2.BasicMessage
 import fmgp.did.method.peer.DidPeerResolver
 import fmgp.did.method.peer.DIDPeer
-import fmgp.did.agent._
+import fmgp.did.agent.*
 import typings.std.stdStrings.childList
 
 object AgentMessageStorage {

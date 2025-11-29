@@ -1,9 +1,9 @@
 /** https://identity.foundation/didcomm-messaging/spec/#trust-ping-protocol-20 */
 package fmgp.did.comm.protocol.trustping2
 
-import zio.json._
-import fmgp.did._
-import fmgp.did.comm._
+import zio.json.*
+import fmgp.did.*
+import fmgp.did.comm.*
 
 extension (msg: PlaintextMessage)
   def toTrustPing: Either[String, TrustPing] =

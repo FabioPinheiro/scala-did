@@ -1,11 +1,11 @@
 package fmgp.did.method.peer
 
-import zio._
-import fmgp.did._
-import fmgp.util._
-import fmgp.multibase._
-import fmgp.crypto._
-import zio.json._
+import zio.*
+import fmgp.did.*
+import fmgp.util.*
+import fmgp.multibase.*
+import fmgp.crypto.*
+import zio.json.*
 import zio.json.ast.Json
 import javax.lang.model.element.Element
 import fmgp.multibase.Base.Base58BTC

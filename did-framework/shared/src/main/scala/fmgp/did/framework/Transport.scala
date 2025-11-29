@@ -1,8 +1,8 @@
 package fmgp.did.framework
 
-import zio._
-import zio.stream._
-import fmgp.did._
+import zio.*
+import zio.stream.*
+import fmgp.did.*
 import fmgp.did.comm.{SignedMessage, EncryptedMessage}
 
 type TransportDIDComm[R] = Transport[R, SignedMessage | EncryptedMessage, SignedMessage | EncryptedMessage]

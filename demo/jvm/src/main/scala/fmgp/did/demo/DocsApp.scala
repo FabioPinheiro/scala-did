@@ -1,7 +1,7 @@
 package fmgp.did.demo
 
-import zio._
-import zio.http._
+import zio.*
+import zio.http.*
 
 object DocsApp {
 
@@ -49,7 +49,7 @@ object DocsApp {
     Method.GET / "doc" / trailing -> handler {
       val extractPath = Handler.param[(Path, Request)](_._1)
       val extractRequest = Handler.param[(Path, Request)](_._2)
-      import zio.http.template._
+      import zio.http.template.*
 
       for {
         path <- extractPath
@@ -85,7 +85,7 @@ object DocsApp {
     Method.GET / "apis" / trailing -> handler {
       val extractPath = Handler.param[(Path, Request)](_._1)
       val extractRequest = Handler.param[(Path, Request)](_._2)
-      import zio.http.template._
+      import zio.http.template.*
 
       for {
         path <- extractPath
@@ -109,7 +109,7 @@ object DocsApp {
     Method.GET / "api" / trailing -> handler {
       val extractPath = Handler.param[(Path, Request)](_._1)
       val extractRequest = Handler.param[(Path, Request)](_._2)
-      import zio.http.template._
+      import zio.http.template.*
 
       for {
         path <- extractPath

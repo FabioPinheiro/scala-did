@@ -1,6 +1,6 @@
 package fmgp.crypto
 
-import zio._
+import zio.*
 
 /** Hide implementation details to improve the API
   *

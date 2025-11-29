@@ -1,10 +1,10 @@
 package fmgp.did.comm
 
-import munit._
-import zio.json._
-import scala.util.chaining._
+import munit.*
+import zio.json.*
+import scala.util.chaining.*
 
-import fmgp.did._
+import fmgp.did.*
 import java.net.{URI, URL}
 import fmgp.util.Base64
 

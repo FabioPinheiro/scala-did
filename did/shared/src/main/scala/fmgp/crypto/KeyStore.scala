@@ -1,6 +1,6 @@
 package fmgp.crypto
 
-import zio.json._
+import zio.json.*
 
 type Keys = Set[PrivateKey]
 case class KeyStore(keys: Set[PrivateKeyWithKid])

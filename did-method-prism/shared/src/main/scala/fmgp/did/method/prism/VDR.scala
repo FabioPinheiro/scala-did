@@ -1,7 +1,7 @@
 package fmgp.did.method.prism
 
-import zio.json._
-import fmgp.did.method.prism.proto._
+import zio.json.*
+import fmgp.did.method.prism.proto.*
 import fmgp.did.method.prism.cardano.EventCursor
 
 final case class VDR(

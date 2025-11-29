@@ -1,6 +1,6 @@
 package fmgp.did.method.prism
 
-import zio.json._
+import zio.json.*
 
 import fmgp.util.bytes2Hex
 import fmgp.util.hex2bytes

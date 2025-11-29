@@ -1,7 +1,7 @@
 package fmgp.crypto
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex

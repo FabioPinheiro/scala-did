@@ -1,9 +1,9 @@
 package fmgp.did.comm
 
-import munit._
+import munit.*
 
-import fmgp.did._
-import fmgp.crypto._
+import fmgp.did.*
+import fmgp.crypto.*
 
 /** didJVM/testOnly fmgp.did.comm.OpaqueTypesSuite
   *

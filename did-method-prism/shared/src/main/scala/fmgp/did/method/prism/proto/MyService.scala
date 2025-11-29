@@ -1,6 +1,6 @@
 package fmgp.did.method.prism.proto
 
-import zio.json._
+import zio.json.*
 import proto.prism.Service
 
 // TODO Rename PrismDidService
@@ -9,7 +9,7 @@ case class MyService(
     `type`: String, // (2)
     serviceEndpoint: String, // (3)
 ) {
-  import fmgp.did._
+  import fmgp.did.*
   def toDIDService =
     DIDServiceGeneric(
       id = id,

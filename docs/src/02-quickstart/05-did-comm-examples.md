@@ -3,11 +3,11 @@
 Here's a basic example of how to send a message using the library:
 
 ```scala mdoc
-import zio._
-import zio.json._
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.did.comm.protocol.basicmessage2._
+import zio.*
+import zio.json.*
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.did.comm.protocol.basicmessage2.*
 
 // Initialize a new message
 val message = new BasicMessage(

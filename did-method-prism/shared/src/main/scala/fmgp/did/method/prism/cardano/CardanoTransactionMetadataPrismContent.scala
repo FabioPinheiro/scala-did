@@ -1,6 +1,6 @@
 package fmgp.did.method.prism.cardano
 
-import zio.json._
+import zio.json.*
 import proto.prism.PrismObject
 import io.bullet.borer.Decoder
 

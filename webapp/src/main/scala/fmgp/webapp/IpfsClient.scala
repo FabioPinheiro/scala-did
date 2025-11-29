@@ -1,8 +1,8 @@
 package fmgp.webapp
 
-import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.JSConverters.*
 
-import zio.json._
+import zio.json.*
 import zio.json.ast.Json
 import scala.scalajs.js
 import org.scalajs.dom

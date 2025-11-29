@@ -1,11 +1,11 @@
 package fmgp.did.comm
 
 import fmgp.did.DIDDocument
-import fmgp.crypto._
+import fmgp.crypto.*
 
 // import fmgp.crypto.RawOperations._
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try

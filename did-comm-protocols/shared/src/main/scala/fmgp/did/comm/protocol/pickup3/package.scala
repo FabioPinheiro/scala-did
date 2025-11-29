@@ -1,8 +1,8 @@
 package fmgp.did.comm.protocol
 
-import zio.json._
-import fmgp.did._
-import fmgp.did.comm._
+import zio.json.*
+import fmgp.did.*
+import fmgp.did.comm.*
 
 package object pickup3 {
   extension (msg: PlaintextMessage)

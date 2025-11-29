@@ -1,6 +1,6 @@
 package fmgp.did.comm
 
-import zio.json._
+import zio.json.*
 import fmgp.util.Base64
 import fmgp.crypto.SHA256
 import fmgp.did.VerificationMethodReferenced

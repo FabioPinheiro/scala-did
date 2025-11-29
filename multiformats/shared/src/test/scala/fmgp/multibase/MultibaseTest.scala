@@ -1,6 +1,6 @@
 package fmgp.multibase
 
-import munit._
+import munit.*
 
 /** multiformatsJVM/testOnly fmgp.multibase.MultibaseTest */
 class MultibaseTest extends FunSuite {

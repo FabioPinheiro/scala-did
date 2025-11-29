@@ -1,6 +1,6 @@
 package fmgp.did.framework
 
-import zio._
+import zio.*
 
 trait Websocket[E] {
   // Binding

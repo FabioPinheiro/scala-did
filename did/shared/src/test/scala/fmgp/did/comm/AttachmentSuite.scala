@@ -1,7 +1,7 @@
 package fmgp.did.comm
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 import zio.json.ast.Json
 
 /** didJVM/testOnly fmgp.did.comm.AttachmentSuite

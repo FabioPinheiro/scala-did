@@ -1,8 +1,8 @@
 package fmgp.crypto
 
-import munit._
-import zio._
-import zio.json._
+import munit.*
+import zio.*
+import zio.json.*
 import fmgp.util.Base64
 
 /** didJVM/testOnly fmgp.crypto.PointOnCurveSuite

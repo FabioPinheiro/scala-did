@@ -1,6 +1,6 @@
 package fmgp.did.method.prism.cardano
 
-import zio.json._
+import zio.json.*
 import scala.deriving.*, scala.compiletime.*
 
 trait PrismBlockIndex {

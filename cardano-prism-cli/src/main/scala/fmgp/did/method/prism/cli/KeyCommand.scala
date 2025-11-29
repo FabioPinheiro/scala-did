@@ -1,6 +1,6 @@
 package fmgp.did.method.prism.cli
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import scala.util.Try
 
 import zio.*

@@ -1,7 +1,7 @@
 package fmgp.did.method.prism
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 import fmgp.did.DIDDocument
 
 case class EventRef(b: Int, o: Int, eventHash: EventHash)

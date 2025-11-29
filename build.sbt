@@ -3,7 +3,7 @@ import scala.sys.process._
 
 inThisBuild(
   Seq(
-    scalaVersion := "3.3.6", // Also update docs/publishWebsite.sh and any ref to scala-3.3.6
+    scalaVersion := "3.3.7", // Also update docs/publishWebsite.sh and any ref to scala-3.3.7
     // scalaVersion := "3.4.2", // Also update docs/publishWebsite.sh and any ref to scala-3.4.2
   )
 )
@@ -258,6 +258,12 @@ inThisBuild(
     // ### https://docs.scala-lang.org/scala3/guides/migration/options-lookup.html
     scalacOptions ++=
       Seq("-encoding", "UTF-8") ++ // source files are in UTF-8
+        // Seq("-explain") ++ // Compile error Explanation
+        Seq( // run all/Test/compile before each commit
+          "-source",
+          "future", // TODO user '3.9' // Note 3.10 will start to remove scala 2 logic like implicits
+          "-Wconf:msg=pattern selector should be an instance of Matchable:s" // FIXME REMOVE
+        ) ++ // preparation for scala 3.9
         Seq(
           "-deprecation", // warn about use of deprecated APIs
           "-unchecked", // warn about unchecked type parameters
@@ -272,7 +278,10 @@ inThisBuild(
           // NO NEED ATM "-Xsemanticdb"
           // NO NEED ATM "-Ykind-projector"
         ) ++ {
-          if (true) Seq("-Xfatal-warnings") else Seq("-rewrite", "-source", "3.4-migration")
+          // https://docs.scala-lang.org/scala3/guides/migration/tooling-syntax-rewriting.html
+          // scalac -help
+          if (true) Seq("-Xfatal-warnings")
+          else Seq("-rewrite", "-source", "future-migration") // preparation for scala 3.9 and 3.10
         } ++
         // Because DeriveJson(Decoder/Encoder).gen[DidFail] exceeded maximal number of successive inlines (default is 32)
         Seq("-Xmax-inlines", "43")

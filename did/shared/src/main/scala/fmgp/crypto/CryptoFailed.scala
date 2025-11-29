@@ -1,10 +1,10 @@
 package fmgp.crypto
 
-import zio.json._
+import zio.json.*
 
 import fmgp.did.DIDSubject
 import fmgp.did.ResolverError
-import fmgp.did.comm._
+import fmgp.did.comm.*
 
 package error {
 

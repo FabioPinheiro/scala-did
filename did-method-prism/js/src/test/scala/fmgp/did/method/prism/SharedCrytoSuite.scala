@@ -1,10 +1,10 @@
 package fmgp.did.method.prism
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 import fmgp.did.DIDDocument
 import fmgp.util.Base64
-import fmgp.did.method.prism.proto._
+import fmgp.did.method.prism.proto.*
 import fmgp.crypto.SharedCryto
 
 class SharedCrytoSuite extends FunSuite {

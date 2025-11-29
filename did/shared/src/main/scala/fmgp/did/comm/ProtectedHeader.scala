@@ -1,9 +1,9 @@
 package fmgp.did.comm
 
-import zio.json._
-import zio.json.ast._
+import zio.json.*
+import zio.json.ast.*
 
-import fmgp.did._
+import fmgp.did.*
 import fmgp.crypto.PublicKey
 import fmgp.util.{Base64, safeValueOf}
 import fmgp.util.Base64Obj

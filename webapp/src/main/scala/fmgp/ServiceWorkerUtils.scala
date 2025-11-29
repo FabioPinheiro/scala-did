@@ -1,11 +1,11 @@
 package fmgp
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
-import org.scalajs.dom._
-import org.scalajs.dom.experimental.push._
-import org.scalajs.dom.experimental.serviceworkers._
+import org.scalajs.dom.*
+import org.scalajs.dom.experimental.push.*
+import org.scalajs.dom.experimental.serviceworkers.*
 import org.scalajs.dom.experimental.{Notification, NotificationOptions}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -14,7 +14,7 @@ import scala.util.{Failure, Random, Success}
 
 import org.scalajs.dom
 import scala.scalajs.js
-import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.JSConverters.*
 import scala.scalajs.js.typedarray.Uint8Array
 import fmgp.did.Client
 import fmgp.WebappConfig.PushNotifications
@@ -140,7 +140,7 @@ object ServiceWorkerUtils {
   @scala.scalajs.js.annotation.JSExport
   def requestNotificationPermission = {
     def aux(status: String) = println(s"Notification permission status: $status")
-    dom.Notification.requestPermission(aux _)
+    dom.Notification.requestPermission((x) => aux(x))
   }
 
 }

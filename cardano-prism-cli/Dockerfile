@@ -1,13 +1,13 @@
 FROM azul/zulu-openjdk-alpine:17
 
-# COPY ./target/scala-3.3.6/prism-Indexer.jar /prism-indexer.jar
-COPY ./target/scala-3.3.6/cardano-prism.jar /cardano-prism.jar
+# COPY ./target/scala-3.3.7/prism-Indexer.jar /prism-indexer.jar
+COPY ./target/scala-3.3.7/cardano-prism.jar /cardano-prism.jar
 VOLUME /data
 
 
 # sbt "cardanoPrismCli/assembly"
-# java -jar cardano-prism-cli/target/scala-3.3.6/cardano-prism.jar indexer ../prism-vdr/preprod
-# shasum -a 256 cardano-prism-cli/target/scala-3.3.6/cardano-prism.jar
+# java -jar cardano-prism-cli/target/scala-3.3.7/cardano-prism.jar indexer ../prism-vdr/preprod
+# shasum -a 256 cardano-prism-cli/target/scala-3.3.7/cardano-prism.jar
 
 # ENTRYPOINT [ "java", "-Dport=8080", "-XX:+UseContainerSupport", "-jar", "app.jar" ]
 # #-Xmx100m

@@ -1,7 +1,7 @@
 package fmgp.did
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 import zio.json.JsonCodec.option
 import zio.json.ast.{Json, JsonCursor}
 

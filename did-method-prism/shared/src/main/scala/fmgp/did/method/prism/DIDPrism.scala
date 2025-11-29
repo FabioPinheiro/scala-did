@@ -1,12 +1,12 @@
 package fmgp.did.method.prism
 
-import zio._
-import zio.json._
-import fmgp.did._
+import zio.*
+import zio.json.*
+import fmgp.did.*
 import fmgp.did.comm.FROMTO
-import fmgp.crypto._
-import fmgp.util._
-import fmgp.did.method.prism.proto._
+import fmgp.crypto.*
+import fmgp.util.*
+import fmgp.did.method.prism.proto.*
 
 /** DID Prism (only short form)
   *

@@ -1,11 +1,11 @@
 package fmgp.crypto
 
 import fmgp.did.DIDDocument
-import fmgp.did.comm._
-import fmgp.crypto.CryptoOperationsImp._
-import munit._
-import zio._
-import zio.json._
+import fmgp.did.comm.*
+import fmgp.crypto.CryptoOperationsImp.*
+import munit.*
+import zio.*
+import zio.json.*
 
 import scala.concurrent.duration.Duration
 import scala.scalajs.js.JavaScriptException

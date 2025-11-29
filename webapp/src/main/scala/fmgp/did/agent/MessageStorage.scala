@@ -1,7 +1,7 @@
 package fmgp.did.agent
 
-import zio.json._
-import fmgp.did.comm._
+import zio.json.*
+import fmgp.did.comm.*
 import fmgp.did.DidExample
 import fmgp.did.AgentProvider
 

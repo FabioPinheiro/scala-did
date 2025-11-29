@@ -1,6 +1,6 @@
 package fmgp.did.method.prism.proto
 
-import zio.json._
+import zio.json.*
 import proto.prism.PublicKey
 import proto.prism.ECKeyData
 import proto.prism.CompressedECKeyData
@@ -43,7 +43,7 @@ object PrismPublicKey {
   case class VoidKey(id: String, reason: String) extends PrismPublicKey
 
   sealed trait PrismPublicKey_TMP extends PrismPublicKey { self =>
-    import fmgp.did._
+    import fmgp.did.*
     def usage: PrismKeyUsage
     def curve: String
 
@@ -63,7 +63,7 @@ object PrismPublicKey {
   case class UncompressedECKey(id: String, usage: PrismKeyUsage, curve: String, x: Array[Byte], y: Array[Byte])
       extends PrismPublicKey
       with PrismPublicKey_TMP {
-    import fmgp.crypto._
+    import fmgp.crypto.*
     def publicKey: fmgp.crypto.ECPublicKeyWithoutKid =
       ECPublicKeyWithoutKid(
         kty = KTY.EC,
@@ -75,7 +75,7 @@ object PrismPublicKey {
   case class CompressedECKey(id: String, usage: PrismKeyUsage, curve: String, data: Array[Byte])
       extends PrismPublicKey
       with PrismPublicKey_TMP {
-    import fmgp.crypto._
+    import fmgp.crypto.*
     def publicKey: fmgp.crypto.PublicKeyWithoutKid = {
 
       fmgp.crypto.Curve.valueOf(curve) match
