@@ -1,14 +1,14 @@
 package fmgp.did.demo
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
-import fmgp.crypto._
-import fmgp.crypto.error._
-import fmgp.did._
-import fmgp.did.comm._
-import zio.http._
-import fmgp.did.framework._
+import fmgp.crypto.*
+import fmgp.crypto.error.*
+import fmgp.did.*
+import fmgp.did.comm.*
+import zio.http.*
+import fmgp.did.framework.*
 import fmgp.did.comm.protocol.auth.AuthRequest
 
 object DemoAgent {

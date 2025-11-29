@@ -1,7 +1,7 @@
 package fmgp.webapp
 
 import org.scalajs.dom
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import typings.std.stdStrings.text
 
 import com.raquo.laminar.nodes.ReactiveHtmlElement

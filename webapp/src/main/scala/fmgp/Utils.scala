@@ -1,12 +1,12 @@
 package fmgp
 
-import zio._
-import zio.json._
-import fmgp.did._
-import fmgp.util._
-import fmgp.did.comm._
-import fmgp.did.framework._
-import fmgp.crypto.error._
+import zio.*
+import zio.json.*
+import fmgp.did.*
+import fmgp.util.*
+import fmgp.did.comm.*
+import fmgp.did.framework.*
+import fmgp.crypto.error.*
 import fmgp.webapp.ResolverTool
 import fmgp.webapp.Global
 

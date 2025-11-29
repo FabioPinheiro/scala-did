@@ -4,10 +4,10 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation.*
 import scala.scalajs.js.JSON
 
-import scalajs._
-import org.scalajs.dom._
+import scalajs.*
+import org.scalajs.dom.*
 
-import zio.json._
+import zio.json.*
 import scala.concurrent.Promise
 
 // import javascriptLogo from "/javascript.svg"

@@ -1,20 +1,20 @@
 package fmgp.did.comm
 
-import zio._
-import zio.json._
-import zio.stream._
-import zio.http._
+import zio.*
+import zio.json.*
+import zio.stream.*
+import zio.http.*
 import zio.http.Header.{AccessControlAllowOrigin, AccessControlAllowMethods}
 
-import fmgp.crypto._
-import fmgp.crypto.error._
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.did.framework._
+import fmgp.crypto.*
+import fmgp.crypto.error.*
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.did.framework.*
 import fmgp.did.method.peer.DidPeerResolver
 import fmgp.did.method.peer.DIDPeer.AgentDIDPeer
 import fmgp.did.demo.AppConfig
-import fmgp.util._
+import fmgp.util.*
 
 object DIDCommRoutes {
 

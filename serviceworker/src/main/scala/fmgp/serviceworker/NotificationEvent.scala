@@ -1,8 +1,8 @@
 package fmgp.serviceworker
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation._
-import org.scalajs.dom._
+import scala.scalajs.js.annotation.*
+import org.scalajs.dom.*
 
 /** See [[https://developer.mozilla.org/en-US/docs/Web/API/NotificationEvent]] of whatwg ServiceWorker spec.
   *

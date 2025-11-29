@@ -1,23 +1,23 @@
 package fmgp.webapp
 
 import org.scalajs.dom
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import scala.scalajs.js
-import scala.scalajs.js.timers._
-import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.timers.*
+import scala.scalajs.js.JSConverters.*
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
 import fmgp.Utils
-import fmgp.did._
-import fmgp.crypto._
-import fmgp.crypto.error._
-import fmgp.did.comm._
+import fmgp.did.*
+import fmgp.crypto.*
+import fmgp.crypto.error.*
+import fmgp.did.comm.*
 import fmgp.did.comm.protocol.mediatorcoordination2
 import fmgp.did.comm.protocol.mediatorcoordination3
-import fmgp.did.comm.protocol.pickup3._
-import fmgp.did.method.peer._
+import fmgp.did.comm.protocol.pickup3.*
+import fmgp.did.method.peer.*
 import fmgp.did.AgentProvider.AgentWithShortName
 
 object AgentManagement {
@@ -73,7 +73,7 @@ object AgentManagement {
   }
 
   object V2 {
-    import mediatorcoordination2._
+    import mediatorcoordination2.*
     def mediateRequest(msg: => MediateRequest) = Utils
       .sendAndReceiveProgram(msg.toPlaintextMessage)
       .map { response =>
@@ -93,7 +93,7 @@ object AgentManagement {
   }
 
   object V3 {
-    import mediatorcoordination3._
+    import mediatorcoordination3.*
     def mediateRequest(msg: => MediateRequest) = Utils
       .sendAndReceiveProgram(msg.toPlaintextMessage)
       .map(_.toMediateGrantOrDeny match {
@@ -205,8 +205,8 @@ object AgentManagement {
         case (Some(agent), Some(mediatorDID)) =>
           val env = ZEnvironment(agent, DidPeerResolver())
           val (mrV2, mrpV2, ruV2, rupV2) = {
-            import mediatorcoordination2._
-            import V2._
+            import mediatorcoordination2.*
+            import V2.*
             def mr = MediateRequest(from = agent.id, to = mediatorDID)
             def mrp = mediateRequest(mr).provideEnvironment(env)
             def ru = KeylistUpdate(
@@ -218,8 +218,8 @@ object AgentManagement {
             (mr, mrp, ru, rup)
           }
           val (mrV3, mrpV3, ruV3, rupV3) = {
-            import mediatorcoordination3._
-            import V3._
+            import mediatorcoordination3.*
+            import V3.*
             def mr = MediateRequest(from = agent.id, to = mediatorDID)
             def mrp = mediateRequest(mr).provideEnvironment(env)
             def ru = RecipientUpdate(

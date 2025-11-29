@@ -1,32 +1,32 @@
 package fmgp.webapp
 
-import scala.scalajs.js.timers._
-import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.timers.*
+import scala.scalajs.js.JSConverters.*
 
 import org.scalajs.dom
 import com.raquo.airstream.core.Sink
-import com.raquo.airstream.ownership._
-import com.raquo.laminar.api.L._
+import com.raquo.airstream.ownership.*
+import com.raquo.laminar.api.L.*
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
-import proto.prism._
+import proto.prism.*
 import fmgp.*
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.did.comm.extension._
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.did.comm.extension.*
 import fmgp.did.method.peer.DIDPeer2
-import fmgp.did.method.prism.proto._
+import fmgp.did.method.prism.proto.*
 import fmgp.did.uniresolver.Uniresolver
 import fmgp.did.comm.protocol.routing2.ForwardMessage
-import fmgp.crypto.error._
+import fmgp.crypto.error.*
 import scala.annotation.tailrec
 import scalapb.GeneratedMessageCompanion
 import scalapb.GeneratedMessage
-import fmgp.util._
-import scalapb.descriptors._
+import fmgp.util.*
+import scalapb.descriptors.*
 import scala.collection.View.Single
 import fmgp.webapp.utils.ProtoHTML
 import com.google.protobuf.ByteString

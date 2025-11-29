@@ -1,13 +1,13 @@
 package fmgp.webapp
 
-import zio._
-import zio.json._
-import com.raquo.laminar.api.L._
+import zio.*
+import zio.json.*
+import com.raquo.laminar.api.L.*
 
-import fmgp.did._
-import fmgp.did.comm._
+import fmgp.did.*
+import fmgp.did.comm.*
 import fmgp.did.comm.protocol.basicmessage2.BasicMessage
-import fmgp.did.method.peer._
+import fmgp.did.method.peer.*
 
 object BasicMessageTool {
 

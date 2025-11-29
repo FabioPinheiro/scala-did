@@ -20,7 +20,7 @@ trait AssertionsHash extends Assertions {
     StackTraces.dropInside {
       if (!compare.isEqual(hashA.hash(obtained), hashB.hash(expected))) {
         (obtained, expected) match {
-          case (a: Array[_], b: Array[_]) if a.sameElements(b) =>
+          case (a: Array[?], b: Array[?]) if a.sameElements(b) =>
             failComparison(
               "arrays have the same elements but different reference equality. " +
                 "Convert the arrays to a non-Array collection if you intend to assert the two arrays have the same elements. " +

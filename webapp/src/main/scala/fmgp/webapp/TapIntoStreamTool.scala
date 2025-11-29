@@ -1,18 +1,18 @@
 package fmgp.webapp
 
 import scala.scalajs.js
-import scala.scalajs.js.timers._
-import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.timers.*
+import scala.scalajs.js.JSConverters.*
 import org.scalajs.dom
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 import zio.stream.ZStream
 
-import fmgp._
-import fmgp.did._
-import fmgp.did.comm._
+import fmgp.*
+import fmgp.did.*
+import fmgp.did.comm.*
 import fmgp.did.comm.protocol.basicmessage2.BasicMessage
 import fmgp.did.framework.TransportWSImp
 

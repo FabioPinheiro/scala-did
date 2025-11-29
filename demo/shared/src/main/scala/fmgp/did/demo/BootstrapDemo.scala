@@ -1,11 +1,11 @@
 package fmgp.did.demo
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
-import fmgp.did._
-import fmgp.did.method.peer._
-import fmgp.crypto._
+import fmgp.did.*
+import fmgp.did.method.peer.*
+import fmgp.crypto.*
 
 /** didExampleJVM/console
   */

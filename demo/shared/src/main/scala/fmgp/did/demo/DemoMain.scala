@@ -1,16 +1,16 @@
 package fmgp.did.demo
 
-import zio._
-import zio.Console._
-import zio.json._
+import zio.*
+import zio.Console.*
+import zio.json.*
 import zio.json.ast.Json
-import fmgp.crypto._
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.did.method.peer._
+import fmgp.crypto.*
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.did.method.peer.*
 
 @main def DemoMain() = {
-  import Agent0Mediators._
+  import Agent0Mediators.*
   val program = for {
     _ <- Console.printLine(s"Did: ${agent.id.string}")
     _ <- Console.printLine(s"Agreement Key: ${keyAgreement}")

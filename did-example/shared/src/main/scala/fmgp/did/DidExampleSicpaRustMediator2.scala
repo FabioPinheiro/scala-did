@@ -1,8 +1,8 @@
 package fmgp.did
 
-import zio.json._
-import fmgp.crypto._
-import fmgp.did._
+import zio.json.*
+import fmgp.crypto.*
+import fmgp.did.*
 
 object DidExampleSicpaRustMediator2 {
 

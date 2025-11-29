@@ -2,7 +2,7 @@ package fmgp.serviceworker
 
 import scala.scalajs.js
 
-import org.scalajs.dom._
+import org.scalajs.dom.*
 
 object NotificationUtils {
   def hasNotificationPermission = Notification.permission == "granted"

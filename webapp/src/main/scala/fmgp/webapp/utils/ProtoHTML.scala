@@ -1,15 +1,15 @@
 package fmgp.webapp.utils
 
-import scala.util._
+import scala.util.*
 import org.scalajs.dom
 
 import com.raquo.airstream.core.Signal
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import com.raquo.laminar.nodes.ReactiveHtmlElement
-import scalapb.descriptors._
-import scalapb._
+import scalapb.descriptors.*
+import scalapb.*
 
-import fmgp.util._
+import fmgp.util.*
 import fmgp.webapp.utils.ProtoHTML.AuxBuilder
 
 object ProtoHTML {

@@ -1,9 +1,9 @@
 package fmgp.did.method.hardcode
 
-import zio._
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.crypto.error._
+import zio.*
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.crypto.error.*
 
 class HardcodeResolver extends Resolver {
   override protected def didDocumentOf(did: FROMTO): IO[ResolverError, DIDDocument] =

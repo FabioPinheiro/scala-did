@@ -1,13 +1,13 @@
 package fmgp.webapp
 
-import scala.scalajs.js.annotation._
+import scala.scalajs.js.annotation.*
 
 import scalajs.js
 import org.scalajs.dom
-import com.raquo.laminar.api.L._
-import com.raquo.waypoint._
+import com.raquo.laminar.api.L.*
+import com.raquo.waypoint.*
 
-import MyRouter._
+import MyRouter.*
 import com.raquo.airstream.ownership.ManualOwner
 
 import fmgp.webapp.Home

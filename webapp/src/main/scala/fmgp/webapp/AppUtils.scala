@@ -4,11 +4,11 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.scalajs.js.annotation.JSExport
 
 import org.scalajs.dom
-import com.raquo.laminar.codecs._
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.codecs.*
+import com.raquo.laminar.api.L.*
 
-import MyRouter._
-import fmgp.did._
+import MyRouter.*
+import fmgp.did.*
 @JSExportTopLevel("AppUtils")
 object AppUtils { // TODO RENAME TO UIUtils
 

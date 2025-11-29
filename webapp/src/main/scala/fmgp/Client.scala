@@ -2,18 +2,18 @@ package fmgp.did
 
 import scala.util.chaining.scalaUtilChainingOps
 import scala.scalajs.js
-import org.scalajs.dom._
+import org.scalajs.dom.*
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
-import fmgp.did._
-import fmgp.crypto._
-import fmgp.crypto.error._
+import fmgp.did.*
+import fmgp.crypto.*
+import fmgp.crypto.error.*
 import fmgp.webapp.Global
 import fmgp.did.comm.EncryptedMessage
 
-import fmgp._
+import fmgp.*
 
 @scala.scalajs.js.annotation.JSExportTopLevel("HttpClient")
 object Client {

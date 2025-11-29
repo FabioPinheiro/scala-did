@@ -40,7 +40,7 @@ class NDEFReader() extends EventTarget {
   def write(message: String, options: NDEFWriteOptions): js.Promise[Unit] = js.native
   def write(message: js.typedarray.ArrayBuffer, options: NDEFWriteOptions): js.Promise[Unit] = js.native
 
-  def write(message: js.typedarray.TypedArray[_, _], options: NDEFWriteOptions = js.native): js.Promise[Unit] =
+  def write(message: js.typedarray.TypedArray[?, ?], options: NDEFWriteOptions = js.native): js.Promise[Unit] =
     js.native
   def write(message: js.typedarray.DataView, options: NDEFWriteOptions): js.Promise[Unit] = js.native
   def write(message: js.Array[NDEFRecord], options: NDEFWriteOptions): js.Promise[Unit] = js.native

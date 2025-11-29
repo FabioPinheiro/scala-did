@@ -1,16 +1,16 @@
 package fmgp.webapp
 
-import scala.util._
+import scala.util.*
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
 import org.scalajs.dom
-import com.raquo.laminar.api.L._
-import zio._
-import zio.json._
+import com.raquo.laminar.api.L.*
+import zio.*
+import zio.json.*
 
-import fmgp.crypto.error._
-import fmgp.did._
-import fmgp.did.comm._
+import fmgp.crypto.error.*
+import fmgp.did.*
+import fmgp.did.comm.*
 import fmgp.did.agent.MessageStorage
 import fmgp.did.method.web.DIDWebResolver
 import fmgp.did.method.peer.DidPeerResolver

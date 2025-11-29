@@ -1,25 +1,25 @@
 package fmgp.webapp
 
-import scala.scalajs.js.timers._
-import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.timers.*
+import scala.scalajs.js.JSConverters.*
 
 import org.scalajs.dom
 import org.scalajs.dom.HTMLButtonElement
 import com.raquo.airstream.core.Sink
-import com.raquo.airstream.ownership._
-import com.raquo.laminar.api.L._
+import com.raquo.airstream.ownership.*
+import com.raquo.laminar.api.L.*
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.did.comm.extension._
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.did.comm.extension.*
 import fmgp.did.method.peer.DIDPeer2
 import fmgp.did.uniresolver.Uniresolver
 import fmgp.did.comm.protocol.routing2.ForwardMessage
-import fmgp.crypto.error._
+import fmgp.crypto.error.*
 import fmgp.*
 
 object EncryptTool {
@@ -297,7 +297,7 @@ object EncryptTool {
         ),
         // Mediator Coordination V2.0
         {
-          import MessageTemplate.Mediatorcoordination2._
+          import MessageTemplate.Mediatorcoordination2.*
           li(
             button(
               "MediateRequest2",
@@ -331,7 +331,7 @@ object EncryptTool {
         },
         // Mediator Coordination V3.0
         {
-          import MessageTemplate.Mediatorcoordination3._
+          import MessageTemplate.Mediatorcoordination3.*
           li(
             button(
               "MediateRequest3",
@@ -365,7 +365,7 @@ object EncryptTool {
         },
         // Pickup V3.0
         {
-          import MessageTemplate.Pickup3._
+          import MessageTemplate.Pickup3.*
           li(
             button(
               "Status",
@@ -395,7 +395,7 @@ object EncryptTool {
         },
         // DiscoverFeatures V2.0
         {
-          import MessageTemplate.DiscoverFeatures2._
+          import MessageTemplate.DiscoverFeatures2.*
           li(
             button(
               "FeatureQuery",
@@ -409,7 +409,7 @@ object EncryptTool {
         },
         // PubSub (Draft Version)
         {
-          import MessageTemplate.PubSub._
+          import MessageTemplate.PubSub.*
           li(
             button(
               "RequestToSubscribe",
@@ -444,7 +444,7 @@ object EncryptTool {
         },
         // ProveControl (Draft Version)
         {
-          import MessageTemplate.ProveControl._
+          import MessageTemplate.ProveControl.*
           li(
             button(
               "RequestVerification",
@@ -466,7 +466,7 @@ object EncryptTool {
         },
         // ChatriqubeRegistry (Draft Version)
         {
-          import MessageTemplate.ChatriqubeRegistry._
+          import MessageTemplate.ChatriqubeRegistry.*
           li(
             button(
               "Enroll",
@@ -484,7 +484,7 @@ object EncryptTool {
         },
         // ChatriqubeDiscovery (Draft Version)
         {
-          import MessageTemplate.ChatriqubeDiscovery._
+          import MessageTemplate.ChatriqubeDiscovery.*
           li(
             button(
               "AskIntroduction",

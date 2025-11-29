@@ -1,8 +1,8 @@
 package fmgp.did
 
-import zio._
+import zio.*
 import zio.json.*
-import fmgp.crypto._
+import fmgp.crypto.*
 import fmgp.did.Agent
 import fmgp.did.comm.*
 import fmgp.did.method.peer.DIDPeer
@@ -11,7 +11,7 @@ import fmgp.did.method.peer.DIDPeer4
 import fmgp.did.method.peer.DIDPeerServiceEncoded
 import fmgp.did.method.hardcode.HardcodeResolver
 
-import fmgp.did.AgentProvider._
+import fmgp.did.AgentProvider.*
 
 case class AgentProvider(agents: Seq[AgentWithShortName], identities: Seq[DIDWithShortName]) {
   def getAgentByDID(subject: DIDSubject): Option[Agent] = agents.find(_.id.did == subject.did).map(_.value)

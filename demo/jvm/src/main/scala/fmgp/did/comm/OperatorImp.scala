@@ -1,12 +1,12 @@
 package fmgp.did.comm
 
-import zio._
-import zio.http._
+import zio.*
+import zio.http.*
 
 import fmgp.crypto.error.DidFail
-import fmgp.did._
+import fmgp.did.*
 import fmgp.did.comm.protocol.ProtocolExecuter
-import fmgp.did.framework._
+import fmgp.did.framework.*
 
 object OperatorImp {
   val layer: ZLayer[Client & Scope, Nothing, Operator] =

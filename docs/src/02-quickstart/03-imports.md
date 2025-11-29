@@ -6,8 +6,8 @@
 Here are the usfull imports for most of the cases:
 
 ```scala mdoc
-import zio._
-import zio.json._
-import fmgp.did._
-import fmgp.did.comm._
+import zio.*
+import zio.json.*
+import fmgp.did.*
+import fmgp.did.comm.*
 ```

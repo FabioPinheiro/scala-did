@@ -1,12 +1,12 @@
 package fmgp.did.demo
 
-import fmgp.crypto._
-import fmgp.crypto.error._
-import fmgp.did._
-import fmgp.did.comm._
-import zio._
-import zio.json._
-import fmgp.did.method.peer._
+import fmgp.crypto.*
+import fmgp.crypto.error.*
+import fmgp.did.*
+import fmgp.did.comm.*
+import zio.*
+import zio.json.*
+import fmgp.did.method.peer.*
 import fmgp.did.method.hardcode.HardcodeResolver
 import fmgp.did.uniresolver.Uniresolver
 

@@ -2,12 +2,12 @@ package fmgp.webapp
 
 import org.scalajs.dom
 import org.scalajs.dom.HTMLElement
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 import typings.std.stdStrings.text
 import typings.mermaid
 
-import fmgp.did._
+import fmgp.did.*
 object WebBluetoothTool {
 
   def apply(): HtmlElement = // rootElement
