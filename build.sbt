@@ -272,7 +272,10 @@ inThisBuild(
           // NO NEED ATM "-Xsemanticdb"
           // NO NEED ATM "-Ykind-projector"
         ) ++ {
-          if (true) Seq("-Xfatal-warnings") else Seq("-rewrite", "-source", "3.4-migration")
+          // "-rewrite" https://docs.scala-lang.org/scala3/guides/migration/tooling-syntax-rewriting.html
+          // scalac -help
+          if (true) Seq("-Xfatal-warnings")
+          else Seq("-source", "future-migration") // preparation for scala 3.9 and 3.10
         } ++
         // Because DeriveJson(Decoder/Encoder).gen[DidFail] exceeded maximal number of successive inlines (default is 32)
         Seq("-Xmax-inlines", "43")
