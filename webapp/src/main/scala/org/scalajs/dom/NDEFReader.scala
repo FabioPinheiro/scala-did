@@ -2,6 +2,7 @@ package org.scalajs.dom
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
+import scala.language.adhocExtensions //https://docs.scala-lang.org/scala3/reference/other-new-features/open-classes.html
 
 /** The [[NDEFReader]] interface of the Web NFC API (https://developer.mozilla.org/en-US/docs/Web/API/Web_NFC_API) is
   * used to read from and write data to compatible NFC devices, e.g. NFC tags supporting NDEF, when these devices are

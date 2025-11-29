@@ -3,6 +3,7 @@ package fmgp.serviceworker
 import scala.scalajs.js
 import scala.scalajs.js.annotation.*
 import org.scalajs.dom.*
+import scala.language.adhocExtensions //https://docs.scala-lang.org/scala3/reference/other-new-features/open-classes.html
 
 /** See [[https://developer.mozilla.org/en-US/docs/Web/API/NotificationEvent]] of whatwg ServiceWorker spec.
   *

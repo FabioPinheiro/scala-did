@@ -2,6 +2,7 @@ package org.scalajs.dom
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
+import scala.language.adhocExtensions //https://docs.scala-lang.org/scala3/reference/other-new-features/open-classes.html
 
 /** The NDEFReadingEvent interface of the Web NFC API represents events dispatched on new NFC readings obtained by
   * NDEFReader.

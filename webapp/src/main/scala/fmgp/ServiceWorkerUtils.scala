@@ -140,7 +140,7 @@ object ServiceWorkerUtils {
   @scala.scalajs.js.annotation.JSExport
   def requestNotificationPermission = {
     def aux(status: String) = println(s"Notification permission status: $status")
-    dom.Notification.requestPermission(aux)
+    dom.Notification.requestPermission((x) => aux(x))
   }
 
 }
