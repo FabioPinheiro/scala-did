@@ -1,12 +1,12 @@
 package fmgp.crypto
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 import scala.util.Try
 
 import com.nimbusds.jose.jwk
 
-import fmgp.crypto.error._
+import fmgp.crypto.error.*
 
 object KeyGenerator {
   def makeX25519: IO[FailToGenerateKey, OKPPrivateKey] =

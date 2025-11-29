@@ -1,9 +1,9 @@
 package fmgp.did.framework
 
-import zio._
-import zio.json._
-import zio.http._
-import fmgp.did._
+import zio.*
+import zio.json.*
+import zio.http.*
+import fmgp.did.*
 import fmgp.crypto.error.DidFail
 import fmgp.did.comm.protocol.routing2.ForwardMessage.makeForwardMessage
 

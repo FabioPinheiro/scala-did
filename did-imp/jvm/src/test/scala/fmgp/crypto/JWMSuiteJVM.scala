@@ -2,17 +2,17 @@ package fmgp.crypto
 
 import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.OctetKeyPair
-import com.nimbusds.jose.jwk.{Curve => JWKCurve}
-import com.nimbusds.jose.jwk.{ECKey => JWKECKey}
+import com.nimbusds.jose.jwk.{Curve as JWKCurve}
+import com.nimbusds.jose.jwk.{ECKey as JWKECKey}
 
-import munit._
-import scala.concurrent.duration._
+import munit.*
+import scala.concurrent.duration.*
 import scala.concurrent.ExecutionContext.Implicits.global
-import zio.json._
+import zio.json.*
 
 import fmgp.did.DIDDocument
-import fmgp.did.comm._
-import fmgp.crypto.UtilsJVM._
+import fmgp.did.comm.*
+import fmgp.crypto.UtilsJVM.*
 import fmgp.util.Base64
 
 /** didImpJVM/testOnly fmgp.crypto.JWMSuiteJVM */

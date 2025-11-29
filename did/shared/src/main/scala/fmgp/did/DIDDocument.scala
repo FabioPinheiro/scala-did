@@ -1,6 +1,6 @@
 package fmgp.did
 
-import zio.json._
+import zio.json.*
 import fmgp.crypto.PublicKey
 
 /** DIDDocument

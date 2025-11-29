@@ -1,7 +1,7 @@
 package fmgp.util
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 
 // didJVM/testOnly fmgp.util.HexSuite
 class HexSuite extends FunSuite {

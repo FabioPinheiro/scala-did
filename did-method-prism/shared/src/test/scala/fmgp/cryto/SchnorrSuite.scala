@@ -1,6 +1,6 @@
 package fmgp.crypto
 
-import munit._
+import munit.*
 
 class SchnorrSuite extends FunSuite {
 

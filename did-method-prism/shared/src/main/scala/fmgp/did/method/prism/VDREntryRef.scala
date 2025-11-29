@@ -1,10 +1,10 @@
 package fmgp.did.method.prism
 
-import fmgp.did.method.prism.proto._
+import fmgp.did.method.prism.proto.*
 import fmgp.util.bytes2Hex
 import fmgp.util.hex2bytes
 
-import zio.json._
+import zio.json.*
 
 //FIXME rename to VDREntryRef {
 

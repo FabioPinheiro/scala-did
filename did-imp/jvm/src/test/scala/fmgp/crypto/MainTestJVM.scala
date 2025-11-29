@@ -9,7 +9,7 @@ import com.nimbusds.jwt.*
 import fmgp.did.comm.DIDCommExamples
 import fmgp.did.comm.PlaintextMessageClass
 import fmgp.util.Base64
-import zio.json._
+import zio.json.*
 
 import java.math.BigInteger
 import java.nio.charset.StandardCharsets

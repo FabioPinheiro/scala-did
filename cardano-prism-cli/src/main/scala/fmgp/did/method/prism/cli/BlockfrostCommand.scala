@@ -2,7 +2,7 @@ package fmgp.did.method.prism.cli
 
 import zio.*
 import zio.cli.*
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import scala.util.Try
 
 import org.hyperledger.identus.apollo.derivation.MnemonicHelper

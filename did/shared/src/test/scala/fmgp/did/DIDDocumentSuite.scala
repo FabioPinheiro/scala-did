@@ -1,9 +1,9 @@
 package fmgp.did
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 import fmgp.did.DIDDocument
-import fmgp.crypto._
+import fmgp.crypto.*
 
 class DIDDocumentSuite extends FunSuite {
 

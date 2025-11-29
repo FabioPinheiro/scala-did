@@ -1,12 +1,12 @@
 package fmgp.did.framework
 
-import zio._
-import zio.json._
-import zio.stream._
-import zio.http._
-import fmgp.crypto.error._
-import fmgp.did._
-import fmgp.did.comm._
+import zio.*
+import zio.json.*
+import zio.stream.*
+import zio.http.*
+import fmgp.crypto.error.*
+import fmgp.did.*
+import fmgp.did.comm.*
 
 /** this API is still a WIP
   *

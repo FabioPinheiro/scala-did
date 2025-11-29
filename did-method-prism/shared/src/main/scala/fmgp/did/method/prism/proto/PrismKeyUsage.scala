@@ -1,6 +1,6 @@
 package fmgp.did.method.prism.proto
 
-import zio.json._
+import zio.json.*
 import proto.prism.KeyUsage
 import fmgp.util.safeValueOf
 

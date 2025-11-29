@@ -1,7 +1,7 @@
 package fmgp.did.method.prism.vdr
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 import proto.prism.PrismBlock
 import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.did.method.prism.*

@@ -1,7 +1,7 @@
 package fmgp.did.comm
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 import fmgp.did.DIDDocument
 
 /** didJS/testOnly fmgp.did.comm.DIDCommSuite */

@@ -1,7 +1,7 @@
 package fmgp.util
 
-import java.{util => ju}
-import zio.json._
+import java.{util as ju}
+import zio.json.*
 // import scala.collection.compat.immutable.ArraySeq
 import scala.util.Try
 

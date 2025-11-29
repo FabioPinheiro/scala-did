@@ -1,9 +1,9 @@
 package fmgp.did.comm
 
-import munit._
+import munit.*
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 import zio.json.ast.Json
 
 /** didJVM/testOnly fmgp.did.comm.EnumTypesSuite */

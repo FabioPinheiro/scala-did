@@ -1,6 +1,6 @@
 package fmgp.crypto
 
-import zio.json._
+import zio.json.*
 import zio.json.ast.Json
 import zio.json.ast.JsonCursor
 import fmgp.util.{Base64, safeValueOf}
@@ -326,7 +326,7 @@ object OKP_EC_Key {
           Some(("x", Json.Str(k.x))),
           k match { case ecKey: ECKey => Some(("y", Json.Str(ecKey.y))); case _ => None },
           k.maybeKid.map(kid => ("kid", Json.Str(kid)))
-        ).flatten: _*
+        ).flatten *
       )
     }
   given decoder: JsonDecoder[OKP_EC_Key] = JsonDecoder[Json.Obj]

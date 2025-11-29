@@ -1,9 +1,9 @@
 package fmgp.did.comm
 
-import munit._
+import munit.*
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
 /** didJVM/testOnly fmgp.did.comm.PlaintextMessageSuite */
 class PlaintextMessageSuite extends FunSuite {

@@ -1,8 +1,8 @@
 package fmgp.did
 
-import munit._
-import zio.json._
-import fmgp.did.DIDSubject._
+import munit.*
+import zio.json.*
+import fmgp.did.DIDSubject.*
 
 /** didJVM/testOnly fmgp.did.DIDSubjectSuite */
 class DIDSubjectSuite extends FunSuite {

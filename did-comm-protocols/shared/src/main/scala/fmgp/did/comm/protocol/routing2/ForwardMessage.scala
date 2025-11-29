@@ -1,11 +1,11 @@
 package fmgp.did.comm.protocol.routing2
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.crypto.error._
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.crypto.error.*
 import fmgp.util.Base64
 
 extension (msg: PlaintextMessage)

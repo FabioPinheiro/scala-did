@@ -1,7 +1,7 @@
 package fmgp.did.comm
 
-import zio._
-import fmgp.crypto._
+import zio.*
+import fmgp.crypto.*
 
 /** Hide implementation details to improve the API
   *

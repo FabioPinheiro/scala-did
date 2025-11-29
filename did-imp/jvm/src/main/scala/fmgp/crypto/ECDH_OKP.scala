@@ -1,27 +1,27 @@
 package fmgp.crypto
 
 import scala.util.Try
-import scala.util.chaining._
-import scala.collection.convert._
-import scala.jdk.CollectionConverters._
+import scala.util.chaining.*
+import scala.collection.convert.*
+import scala.jdk.CollectionConverters.*
 import java.util.Collections
 
 import com.nimbusds.jose.crypto.impl.ECDH
 import com.nimbusds.jose.crypto.impl.ECDH1PU
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral
 import com.nimbusds.jose.jwk.OctetKeyPair
-import com.nimbusds.jose.jwk.{ECKey => JWKECKey}
+import com.nimbusds.jose.jwk.{ECKey as JWKECKey}
 import javax.crypto.SecretKey
 
 import fmgp.did.VerificationMethodReferenced
-import fmgp.did.comm._
+import fmgp.did.comm.*
 import fmgp.crypto.UtilsJVM.toJWKCurve
 import fmgp.crypto.UtilsJVM.toJWK
 import fmgp.util.Base64
 
-import zio.json._
+import zio.json.*
 
-import fmgp.crypto.error._
+import fmgp.crypto.error.*
 import com.nimbusds.jose.jca.JWEJCAContext
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider
 import com.nimbusds.jose.crypto.impl.AAD

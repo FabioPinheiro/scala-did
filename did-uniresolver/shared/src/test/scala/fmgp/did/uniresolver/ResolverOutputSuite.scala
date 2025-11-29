@@ -1,10 +1,10 @@
 package fmgp.did.uniresolver
 
-import munit._
-import fmgp.did._
-import fmgp.did.comm._
+import munit.*
+import fmgp.did.*
+import fmgp.did.comm.*
 
-import zio.json._
+import zio.json.*
 import zio.json.ast.Json
 
 class ResolverOutputSuite extends ZSuite {

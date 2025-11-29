@@ -1,14 +1,14 @@
 package fmgp.did.method.prism
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 import scala.annotation.tailrec
 import fmgp.did.DIDDocument
-import fmgp.did.method.prism._
+import fmgp.did.method.prism.*
 import fmgp.did.DIDSubject
 import fmgp.did.method.prism.SSI
 import fmgp.did.method.prism.RefVDR
-import fmgp.did.method.prism.proto._
+import fmgp.did.method.prism.proto.*
 
 object PrismStateInMemoryData {
   def empty = PrismStateInMemoryData(Map.empty, Map.empty, Map.empty, Map.empty)

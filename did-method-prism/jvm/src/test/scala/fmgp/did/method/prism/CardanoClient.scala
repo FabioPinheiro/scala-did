@@ -1,6 +1,6 @@
 package fmgp.did.method.prism
 
-import zio._
+import zio.*
 
 import com.bloxbean.cardano.client.account.Account
 import com.bloxbean.cardano.client.common.model.Networks
@@ -9,9 +9,9 @@ import java.math.BigInteger
 import scala.collection.StepperShape
 
 import fmgp.blockfrost.*
-import fmgp.util._
-import fmgp.did.method.prism.cardano._
-import fmgp.did.method.prism.vdr._
+import fmgp.util.*
+import fmgp.did.method.prism.cardano.*
+import fmgp.did.method.prism.vdr.*
 import _root_.proto.prism.PrismBlock
 import _root_.proto.prism.PrismEvent
 import _root_.proto.prism.SignedPrismEvent

@@ -7,11 +7,11 @@ import zio.json.*
 import zio.stream.*
 
 import java.nio.file.StandardOpenOption.*
-import scala.util._
-import fmgp.did._
-import fmgp.did.method.prism._
-import fmgp.did.method.prism.cardano._
-import fmgp.did.method.prism.proto._
+import scala.util.*
+import fmgp.did.*
+import fmgp.did.method.prism.*
+import fmgp.did.method.prism.cardano.*
+import fmgp.did.method.prism.proto.*
 import fmgp.did.method.prism.vdr.IndexerUtils.EventCounter
 
 /** Indexer
@@ -173,7 +173,7 @@ object Indexer extends ZIOAppDefault {
         ZIO.logWarning(s"Fail to parse indexerConfig from '${next.mkString(" ")}'") *>
           ZIO.fail(RuntimeException("Indexer <dataPath> [<TOKEN_mainnet|preprod|preview>]"))
     }
-    .map(ZLayer.succeed _)
+    .map(ZLayer.succeed)
 
   def indexerJobFS = for {
     indexerConfig <- ZIO.service[IndexerConfig]

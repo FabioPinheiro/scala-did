@@ -1,7 +1,7 @@
 package fmgp.did.comm
 
 import util.chaining.scalaUtilChainingOps
-import zio.json._
+import zio.json.*
 
 import fmgp.util.Base64
 

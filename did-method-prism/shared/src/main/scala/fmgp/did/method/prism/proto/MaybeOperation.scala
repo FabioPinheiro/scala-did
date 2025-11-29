@@ -1,7 +1,7 @@
 package fmgp.did.method.prism.proto
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
 import fmgp.crypto.SHA256
 
@@ -10,7 +10,7 @@ import proto.prism.PrismObject
 import proto.prism.SignedPrismEvent
 import fmgp.util.safeValueOf
 import fmgp.util.bytes2Hex
-import fmgp.did.method.prism._
+import fmgp.did.method.prism.*
 import fmgp.did.method.prism.cardano.{PrismBlockIndex, PrismEventIndex, EventCursor}
 
 // TODO Rename to MaybeEvent

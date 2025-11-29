@@ -1,11 +1,11 @@
 package fmgp.did.comm
 
-import zio.json._
-import fmgp.did._
-import fmgp.did.comm.extension._
-import fmgp.util._
-import fmgp.crypto._
-import fmgp.crypto.error._
+import zio.json.*
+import fmgp.did.*
+import fmgp.did.comm.extension.*
+import fmgp.util.*
+import fmgp.crypto.*
+import fmgp.crypto.error.*
 import zio.json.ast.Json
 import zio.json.ast.JsonCursor
 

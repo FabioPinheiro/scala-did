@@ -1,8 +1,8 @@
 package fmgp.did.method.prism.proto
 
-import zio.json._
+import zio.json.*
 import fmgp.util.bytes2Hex
-import proto.prism._
+import proto.prism.*
 import fmgp.did.method.prism.VDR
 import fmgp.did.method.prism.DIDPrism
 
@@ -165,10 +165,10 @@ object UpdateDidOP {
   case class PatchContext(context: Seq[String]) extends Action
 
   def fromProto(p: ProtoUpdateDID) = {
-    import proto.prism.UpdateDIDAction.{Action => UAction}
+    import proto.prism.UpdateDIDAction.{Action as UAction}
     p match
       case ProtoUpdateDID(previousEventHash, id, actions, unknownFields) =>
-        import proto.prism._
+        import proto.prism.*
         val myAction = actions.map { case UpdateDIDAction(action, unknownFields) =>
           action match
             case UAction.Empty => VoidAction("Action Empty")

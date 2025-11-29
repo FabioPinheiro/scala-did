@@ -1,6 +1,6 @@
 package fmgp.did.method.prism
 
-import zio._
+import zio.*
 
 object HttpUtilsSuiteAUX {
   val layer: ULayer[HttpUtils] =

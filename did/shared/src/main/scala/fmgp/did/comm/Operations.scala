@@ -1,11 +1,11 @@
 package fmgp.did.comm
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
-import fmgp.did._
-import fmgp.crypto.error._
-import fmgp.crypto._
+import fmgp.did.*
+import fmgp.crypto.error.*
+import fmgp.crypto.*
 
 /** DID Comm operations */
 trait Operations {

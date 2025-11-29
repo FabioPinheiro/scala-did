@@ -1,10 +1,10 @@
 package fmgp.did.comm.protocol.discoverfeatures2
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 import zio.json.ast.Json
 
-import fmgp.did.comm._
+import fmgp.did.comm.*
 
 /** didCommProtocolsJVM/testOnly fmgp.did.comm.protocol.discoverfeatures2.DiscoverFeatures2Suite */
 class DiscoverFeatures2Suite extends FunSuite {

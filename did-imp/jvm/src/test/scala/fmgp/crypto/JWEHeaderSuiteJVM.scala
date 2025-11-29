@@ -1,7 +1,7 @@
 package fmgp.crypto
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 
 import com.nimbusds.jose.JWEHeader
 import com.nimbusds.jose.util.Base64URL

@@ -1,10 +1,10 @@
 package fmgp.did.comm
 
-import zio.json._
-import scala.util.chaining._
+import zio.json.*
+import scala.util.chaining.*
 
-import fmgp.did._
-import fmgp.crypto.error._
+import fmgp.did.*
+import fmgp.crypto.error.*
 
 private[comm] object FromTo {
 

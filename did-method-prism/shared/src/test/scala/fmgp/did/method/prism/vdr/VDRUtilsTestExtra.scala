@@ -1,21 +1,21 @@
 package fmgp.did.method.prism.vdr
 
-import scala.jdk.CollectionConverters._
-import zio._
-import zio.stream._
+import scala.jdk.CollectionConverters.*
+import zio.*
+import zio.stream.*
 
 import com.google.protobuf.ByteString
 import fmgp.util.bytes2Hex
 import fmgp.util.hex2bytes
 import fmgp.crypto.Secp256k1PrivateKey
-import fmgp.did.method.prism._
-import fmgp.did.method.prism.cardano._
-import fmgp.did.method.prism.proto._
+import fmgp.did.method.prism.*
+import fmgp.did.method.prism.cardano.*
+import fmgp.did.method.prism.proto.*
 import fmgp.crypto.SHA256
-import _root_.proto.prism._
+import _root_.proto.prism.*
 
 object VDRUtilsTestExtra {
-  import KeyConstanceUtils._
+  import KeyConstanceUtils.*
 
   val didPrism = DIDPrism("51d47b13393a7cc5c1afc47099dcbecccf0c8a70828c072ac82f55225b42d4f4")
   val refVDR = RefVDR("2a0d49ff70f6403cab5bba090478300369ff4875f849dd42c9c59ca4272a9a7b")

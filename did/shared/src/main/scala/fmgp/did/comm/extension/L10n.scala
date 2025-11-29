@@ -1,6 +1,6 @@
 package fmgp.did.comm.extension
 
-import zio.json._
+import zio.json.*
 
 // Lang Extension: https://github.com/decentralized-identity/didcomm-messaging/blob/main/extensions/l10n/main.md
 

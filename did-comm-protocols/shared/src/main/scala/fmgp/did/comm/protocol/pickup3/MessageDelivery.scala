@@ -1,8 +1,8 @@
 package fmgp.did.comm.protocol.pickup3
 
-import zio.json._
-import fmgp.did._
-import fmgp.did.comm._
+import zio.json.*
+import fmgp.did.*
+import fmgp.did.comm.*
 import fmgp.util.Base64
 
 /** Batch of messages delivered to the recipient as attachments.

@@ -2,10 +2,10 @@ package fmgp.did.framework
 
 import scala.scalajs.js
 import org.scalajs.dom
-import zio._
-import zio.json._
-import zio.stream._
-import fmgp.did.comm._
+import zio.*
+import zio.json.*
+import zio.stream.*
+import fmgp.did.comm.*
 
 /** this API is still a WIP
   *

@@ -1,8 +1,8 @@
 package fmgp.did
 
-import zio.json._
-import scala.util.chaining._
-import fmgp.crypto.error._
+import zio.json.*
+import scala.util.chaining.*
+import fmgp.crypto.error.*
 
 /** The entity identified by a DID and described by a DID document. Anything can be a DID subject: person, group,
   * organization, physical thing, digital thing, logical thing, etc.

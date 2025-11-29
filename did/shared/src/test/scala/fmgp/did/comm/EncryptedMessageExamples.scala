@@ -1,8 +1,8 @@
 package fmgp.did.comm
 
-import fmgp.util._
-import fmgp.did._
-import fmgp.crypto._
+import fmgp.util.*
+import fmgp.did.*
+import fmgp.crypto.*
 
 object EncryptedMessageExamples {
 

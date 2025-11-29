@@ -1,6 +1,6 @@
 package fmgp.did.comm.extension
 
-import zio.json._
+import zio.json.*
 import fmgp.did.DIDSubject
 
 // Extension: https://github.com/decentralized-identity/didcomm-messaging/blob/main/extensions/advanced_sequencing/main.md

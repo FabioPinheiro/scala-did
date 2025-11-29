@@ -1,10 +1,10 @@
 package fmgp.did.method.web
 
-import munit._
-import fmgp.did._
-import fmgp.did.comm._
+import munit.*
+import fmgp.did.*
+import fmgp.did.comm.*
 
-import zio._
+import zio.*
 
 /** didResolverWebJVM/testOnly fmgp.did.method.web.DIDWebResolverSuite */
 class DIDWebResolverSuite extends ZSuite {

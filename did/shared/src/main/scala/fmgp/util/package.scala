@@ -1,6 +1,6 @@
 package fmgp
 
-import zio.json._
+import zio.json.*
 package object util {
 
   /** Use call valueOf of a enum inside of safeValueOf (and ONLY valueOf!)

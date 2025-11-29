@@ -1,8 +1,8 @@
 package fmgp.did.comm
 
-import zio.json._
-import fmgp.did._
-import fmgp.did.comm.extension._
+import zio.json.*
+import fmgp.did.*
+import fmgp.did.comm.extension.*
 
 import fmgp.did.comm.ReturnRoute
 import fmgp.crypto.SHA256

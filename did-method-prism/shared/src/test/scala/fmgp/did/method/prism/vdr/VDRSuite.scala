@@ -1,11 +1,11 @@
 package fmgp.did.method.prism.vdr
 
-import munit._
-import zio._
-import zio.json._
-import zio.stream._
+import munit.*
+import zio.*
+import zio.json.*
+import zio.stream.*
 
-import _root_.proto.prism._
+import _root_.proto.prism.*
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
 import fmgp.did.method.prism.*
@@ -18,9 +18,9 @@ import fmgp.crypto.SHA256
   */
 class VDRSuite extends ZSuite {
 
-  import fmgp.did.method.prism.vdr.KeyConstanceUtils._
-  import fmgp.did.method.prism.vdr.VDRUtilsTestExtra._
-  import fmgp.did.method.prism.vdr.VDRUtils._
+  import fmgp.did.method.prism.vdr.KeyConstanceUtils.*
+  import fmgp.did.method.prism.vdr.VDRUtilsTestExtra.*
+  import fmgp.did.method.prism.vdr.VDRUtils.*
 
   private def getSignedPrismEventFromHex(hex: String) =
     SignedPrismEvent.parseFrom(hex2bytes(hex))

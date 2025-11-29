@@ -1,7 +1,7 @@
 package fmgp.did.comm
 
-import zio.json._
-import fmgp.did._
+import zio.json.*
+import fmgp.did.*
 import fmgp.util.Base64Obj
 import fmgp.crypto.OKP_EC_Key
 import zio.json.ast.Json

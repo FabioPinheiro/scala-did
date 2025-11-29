@@ -1,11 +1,11 @@
 package fmgp.did.method.prism
 
-import zio._
-import zio.json._
-import fmgp.did.method.prism._
+import zio.*
+import zio.json.*
+import fmgp.did.method.prism.*
 import fmgp.did.DIDSubject
 import fmgp.did.method.prism.RefVDR
-import fmgp.did.method.prism.proto._
+import fmgp.did.method.prism.proto.*
 import fmgp.did.method.prism.cardano.EventCursor
 
 /** Read-only interface for querying PRISM blockchain state.

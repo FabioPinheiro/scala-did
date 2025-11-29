@@ -1,13 +1,13 @@
 package fmgp.did.comm
 
-import munit._
+import munit.*
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 import zio.json.ast.Json
 
 /** didJVM/testOnly fmgp.did.comm.MediaTypesSuite */
-import fmgp.did.comm.MediaTypes._
+import fmgp.did.comm.MediaTypes.*
 class MediaTypesSuite extends ZSuite {
 
   test("Encode MediaTypes") {

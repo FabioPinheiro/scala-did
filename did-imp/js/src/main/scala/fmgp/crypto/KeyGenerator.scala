@@ -1,10 +1,10 @@
 package fmgp.crypto
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 import scala.scalajs.js
 
-import fmgp.crypto.error._
+import fmgp.crypto.error.*
 
 object KeyGenerator extends KeyGeneratorWeb with KeyGeneratorJose {
 

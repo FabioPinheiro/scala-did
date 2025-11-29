@@ -1,13 +1,13 @@
 package fmgp.did.method.prism
 
-import munit._
-import zio._
-import zio.json._
-import zio.stream._
+import munit.*
+import zio.*
+import zio.json.*
+import zio.stream.*
 
 import fmgp.did.method.prism.vdr.IndexerUtils
 import fmgp.did.method.prism.proto.MaybeEvent
-import _root_.proto.prism._
+import _root_.proto.prism.*
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
 import fmgp.did.method.prism.proto.MySignedPrismEvent
@@ -17,8 +17,8 @@ import fmgp.crypto.SHA256
   */
 class IndexerSuite extends ZSuite {
 
-  import fmgp.did.method.prism.vdr.KeyConstanceUtils._
-  import fmgp.did.method.prism.vdr.VDRUtilsTestExtra._
+  import fmgp.did.method.prism.vdr.KeyConstanceUtils.*
+  import fmgp.did.method.prism.vdr.VDRUtilsTestExtra.*
 
   val prismStateFixture: FunFixture[ULayer[PrismState]] =
     ZTestLocalFixture { _ => PrismStateInMemory.empty.map(s => ZLayer.succeed(s)) }(_ => ZIO.unit)

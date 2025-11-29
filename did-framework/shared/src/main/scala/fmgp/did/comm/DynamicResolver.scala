@@ -1,9 +1,9 @@
 package fmgp.did.comm
 
-import zio._
+import zio.*
 
-import fmgp.did._
-import fmgp.crypto.error._
+import fmgp.did.*
+import fmgp.crypto.error.*
 
 //TODO move out of the JVM into the
 final case class DynamicResolver(resolver: Resolver) extends Resolver {

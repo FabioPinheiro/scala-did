@@ -1,6 +1,6 @@
 package fmgp.did.method.prism.node
 
-import fmgp.did.method.prism._
+import fmgp.did.method.prism.*
 
 extension (state: PrismState)
   def lastSyncedBlockTimestamp: com.google.protobuf.timestamp.Timestamp = {

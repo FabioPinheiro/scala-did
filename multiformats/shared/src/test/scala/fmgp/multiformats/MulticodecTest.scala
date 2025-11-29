@@ -1,6 +1,6 @@
 package fmgp.multiformats
 
-import munit._
+import munit.*
 
 /** multiformatsJVM/testOnly fmgp.multiformats.MulticodecTest */
 class MulticodecTest extends FunSuite {

@@ -1,6 +1,6 @@
 package fmgp.did.comm.protocol.reportproblem2
 
-import zio.json._
+import zio.json.*
 import scala.util.matching.Regex
 
 /** https://identity.foundation/didcomm-messaging/spec/#problem-reports

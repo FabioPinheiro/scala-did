@@ -1,7 +1,7 @@
 package fmgp.did.method.prism.cardano
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 
 object MainnetExamples {
 

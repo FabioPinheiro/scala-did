@@ -2,8 +2,8 @@ package fmgp.crypto
 
 import fmgp.did.VerificationMethodReferenced
 import fmgp.did.VerificationMethodReferencedWithKey
-import fmgp.did.comm._
-import fmgp.crypto.error._
+import fmgp.did.comm.*
+import fmgp.crypto.error.*
 
 object ECDH {
   def anonEncryptEC(

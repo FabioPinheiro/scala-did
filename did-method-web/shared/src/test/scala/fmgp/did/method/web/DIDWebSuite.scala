@@ -1,9 +1,9 @@
 package fmgp.did.method.web
 
-import munit._
-import fmgp.did._
+import munit.*
+import fmgp.did.*
 
-import DIDWebExamples._
+import DIDWebExamples.*
 
 class DIDWebSuite extends ZSuite {
 

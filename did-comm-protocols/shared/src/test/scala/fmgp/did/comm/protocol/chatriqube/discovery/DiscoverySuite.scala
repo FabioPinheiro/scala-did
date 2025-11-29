@@ -1,11 +1,11 @@
 package fmgp.did.comm.protocol.chatriqube.discovery
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 import zio.json.ast.Json
 
-import fmgp.did.comm._
-import fmgp.did.comm.protocol.chatriqube._
+import fmgp.did.comm.*
+import fmgp.did.comm.protocol.chatriqube.*
 
 /** didCommProtocolsJVM/testOnly fmgp.did.comm.protocol.chatriqube.discovery.DiscoverySuite */
 class DiscoverySuite extends FunSuite {

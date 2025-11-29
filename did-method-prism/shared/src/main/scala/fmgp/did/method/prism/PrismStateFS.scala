@@ -1,11 +1,11 @@
 package fmgp.did.method.prism
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 import fmgp.did.DIDSubject
-import fmgp.did.method.prism._
+import fmgp.did.method.prism.*
 import fmgp.did.method.prism.RefVDR
-import fmgp.did.method.prism.proto._
+import fmgp.did.method.prism.proto.*
 
 case class PrismStateFS() extends PrismStateRead {
 

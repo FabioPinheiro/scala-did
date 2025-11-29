@@ -1,12 +1,12 @@
 package fmgp.did.uniresolver
 
-import zio._
-import zio.json._
-import zio.http._
+import zio.*
+import zio.json.*
+import zio.http.*
 
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.crypto.error._
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.crypto.error.*
 import io.netty.bootstrap.ChannelFactory
 
 object Uniresolver {

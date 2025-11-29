@@ -1,15 +1,15 @@
 package fmgp.did.comm.protocol
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
-import fmgp.crypto.error._
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.did.comm.Operations._
-import fmgp.did.comm.protocol._
-import fmgp.did.comm.protocol.basicmessage2._
-import fmgp.did.comm.protocol.trustping2._
+import fmgp.crypto.error.*
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.did.comm.Operations.*
+import fmgp.did.comm.protocol.*
+import fmgp.did.comm.protocol.basicmessage2.*
+import fmgp.did.comm.protocol.trustping2.*
 
 //TODO pick a better name // maybe "Protocol" only
 

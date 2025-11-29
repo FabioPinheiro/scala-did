@@ -1,8 +1,8 @@
 package fmgp.did
 
-import munit._
-import zio._
-import zio.json._
+import munit.*
+import zio.*
+import zio.json.*
 import zio.json.ast.{Json, JsonCursor}
 import fmgp.did.DIDDocument
 

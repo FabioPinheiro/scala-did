@@ -1,7 +1,7 @@
 package fmgp.did.method.web
 
-import zio._
-import zio.http._
+import zio.*
+import zio.http.*
 import fmgp.did.Resolver
 
 object DIDWebResolverSuiteUtils {

@@ -1,6 +1,6 @@
 package fmgp.did
 
-import fmgp.crypto._
+import fmgp.crypto.*
 import zio.json.ast.Json
 
 object DIDExamples {

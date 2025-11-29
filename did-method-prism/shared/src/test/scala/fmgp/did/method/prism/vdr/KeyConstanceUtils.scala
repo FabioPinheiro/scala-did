@@ -1,6 +1,6 @@
 package fmgp.did.method.prism.vdr
 
-import fmgp.did.method.prism.cardano._
+import fmgp.did.method.prism.cardano.*
 
 object KeyConstanceUtils {
   val wallet = CardanoWalletConfig()

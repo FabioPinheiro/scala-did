@@ -1,7 +1,7 @@
 package fmgp.crypto
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 import fmgp.did.DIDDocument
 import zio.json.ast.Json
 

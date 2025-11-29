@@ -1,8 +1,8 @@
 package fmgp.crypto
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 import fmgp.did.DIDDocument
-import fmgp.did.comm._
+import fmgp.did.comm.*
 
 class TestJVM extends FunSuite {}

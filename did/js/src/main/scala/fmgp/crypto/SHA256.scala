@@ -4,11 +4,11 @@ import scala.scalajs.js
 import scala.scalajs.js.typedarray.Uint8Array
 import scala.scalajs.js.typedarray.ArrayBuffer
 import org.scalajs.dom.{crypto, HashAlgorithm}
-import zio._
+import zio.*
 import fmgp.crypto.error.SomeThrowable
 import fmgp.typings.std.global.TextEncoder
 import fmgp.typings.jsSha256
-import fmgp.util._
+import fmgp.util.*
 
 object SHA256 {
   def digestToHex(str: String): String = bytes2Hex(digest(str))

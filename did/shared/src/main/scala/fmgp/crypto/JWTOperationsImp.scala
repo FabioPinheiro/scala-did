@@ -1,11 +1,11 @@
 package fmgp.crypto
 
-import zio._
-import zio.json._
-import fmgp.did._
-import fmgp.did.comm._
-import fmgp.crypto.error._
-import scala.util.chaining._
+import zio.*
+import zio.json.*
+import fmgp.did.*
+import fmgp.did.comm.*
+import fmgp.crypto.error.*
+import scala.util.chaining.*
 
 object JWTOperationsImp {
   val layer: URLayer[CryptoJWTOperations, JWTOperations] =

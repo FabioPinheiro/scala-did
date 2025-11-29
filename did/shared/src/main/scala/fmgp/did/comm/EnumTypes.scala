@@ -1,6 +1,6 @@
 package fmgp.did.comm
 
-import zio.json._
+import zio.json.*
 
 /** https://github.com/decentralized-identity/didcomm-messaging/blob/main/extensions/return_route/main.md
   */

@@ -1,12 +1,12 @@
 package fmgp.did.method.prism
 
-import zio._
-import zio.json._
-import fmgp.did._
+import zio.*
+import zio.json.*
+import fmgp.did.*
 
 import scala.util.chaining.scalaUtilChainingOps
 import scala.scalajs.js
-import org.scalajs.dom._
+import org.scalajs.dom.*
 import fmgp.typings.std.stdStrings.resume
 
 object HttpUtils {

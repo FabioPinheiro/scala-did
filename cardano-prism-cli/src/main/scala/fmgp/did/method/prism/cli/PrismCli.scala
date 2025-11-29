@@ -1,9 +1,9 @@
 package fmgp.did.method.prism.cli
 
-import zio._
-import zio.cli._
-import zio.json._
-import zio.http._
+import zio.*
+import zio.cli.*
+import zio.json.*
+import zio.http.*
 
 import fmgp.did.DIDSubject
 import fmgp.did.method.prism.*

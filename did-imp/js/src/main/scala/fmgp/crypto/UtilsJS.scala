@@ -14,16 +14,16 @@ import fmgp.typings.jose.typesMod.JWTPayload
 import fmgp.typings.jose.typesMod.GeneralJWSInput
 import fmgp.typings.jose.mod.errors.JWSSignatureVerificationFailed
 
-import fmgp.did.comm._
-import fmgp.crypto.error._
+import fmgp.did.comm.*
+import fmgp.crypto.error.*
 import fmgp.util.Base64
 
-import zio._
-import zio.json._
+import zio.*
+import zio.json.*
 
 import scala.scalajs.js
-import scala.scalajs.js.JSConverters._
-import scala.util.chaining._
+import scala.scalajs.js.JSConverters.*
+import scala.util.chaining.*
 import concurrent.ExecutionContext.Implicits.global
 
 object UtilsJS {

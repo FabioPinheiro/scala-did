@@ -1,11 +1,11 @@
 package fmgp.did.method.prism.cardano
 
-import munit._
-import zio.json._
+import munit.*
+import zio.json.*
 
 import fmgp.did.method.prism.PrismStateInMemory
-import fmgp.did.method.prism.proto._
-import PreprodExamples._
+import fmgp.did.method.prism.proto.*
+import PreprodExamples.*
 import zio.ZEnvironment
 
 /** didResolverPrismJVM/testOnly fmgp.did.method.prism.cardano.PreprodModelsSuite */

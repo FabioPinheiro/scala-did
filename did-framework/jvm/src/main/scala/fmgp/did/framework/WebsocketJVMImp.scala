@@ -1,9 +1,9 @@
 package fmgp.did.framework
 
-import zio._
-import zio.http._
-import zio.http.ChannelEvent._
-import zio.http.WebSocketFrame._
+import zio.*
+import zio.http.*
+import zio.http.ChannelEvent.*
+import zio.http.WebSocketFrame.*
 
 object WebsocketJVMImp {
   def bindings(

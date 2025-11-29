@@ -1,8 +1,8 @@
 package fmgp.did.method.prism
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
-import zio._
+import zio.*
 import com.bloxbean.cardano.client.account.Account
 import com.bloxbean.cardano.client.api.ProtocolParamsSupplier
 import com.bloxbean.cardano.client.api.UtxoSupplier
@@ -25,13 +25,13 @@ import com.bloxbean.cardano.client.function.helper.InputBuilders.createFromSende
 import com.bloxbean.cardano.client.function.helper.SignerProviders.signerFrom
 import com.bloxbean.cardano.client.backend.blockfrost.service.http.MetadataApi
 import com.bloxbean.cardano.client.function.TxOutputBuilder
-import com.bloxbean.cardano.client.metadata._
-import com.bloxbean.cardano.client.metadata.cbor._
+import com.bloxbean.cardano.client.metadata.*
+import com.bloxbean.cardano.client.metadata.cbor.*
 import java.math.BigInteger
 import fmgp.blockfrost.*
-import fmgp.util._
-import fmgp.did.method.prism.cardano._
-import fmgp.did.method.prism.vdr._
+import fmgp.util.*
+import fmgp.did.method.prism.cardano.*
+import fmgp.did.method.prism.vdr.*
 import _root_.proto.prism.PrismBlock
 // import _root_.proto.prism.PrismEvent
 import _root_.proto.prism.SignedPrismEvent

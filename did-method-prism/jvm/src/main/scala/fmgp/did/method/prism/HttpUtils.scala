@@ -1,9 +1,9 @@
 package fmgp.did.method.prism
 
-import zio._
-import zio.http._
-import zio.json._
-import fmgp.did._
+import zio.*
+import zio.http.*
+import zio.json.*
+import fmgp.did.*
 
 object HttpUtils {
 

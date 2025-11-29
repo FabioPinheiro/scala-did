@@ -6,8 +6,8 @@ import proto.prism.node.*
 import fmgp.crypto.SHA256
 import fmgp.util.Base64
 import fmgp.did.DIDSubject
-import fmgp.did.method.prism._
-import fmgp.did.method.prism.cardano._
+import fmgp.did.method.prism.*
+import fmgp.did.method.prism.cardano.*
 
 object PrismNodeImpl {
   def make = for {

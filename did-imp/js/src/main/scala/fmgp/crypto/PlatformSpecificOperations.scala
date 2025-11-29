@@ -1,11 +1,11 @@
 package fmgp.crypto
 
-import zio._
+import zio.*
 
 import fmgp.did.comm.PlaintextMessage
 import fmgp.did.comm.SignedMessage
-import fmgp.crypto.UtilsJS._
-import fmgp.crypto.error._
+import fmgp.crypto.UtilsJS.*
+import fmgp.crypto.error.*
 
 object PlatformSpecificOperations {
 
