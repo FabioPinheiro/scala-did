@@ -203,7 +203,7 @@
   ),
   </span><span class="type-name">Seq</span><span>(</span><span class="type-name">DIDPeerServiceEncoded</span><span>.</span><span class="identifier">fromEndpoint</span><span>(</span><span class="string-literal">&quot;https://alice.did.fmgp.app/&quot;</span><span>))
 )
-</span><span class="comment">// alice: AgentDIDPeer = fmgp.did.method.peer.DIDPeer2$$anon$4@726c96d0
+</span><span class="comment">// alice: AgentDIDPeer = fmgp.did.method.peer.DIDPeer2$$anon$4@62326bbe
 </span><span>
 </span><span class="identifier">alice</span><span>.</span><span class="identifier">id</span><span>.</span><span class="identifier">asDIDSubject</span><span>
 </span><span class="comment">// res3: DIDSubject = &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjp7InVyaSI6Imh0dHBzOi8vYWxpY2UuZGlkLmZtZ3AuYXBwLyIsImEiOlsiZGlkY29tbS92MiJdfX0&quot;
@@ -254,7 +254,7 @@
 </span><span class="keyword">val</span><span> </span><span class="identifier">program1</span><span> = </span><span class="type-name">DidPeerResolver</span><span>.</span><span class="identifier">didDocument</span><span>(</span><span class="type-name">DIDPeer</span><span>(</span><span class="identifier">alice</span><span>.</span><span class="identifier">id</span><span>.</span><span class="identifier">asDIDSubject</span><span>))
 </span><span class="comment">// program1: ZIO[Any, Nothing, DIDDocument] = Sync(
 //   trace = &quot;fmgp.did.method.peer.DidPeerResolver.genesisDocument(DidPeerResolver.scala:34)&quot;,
-//   eval = fmgp.did.method.peer.DidPeerResolver$$$Lambda$22809/0x00000008040e87c0@...
+//   eval = fmgp.did.method.peer.DidPeerResolver$$$Lambda$22689/0x000000080414a568@...
 </span><span>
 </span><span class="type-name">Unsafe</span><span>.</span><span class="identifier">unsafe</span><span> { </span><span class="keyword">implicit</span><span> </span><span class="identifier">unsafe</span><span> =&gt; </span><span class="comment">// Run side effect
 </span><span>  </span><span class="type-name">Runtime</span><span>.</span><span class="keyword">default</span><span>.</span><span class="identifier">unsafe</span><span>
@@ -273,14 +273,14 @@
   </span><span class="identifier">to</span><span> = </span><span class="type-name">TO</span><span>(</span><span class="string-literal">&quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ&quot;</span><span>)
 )
 </span><span class="comment">// ping: TrustPingWithRequestedResponse = TrustPingWithRequestedResponse(
-//   id = &quot;005d7925-a33a-47df-ac15-c7f59277f852&quot;,
+//   id = &quot;713f9966-0ef1-4c20-ae3e-72ed0a02915d&quot;,
 //   from = &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjp7InVyaSI6Imh0dHBzOi8vYWxpY2UuZGlkLmZtZ3AuYXBwLyIsImEiOlsiZGlkY29tbS92MiJdfX0&quot;,
 //   to = &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ&quot;
 // )
 </span><span>
 </span><span class="identifier">ping</span><span>.</span><span class="identifier">toPlaintextMessage</span><span>.</span><span class="identifier">toJsonPretty</span><span>
 </span><span class="comment">// res6: String = &quot;&quot;&quot;{
-//   &quot;id&quot; : &quot;005d7925-a33a-47df-ac15-c7f59277f852&quot;,
+//   &quot;id&quot; : &quot;713f9966-0ef1-4c20-ae3e-72ed0a02915d&quot;,
 //   &quot;type&quot; : &quot;https://didcomm.org/trust-ping/2.0/ping&quot;,
 //   &quot;to&quot; : [
 //     &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ&quot;
@@ -304,18 +304,18 @@
     .</span><span class="identifier">getOrThrowFiberFailure</span><span>()
 }
 </span><span class="comment">// {
-//   &quot;ciphertext&quot; : &quot;LHicNNyxsM1SsYuqxsYmFIBUQKVYx7Els-ktKi74V001hZ80LzayOM_KsqlUSo6hm3DdVxCBXOcKBndu21dyesQZvIjBenrkSJ9x059TKbKBwmiluskuMV9gwapMAw2wH877FDayp52c-7zHoIjl1YY_jv0r6PCpa0NTkGCqmP5XAkfmnGqxQASKp6G9EJCyBuUNMAUBrI3m8-dhBFTBQKMRFXqeIQPphUXtB9RwEelA910dPWfKRyQoMaNpown-92XMrQardYFkYGoMug5sG9A8OAeXUS4x-bIuWO_jFvGpuwwyeT9kox5wDypYqKeKFQF1uP8zn_fUgLxCCS4RVo8s77e2Id-ZrxYdi0AJ6g4Twg4qQ4qJgUQzGMSwkw57YD3Kfm_cnOij6n3FUGfTuxF8eFGsT2a5ybNnCAV8EDwVe1MUXCYdNkXEuz7NuEaxUcXqhhz8FR7IB6hWm7JIDjqPKlgdexd5jxMtfPWzWX_CwZQwimiLUlsITAO8HhKEpCJ9pvR1UEycicut2efMpiqNDlXsgy4sm525IM_qYMVffJMF5mlTWQQMTof5p_gICaL3vRJChft1Gmwzf2znhnI4SPbTKHlPVy47xRYAQdu8bxDJ1vAhYtpgziK3vv8JeRfhKEeOednFAVUpzyo9DfmFfXcjkW0fGtIr36fnvTPqRfw7o9SKazDIp0qwVAL-fFYh3ZVCr1osPEDSz_EbcFK0A_Bd20NQc1Nfub2v5lfNtXOp0tEArLHvMOKJQ96X&quot;,
-//   &quot;protected&quot; : &quot;eyJlcGsiOnsia3R5IjoiT0tQIiwiY3J2IjoiWDI1NTE5IiwieCI6ImJud2xmZU5BQnpJOXA0SjEzckdWM2hvbk41Y3I3U3dyeGNIUk9vcUowRkkifSwiYXB2IjoiZXVXaDJHcEc0WUl3OVlXVFAyX1ZLUWhUVHRCN2VhR25CZk85OV9NZjhuZyIsInNraWQiOiJkaWQ6cGVlcjoyLkV6NkxTZ2h3U0U0Mzd3bkRFMXB0M1g2aFZEVVF6U2pzSHppbnBYM1hGdk1qUkFtN3kuVno2TWtoaDFlNUNFWVlxNkpCVWNUWjZDcDJyYW5DV1JydjdZYXgzTGU0TjU5UjZkZC5TZXlKMElqb2laRzBpTENKeklqcDdJblZ5YVNJNkltaDBkSEJ6T2k4dllXeHBZMlV1Wkdsa0xtWnRaM0F1WVhCd0x5SXNJbUVpT2xzaVpHbGtZMjl0YlM5Mk1pSmRmWDAja2V5LTEiLCJhcHUiOiJaR2xrT25CbFpYSTZNaTVGZWpaTVUyZG9kMU5GTkRNM2QyNUVSVEZ3ZEROWU5taFdSRlZSZWxOcWMwaDZhVzV3V0ROWVJuWk5hbEpCYlRkNUxsWjZOazFyYUdneFpUVkRSVmxaY1RaS1FsVmpWRm8yUTNBeWNtRnVRMWRTY25ZM1dXRjRNMHhsTkU0MU9WSTJaR1F1VTJWNVNqQkphbTlwV2tjd2FVeERTbnBKYW5BM1NXNVdlV0ZUU1RaSmJXZ3daRWhDZWs5cE9IWlpWM2h3V1RKVmRWcEhiR3RNYlZwMFdqTkJkVmxZUW5kTWVVbHpTVzFGYVU5c2MybGFSMnhyV1RJNWRHSlRPVEpOYVVwa1psZ3dJMnRsZVMweCIsInR5cCI6ImFwcGxpY2F0aW9uL2RpZGNvbW0tZW5jcnlwdGVkK2pzb24iLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiRUNESC0xUFUrQTI1NktXIn0&quot;,
+//   &quot;ciphertext&quot; : &quot;O6Cz6yrSVKwQLeuY772Jo1SxcmoGHewA7InkYD91Zt-kDHDDJZpr2o8lJoXF9bIXY_0I2y9p6vuuB0IZ2p1Xfosj3RzznvAR63WsNUZPTaqekXG3x1AplRqY9mBPHFCFMMc3mK3js-Yer0T4lB1eA3INJIJT-2LHDYg1F4ja4jOaL2y_b-ZjoXpe7DfcRlei1c2b52qYfYwSID3LvJN-twIdXXAE0TrNBD1qDotPU1AAwrz2xBiTu0HjI1bmHUkV42nlDpn3FIgoZNy85Rz7iLzFggyk6fVHbo1Fw3Q7Z9X85_DUmRV05WSSvxusg4prbd8faH1xMPC69oYkUnOyKasw9yI7kyQY0DZmg9Hmbh_H9wlRHsAwqciwzPZsLNJgP5EdehGyh0eAOGBbHb0rkOgycV26PKCVXwabAu-9a2STkTi9k1XT1RgaP38n9QPNztu9I9Uchsfnf3v4hD4R-Az9iKHYvtn2hXTFiuFQotnvUcaGFay0KMmDOK0PdRx9-g8UU1he7Qq93yVXw9T90EQ-xl87zpC7_RiLX5H0uMr_hO-lPCHt6ru4-O66Ed8xNu3ErCNEIULE3xnR2e6ff7-AAyb3Mye7X82JDLYsixEGZhHgCC4ciP515i1CjTE_PIrfADen4CO3jKgF5xQ2CuCXzr1PEiIOMVR_V9e8tQDNcTCwFYkD5MvkmsDV0dDjc3KA4L-OXNYxYP9hQ0I9g-qyV4Q_6T6vre9qBrICc5HjjOjp763fh4-vLdMHok9U&quot;,
+//   &quot;protected&quot; : &quot;eyJlcGsiOnsia3R5IjoiT0tQIiwiY3J2IjoiWDI1NTE5IiwieCI6ImwxR2hzS2l0RlAxU2JLcVh4VmR6OC1qVFByVExHVUxDMEhnaDdHajNnMDAifSwiYXB2IjoiZXVXaDJHcEc0WUl3OVlXVFAyX1ZLUWhUVHRCN2VhR25CZk85OV9NZjhuZyIsInNraWQiOiJkaWQ6cGVlcjoyLkV6NkxTZ2h3U0U0Mzd3bkRFMXB0M1g2aFZEVVF6U2pzSHppbnBYM1hGdk1qUkFtN3kuVno2TWtoaDFlNUNFWVlxNkpCVWNUWjZDcDJyYW5DV1JydjdZYXgzTGU0TjU5UjZkZC5TZXlKMElqb2laRzBpTENKeklqcDdJblZ5YVNJNkltaDBkSEJ6T2k4dllXeHBZMlV1Wkdsa0xtWnRaM0F1WVhCd0x5SXNJbUVpT2xzaVpHbGtZMjl0YlM5Mk1pSmRmWDAja2V5LTEiLCJhcHUiOiJaR2xrT25CbFpYSTZNaTVGZWpaTVUyZG9kMU5GTkRNM2QyNUVSVEZ3ZEROWU5taFdSRlZSZWxOcWMwaDZhVzV3V0ROWVJuWk5hbEpCYlRkNUxsWjZOazFyYUdneFpUVkRSVmxaY1RaS1FsVmpWRm8yUTNBeWNtRnVRMWRTY25ZM1dXRjRNMHhsTkU0MU9WSTJaR1F1VTJWNVNqQkphbTlwV2tjd2FVeERTbnBKYW5BM1NXNVdlV0ZUU1RaSmJXZ3daRWhDZWs5cE9IWlpWM2h3V1RKVmRWcEhiR3RNYlZwMFdqTkJkVmxZUW5kTWVVbHpTVzFGYVU5c2MybGFSMnhyV1RJNWRHSlRPVEpOYVVwa1psZ3dJMnRsZVMweCIsInR5cCI6ImFwcGxpY2F0aW9uL2RpZGNvbW0tZW5jcnlwdGVkK2pzb24iLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiRUNESC0xUFUrQTI1NktXIn0&quot;,
 //   &quot;recipients&quot; : [
 //     {
-//       &quot;encrypted_key&quot; : &quot;LkU3HXxgykAaCwHcRHzgKOy2Pzc13jFoJilvy6HFKmUx8NgYQINgOdhou233P77vF0dZllg3TdyAAknv3M-CU0NIu6sX9k5r&quot;,
+//       &quot;encrypted_key&quot; : &quot;Bc9HDO6DXDm4S32UDyHDyXk8aMaHnhX86BQ_JI7YOX3PNPuVDz76TM_86wwhcOzk0VrmoM1dLtrkpMyW5m2mwJYEYsQABHSy&quot;,
 //       &quot;header&quot; : {
 //         &quot;kid&quot; : &quot;did:peer:2.Ez6LSghwSE437wnDE1pt3X6hVDUQzSjsHzinpX3XFvMjRAm7y.Vz6Mkhh1e5CEYYq6JBUcTZ6Cp2ranCWRrv7Yax3Le4N59R6dd.SeyJ0IjoiZG0iLCJzIjoiaHR0cHM6Ly9hbGljZS5kaWQuZm1ncC5hcHAvIiwiciI6W10sImEiOlsiZGlkY29tbS92MiJdfQ#key-1&quot;
 //       }
 //     }
 //   ],
-//   &quot;tag&quot; : &quot;_ja4ZZuxsxbpNAwEbi8FgY7dwArV0DB1m6rB7CeMlK0&quot;,
-//   &quot;iv&quot; : &quot;SQhGZmL5aAYIDhYoSw3caw&quot;
+//   &quot;tag&quot; : &quot;fb8LJ8Z5SGaioZtpueuS-2r28n9eXnCNhCzYg9I7OZo&quot;,
+//   &quot;iv&quot; : &quot;L9oYirzh0uQV4ZFHt_iXPg&quot;
 // }</span></code></pre>
 
         
