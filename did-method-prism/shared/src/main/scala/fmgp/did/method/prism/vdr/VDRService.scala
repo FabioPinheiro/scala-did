@@ -3,14 +3,14 @@ package fmgp.did.method.prism.vdr
 import zio._
 import zio.json._
 import fmgp.crypto.Secp256k1PrivateKey
-import fmgp.did.method.prism.{RefVDR, DIDPrism, PrismState, VDR, EventHash, PrismChainService}
+import fmgp.did.method.prism.{RefVDR, DIDPrism, PrismStateRead, VDR, EventHash, PrismChainService}
 import fmgp.did.method.prism.cardano.TxHash
 import proto.prism.PrismBlock
 import proto.prism.SignedPrismEvent
 
 case class VDRServiceImpl(
     chain: PrismChainService,
-    protected val prismState: PrismState
+    protected val prismState: PrismStateRead
 ) extends VDRService {
   override def submit(seqSignedPrismEvent: SignedPrismEvent*): ZIO[Any, Throwable, TxHash] =
     chain.commitAndPush(

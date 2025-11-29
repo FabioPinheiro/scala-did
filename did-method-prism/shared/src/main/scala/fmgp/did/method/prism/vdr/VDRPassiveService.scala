@@ -8,7 +8,7 @@ import fmgp.did.method.prism.cardano.TxHash
 import proto.prism.PrismBlock
 import proto.prism.SignedPrismEvent
 
-case class VDRPassiveServiceImpl(protected val prismState: PrismState) extends VDRPassiveService
+case class VDRPassiveServiceImpl(protected val prismState: PrismStateRead) extends VDRPassiveService
 
 trait VDRPassiveService {
   protected def prismState: PrismStateRead
