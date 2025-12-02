@@ -28,12 +28,12 @@ object PrismStateMongoDB {
     * }}}
     */
   def makeLayer(url: String): ZLayer[AsyncDriver, Throwable, PrismState] = {
-    ReactiveMongoApi.layer(url) >>> // "mongodb+srv://fabio:ZiT61pB5@cluster0.bgnyyy1.mongodb.net/test"
+    ReactiveMongoApi.layer(url) >>> // "mongodb+srv://user:password@cluster0.bgnyyy1.mongodb.net/test"
       ZLayer.fromZIO(ZIO.service[ReactiveMongoApi].map(reactiveMongoApi => PrismStateMongoDB(reactiveMongoApi)))
   }
 
   def makeReadOnlyLayer(url: String): ZLayer[AsyncDriver, Throwable, PrismStateRead] = {
-    ReactiveMongoApi.layer(url) >>> // "mongodb+srv://fabio:ZiT61pB5@cluster0.bgnyyy1.mongodb.net/test"
+    ReactiveMongoApi.layer(url) >>> // "mongodb+srv://user:password@cluster0.bgnyyy1.mongodb.net/test"
       ZLayer.fromZIO(ZIO.service[ReactiveMongoApi].map(reactiveMongoApi => PrismStateReadMongoDB(reactiveMongoApi)))
   }
 }

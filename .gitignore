@@ -33,3 +33,6 @@ vite/dev-dist/
 
 #lixo
 lixo
+
+# Secrets
+.secret

@@ -30,7 +30,8 @@ import reactivemongo.api.bson.BSONDocument
   */
 class PrismStateMongoDBSuite extends ZSuite {
 
-  val mongoDBConnection = "mongodb+srv://fabio:ZiT61pB5@cluster0.bgnyyy1.mongodb.net/test" // FIXME
+  val mongoDBConnection = // FIXME This value should come from the environment
+    "mongodb+srv://user:password@cluster0.bgnyyy1.mongodb.net/test"
 
   val prismStateFixture: FunFixture[ULayer[PrismState]] =
     ZTestLocalFixture { _ =>

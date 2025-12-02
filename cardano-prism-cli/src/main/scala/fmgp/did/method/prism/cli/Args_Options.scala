@@ -19,7 +19,7 @@ val blockfrostConfig =
 
 val networkFlag =
   Options
-    .enumeration[PublicCardanoNetwork]("network")(PublicCardanoNetwork.values.toSeq.map(e => (e.name, e)) *)
+    .enumeration[PublicCardanoNetwork]("network")(PublicCardanoNetwork.values.toSeq.map(e => (e.name, e))*)
     .withDefault(PublicCardanoNetwork.Mainnet)
 
 val networkOnlineFlag =
@@ -27,12 +27,12 @@ val networkOnlineFlag =
     .enumeration[PublicCardanoNetwork]("network")(
       Seq(PublicCardanoNetwork.Mainnet, PublicCardanoNetwork.Preprod, PublicCardanoNetwork.Preview).map(e =>
         (e.name, e)
-      ) *
+      )*
     )
 
 val networkArgs =
   Args.enumeration[PublicCardanoNetwork]("network")(
-    PublicCardanoNetwork.values.filterNot(_ == PublicCardanoNetwork.Testnet).toSeq.map(e => (e.name, e)) *
+    PublicCardanoNetwork.values.filterNot(_ == PublicCardanoNetwork.Testnet).toSeq.map(e => (e.name, e))*
   )
 
 val mnemonicWords = Options
@@ -89,5 +89,5 @@ val indexerDBConnectionAgr =
     .text("mongodb-connection")
     .mapOrFail(e => Right(e))
     .??(
-      "Indexer MongoDB connection to be used as a state storage. Ex: 'mongodb+srv://fabio:ZiT61pB5@cluster0.bgnyyy1.mongodb.net/indexer'"
+      "Indexer MongoDB connection to be used as a state storage. Ex: 'mongodb+srv://user:password@cluster0.bgnyyy1.mongodb.net/indexer'"
     )
