@@ -161,7 +161,7 @@ lazy val V = new {
 
   val bullet = "1.16.2"
 
-  val reactivemongo = "1.1.0-RC17"
+  val reactivemongo = "1.1.0-RC19"
 
   val logbackClassic = "1.2.10"
   val scalaLogging = "3.9.4"
