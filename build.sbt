@@ -176,7 +176,7 @@ lazy val V = new {
   val upickle = "4.3.2"
 
   val identusApollo = "1.8.0" // "1.7.1"
-  val scalus = "0.13.0"
+  val scalus = "0.14.2"
 }
 
 /** NPM Dependencies */
@@ -228,11 +228,13 @@ lazy val D = new {
   val reactivemongo = Def.setting("org.reactivemongo" %% "reactivemongo" % V.reactivemongo)
 
   // https://mvnrepository.com/artifact/org.scalus/scalus
-  // https://mvnrepository.com/artifact/org.scalus/scalus-cardano-ledger
-  // https://mvnrepository.com/artifact/org.scalus/scalus-bloxbean-cardano-client-lib
   val scalus = Def.setting("org.scalus" %%% "scalus" % V.scalus)
+  // https://mvnrepository.com/artifact/org.scalus/scalus-cardano-ledger
   val scalusCardanoLedger = Def.setting("org.scalus" %%% "scalus-cardano-ledger" % V.scalus)
+  // https://mvnrepository.com/artifact/org.scalus/scalus-bloxbean-cardano-client-lib
   val scalusBloxbean = Def.setting("org.scalus" %% "scalus-bloxbean-cardano-client-lib" % V.scalus)
+  // https://mvnrepository.com/artifact/org.scalus/scalus-plugin
+  val scalusPlugin = Def.setting("org.scalus" %% "scalus-plugin" % V.scalus)
 
   // Test DID comm
   // val didcomm = Def.setting("org.didcommx" % "didcomm" % "0.3.1")
@@ -584,6 +586,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.scalus.value,
     libraryDependencies += D.scalusCardanoLedger.value,
     libraryDependencies += D.scalusBloxbean.value,
+    libraryDependencies += compilerPlugin(D.scalusPlugin.value),
     libraryDependencies += "com.lihaoyi" %%% "pprint" % "0.9.4",
   )
   .jvmSettings(libraryDependencies += D.ziohttp.value)
