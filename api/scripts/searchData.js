@@ -2138,6 +2138,7 @@ pages = [{"l":"index.html#","e":false,"i":"","n":"scala-did-docs","t":"scala-did
 {"l":"https://doc.did.fmgp.app/api/fmgp/did.html#SetU","e":true,"i":"","n":"SetU","t":"SetU[A] = A | Seq[A]","d":"fmgp.did","k":"type","x":""},
 {"l":"https://doc.did.fmgp.app/api/fmgp/did.html#URI","e":true,"i":"","n":"URI","t":"URI = String","d":"fmgp.did","k":"type","x":""},
 {"l":"https://doc.did.fmgp.app/api/fmgp/did.html#VerificationMethodType","e":true,"i":"","n":"VerificationMethodType","t":"VerificationMethodType = String","d":"fmgp.did","k":"type","x":""},
+{"l":"https://doc.did.fmgp.app/api/fmgp/did.html#did(sc:StringContext)(args:<repeated>[Any]):DID","e":true,"i":"extension (sc: StringContext)","n":"did","t":"did(args: Any*): DID","d":"fmgp.did","k":"def","x":""},
 {"l":"fmgp/did/comm.html#","e":false,"i":"","n":"fmgp.did.comm","t":"fmgp.did.comm","d":"","k":"package","x":""},
 {"l":"https://doc.did.fmgp.app/api/fmgp/did/comm.html#APU","e":true,"i":"","n":"APU","t":"APU","d":"fmgp.did.comm","k":"type","x":""},
 {"l":"https://doc.did.fmgp.app/api/fmgp/did/comm.html#APV","e":true,"i":"","n":"APV","t":"APV","d":"fmgp.did.comm","k":"type","x":""},
