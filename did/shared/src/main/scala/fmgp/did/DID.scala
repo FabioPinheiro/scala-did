@@ -3,6 +3,7 @@ package fmgp.did
 import zio.json.*
 import zio.json.ast.Json
 import fmgp.did.comm.{FROM, FROMTO, TO}
+import fmgp.crypto.error.DidException
 
 //https://github.com/jwtk/jjwt
 //https://github.com/panva/jose

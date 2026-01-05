@@ -35,6 +35,17 @@ class DIDSubjectSuite extends FunSuite {
     }
   }
 
+  test("DID string interpolation with valid DID") {
+    val ret = did"did:example:123456789abcdefghijk"
+    assert(ret.isInstanceOf[DID])
+  }
+
+  test("DID string interpolation into with a invalid DID") {
+    interceptMessage[fmgp.crypto.error.DidException]("FailToParse(NOT a DID subject 'did::i')") {
+      val ret = did"did::i"
+    }
+  }
+
   Seq(
     "did::",
     "did::i",
