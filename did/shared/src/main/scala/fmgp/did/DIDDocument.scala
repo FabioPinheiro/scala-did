@@ -38,6 +38,10 @@ trait DIDDocument extends DID {
     * authenticated, for purposes such as logging into a website or engaging in any sort of challenge-response protocol.
     * @see
     *   https://www.w3.org/TR/did-core/#authentication
+    *
+    * In DIDComm Keys for Encrypting Messages
+    *
+    * Key example OKP key with Curve Ed25519
     */
   def authentication: NotRequired[SetU[VerificationMethod]]
 
@@ -55,6 +59,10 @@ trait DIDDocument extends DID {
     * a secure communication channel with the recipient.
     * @see
     *   https://www.w3.org/TR/did-core/#key-agreement
+    *
+    * In DIDComm Keys for Signing Messages
+    *
+    * Key example OKP key with Curve X25519
     */
   def keyAgreement: NotRequired[Set[VerificationMethod]]
 
@@ -90,13 +98,13 @@ trait DIDDocument extends DID {
     case e: VerificationMethodEmbeddedMultibase => ??? // FIXME
   }
 
-  /** Keys for Signing Messages */
+  /** Keys for Signing Messages (DIDComm) */
   def allKeysTypeKeyAgreement = keyAgreement
     .getOrElse(Set.empty)
     .flatMap { vm => converteToVerificationMethodReferencedWithKey(vm) }
 
   val (namespace, specificId) = (id.namespace, id.specificId) // DID.getNamespaceAndSpecificId(id)
-  /** Keys for Encrypting Messages */
+  /** Keys for Encrypting Messages (DIDComm) */
   def allKeysTypeAuthentication: Seq[VerificationMethod] = authentication.toSeq.flatMap {
     case v: VerificationMethod                   => Seq(v)
     case seq: Seq[VerificationMethod] @unchecked => seq
