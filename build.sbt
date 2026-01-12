@@ -630,7 +630,7 @@ lazy val cardanoPrismCli = project
     libraryDependencies += D.zioMunitTest.value,
   )
   .settings( // PoC for a prism-cli tooling // TODO Move to a new repo
-    libraryDependencies += "dev.zio" %% "zio-cli" % "0.7.4",
+    libraryDependencies += "dev.zio" %% "zio-cli" % "0.7.5",
     libraryDependencies += D.reactivemongo.value,
     assembly / mainClass := Some("fmgp.did.method.prism.cli.PrismCli"),
     assembly / assemblyJarName := "cardano-prism.jar",
