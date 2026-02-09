@@ -580,7 +580,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
     libraryDependencies += "com.google.crypto.tink" % "tink" % "1.20.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
-    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.5",
+    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.6",
     // https://oss.sonatype.org/#nexus-search;quick~com.bloxbean.cardano
     libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.6.7",
     libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.6.7",
@@ -655,7 +655,7 @@ lazy val didPrismNode = project
     ),
     libraryDependencies ++= Seq(
       "io.grpc" % "grpc-netty" % "1.79.0", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
-      "io.netty" % "netty-handler" % "4.2.9.Final", // This is to forces a update in from "io.grpc" % "grpc-netty" % "1.73.0" -> https://mvnrepository.com/artifact/io.netty/netty-handler/4.1.110.Final
+      "io.netty" % "netty-handler" % "4.2.10.Final", // This is to forces a update in from "io.grpc" % "grpc-netty" % "1.73.0" -> https://mvnrepository.com/artifact/io.netty/netty-handler/4.1.110.Final
       // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion,
       // REMOVE // The following needed only if you include scalapb/scalapb.proto:
       // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
