@@ -151,7 +151,7 @@ lazy val V = new {
 
   // https://mvnrepository.com/artifact/dev.zio/zio
   val zio = "2.1.24"
-  val zioJson = "0.7.45"
+  val zioJson = "0.9.0"
   val zioMunitTest = "0.4.0"
   val zioHttp = "3.7.4" // FIXES CORS https://github.com/zio/zio-http/pull/2490
   val zioPrelude = "1.0.0-RC21"
