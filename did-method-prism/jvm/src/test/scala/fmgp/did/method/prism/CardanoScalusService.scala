@@ -1,33 +1,20 @@
 package fmgp.prism
 
 import munit.FunSuite
-// import scalus.*
-// import scalus.cardano.*
-// import scalus.cardano.txbuilder.*
-// import scalus.cardano.address.Address
-// import fmgp.did.method.prism.cardano.PublicCardanoNetwork
-// import fmgp.did.method.prism.cardano.CardanoWalletConfig
-// import scalus.cardano.address.Network
-// import scalus.cardano.ledger.*
-// import fmgp.did.method.prism.CardanoService
-// import scalus.uplc.eval.ExBudget
-// // import scalus.cardano.txbuilder.LowLevelTxBuilder.ChangeOutputDiffHandler
-// import fmgp.did.method.prism.cardano.PRISM_LABEL_CIP_10
-// import com.bloxbean.cardano.client.util.HexUtil
-
-import scalus.Compiler
-import scalus.builtin.Data.toData
-import scalus.builtin.{ByteString, Data}
 import scalus.cardano.address.Address
 import scalus.cardano.address.Address.{addr, stake}
 import scalus.cardano.ledger.*
 import scalus.cardano.ledger.AuxiliaryData.Metadata
 import scalus.cardano.node.Emulator
-// import scalus.cardano.txbuilder.TestPeer.{Alice, Bob}
+import scalus.compiler.*
 import scalus.uplc.PlutusV3
 import scalus.uplc.eval.PlutusVM
 import scalus.uplc.transform.V3Optimizer
+import scalus.uplc.builtin.ByteString
+import scalus.uplc.builtin.Data
+
 import scalus.utils.await
+
 import fmgp.did.method.prism.TestPeer.{Alice, Bob}
 import scalus.cardano.txbuilder.TxBuilder
 
@@ -46,7 +33,7 @@ class CardanoScalusService extends FunSuite {
     TransactionOutput(address, Value.ada(ada))
 
   val alwaysOkScript: Script.PlutusV3 = {
-    val alwaysOk = PlutusV3.compile((sc: Data) => ())(using Compiler.defaultOptions)
+    val alwaysOk = PlutusV3.compile((sc: Data) => ())(using Options.default)
     alwaysOk.script
   }
 
@@ -58,34 +45,32 @@ class CardanoScalusService extends FunSuite {
     )
   )
 
-  // test("Building a simple transaction with `complete()`") {
-  //   // Simple tx, using magic `complete()`
-  //   val tx = TxBuilder(env)
-  //     .payTo(Bob.address, Value.ada(10))
-  //     // Magic: sets inputs, collateral input/output, execution budgets,
-  //     // fee, handle change, etc.
-  //     .complete(provider = emulator, sponsor = Alice.address)
-  //     .await()
-  //     .sign(Alice.signer)
-  //     .transaction
+  test("Building a simple transaction") {
+    // Simple tx, using magic `complete()`
+    val tx = TxBuilder(env)
+      .payTo(Bob.address, Value.ada(10))
+      // Magic: sets inputs, collateral input/output, execution budgets, fee, handle change, etc.
+      .complete(reader = emulator, sponsor = Alice.address)
+      .map(_.sign(Alice.signer))
+      .map(_.transaction)
+      .await()
 
-  //   pprint.pprintln(tx.body.value)
-  //   pprint.pprintln(tx.witnessSet)
-  // }
+    pprint.pprintln(tx.body.value)
+    pprint.pprintln(tx.witnessSet)
+  }
 
-  test("Building a simple transaction with `complete()`") {
+  test("Building a simple transaction with Metadata") {
 
     val meta = AuxiliaryData.Metadata(Map(Word64.fromUnsignedInt(999) -> Metadatum.Int(123)))
-    // Simple tx, using magic `complete()`
     val tx = TxBuilder(env)
       .payTo(Bob.address, Value.ada(10))
       .metadata(meta)
       // Magic: sets inputs, collateral input/output, execution budgets,
       // fee, handle change, etc.
-      .complete(provider = emulator, sponsor = Alice.address)
+      .complete(reader = emulator, sponsor = Alice.address)
+      .map(_.sign(Alice.signer))
+      .map(_.transaction)
       .await()
-      .sign(Alice.signer)
-      .transaction
 
     pprint.pprintln(tx.auxiliaryData)
     pprint.pprintln(tx.body.value)

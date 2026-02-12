@@ -176,7 +176,7 @@ lazy val V = new {
   val upickle = "4.3.2"
 
   val identusApollo = "1.8.0" // "1.7.1"
-  val scalus = "0.14.2"
+  val scalus = "0.15.0"
 }
 
 /** NPM Dependencies */
@@ -231,6 +231,8 @@ lazy val D = new {
   val scalus = Def.setting("org.scalus" %%% "scalus" % V.scalus)
   // https://mvnrepository.com/artifact/org.scalus/scalus-cardano-ledger
   val scalusCardanoLedger = Def.setting("org.scalus" %%% "scalus-cardano-ledger" % V.scalus)
+  // https://mvnrepository.com/artifact/org.scalus/scalus-testkit
+  val scalusTest = Def.setting("org.scalus" %%% "scalus-testkit" % V.scalus)
   // https://mvnrepository.com/artifact/org.scalus/scalus-bloxbean-cardano-client-lib
   val scalusBloxbean = Def.setting("org.scalus" %% "scalus-bloxbean-cardano-client-lib" % V.scalus)
   // https://mvnrepository.com/artifact/org.scalus/scalus-plugin
@@ -583,11 +585,19 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.bullet.value,
     libraryDependencies += D.munit.value,
     libraryDependencies += D.zioMunitTest.value,
-    libraryDependencies += D.scalus.value,
-    libraryDependencies += D.scalusCardanoLedger.value,
-    libraryDependencies += D.scalusBloxbean.value,
     libraryDependencies += compilerPlugin(D.scalusPlugin.value),
     libraryDependencies += "com.lihaoyi" %%% "pprint" % "0.9.4",
+  )
+  .jvmSettings(
+    libraryDependencies += D.scalus.value,
+    libraryDependencies += D.scalusCardanoLedger.value,
+    libraryDependencies += D.scalusTest.value,
+    libraryDependencies += D.scalusBloxbean.value,
+  )
+  .jsSettings( // FIXME
+    // libraryDependencies += D.scalus.value,
+    // libraryDependencies += D.scalusCardanoLedger.value,
+    // libraryDependencies += D.scalusTest.value,
   )
   .jvmSettings(libraryDependencies += D.ziohttp.value)
   .jvmSettings( // Add JVM-specific settings here

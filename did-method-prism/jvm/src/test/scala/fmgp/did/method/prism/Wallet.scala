@@ -5,9 +5,9 @@ import com.bloxbean.cardano.client.crypto.bip32.key.{HdPrivateKey, HdPublicKey}
 import com.bloxbean.cardano.client.crypto.config.CryptoConfiguration
 import com.bloxbean.cardano.client.transaction.util.TransactionBytes
 import scalus.cardano.ledger.{Transaction, VKeyWitness}
+import scalus.uplc.builtin.ByteString
 
 import scala.language.implicitConversions
-import scalus.builtin.ByteString
 
 // Wrapper types for cryptographic keys and signatureså
 case class VerificationKeyBytes(bytes: ByteString)
