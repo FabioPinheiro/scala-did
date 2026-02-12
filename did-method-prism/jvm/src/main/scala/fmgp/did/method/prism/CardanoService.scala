@@ -33,7 +33,6 @@ import fmgp.util.*
 import fmgp.did.method.prism.cardano.*
 import fmgp.did.method.prism.vdr.*
 import _root_.proto.prism.PrismBlock
-// import _root_.proto.prism.PrismEvent
 import _root_.proto.prism.SignedPrismEvent
 import _root_.proto.prism.PrismObject
 import com.bloxbean.cardano.client.common.model.Network

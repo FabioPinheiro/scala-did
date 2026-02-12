@@ -585,19 +585,16 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.bullet.value,
     libraryDependencies += D.munit.value,
     libraryDependencies += D.zioMunitTest.value,
-    libraryDependencies += compilerPlugin(D.scalusPlugin.value),
     libraryDependencies += "com.lihaoyi" %%% "pprint" % "0.9.4",
   )
-  .jvmSettings(
+  .jvmSettings( // scalus //FIXME use settings
     libraryDependencies += D.scalus.value,
     libraryDependencies += D.scalusCardanoLedger.value,
     libraryDependencies += D.scalusTest.value,
-    libraryDependencies += D.scalusBloxbean.value,
   )
-  .jsSettings( // FIXME
-    // libraryDependencies += D.scalus.value,
-    // libraryDependencies += D.scalusCardanoLedger.value,
-    // libraryDependencies += D.scalusTest.value,
+  .jvmSettings( // scalus
+    libraryDependencies += compilerPlugin(D.scalusPlugin.value),
+    libraryDependencies += D.scalusBloxbean.value,
   )
   .jvmSettings(libraryDependencies += D.ziohttp.value)
   .jvmSettings( // Add JVM-specific settings here
