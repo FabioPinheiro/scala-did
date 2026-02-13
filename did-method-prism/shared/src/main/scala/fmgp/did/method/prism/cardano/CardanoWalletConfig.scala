@@ -2,8 +2,11 @@ package fmgp.did.method.prism.cardano
 
 import zio.json.*
 
+/** @param mnemonic
+  *   BIP-39 mnemonic sentence. TODO REMVOE default
+  * @param passphrase
+  */
 case class CardanoWalletConfig(
-    // TODO REMVOE default
     mnemonic: Seq[String] = Seq(
       "mention",
       "side",

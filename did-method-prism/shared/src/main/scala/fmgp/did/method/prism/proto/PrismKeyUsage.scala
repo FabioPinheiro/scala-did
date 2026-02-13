@@ -4,17 +4,18 @@ import zio.json.*
 import proto.prism.KeyUsage
 import fmgp.util.safeValueOf
 
-enum PrismKeyUsage:
+//TODO move to fmgp.did.method.prism
+enum PrismKeyUsage(val protoEnum: Int):
   // case UnknownKeyUsage extends PrismKeyUsage
-  case MasterKeyUsage extends PrismKeyUsage
-  case IssuingKeyUsage extends PrismKeyUsage
-  case KeyagreementKeyUsage extends PrismKeyUsage
-  case AuthenticationKeyUsage extends PrismKeyUsage
-  case RevocationKeyUsage extends PrismKeyUsage
-  case CapabilityinvocationKeyUsage extends PrismKeyUsage
-  case CapabilitydelegationKeyUsage extends PrismKeyUsage
-  case VdrKeyUsage extends PrismKeyUsage
-  // case UnrecognizedKeyUsage extends PrismKeyUsage
+  case MasterKeyUsage extends PrismKeyUsage(1)
+  case IssuingKeyUsage extends PrismKeyUsage(2)
+  case KeyagreementKeyUsage extends PrismKeyUsage(3)
+  case AuthenticationKeyUsage extends PrismKeyUsage(4)
+  case RevocationKeyUsage extends PrismKeyUsage(5)
+  case CapabilityinvocationKeyUsage extends PrismKeyUsage(6)
+  case CapabilitydelegationKeyUsage extends PrismKeyUsage(7)
+  case VdrKeyUsage extends PrismKeyUsage(8)
+  // case UnrecognizedKeyUsage extends PrismKeyUsage()
 
 object PrismKeyUsage {
   given decoder: JsonDecoder[PrismKeyUsage] = JsonDecoder.string.mapOrFail(e => safeValueOf(PrismKeyUsage.valueOf(e)))
