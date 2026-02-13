@@ -153,8 +153,11 @@ sealed trait OKP_EC_Key extends JWKObj {
   def kty: KTY // EC.type = KTY.EC
   def crv: Curve
   // def kid: Option[String]
+
+  /** x is a Base64url (RFC 4648) without padding. */
   def x: String
-  def xNumbre = Base64.fromBase64url(x).decodeToBigInt
+  def xBase64Url = Base64.fromBase64url(x)
+  def xNumbre = xBase64Url.decodeToBigInt
 
   /** https://identity.foundation/didcomm-messaging/spec/#algorithms */
   def jwaAlgorithmtoSign: JWAAlgorithm = crv match {
@@ -188,8 +191,11 @@ sealed trait OKPKeyWithoutKid extends OKPKey with WithoutKid
 sealed abstract class ECKey extends OKP_EC_Key {
   override def kty: KTY.EC.type
   override def crv: ECCurve
+
+  /** y is a Base64url (RFC 4648) without padding. */
   def y: String
-  def yNumbre = Base64.fromBase64url(y).decodeToBigInt
+  def yBase64Url = Base64.fromBase64url(y)
+  def yNumbre = yBase64Url.decodeToBigInt
   def getCurve: ECCurve = crv.asECCurve
   def isPointOnCurve = getCurve.isPointOnCurve(xNumbre, yNumbre)
 }
@@ -597,6 +603,7 @@ object OKPPublicKey {
     OKPPublicKeyWithKid(kty = kty, crv = crv, x = x, kid = kid)
   def apply(kty: KTY.OKP.type, crv: OKPCurve, x: String): OKPPublicKeyWithoutKid =
     OKPPublicKeyWithoutKid(kty = kty, crv = crv, x = x)
+  def makeEd25519(x: Base64) = OKPPublicKey(kty = KTY.OKP, crv = Curve.Ed25519, x = x.urlBase64WithoutPadding)
   def unapply(key: OKPPublicKey): Option[(KTY, OKPCurve, String, Option[String])] =
     Some((key.kty, key.crv, key.x, key.maybeKid))
 
