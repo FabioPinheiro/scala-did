@@ -36,7 +36,7 @@ class GenericVDRDriver(
   // HACK
   def updateState = ZIO.succeed(globalState) // FIXME
 
-  def createBytesEntry(data: Array[Byte]): ZIO[Any, Throwable, (RefVDR, TxHash)] =
+  def createBytesEntry(data: Array[Byte]): ZIO[Any, Throwable, (RefVDR, TxHash)] = {
     for {
       // TODO check is in of the type bytes
       // TODO check key
@@ -51,17 +51,11 @@ class GenericVDRDriver(
           data = data,
         )
       _ <- ZIO.log(s"New signedPrismEvent to create $refVDR: ${bytes2Hex(signedPrismEvent.toByteArray)}")
-      tx = CardanoService.makeTrasation(
-        bfConfig = bfConfig,
-        wallet = wallet,
-        prismEvents = Seq(signedPrismEvent),
-        maybeMsgCIP20,
-      )
-      _ <- ZIO.log(s"Transation: ${bytes2Hex(tx.serialize)}")
-      txHash <- CardanoService
-        .submitTransaction(tx)
-        .provideEnvironment(ZEnvironment(bfConfig))
+      tx <- ScalusService.makeTrasation(prismEvents = Seq(signedPrismEvent), maybeMsgCIP20)
+      _ <- ZIO.log(s"Transation: ${bytes2Hex(tx.toCbor)}")
+      txHash <- ScalusService.submitTransaction(tx)
     } yield (refVDR, txHash)
+  }.provideEnvironment(ZEnvironment(bfConfig) ++ ZEnvironment(wallet))
 
   def updateBytesEntry(eventRef: RefVDR, data: Array[Byte]): ZIO[Any, Throwable, (EventHash, TxHash)] = {
     for {
@@ -80,18 +74,11 @@ class GenericVDRDriver(
         data = data,
       )
       _ <- ZIO.log(s"New signedPrismEvent to update $eventRef: ${bytes2Hex(signedPrismEvent.toByteArray)}")
-      tx = CardanoService.makeTrasation(
-        bfConfig = bfConfig,
-        wallet = wallet,
-        prismEvents = Seq(signedPrismEvent),
-        maybeMsgCIP20,
-      )
-      _ <- ZIO.log(s"Transation: ${bytes2Hex(tx.serialize)}")
-      txHash <- CardanoService
-        .submitTransaction(tx)
-        .provideEnvironment(ZEnvironment(bfConfig))
+      tx <- ScalusService.makeTrasation(prismEvents = Seq(signedPrismEvent), maybeMsgCIP20)
+      _ <- ZIO.log(s"Transation: ${bytes2Hex(tx.toCbor)}")
+      txHash <- ScalusService.submitTransaction(tx)
     } yield (eventHash, txHash)
-  }
+  }.provideEnvironment(ZEnvironment(bfConfig) ++ ZEnvironment(wallet))
 
   def fetchEntry(eventRef: RefVDR): ZIO[Any, Throwable, VDR] =
     for {
@@ -100,7 +87,7 @@ class GenericVDRDriver(
       vdrEntry <- state.getVDR(eventRef)
     } yield vdrEntry
 
-  def deactivateEntry(eventRef: RefVDR): ZIO[Any, Throwable, (EventHash, TxHash)] =
+  def deactivateEntry(eventRef: RefVDR): ZIO[Any, Throwable, (EventHash, TxHash)] = {
     for {
       _ <- ZIO.log(s"Deactivate VDR entry $eventRef")
       state <- updateState
@@ -115,16 +102,15 @@ class GenericVDRDriver(
         keyName = keyName,
       )
       _ <- ZIO.log(s"New signedPrismEvent to deactivate $eventRef: ${bytes2Hex(signedPrismEvent.toByteArray)}")
-      tx = CardanoService.makeTrasation(
-        bfConfig = bfConfig,
-        wallet = wallet,
+      tx <- ScalusService.makeTrasation(
         prismEvents = Seq(signedPrismEvent),
         maybeMsgCIP20,
       )
-      _ <- ZIO.log(s"Transation: ${bytes2Hex(tx.serialize)}")
-      txHash <- CardanoService
+      _ <- ZIO.log(s"Transation: ${bytes2Hex(tx.toCbor)}")
+      txHash <- ScalusService
         .submitTransaction(tx)
         .provideEnvironment(ZEnvironment(bfConfig))
     } yield (eventHash, txHash)
+  }.provideEnvironment(ZEnvironment(bfConfig) ++ ZEnvironment(wallet))
 
 }

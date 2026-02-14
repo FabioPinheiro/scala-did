@@ -1,26 +1,18 @@
 package fmgp.did.method.prism
 
-import cats.data.NonEmptyList
-// import com.bloxbean.cardano.client.account.Account
-// import com.bloxbean.cardano.client.common.model.Network as BBNetwork
-// import com.bloxbean.cardano.client.crypto.cip1852.DerivationPath.createExternalAddressDerivationPathForAccount
 import scalus.uplc.builtin.ByteString
-import scalus.cardano.address.Network.Mainnet
-import scalus.cardano.address.ShelleyDelegationPart.Null
-import scalus.cardano.address.ShelleyPaymentPart.Key
-import scalus.cardano.address.{Network, ShelleyAddress, ShelleyDelegationPart, ShelleyPaymentPart}
-import scalus.cardano.ledger.Hash
-
 import scala.collection.mutable
-import scalus.cardano.txbuilder.TransactionSigner
+import scalus.cardano.address.*
+import scalus.cardano.ledger.Hash
 import scalus.cardano.ledger.Hash28
 import scalus.cardano.wallet.hd.*
 import scalus.cardano.wallet.Account
-
-import scalus.cardano.address.Network
 import scalus.cardano.node.Emulator
+import scalus.cardano.txbuilder.TransactionSigner
 import scalus.cardano.wallet.hd.HdAccount
 import scalus.crypto.ed25519.given
+
+import fmgp.did.method.prism.cardano.*
 
 enum TestPeer(@annotation.unused ix: Int) derives CanEqual {
   case Alice extends TestPeer(0)
@@ -48,7 +40,7 @@ enum TestPeer(@annotation.unused ix: Int) derives CanEqual {
 }
 
 object TestPeer:
-  private val mnemonic: String =
+  val mnemonic: String =
     "test test test test " +
       "test test test test " +
       "test test test test " +
@@ -56,8 +48,11 @@ object TestPeer:
       "test test test test " +
       "test test test sauce"
 
-  def account(index: Int) = HdAccount.fromMnemonic(mnemonic, "", index)
-  def address(account: HdAccount) = account.baseAddress(Network.Mainnet)
+  val cw = CardanoWalletConfig.fromMnemonicPhrase(phrase = mnemonic, passphrase = "").getOrElse(???)
+
+  def account(index: Int) = cw.account(0) // HdAccount.fromMnemonic(mnemonic, "", index)
+  def address(account: HdAccount) = cw.address(0) // account.baseAddress(Network.Mainnet)
+
   def emulator(addressAUX: ShelleyAddress) = Emulator.withAddresses(Seq(addressAUX))
 
   val ctx = {
@@ -69,7 +64,6 @@ object TestPeer:
       emulatorAUX,
       accountAUX,
       accountAUX.signerForUtxos,
-      // tokenName
     )
   }
 
