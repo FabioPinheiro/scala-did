@@ -22,6 +22,11 @@ import scalus.uplc.builtin.ByteString
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
+import scalus.cardano.wallet.Account
+import scalus.cardano.address.ShelleyAddress
+import scalus.cardano.address.Address
+import scalus.cardano.node.UtxoQuery
+import scalus.cardano.node.UtxoSource
 
 object ScalusService {
   val env: CardanoInfo = CardanoInfo.mainnet
@@ -137,10 +142,10 @@ object ScalusService {
       nodeProvider: BlockfrostProvider <- bfConfig.nodeProvider
       tx <- ZIO.fromFuture(implicit ec =>
         TxBuilder(env)
-          .payTo(wallet.address(0), Value.lovelace(1))
+          .payTo(wallet.addressMainnet(0), Value.lovelace(1))
           .metadata(meta)
           // Magic: sets inputs, collateral input/output, execution budgets, fee, handle change, etc.
-          .complete(reader = nodeProvider, sponsor = wallet.address(0))
+          .complete(reader = nodeProvider, sponsor = wallet.addressMainnet(0))
       )
       ret = tx.sign(wallet.signer(0)).transaction
     } yield ret
@@ -154,12 +159,8 @@ object ScalusService {
   //   case PrivateCardanoNetwork(_, magic) => Network(0x00, magic)
   // private def makeBFBackendService(bfConfig: BlockfrostConfig) =
   //   new BFBackendService(bfConfig.network.blockfrostURL + "/", bfConfig.token)
-  // @annotation.nowarn
-  // def makeAccount(bfConfig: BlockfrostConfig, wallet: CardanoWalletConfig): Account =
-  //   new Account(makeBFNetworks(bfConfig.network), wallet.mnemonicPhrase)
-  // @annotation.nowarn
-  // def makeAccount(network: PublicCardanoNetwork, wallet: CardanoWalletConfig): Account =
-  //   new Account(makeBFNetworks(network), wallet.mnemonicPhrase)
+  // def makeAccountMainnet(wallet: CardanoWalletConfig): ShelleyAddress = wallet.addressMainnet(0)
+  // def makeAccount(wallet: CardanoWalletConfig): ShelleyAddress = wallet.addressTestnet(0)
 
   // Return the hash/id of the transaction
   def submitTransaction(
@@ -172,7 +173,7 @@ object ScalusService {
       hash <- ZIO
         .fromFuture(implicit ec => nodeProvider.submit(tx))
         .flatMap {
-          case Left(value)  => ZIO.fail(new RuntimeException(value.message))
+          case Left(value)  => ZIO.fail(new RuntimeException(value.message)) // TODO new Exception type
           case Right(value) => ZIO.succeed(value)
         }
       // backendService: BackendService = makeBFBackendService(bfConfig)
@@ -183,23 +184,28 @@ object ScalusService {
       _ <- ZIO.log(s"See https://${bfConfig.network.name}.cardanoscan.io/transaction/${hash.toHex}?tab=metadata")
     } yield TxHash.fromHex(hash.toHex)
 
-  // def addressesTotalAda(address: String): ZIO[BlockfrostConfig, Throwable, BigDecimal] =
-  //   for {
-  //     _ <- ZIO.log(s"addressesTotal for $address")
-  //     backendService: BackendService <- ZIO.service[BlockfrostConfig].map(makeBFBackendService(_))
-  //     result <- ZIO.attempt(backendService.getAddressService().getAddressDetails(address))
-  //     _ <- ZIO.log(s"addressesTotal result = ${result.toString}")
-  //     receivedSum = result.getValue
-  //       .getReceivedSum()
-  //       .asScala
-  //       .map(e => BigInt(e.getQuantity))
-  //       .fold(BigInt(0))((a, b) => a + b)
-  //     sentSum = result.getValue
-  //       .getSentSum()
-  //       .asScala
-  //       .map(e => BigInt(e.getQuantity))
-  //       .fold(BigInt(0))((a, b) => a + b)
-  //     total = BigDecimal(receivedSum - sentSum) / BigDecimal(1000000)
-  //     _ <- ZIO.log("total ADA found in address")
-  //   } yield total
+  def addressesTotalAda(address: String): ZIO[BlockfrostConfig, Throwable, BigDecimal] =
+    addressesTotalAda(Address.fromString(address))
+
+  def addressesTotalAda(address: Address): ZIO[BlockfrostConfig, Throwable, BigDecimal] =
+    for {
+      _ <- ZIO.log(s"addressesTotal for $address")
+      bfConfig <- ZIO.service[BlockfrostConfig]
+      nodeProvider: BlockfrostProvider <- bfConfig.nodeProvider
+      // query = UtxoQuery(UtxoSource.FromAddress(Address.fromString(address)))
+      query = UtxoQuery(UtxoSource.FromAddress(address))
+      utxos <- ZIO
+        .fromFuture(implicit ec => nodeProvider.findUtxos(query))
+        .flatMap {
+          case Left(value)  => ZIO.fail(new RuntimeException(value.toString)) // TODO new Exception type
+          case Right(value) => ZIO.succeed(value)
+        }
+      coin = utxos.values
+        .map { case v: TransactionOutput => v.value.coin }
+        .reduce((l, r) => l + r)
+
+      _ <- ZIO.log(s"addressesTotal result = ${coin.value.toString} ADA")
+      total = BigDecimal(coin.value) / BigDecimal(1000000)
+      _ <- ZIO.log("total ADA found in address")
+    } yield total
 }

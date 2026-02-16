@@ -51,7 +51,7 @@ object TestPeer:
   val cw = CardanoWalletConfig.fromMnemonicPhrase(phrase = mnemonic, passphrase = "").getOrElse(???)
 
   def account(index: Int) = cw.account(0) // HdAccount.fromMnemonic(mnemonic, "", index)
-  def address(account: HdAccount) = cw.address(0) // account.baseAddress(Network.Mainnet)
+  def address(account: HdAccount) = cw.addressMainnet(0) // account.baseAddress(Network.Mainnet)
 
   def emulator(addressAUX: ShelleyAddress) = Emulator.withAddresses(Seq(addressAUX))
 
