@@ -12,11 +12,16 @@ case class PrismChainServiceImpl(
   def commitAndPush(
       prismEvents: Seq[SignedPrismEvent],
       msg: Option[String],
-  ): ZIO[Any, Throwable, TxHash] =
+  ): ZIO[Any, Throwable, TxHash] = {
     for {
-      tx <- ZIO.succeed(CardanoService.makeTrasation(bfConfig, wallet, prismEvents, msg))
-      txHash <- CardanoService
+      // tx <- ZIO.succeed(CardanoService.makeTrasation(bfConfig, wallet, prismEvents, msg))
+      // txHash <- CardanoService
+      //   .submitTransaction(tx)
+      //   .provideEnvironment(ZEnvironment(bfConfig))
+      tx <- ScalusService
+        .makeTrasation(prismEvents, msg)
+      txHash <- ScalusService
         .submitTransaction(tx)
-        .provideEnvironment(ZEnvironment(bfConfig))
     } yield (txHash)
+  }.provideEnvironment(ZEnvironment(bfConfig) ++ ZEnvironment(wallet))
 }

@@ -6,9 +6,8 @@ import scala.jdk.CollectionConverters.*
 import scala.util.Try
 
 import org.hyperledger.identus.apollo.derivation.MnemonicHelper
-import fmgp.did.method.prism.CardanoService
-import fmgp.did.method.prism.cardano.CardanoWalletConfig
-import fmgp.did.method.prism.cardano.PublicCardanoNetwork
+import fmgp.did.method.prism.*
+import fmgp.did.method.prism.cardano.*
 import fmgp.util.bytes2Hex
 
 object MnemonicCommand {
@@ -83,20 +82,21 @@ object MnemonicCommand {
               case Some(cardanoWallet) => ZIO.log(s"Lodding cardano wallet") *> ZIO.succeed(cardanoWallet)
         }
         _ <- ZIO.when(wallet.passphrase.nonEmpty)(ZIO.logError("FIXME this is ignores wallet passphrase"))
-        account = CardanoService.makeAccount(network, wallet)
-        _ <- ZIO.log("base Address:      " + account.baseAddress)
-        _ <- ZIO.log("stake Address:     " + account.stakeAddress())
-        _ <- ZIO.log("base Path:         " + account.hdKeyPair().getPath())
-        _ <- ZIO.log("stake Path:        " + account.stakeHdKeyPair().getPath())
-        _ <- ZIO.log("stake KeyHash:     " + bytes2Hex(account.stakeHdKeyPair().getPublicKey().getKeyHash()))
-        _ <- ZIO.log("Private Bytes:     " + bytes2Hex(account.hdKeyPair().getPrivateKey().getBytes()))
-        _ <- ZIO.log("Public Bytes:      " + bytes2Hex(account.hdKeyPair().getPublicKey().getBytes()))
-        _ <- ZIO.log("Private KeyData:   " + bytes2Hex(account.hdKeyPair().getPrivateKey().getKeyData()))
-        _ <- ZIO.log("Public KeyData:    " + bytes2Hex(account.hdKeyPair().getPublicKey().getKeyData()))
-        _ <- ZIO.log("Private ChainCode: " + bytes2Hex(account.hdKeyPair().getPrivateKey().getChainCode()))
-        _ <- ZIO.log("Public ChainCode:  " + bytes2Hex(account.hdKeyPair().getPublicKey().getChainCode()))
-        _ <- ZIO.log("Public KeyHash:    " + bytes2Hex(account.hdKeyPair().getPublicKey().getKeyHash()))
-        _ <- ZIO.log("Public KeyHash:    " + bytes2Hex(account.hdKeyPair().getPublicKey().getKeyHash()))
+        address = network.match
+          case PublicCardanoNetwork.Mainnet => wallet.addressMainnet()
+          case PublicCardanoNetwork.Testnet => wallet.addressTestnet()
+          case PublicCardanoNetwork.Preprod => wallet.addressTestnet()
+          case PublicCardanoNetwork.Preview => wallet.addressTestnet()
+        _ <- ZIO.log("base Address:        " + address.encode.get)
+        _ <- ZIO.log("base Address Bech32: " + address.toBech32.get)
+        _ <- ZIO.log("stake KeyHash:       " + wallet.account().stakeKeyHash)
+        _ <- ZIO.log("stake Public kye:   " + bytes2Hex(wallet.account().stakeKeyPair.verificationKey.bytes))
+        // _ <- ZIO.log("stake Private kye:  " + bytes2Hex(wallet.account().stakeKeyPair.privateKeyBytes))
+        _ <- ZIO.log("payment KeyHash:     " + wallet.account().paymentKeyHash)
+        _ <- ZIO.log("payment Public kye:   " + bytes2Hex(wallet.account().paymentKeyPair.verificationKey.bytes))
+        // _ <- ZIO.log("payment Private kye:  " + bytes2Hex(wallet.account().paymentKeyPair.privateKeyBytes))
+        _ <- ZIO.log("change Public kye:   " + bytes2Hex(wallet.account().changeKeyPair.verificationKey.bytes))
+        // _ <- ZIO.log("change Private kye:  " + bytes2Hex(wallet.account().changeKeyPair.privateKeyBytes))
         _ <- network match
           case PublicCardanoNetwork.Mainnet => ZIO.unit
           case PublicCardanoNetwork.Testnet => ZIO.log(s"Believe the $network network is deprecated")
@@ -104,7 +104,7 @@ object MnemonicCommand {
             ZIO.log(
               s"A $network wallet can be popup with tADA using https://docs.cardano.org/cardano-testnets/tools/faucet"
             )
-        _ <- Console.printLine(account.baseAddress).orDie
+        _ <- Console.printLine(address.encode.get).orDie
       } yield ()).provideLayer(setup.layer)
   }
 }

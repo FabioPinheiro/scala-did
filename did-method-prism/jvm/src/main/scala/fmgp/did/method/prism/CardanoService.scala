@@ -33,31 +33,37 @@ import fmgp.util.*
 import fmgp.did.method.prism.cardano.*
 import fmgp.did.method.prism.vdr.*
 import _root_.proto.prism.PrismBlock
-// import _root_.proto.prism.PrismEvent
 import _root_.proto.prism.SignedPrismEvent
 import _root_.proto.prism.PrismObject
 import com.bloxbean.cardano.client.common.model.Network
 
+@deprecated("use ScalusService object instead")
 object CardanoService {
 
+  @deprecated("use ScalusService object instead")
   object internal {
     import fmgp.did.method.prism.cardano.PRISM_LABEL_CIP_10
     import fmgp.did.method.prism.cardano.MSG_LABEL_CIP_20
 
+    @deprecated("use ScalusService object instead")
     def prismObject2CBORMetadataList(block: PrismObject): CBORMetadataList = bytes2CBORMetadataList(block.toByteArray)
+    @deprecated("use ScalusService object instead")
     def bytes2CBORMetadataList(bytes: Array[Byte]): CBORMetadataList =
       bytes
         .grouped(cborByteStringMaxMatadataSize)
         .foldLeft(CBORMetadataList()) { case (acu, seqData) => acu.add(seqData.toArray[Byte]) }
 
+    @deprecated("use ScalusService object instead")
     def prismObject2metadata(prismObject: PrismObject) =
       CBORMetadataMap()
         .put("v", BigInteger.valueOf(1)) // PRISM version
         .put("c", prismObject2CBORMetadataList(prismObject))
 
+    @deprecated("use ScalusService object instead")
     def text2metadata(text: String) = CBORMetadataMap().put("msg", text)
 
     /** Define expected Outputs from Tx */
+    @deprecated("use ScalusService object instead")
     def makeOutput(senderAccount: Account): Output = Output
       .builder()
       .address(senderAccount.baseAddress)
@@ -65,6 +71,7 @@ object CardanoService {
       .qty(BigInteger.valueOf(1)) // .qty(adaToLovelace(1))
       .build();
 
+    @deprecated("use ScalusService object instead")
     def txBuilder(senderAccount: Account, output: Output, metadata: Metadata): TxBuilder = output
       .outputBuilder()
       .buildInputs(createFromSender(senderAccount.baseAddress, senderAccount.baseAddress()))
@@ -72,28 +79,33 @@ object CardanoService {
       .andThen(balanceTx(senderAccount.baseAddress, 1))
   }
 
+  @deprecated("use ScalusService object instead")
   def makeMetadataPrism(prismObject: PrismObject) =
     MetadataBuilder
       .createMetadata()
       .put(PRISM_LABEL_CIP_10, internal.prismObject2metadata(prismObject))
 
+  @deprecated("use ScalusService object instead")
   def makeMetadataCIP20(msgCIP20: String) =
     MetadataBuilder
       .createMetadata()
       .put(MSG_LABEL_CIP_20, msgCIP20)
 
+  @deprecated("use ScalusService object instead")
   def makeMetadataPrismWithCIP20(prismObject: PrismObject, msgCIP20: String = "PRISM VDR (by fmgp)") =
     MetadataBuilder
       .createMetadata()
       .put(PRISM_LABEL_CIP_10, internal.prismObject2metadata(prismObject))
       .put(MSG_LABEL_CIP_20, msgCIP20)
 
+  @deprecated("use ScalusService object instead")
   def makeTxBuilder(bfConfig: BlockfrostConfig, wallet: CardanoWalletConfig, metadata: Metadata): TxBuilder = {
     val senderAccount: Account = makeAccount(bfConfig, wallet)
     val output = internal.makeOutput(senderAccount)
     internal.txBuilder(senderAccount, output, metadata)
   }
 
+  @deprecated("use ScalusService object instead")
   def makeTxBuilder(
       bfConfig: BlockfrostConfig,
       wallet: CardanoWalletConfig,
@@ -104,6 +116,7 @@ object CardanoService {
       case None           => makeTxBuilder(bfConfig, wallet, makeMetadataPrism(prismObject))
       case Some(msgCIP20) => makeTxBuilder(bfConfig, wallet, makeMetadataPrismWithCIP20(prismObject, msgCIP20))
 
+  @deprecated("use ScalusService object instead")
   def makeTxBuilder(
       bfConfig: BlockfrostConfig,
       wallet: CardanoWalletConfig,
@@ -117,6 +130,7 @@ object CardanoService {
       maybeMsgCIP20
     )
 
+  @deprecated("use ScalusService object instead")
   def makeTrasation(
       bfConfig: BlockfrostConfig,
       wallet: CardanoWalletConfig,
@@ -146,12 +160,17 @@ object CardanoService {
     case PrivateCardanoNetwork(_, magic) => Network(0x00, magic)
   private def makeBFBackendService(bfConfig: BlockfrostConfig) =
     new BFBackendService(bfConfig.network.blockfrostURL + "/", bfConfig.token)
+  @deprecated("use ScalusService object instead")
+  @annotation.nowarn
   def makeAccount(bfConfig: BlockfrostConfig, wallet: CardanoWalletConfig): Account =
     new Account(makeBFNetworks(bfConfig.network), wallet.mnemonicPhrase)
+  @deprecated("use ScalusService object instead")
+  @annotation.nowarn
   def makeAccount(network: PublicCardanoNetwork, wallet: CardanoWalletConfig): Account =
     new Account(makeBFNetworks(network), wallet.mnemonicPhrase)
 
   // Return the hash/id of the transaction
+  @deprecated("use ScalusService object instead")
   def submitTransaction(tx: Transaction): ZIO[BlockfrostConfig, Throwable, TxHash] =
     for {
       _ <- ZIO.log("submitTransaction")
@@ -165,6 +184,7 @@ object CardanoService {
       // TODO If result.code(),  <= 200 < 300 return error
     } yield TxHash.fromHex(result.getValue)
 
+  @deprecated("use ScalusService object instead")
   def addressesTotalAda(address: String): ZIO[BlockfrostConfig, Throwable, BigDecimal] =
     for {
       _ <- ZIO.log(s"addressesTotal for $address")

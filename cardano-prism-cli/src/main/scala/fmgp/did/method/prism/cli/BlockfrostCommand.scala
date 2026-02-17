@@ -8,15 +8,14 @@ import scala.util.Try
 import org.hyperledger.identus.apollo.derivation.MnemonicHelper
 import fmgp.did.method.prism.BlockfrostConfig
 import fmgp.did.method.prism.CardanoService
-import fmgp.did.method.prism.cardano.CardanoWalletConfig
-import fmgp.did.method.prism.cardano.PublicCardanoNetwork
-import fmgp.did.method.prism.cardano.TxHash
+import fmgp.did.method.prism.cardano.*
 import fmgp.did.method.prism.cli.CMD.BlockfrostSubmitEvents
 import fmgp.did.method.prism.proto.tryParseFrom
 import proto.prism.PrismEvent
 import proto.prism.SignedPrismEvent
 import fmgp.util.bytes2Hex
 import fmgp.util.hex2bytes
+import fmgp.did.method.prism.ScalusService
 
 object BlockfrostCommand {
 
@@ -113,8 +112,12 @@ object BlockfrostCommand {
                 ZIO.logError("Cardano Wallet not found") *> ZIO.fail(PrismCliError("SSI Wallet not found"))
               case Some(cardanoWallet) => ZIO.log(s"Lodding cardano wallet") *> ZIO.succeed(cardanoWallet)
         }
-        account = CardanoService.makeAccount(network, wallet)
-        addresses = account.baseAddress()
+        account = wallet.account(0)
+        addresses = network match
+          case PublicCardanoNetwork.Mainnet => wallet.addressMainnet(0)
+          case PublicCardanoNetwork.Testnet => wallet.addressTestnet(0)
+          case PublicCardanoNetwork.Preprod => wallet.addressTestnet(0)
+          case PublicCardanoNetwork.Preview => wallet.addressTestnet(0)
         _ <- ZIO.log(s"Get addresses totals for $addresses")
         mBFConfig <- mBlockfrostConfig match
           case None         => stateLen[BlockfrostConfig](_.blockfrost(network))
@@ -122,19 +125,22 @@ object BlockfrostCommand {
         _ <- ZIO.log(s"Get addresses totals for $addresses")
         totalAda <- mBFConfig match
           case None           => ZIO.fail(PrismCliError(s"Token not found ($network)"))
-          case Some(bfConfig) => CardanoService.addressesTotalAda(addresses).provideEnvironment(ZEnvironment(bfConfig))
+          case Some(bfConfig) => ScalusService.addressesTotalAda(addresses).provideEnvironment(ZEnvironment(bfConfig))
         _ <- Console.printLine(totalAda).orDie
       } yield ()).provideLayer(setup.layer)
     case cmd: BlockfrostSubmitEvents =>
       for {
-        txId <- submitProgram(cmd).provideLayer(cmd.setup.layer)
+        txId <- submitProgram(cmd)
+          .provideLayer(cmd.setup.layer)
         _ <- Console.printLine(txId)
       } yield ()
   }
 
-  def submitProgram(cmd: BlockfrostSubmitEvents): ZIO[Ref[Setup], Throwable, TxHash] = {
+  def submitProgram(
+      cmd: BlockfrostSubmitEvents
+  ): ZIO[Ref[Setup], Throwable, TxHash] = {
     cmd match
-      case BlockfrostSubmitEvents(setup, network, events) =>
+      case BlockfrostSubmitEvents(setup, network, events) => {
         for {
           _ <- ZIO.logError(s"CMD: $cmd") // TODO
           bfConfig <- {
@@ -152,17 +158,13 @@ object BlockfrostCommand {
               case None    => ZIO.fail(PrismCliError(s"Cardano Wallet is not setup"))
               case Some(e) => ZIO.succeed(e)
             }
-          tx = CardanoService.makeTrasation(
-            bfConfig = bfConfig,
-            wallet = wallet,
-            prismEvents = events,
-            maybeMsgCIP20 = Some("cardano-prism cli"),
-          )
-          txHash <-
-            CardanoService
-              .submitTransaction(tx)
-              .provideEnvironment(ZEnvironment(bfConfig))
-          // else ZIO.succeed(bytes2Hex(tx.serialize))
+          tx <- ScalusService
+            .makeTrasation(prismEvents = events, maybeMsgCIP20 = Some("cardano-prism cli"))
+            .provideEnvironment(ZEnvironment(bfConfig) ++ ZEnvironment(wallet))
+          txHash <- ScalusService
+            .submitTransaction(tx)
+            .provideEnvironment(ZEnvironment(bfConfig))
         } yield (txHash)
+      }
   }
 }

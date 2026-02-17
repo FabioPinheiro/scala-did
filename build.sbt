@@ -173,9 +173,10 @@ lazy val V = new {
 
   val laminar = "16.0.0"
   val waypoint = "7.0.0"
-  val upickle = "3.1.3"
+  val upickle = "4.3.2"
 
   val identusApollo = "1.8.0" // "1.7.1"
+  val scalus = "0.15.0"
 }
 
 /** NPM Dependencies */
@@ -225,6 +226,17 @@ lazy val D = new {
   // mongoexport --uri=$MONGODB_CONNECTION  --db=sample_mflix --sort='{_id:1}' --type=json --collection=users --out=users.json
   val reactivemongoProvided = Def.setting("org.reactivemongo" %% "reactivemongo" % V.reactivemongo % Provided)
   val reactivemongo = Def.setting("org.reactivemongo" %% "reactivemongo" % V.reactivemongo)
+
+  // https://mvnrepository.com/artifact/org.scalus/scalus
+  val scalus = Def.setting("org.scalus" %%% "scalus" % V.scalus)
+  // https://mvnrepository.com/artifact/org.scalus/scalus-cardano-ledger
+  val scalusCardanoLedger = Def.setting("org.scalus" %%% "scalus-cardano-ledger" % V.scalus)
+  // https://mvnrepository.com/artifact/org.scalus/scalus-testkit
+  val scalusTest = Def.setting("org.scalus" %%% "scalus-testkit" % V.scalus)
+  // https://mvnrepository.com/artifact/org.scalus/scalus-bloxbean-cardano-client-lib
+  val scalusBloxbean = Def.setting("org.scalus" %% "scalus-bloxbean-cardano-client-lib" % V.scalus)
+  // https://mvnrepository.com/artifact/org.scalus/scalus-plugin
+  val scalusPlugin = Def.setting("org.scalus" %% "scalus-plugin" % V.scalus)
 
   // Test DID comm
   // val didcomm = Def.setting("org.didcommx" % "didcomm" % "0.3.1")
@@ -571,6 +583,18 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
   .settings(
     name := "did-method-prism",
     libraryDependencies += D.bullet.value,
+    libraryDependencies += D.munit.value,
+    libraryDependencies += D.zioMunitTest.value,
+    libraryDependencies += "com.lihaoyi" %%% "pprint" % "0.9.4",
+  )
+  .jvmSettings( // scalus //FIXME use settings
+    libraryDependencies += D.scalus.value,
+    libraryDependencies += D.scalusCardanoLedger.value,
+    libraryDependencies += D.scalusTest.value,
+  )
+  .jvmSettings( // scalus
+    libraryDependencies += compilerPlugin(D.scalusPlugin.value),
+    libraryDependencies += D.scalusBloxbean.value,
   )
   .jvmSettings(libraryDependencies += D.ziohttp.value)
   .jvmSettings( // Add JVM-specific settings here
@@ -582,8 +606,8 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
     libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.6",
     // https://oss.sonatype.org/#nexus-search;quick~com.bloxbean.cardano
-    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.6.7",
-    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.6.7",
+    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.7.0",
+    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.7.0",
     libraryDependencies += D.reactivemongoProvided.value,
   )
   .settings(
