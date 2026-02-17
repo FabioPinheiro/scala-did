@@ -585,7 +585,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.bullet.value,
     libraryDependencies += D.munit.value,
     libraryDependencies += D.zioMunitTest.value,
-    libraryDependencies += "com.lihaoyi" %%% "pprint" % "0.9.4",
+    libraryDependencies += "com.lihaoyi" %%% "pprint" % "0.9.6",
   )
   .jvmSettings( // scalus //FIXME use settings
     libraryDependencies += D.scalus.value,
