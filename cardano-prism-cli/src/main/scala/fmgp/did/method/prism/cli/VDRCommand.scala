@@ -175,9 +175,11 @@ object VDRCommand {
         vdrKey <- vdrKeyRaw match
           case Some(raw) => ZIO.succeed(Secp256k1PrivateKey(raw))
           case None      =>
-            stateLen(_.secp256k1PrivateKey.get(vdrKeyLabel))
+            stateLen(_.ssiPrivateKeys.get(vdrKeyLabel))
               .flatMap {
-                case Some(Key(seed, derivationPath, key)) => ZIO.succeed(key)
+                case Some(KeySecp256k1(derivationPath, key)) => ZIO.succeed(key)
+                case Some(KeyEd25519(derivationPath, key))   =>
+                  ZIO.fail(PrismCliError(s"Key '$vdrKeyLabel' found but is not of the type secp256k1"))
                 case None => ZIO.fail(PrismCliError(s"No Key found with label '$vdrKeyLabel'"))
               }
         driver = GenericVDRDriver(

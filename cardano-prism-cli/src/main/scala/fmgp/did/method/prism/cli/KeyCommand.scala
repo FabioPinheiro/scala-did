@@ -10,7 +10,13 @@ import fmgp.util.bytes2Hex
 import fmgp.crypto.Secp256k1PrivateKey
 import org.hyperledger.identus.apollo.derivation.MnemonicHelper
 import org.hyperledger.identus.apollo.derivation.HDKey
+import fmgp.did.method.prism.*
+import fmgp.did.method.prism.cardano.*
 import fmgp.did.method.prism.cardano.DIDExtra
+import fmgp.did.method.prism.proto.PrismKeyUsage
+import fmgp.did.method.prism.cli.CMD.KeyEd25519FromMnemonic
+import fmgp.did.method.prism.cli.CMD.Keysepc256k1FromMnemonic
+import fmgp.util.hex2bytes
 
 object KeyCommand {
 
@@ -22,34 +28,120 @@ object KeyCommand {
         "The purpose' and method' constants are based on the decision in https://hyperledger-identus.github.io/docs/adrs/decisions/2023-05-16-hierarchical-deterministic-key-generation-algorithm."
     )
 
-  val command: Command[CMD] =
-    Command(
-      "key",
-      Options.none
-        ++ ConfigCommand.optionsDefualt
-        ++ walletOpt.optional
-        ++ derivationPathOpt
-        ++ Options.text("label").??("Key label/name. key will be save staging with that name.").optional
+  val didIndexAgr = Args.integer.??("DID account index")
+  val keyIndexAgr = Args.integer.??("Account key index")
+  val keyUsageAgr = Args
+    .enumeration[PrismKeyUsage]("keyUsage")(
+      ("Master", PrismKeyUsage.MasterKeyUsage),
+      ("Issuing", PrismKeyUsage.IssuingKeyUsage),
+      ("Keyagreement", PrismKeyUsage.KeyAgreementKeyUsage),
+      ("Authentication", PrismKeyUsage.AuthenticationKeyUsage),
+      ("Revocation", PrismKeyUsage.RevocationKeyUsage),
+      ("Capabilityinvocation", PrismKeyUsage.CapabilityinvocationKeyUsage),
+      ("Capabilitydelegation", PrismKeyUsage.CapabilitydelegationKeyUsage),
+      ("Vdr", PrismKeyUsage.VdrKeyUsage),
     )
-      .withHelp("Make a private Secp256k1 key")
-      .map { case (setup, mWallet, derivationPath, keyLabel) =>
-        CMD.Mnemonic2Key(setup, mWallet, derivationPath, keyLabel)
-      }
-      .orElse(
+    .??("Account key index")
+
+  val command: Command[CMD] =
+    Command("key", Options.none ++ ConfigCommand.optionsDefualt)
+      .subcommands(
         Command(
-          "deterministic-did",
+          "Ed25519",
+          Options.text("label").??("Key label/name. key will be save staging with that name.").optional,
+          didIndexAgr ++ keyUsageAgr ++ keyIndexAgr
+        )
+          .map { case (mLabel, (didIndex, keyUsage, keyIndex)) =>
+            (setup: Setup) =>
+              val wallet = setup.stateLen(_.ssiWallet).get // FIXME
+              CMD.KeyEd25519FromMnemonic(
+                setup = setup,
+                wallet,
+                didIndex = didIndex.toInt,
+                keyUsage = keyUsage,
+                keyIndex = keyIndex.toInt,
+                keyLabel = mLabel.getOrElse(s"key-$didIndex-${keyUsage.name}-$keyIndex")
+                // getOrElse(s"key${stagingState.privateKeys.size}"
+              )
+          },
+        Command(
+          "sepc256k1",
+          Options.text("label").??("Key label/name. key will be save staging with that name.").optional,
+          didIndexAgr ++ keyUsageAgr ++ keyIndexAgr
+        )
+          .map { case (mLabel, (didIndex, keyUsage, keyIndex)) =>
+            (setup: Setup) =>
+              val wallet = setup.stateLen(_.ssiWallet).get // FIXME
+              CMD.Keysepc256k1FromMnemonic(
+                setup = setup,
+                wallet,
+                didIndex = didIndex.toInt,
+                keyUsage = keyUsage,
+                keyIndex = keyIndex.toInt,
+                keyLabel = mLabel.getOrElse(s"key-$didIndex-${keyUsage.name}-$keyIndex"),
+                // getOrElse(s"key${stagingState.privateKeys.size}"
+
+              )
+          },
+        Command(
+          "derivation-path",
           Options.none
-            ++ ConfigCommand.optionsDefualt
-            ++ walletOpt.optional,
+            ++ walletOpt.optional
+            ++ derivationPathOpt
+            ++ Options.text("label").??("Key label/name. key will be save staging with that name.").optional
+        )
+          .withHelp("Make a private Secp256k1 key")
+          .map { case (mWallet, derivationPath, keyLabel) =>
+            (setup: Setup) => CMD.Mnemonic2Key(setup, mWallet, derivationPath, keyLabel)
+          },
+        Command(
+          "did-deterministic",
+          Options.none ++ walletOpt.optional,
           Args.integer("DID index").??("index of the DID (starts in 0)")
         )
           .withHelp("Make Test Vector for the Deterministic PRISM DID Generation Proposal")
-          .map { case ((setup, mWallet), index) =>
-            CMD.Mnemonic2Key2SSITestVector(setup, mWallet, index.toInt)
+          .map { case (mWallet, index) =>
+            (setup: Setup) => CMD.Mnemonic2Key2SSITestVector(setup, mWallet, index.toInt)
           }
       )
+      .map { case (setup, f) => f(setup) }
 
   def program(cmd: CMD.KeyCMD): ZIO[Any, Nothing, Unit] = cmd match {
+    case KeyEd25519FromMnemonic(setup, ssiWallet, didIndex, keyUsage, keyIndex, keyLabel) =>
+      (for {
+        _ <- ZIO.unit
+        path = Cip0000.didPath(didIndex, keyUsage, keyIndex)
+        key = ssiWallet.ed25519DerivePrism(didIndex, keyUsage, keyIndex)
+        keyBytes = key.extendedKey.extendedSecretKey
+        _ <- forceStateUpdateAtEnd
+        _ <- updateState { stagingState =>
+          stagingState.copy(ssiPrivateKeys =
+            stagingState.ssiPrivateKeys.+(keyLabel -> KeyEd25519(derivationPath = path, key = key))
+          )
+        }
+        text = s"Key Ed25519 From Mnemonic with path $path '${bytes2Hex(keyBytes)}'"
+        _ <- ZIO.log(text)
+        _ <- Console.printLine(text)
+      } yield ()).provideLayer(cmd.setup.layer).orDie
+
+    case Keysepc256k1FromMnemonic(setup, ssiWallet, didIndex, keyUsage, keyIndex, keyLabel) =>
+      (for {
+        _ <- ZIO.unit
+        path = Cip0000.didPath(didIndex, keyUsage, keyIndex)
+        key = ssiWallet.secp256k1DerivePrism(didIndex, keyUsage, keyIndex)
+        // key.compressedPublicKey
+        keyBytes = key.rawBytes
+        _ <- forceStateUpdateAtEnd
+        _ <- updateState { stagingState =>
+          stagingState.copy(ssiPrivateKeys =
+            stagingState.ssiPrivateKeys.+(keyLabel -> KeySecp256k1(derivationPath = path, key = key))
+          )
+        }
+        text = s"Key sepc256k1 From Mnemonic with path $path '${bytes2Hex(keyBytes)}'"
+        _ <- ZIO.log(text)
+        _ <- Console.printLine(text)
+      } yield ()).provideLayer(cmd.setup.layer).orDie
+
     case CMD.Mnemonic2Key(setup, mWallet, derivationPath, keyLabel) =>
       val (info, wallet) = mWallet.orElse(setup.mState.flatMap(_.ssiWallet)) match
         case Some(wallet) => (s"Lodding wallett: $wallet", wallet)
@@ -77,13 +169,13 @@ object KeyCommand {
         _ <- ZIO.log("PublicKey CurvePoint X - " + bytes2Hex(key.getPublicKey().getCurvePoint().getX()))
         _ <- ZIO.log("PublicKey CurvePoint Y - " + bytes2Hex(key.getPublicKey().getCurvePoint().getY()))
         _ <- updateState { stagingState =>
-          val keys = stagingState.secp256k1PrivateKey.+(
+          val keys = stagingState.ssiPrivateKeys.+(
             (
-              keyLabel.getOrElse(s"key${stagingState.secp256k1PrivateKey.size}"),
-              Key(seed = seed, derivationPath = derivationPath, key = Secp256k1PrivateKey(key.getEncoded()))
+              keyLabel.getOrElse(s"key${stagingState.ssiPrivateKeys.size}"),
+              Key(derivationPath = derivationPath, key = Secp256k1PrivateKey(key.getEncoded()))
             )
           )
-          stagingState.copy(ssiWallet = Some(wallet), seed = Some(seed), secp256k1PrivateKey = keys)
+          stagingState.copy(ssiWallet = Some(wallet), ssiPrivateKeys = keys)
         }
         _ <- Console.printLine(bytes2Hex(key.getEncoded())).orDie
       } yield ()).provideLayer(setup.layer)

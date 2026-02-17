@@ -78,7 +78,14 @@ object DIDCommand {
     case CMD.DIDCreate(setup, masterLabel, masterRaw, vdrLabel, vdrRaw) =>
       (for {
         _ <- ZIO.log(s"Command: $cmd")
-        mkAlternative <- stateLen(_.secp256k1PrivateKey.get(masterLabel).map(_.key))
+        mkAlternative <- stateLen(
+          _.ssiPrivateKeys
+            .get(masterLabel)
+            .map {
+              case KeySecp256k1(derivationPath, key) => key
+              case KeyEd25519(derivationPath, key)   => ??? // TODO fail becuase type type is not supported
+            }
+        )
         master = masterRaw
           .map(rawHex => Utils.secp256k1FromRaw(rawHex))
           .orElse(mkAlternative)
@@ -87,7 +94,14 @@ object DIDCommand {
           case None        => ZIO.none
           case Some(label) =>
             for {
-              alternative <- stateLen(_.secp256k1PrivateKey.get(label).map(_.key))
+              alternative <- stateLen(
+                _.ssiPrivateKeys
+                  .get(label)
+                  .map {
+                    case KeySecp256k1(derivationPath, key) => key
+                    case KeyEd25519(derivationPath, key)   => ??? // TODO fail becuase type type is not supported
+                  }
+              )
               key = vdrRaw.map(rawHex => Utils.secp256k1FromRaw(rawHex)).orElse(alternative)
             } yield key.map(k => (label, k))
         (didPrism, signedPrismEvent) = DIDExtra.createDID(

@@ -60,7 +60,7 @@ object ConfigCommand {
               _ <- Console.printLine(value.toJsonPretty)
             } yield ()
           case Tuple2(true, Left(noFileReason)) =>
-            val tmp = StagingState(test = "new file")
+            val tmp = StagingState()
             for {
               _ <- ZIO.log(s"Creating file ${config.stagingPath} with ${tmp.toJson}")
               output <- ZIO

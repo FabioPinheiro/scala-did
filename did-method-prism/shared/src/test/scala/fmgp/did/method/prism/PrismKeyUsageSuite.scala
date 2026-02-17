@@ -10,7 +10,7 @@ class PrismKeyUsageSuite extends FunSuite {
   test("PrismKeyUsage is aligned with proto") {
     assertEquals(PrismKeyUsage.MasterKeyUsage.protoEnum, KeyUsage.MASTER_KEY.index)
     assertEquals(PrismKeyUsage.IssuingKeyUsage.protoEnum, KeyUsage.ISSUING_KEY.index)
-    assertEquals(PrismKeyUsage.KeyagreementKeyUsage.protoEnum, KeyUsage.KEY_AGREEMENT_KEY.index)
+    assertEquals(PrismKeyUsage.KeyAgreementKeyUsage.protoEnum, KeyUsage.KEY_AGREEMENT_KEY.index)
     assertEquals(PrismKeyUsage.AuthenticationKeyUsage.protoEnum, KeyUsage.AUTHENTICATION_KEY.index)
     assertEquals(PrismKeyUsage.RevocationKeyUsage.protoEnum, KeyUsage.REVOCATION_KEY.index)
     assertEquals(PrismKeyUsage.CapabilityinvocationKeyUsage.protoEnum, KeyUsage.CAPABILITY_INVOCATION_KEY.index)

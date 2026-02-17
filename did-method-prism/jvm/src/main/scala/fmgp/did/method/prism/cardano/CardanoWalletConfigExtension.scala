@@ -10,7 +10,6 @@ import scalus.crypto.ed25519.given
 
 import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.did.method.prism.proto.PrismKeyUsage
-import fmgp.did.method.prism.proto.PrismKeyUsage.{MasterKeyUsage, VdrKeyUsage}
 
 extension (wallet: CardanoWalletConfig) {
 
@@ -38,14 +37,19 @@ extension (wallet: CardanoWalletConfig) {
     secp256k1DerivePath(Cip0000.didPath(didIndex, keyUsage, keyIndex))
   def secp256k1DerivePath(path: String) =
     Secp256k1PrivateKey(HDKey(wallet.seed, 0, 0).derive(path).getKMMSecp256k1PrivateKey().getEncoded())
+
   def prismDeriveMaster(didIndex: Int = 0, keyIndex: Int = 0) =
-    secp256k1DerivePrism(didIndex = didIndex, keyUsage = MasterKeyUsage, keyIndex = keyIndex)
+    secp256k1DerivePrism(didIndex = didIndex, keyUsage = PrismKeyUsage.MasterKeyUsage, keyIndex = keyIndex)
   def prismDeriveVDR(didIndex: Int = 0, keyIndex: Int = 0) =
-    secp256k1DerivePrism(didIndex = didIndex, keyUsage = VdrKeyUsage, keyIndex = keyIndex)
-  def hdKeyPair(didIndex: Int = 0, keyUsage: PrismKeyUsage = MasterKeyUsage, keyIndex: Int = 0): HdKeyPair =
-    HdKeyPair.fromMnemonic(
-      mnemonic = wallet.mnemonicPhrase,
-      passphrase = wallet.passphrase,
-      path = Cip0000.didPath(didIndex, keyUsage, keyIndex)
-    )
+    secp256k1DerivePrism(didIndex = didIndex, keyUsage = PrismKeyUsage.VdrKeyUsage, keyIndex = keyIndex)
+  def prismDeriveAuthentication(didIndex: Int = 0, keyIndex: Int = 0): HdKeyPair =
+    ed25519DerivePrism(didIndex = didIndex, keyUsage = PrismKeyUsage.AuthenticationKeyUsage, keyIndex = keyIndex)
+
+  def ed25519DerivePrism(
+      didIndex: Int = 0,
+      keyUsage: PrismKeyUsage = PrismKeyUsage.MasterKeyUsage,
+      keyIndex: Int = 0
+  ): HdKeyPair = ed25519DerivePath(Cip0000.didPath(didIndex, keyUsage, keyIndex))
+  def ed25519DerivePath(path: String) =
+    HdKeyPair.fromMnemonic(mnemonic = wallet.mnemonicPhrase, passphrase = wallet.passphrase, path = path)
 }

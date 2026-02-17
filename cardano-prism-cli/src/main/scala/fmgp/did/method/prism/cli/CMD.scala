@@ -9,6 +9,7 @@ import java.nio.file.Path
 import proto.prism.SignedPrismEvent
 import zio.http.URL
 import fmgp.did.DID
+import fmgp.did.method.prism.proto.PrismKeyUsage
 
 sealed trait CMD extends Product with Serializable
 object CMD {
@@ -17,6 +18,7 @@ object CMD {
   final case class IndexerMongoDB(utlMongoConnection: String, blockfrostConfig: BlockfrostConfig) extends CMD.Indexer
 
   final case class Version() extends CMD
+  final case class PWD() extends CMD
   final case class ConfigCMD(config: Setup, createFlag: Boolean) extends CMD
 
   sealed trait MnemonicCMD extends CMD
@@ -47,7 +49,28 @@ object CMD {
       events: Seq[SignedPrismEvent],
   ) extends BlockfrostCMD
 
-  sealed trait KeyCMD extends CMD
+  sealed trait KeyCMD extends CMD {
+    def setup: Setup
+  }
+
+  final case class KeyEd25519FromMnemonic(
+      override val setup: Setup,
+      ssiWallet: CardanoWalletConfig,
+      didIndex: Int,
+      keyUsage: PrismKeyUsage,
+      keyIndex: Int,
+      keyLabel: String,
+  ) extends KeyCMD
+
+  final case class Keysepc256k1FromMnemonic(
+      override val setup: Setup,
+      ssiWallet: CardanoWalletConfig,
+      didIndex: Int,
+      keyUsage: PrismKeyUsage,
+      keyIndex: Int,
+      keyLabel: String,
+  ) extends KeyCMD
+
   final case class Mnemonic2Key(
       setup: Setup,
       mWallet: Option[CardanoWalletConfig],

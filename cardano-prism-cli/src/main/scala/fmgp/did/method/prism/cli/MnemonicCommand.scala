@@ -19,12 +19,14 @@ object MnemonicCommand {
   val command: Command[CMD.MnemonicCMD] =
     Command("mnemonic")
       .subcommands(
-        Command("new", ConfigCommand.options ++ walletTypeOpt.withDefault(WalletType.SSI)).map { (setup, walletType) =>
-          CMD.MnemonicCreate(setup, walletType)
-        },
-        Command("seed", ConfigCommand.options ++ mnemonicWords.optional).map { (setup, mWallet) =>
-          CMD.MnemonicSeed(setup, mWallet)
-        },
+        Command("new", ConfigCommand.options ++ walletTypeOpt.withDefault(WalletType.SSI))
+          .map { (setup, walletType) =>
+            CMD.MnemonicCreate(setup, walletType)
+          },
+        Command("seed", ConfigCommand.options ++ mnemonicWords.optional)
+          .map { (setup, mWallet) =>
+            CMD.MnemonicSeed(setup, mWallet)
+          },
         Command(
           "address",
           ConfigCommand.options ++
@@ -59,7 +61,7 @@ object MnemonicCommand {
       (for {
         _ <- ZIO.log(info)
         seed = MnemonicHelper.Companion.createSeed(wallet.mnemonic.asJava, wallet.passphrase)
-        _ <- updateState(e => e.copy(ssiWallet = Some(wallet), seed = Some(seed)))
+        _ <- updateState(e => e.copy(ssiWallet = Some(wallet)))
         _ <- Console.printLine(bytes2Hex(seed)).orDie
       } yield ()).provideLayer(setup.layer)
     }

@@ -42,7 +42,7 @@ object SSIExtension {
         k.usage match {
           case PrismKeyUsage.MasterKeyUsage               => KeyUsage.MASTER_KEY
           case PrismKeyUsage.IssuingKeyUsage              => KeyUsage.ISSUING_KEY
-          case PrismKeyUsage.KeyagreementKeyUsage         => KeyUsage.KEY_AGREEMENT_KEY
+          case PrismKeyUsage.KeyAgreementKeyUsage         => KeyUsage.KEY_AGREEMENT_KEY
           case PrismKeyUsage.RevocationKeyUsage           => KeyUsage.REVOCATION_KEY
           case PrismKeyUsage.AuthenticationKeyUsage       => KeyUsage.AUTHENTICATION_KEY
           case PrismKeyUsage.CapabilityinvocationKeyUsage => KeyUsage.CAPABILITY_INVOCATION_KEY
@@ -53,7 +53,7 @@ object SSIExtension {
         k.usage match {
           case PrismKeyUsage.MasterKeyUsage               => KeyUsage.MASTER_KEY
           case PrismKeyUsage.IssuingKeyUsage              => KeyUsage.ISSUING_KEY
-          case PrismKeyUsage.KeyagreementKeyUsage         => KeyUsage.KEY_AGREEMENT_KEY
+          case PrismKeyUsage.KeyAgreementKeyUsage         => KeyUsage.KEY_AGREEMENT_KEY
           case PrismKeyUsage.RevocationKeyUsage           => KeyUsage.REVOCATION_KEY
           case PrismKeyUsage.AuthenticationKeyUsage       => KeyUsage.AUTHENTICATION_KEY
           case PrismKeyUsage.CapabilityinvocationKeyUsage => KeyUsage.CAPABILITY_INVOCATION_KEY

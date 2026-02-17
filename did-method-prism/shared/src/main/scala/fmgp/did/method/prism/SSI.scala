@@ -119,7 +119,7 @@ final case class SSI(
       .filter(_.usage == PrismKeyUsage.IssuingKeyUsage)
       .map(k => k.getVerificationMethod(id = s"$did#${k.id}", controller = did.string))
     val keyAgreement = keys
-      .filter(_.usage == PrismKeyUsage.KeyagreementKeyUsage)
+      .filter(_.usage == PrismKeyUsage.KeyAgreementKeyUsage)
       .map(k => k.getVerificationMethod(id = s"$did#${k.id}", controller = did.string))
       .toSet[VerificationMethod]
     val capabilityInvocation = keys

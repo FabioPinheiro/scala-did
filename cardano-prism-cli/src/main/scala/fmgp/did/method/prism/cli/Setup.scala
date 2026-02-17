@@ -4,6 +4,9 @@ import zio.*
 import zio.cli.*
 import zio.json.*
 import java.nio.file.Path
+import scalus.cardano.wallet.hd.HdKeyPair
+import scalus.cardano.wallet.hd.Bip32Ed25519
+import scalus.crypto.ed25519.given
 import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.did.method.prism.BlockfrostConfig
 import fmgp.did.method.prism.BlockfrostRyoConfig
@@ -12,19 +15,28 @@ import fmgp.did.method.prism.cardano.PublicCardanoNetwork
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
 
-case class Key(seed: Array[Byte], derivationPath: String, key: Secp256k1PrivateKey)
+sealed trait Key
+case class KeySecp256k1(derivationPath: String, key: Secp256k1PrivateKey) extends Key
+case class KeyEd25519(derivationPath: String, key: HdKeyPair) extends Key
+
 object Key {
   given decoder: JsonDecoder[Key] = {
     given JsonDecoder[Array[Byte]] = Utils.decoderArrayByte
-    given JsonDecoder[Secp256k1PrivateKey] =
-      JsonDecoder.string.map(hex => Utils.secp256k1FromRaw(hex))
+    given JsonDecoder[Secp256k1PrivateKey] = JsonDecoder.string.map(hex => Utils.secp256k1FromRaw(hex))
+    given extendedKeyDecoder: JsonDecoder[Bip32Ed25519.ExtendedKey] = DeriveJsonDecoder.gen[Bip32Ed25519.ExtendedKey]
+    given JsonDecoder[HdKeyPair] = extendedKeyDecoder.map(ek => HdKeyPair.fromExtendedKey(ek))
     DeriveJsonDecoder.gen[Key]
   }
   given encoder: JsonEncoder[Key] = {
     given JsonEncoder[Array[Byte]] = Utils.encoderArrayByte
     given JsonEncoder[Secp256k1PrivateKey] = JsonEncoder.string.contramap(key => bytes2Hex(key.rawBytes))
+    given extendedKeyEncoder: JsonEncoder[Bip32Ed25519.ExtendedKey] = DeriveJsonEncoder.gen[Bip32Ed25519.ExtendedKey]
+    given JsonEncoder[HdKeyPair] = extendedKeyEncoder.contramap(hd => hd.extendedKey)
     DeriveJsonEncoder.gen[Key]
   }
+
+  def apply(derivationPath: String, key: Secp256k1PrivateKey): KeySecp256k1 = KeySecp256k1(derivationPath, key)
+  def apply(derivationPath: String, key: HdKeyPair): KeyEd25519 = KeyEd25519(derivationPath, key)
 }
 
 object Utils {
@@ -38,15 +50,14 @@ case class StagingState(
     updateStateFileByDefault: Boolean = false,
     ssiWallet: Option[CardanoWalletConfig] = None,
     cardanoWallet: Option[CardanoWalletConfig] = None,
-    seed: Option[Array[Byte]] = None,
-    secp256k1PrivateKey: Map[String, Key] = Map.empty,
+    // seed: Option[Array[Byte]] = None,
+    ssiPrivateKeys: Map[String, Key] = Map.empty,
     blockfrostMainnet: Option[BlockfrostConfig] = None,
     blockfrostTestnet: Option[BlockfrostConfig] = None,
     blockfrostPreprod: Option[BlockfrostConfig] = None,
     blockfrostPreview: Option[BlockfrostConfig] = None,
-    test: String = "",
 ) {
-  secp256k1PrivateKey.get("")
+  ssiPrivateKeys.get("")
   def blockfrost(network: PublicCardanoNetwork): Option[BlockfrostConfig] = network match
     case PublicCardanoNetwork.Mainnet => this.blockfrostMainnet
     case PublicCardanoNetwork.Testnet => this.blockfrostTestnet
