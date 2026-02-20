@@ -187,4 +187,17 @@ object MaybeEvent {
               // operation = OP.fromPrismEvent(prismEvent),
               protobuf = prismEvent,
             )
+
+  def fromProtoForce(signedPrismEvent: SignedPrismEvent): MySignedPrismEvent[OP] =
+    fromProto(signedPrismEvent = signedPrismEvent, tx = "fake_tx", blockIndex = -1, opIndex = -1) match
+      case InvalidPrismObject(tx, b, reason)                                   => ???
+      case InvalidSignedPrismEvent(tx, b, o, reason)                           => ???
+      case obj @ MySignedPrismEvent(tx, b, o, signedWith, signature, protobuf) => obj
+
+  def fromProtoForce2DIDEvent(signedPrismEvent: SignedPrismEvent): MySignedPrismEvent[OP.TypeDIDEvent] =
+    fromProtoForce(signedPrismEvent).asSignedPrismDIDEvent.getOrElse(???)
+
+  def fromProtoForce2StorageEntry(signedPrismEvent: SignedPrismEvent): MySignedPrismEvent[OP.TypeStorageEntryEvent] =
+    fromProtoForce(signedPrismEvent).asSignedPrismStorageEntryEvent.getOrElse(???)
+
 }

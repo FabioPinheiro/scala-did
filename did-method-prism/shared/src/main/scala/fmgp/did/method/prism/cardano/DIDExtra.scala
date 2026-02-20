@@ -4,7 +4,7 @@ import proto.prism.*
 import com.google.protobuf.ByteString
 import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.did.method.prism.DIDPrism
-import fmgp.did.method.prism.proto.didPrism
+import fmgp.did.method.prism.proto.*
 
 object DIDExtra {
 
@@ -46,5 +46,52 @@ object DIDExtra {
     )
     def didPrism: DIDPrism = op.didPrism.getOrElse(???)
     (didPrism, signedPrismCreateEventDID)
+  }
+
+  /* https://github.com/input-output-hk/prism-did-method-spec/blob/main/extensions/deterministic-prism-did-generation-proposal.md */
+  def createDeterministicDID(
+      masterKey: (String /*keyName*/, Secp256k1PrivateKey),
+  ): (DIDPrism, SignedPrismEvent, SignedPrismEvent) = {
+    def createOP: PrismEvent = PrismEvent(
+      event = PrismEvent.Event.CreateDid(
+        value = ProtoCreateDID(
+          didData = Some(
+            ProtoCreateDID.DIDCreationData(
+              publicKeys = Seq(
+                PublicKey(
+                  id = masterKey._1, // keyName
+                  usage = KeyUsage.MASTER_KEY,
+                  keyData = masterKey._2.compressedEcKeyData
+                )
+              ),
+              services = Seq.empty, // Seq[proto.prism.Service],
+              context = Seq.empty // Seq[String]
+            )
+          )
+        )
+      )
+    )
+    def signedPrismCreateEventDID = SignedPrismEvent(
+      signedWith = masterKey._1,
+      signature = ByteString.copyFrom(masterKey._2.sign(createOP.toByteArray)),
+      event = Some(createOP)
+    )
+    val signedPrismEvent = MaybeEvent.fromProtoForce2DIDEvent(signedPrismCreateEventDID)
+
+    def updateOP: PrismEvent =
+      PrismEvent(
+        event = PrismEvent.Event.UpdateDid(
+          value = ProtoUpdateDID(
+            previousEventHash = signedPrismEvent.eventHash.byteString,
+            id = "",
+            actions = Seq(
+              UpdateDIDAction(action = ???),
+            )
+          )
+        )
+      )
+
+    def didPrism: DIDPrism = createOP.didPrism.getOrElse(???)
+    (didPrism, signedPrismCreateEventDID, ???)
   }
 }

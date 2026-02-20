@@ -20,6 +20,7 @@ object EventHash:
   extension (hash: EventHash)
     def hex: String = bytes2Hex(hash)
     def byteArray: Array[Byte] = hash
+    def byteString: com.google.protobuf.ByteString = com.google.protobuf.ByteString.copyFrom(byteArray)
 
     /** Custom equality method */
     def equal(other: EventHash): Boolean = hash.hex == other.hex
