@@ -74,8 +74,8 @@ object DIDExtra {
     )
     val signedPrismCreateEventDID = SignedPrismEvent(
       signedWith = masterKey._1,
-      signature = ByteString.copyFrom(masterKey._2.sign(createOP.toByteArray)),
-      event = Some(createOP)
+      signature = ByteString.copyFrom(masterKey._2.sign(createEvent.toByteArray)),
+      event = Some(createEvent)
     )
     val updateEvent: PrismEvent =
       PrismEvent(
@@ -83,7 +83,7 @@ object DIDExtra {
           value = ProtoUpdateDID(
             previousEventHash = createEvent.getEventHash.byteString,
             id = "", // defualt (not in use)
-            actions = actions.toProto
+            actions = actions.map(_.toProto)
           )
         )
       )
@@ -93,7 +93,7 @@ object DIDExtra {
       event = Some(updateEvent)
     )
 
-    val didPrism: DIDPrism = createOP.didPrism.get // 'get' is ok
+    val didPrism: DIDPrism = createEvent.didPrism.getOrElse(???) // '???' is ok
 
     (didPrism, signedPrismCreateEventDID, signedPrismUpdateEventDID)
   }
