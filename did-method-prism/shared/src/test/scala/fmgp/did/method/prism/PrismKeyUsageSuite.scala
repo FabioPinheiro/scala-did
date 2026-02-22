@@ -17,4 +17,21 @@ class PrismKeyUsageSuite extends FunSuite {
     assertEquals(PrismKeyUsage.CapabilitydelegationKeyUsage.protoEnum, KeyUsage.CAPABILITY_DELEGATION_KEY.index)
     assertEquals(PrismKeyUsage.VdrKeyUsage.protoEnum, KeyUsage.VDR_KEY.index)
   }
+
+  Seq[PrismKeyUsage.ProtoKeyUsage](
+    KeyUsage.MASTER_KEY,
+    KeyUsage.ISSUING_KEY,
+    KeyUsage.KEY_AGREEMENT_KEY,
+    KeyUsage.AUTHENTICATION_KEY,
+    KeyUsage.REVOCATION_KEY,
+    KeyUsage.CAPABILITY_INVOCATION_KEY,
+    KeyUsage.CAPABILITY_DELEGATION_KEY,
+    KeyUsage.VDR_KEY,
+  ).map { original =>
+    test(s"fromProto toProto cycle with '${original.toString}'") {
+      val tmp = PrismKeyUsage.fromProto(original).toProto
+      assertEquals(tmp, original)
+    }
+  }
+
 }

@@ -16,6 +16,7 @@ case class MyService(
       `type` = `type`,
       serviceEndpoint = ast.Json.Str(serviceEndpoint): ServiceEndpoint
     )
+  def toProto: Service = Service(id = id, `type` = `type`, serviceEndpoint = serviceEndpoint)
 }
 object MyService {
   given decoder: JsonDecoder[MyService] = DeriveJsonDecoder.gen[MyService]

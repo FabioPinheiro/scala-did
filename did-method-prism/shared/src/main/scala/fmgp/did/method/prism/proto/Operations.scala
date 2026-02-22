@@ -1,10 +1,12 @@
 package fmgp.did.method.prism.proto
 
+import com.google.protobuf.ByteString
 import zio.json.*
-import fmgp.util.bytes2Hex
 import proto.prism.*
 import fmgp.did.method.prism.VDR
 import fmgp.did.method.prism.DIDPrism
+import fmgp.util.bytes2Hex
+import fmgp.util.hex2bytes
 
 sealed trait OP {
   def isDIDEvent: Boolean
@@ -19,6 +21,22 @@ sealed trait OP {
     if (this.isInstanceOf[OP.TypeStorageEntryEvent])
       Right(this.asInstanceOf[OP.TypeStorageEntryEvent])
     else Left("OP is not a StorageEntryEvent type")
+
+  def toPrismEvent: PrismEvent = {
+    import proto.prism.PrismEvent.Event
+    val event = this match
+      case VoidOP(reason)                => Event.Empty
+      case obj: CreateDidOP              => obj.toProto
+      case obj: UpdateDidOP              => obj.toProto
+      case _: IssueCredentialBatchOP     => ??? // TODO
+      case _: RevokeCredentialsOP        => ??? // TODO
+      case _: ProtocolVersionUpdateOP    => ??? // TODO
+      case obj: DeactivateDidOP          => obj.toProto
+      case obj: CreateStorageEntryOP     => obj.toProto
+      case obj: UpdateStorageEntryOP     => obj.toProto
+      case obj: DeactivateStorageEntryOP => obj.toProto
+    PrismEvent(event = event)
+  }
 }
 
 object OP {
@@ -43,6 +61,7 @@ object OP {
       case Event.DeactivateStorageEntry(p) => DeactivateStorageEntryOP.fromProto(p)
     }
   }
+
 }
 case class VoidOP(reason: String) extends OP {
   def isDIDEvent: Boolean = false
@@ -63,6 +82,20 @@ case class CreateDidOP( // Like DIDCreationData
 ) extends OP {
   def isDIDEvent: Boolean = true
   def isStorageEvent: Boolean = false
+
+  def toProto: PrismEvent.Event.CreateDid =
+    PrismEvent.Event.CreateDid(
+      value = ProtoCreateDID(
+        Some(
+          ProtoCreateDID.DIDCreationData(
+            publicKeys = publicKeys.flatMap { _.toProtoOption },
+            services = services.map(_.toProto),
+            context = context,
+          )
+        )
+      )
+    )
+
 }
 
 /** @param previous_event_hash
@@ -76,6 +109,31 @@ case class UpdateDidOP(previousEventHash: String, id: String, actions: Seq[Updat
   def previousOpHashHex = previousEventHash
   def isDIDEvent: Boolean = true
   def isStorageEvent: Boolean = false
+
+  def toProto: PrismEvent.Event.UpdateDid =
+    PrismEvent.Event.UpdateDid(
+      value = ProtoUpdateDID(
+        previousEventHash = ByteString.copyFrom(hex2bytes(previousEventHash)),
+        id = id,
+        actions = actions.map(_.toProto)
+
+        //
+
+        // )
+
+        // Some(
+        //   ProtoCreateDID.DIDCreationData(
+        //     publicKeys = publicKeys.flatMap {
+        //       case VoidKey(id, reason)  => None
+        //       case o: UncompressedECKey => Some(o.toProto)
+        //       case o: CompressedECKey   => Some(o.toProto)
+        //     },
+        //     services = services.map(_.toProto),
+        //     context = context,
+        //   )
+        // )
+      )
+    )
 }
 
 case class IssueCredentialBatchOP(value: String) extends OP {
@@ -99,6 +157,11 @@ case class ProtocolVersionUpdateOP(value: String) extends OP {
 case class DeactivateDidOP(previousEventHash: String, id: String) extends OP {
   def isDIDEvent: Boolean = true
   def isStorageEvent: Boolean = false
+
+  def toProto: PrismEvent.Event.DeactivateDid =
+    PrismEvent.Event.DeactivateDid(value =
+      proto.prism.ProtoDeactivateDID(previousEventHash = ByteString.copyFrom(hex2bytes(previousEventHash)), id = id)
+    )
 }
 
 case class CreateStorageEntryOP(
@@ -110,6 +173,17 @@ case class CreateStorageEntryOP(
   def isDIDEvent: Boolean = false
   def isStorageEvent: Boolean = true
   def nonceInHex = bytes2Hex(nonce)
+
+  def toProto: PrismEvent.Event.CreateStorageEntry = {
+    assert(unknownFields.isEmpty) // TODO make it type safe
+    PrismEvent.Event.CreateStorageEntry(
+      value = proto.prism.ProtoCreateStorageEntry(
+        didPrismHash = ByteString.copyFrom(didPrism.hashRef),
+        nonce = ByteString.copyFrom(nonce),
+        data = data.toProtoCreateStorageData,
+      )
+    )
+  }
 }
 case class UpdateStorageEntryOP(
     previousEventHash: String,
@@ -118,6 +192,17 @@ case class UpdateStorageEntryOP(
 ) extends OP {
   def isDIDEvent: Boolean = false
   def isStorageEvent: Boolean = true
+
+  def toProto: PrismEvent.Event.UpdateStorageEntry = {
+    assert(unknownFields.isEmpty) // TODO make it type safe
+    PrismEvent.Event.UpdateStorageEntry(
+      value = proto.prism.ProtoUpdateStorageEntry(
+        previousEventHash = ByteString.copyFrom(hex2bytes(previousEventHash)),
+        data = data.toProtoUpdateStorageData,
+      )
+    )
+  }
+
 }
 case class DeactivateStorageEntryOP(
     previousEventHash: String,
@@ -125,6 +210,15 @@ case class DeactivateStorageEntryOP(
 ) extends OP {
   def isDIDEvent: Boolean = false
   def isStorageEvent: Boolean = true
+
+  def toProto: PrismEvent.Event.DeactivateStorageEntry = {
+    assert(unknownFields.isEmpty) // TODO make it type safe
+    PrismEvent.Event.DeactivateStorageEntry(
+      value = proto.prism.ProtoDeactivateStorageEntry(
+        previousEventHash = ByteString.copyFrom(hex2bytes(previousEventHash)),
+      )
+    )
+  }
 }
 
 object CreateDidOP {
@@ -147,22 +241,50 @@ object UpdateDidOP {
   // RemoveServiceAction remove_service = 4; // Used to remove an existing service from a DID,
   // UpdateServiceAction update_service = 5; // Used to Update a list of service endpoints of a given service on a given DID.
   // PatchContextAction patch_context = 6; // Used to Update a list of `@context` strings used during resolution for a given DID.
-  sealed trait Action
+  sealed trait Action { def toProto: UpdateDIDAction }
   object Action {
     given JsonDecoder[Action] = DeriveJsonDecoder.gen[Action]
     given JsonEncoder[Action] = DeriveJsonEncoder.gen[Action]
   }
-  case class VoidAction(reason: String) extends Action
-  case class AddKey(key: PrismPublicKey /*(1)*/ ) extends Action
-  case class RemoveKey(keyId: String /*(1)*/ ) extends Action
-  case class AddService(service: MyService /*(1)*/ ) extends Action
-  case class RemoveService(serviceId: String /*(1)*/ ) extends Action
+  case class VoidAction(reason: String) extends Action {
+    override def toProto: UpdateDIDAction = UpdateDIDAction(UpdateDIDAction.Action.Empty)
+  }
+  case class AddKey(key: PrismPublicKey /*(1)*/ ) extends Action {
+    override def toProto: UpdateDIDAction =
+      UpdateDIDAction(UpdateDIDAction.Action.AddKey(AddKeyAction(key.toProtoOption)))
+  }
+  case class RemoveKey(keyId: String /*(1)*/ ) extends Action {
+    override def toProto: UpdateDIDAction =
+      UpdateDIDAction(UpdateDIDAction.Action.RemoveKey(RemoveKeyAction(keyId = keyId)))
+  }
+  case class AddService(service: MyService /*(1)*/ ) extends Action {
+    override def toProto: UpdateDIDAction =
+      UpdateDIDAction(UpdateDIDAction.Action.AddService(value = AddServiceAction(service = Some(service.toProto))))
+  }
+  case class RemoveService(serviceId: String /*(1)*/ ) extends Action {
+    override def toProto: UpdateDIDAction =
+      UpdateDIDAction(UpdateDIDAction.Action.RemoveService(value = RemoveServiceAction(serviceId = serviceId)))
+  }
   case class UpdateService(
       serviceId: String /*(1)*/,
       newType: Option[String] /*(2)*/,
       serviceEndpoints: String /*(3)*/
-  ) extends Action
-  case class PatchContext(context: Seq[String]) extends Action
+  ) extends Action {
+    override def toProto: UpdateDIDAction =
+      UpdateDIDAction(
+        UpdateDIDAction.Action.UpdateService(value =
+          UpdateServiceAction(
+            serviceId = serviceId,
+            `type` = newType.getOrElse(""),
+            serviceEndpoints = serviceEndpoints
+          )
+        )
+      )
+  }
+  case class PatchContext(context: Seq[String]) extends Action {
+    override def toProto: UpdateDIDAction =
+      UpdateDIDAction(UpdateDIDAction.Action.PatchContext(value = PatchContextAction(context = context)))
+  }
 
   def fromProto(p: ProtoUpdateDID) = {
     import proto.prism.UpdateDIDAction.{Action as UAction}

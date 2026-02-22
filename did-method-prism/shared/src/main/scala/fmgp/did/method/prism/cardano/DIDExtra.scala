@@ -51,8 +51,9 @@ object DIDExtra {
   /* https://github.com/input-output-hk/prism-did-method-spec/blob/main/extensions/deterministic-prism-did-generation-proposal.md */
   def createDeterministicDID(
       masterKey: (String /*keyName*/, Secp256k1PrivateKey),
+      actions: Seq[UpdateDidOP.Action],
   ): (DIDPrism, SignedPrismEvent, SignedPrismEvent) = {
-    def createOP: PrismEvent = PrismEvent(
+    val createEvent: PrismEvent = PrismEvent(
       event = PrismEvent.Event.CreateDid(
         value = ProtoCreateDID(
           didData = Some(
@@ -71,27 +72,29 @@ object DIDExtra {
         )
       )
     )
-    def signedPrismCreateEventDID = SignedPrismEvent(
+    val signedPrismCreateEventDID = SignedPrismEvent(
       signedWith = masterKey._1,
       signature = ByteString.copyFrom(masterKey._2.sign(createOP.toByteArray)),
       event = Some(createOP)
     )
-    val signedPrismEvent = MaybeEvent.fromProtoForce2DIDEvent(signedPrismCreateEventDID)
-
-    def updateOP: PrismEvent =
+    val updateEvent: PrismEvent =
       PrismEvent(
         event = PrismEvent.Event.UpdateDid(
           value = ProtoUpdateDID(
-            previousEventHash = signedPrismEvent.eventHash.byteString,
-            id = "",
-            actions = Seq(
-              UpdateDIDAction(action = ???),
-            )
+            previousEventHash = createEvent.getEventHash.byteString,
+            id = "", // defualt (not in use)
+            actions = actions.toProto
           )
         )
       )
+    val signedPrismUpdateEventDID = SignedPrismEvent(
+      signedWith = masterKey._1,
+      signature = ByteString.copyFrom(masterKey._2.sign(updateEvent.toByteArray)),
+      event = Some(updateEvent)
+    )
 
-    def didPrism: DIDPrism = createOP.didPrism.getOrElse(???)
-    (didPrism, signedPrismCreateEventDID, ???)
+    val didPrism: DIDPrism = createOP.didPrism.get // 'get' is ok
+
+    (didPrism, signedPrismCreateEventDID, signedPrismUpdateEventDID)
   }
 }

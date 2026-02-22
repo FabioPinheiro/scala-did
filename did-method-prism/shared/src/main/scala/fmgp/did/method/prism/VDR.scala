@@ -114,8 +114,23 @@ object VDR {
       // Invalid events on the data state of machine
       case (old, update) => self // ignore update
 
+    def toProtoCreateStorageData: _root_.proto.prism.ProtoCreateStorageEntry.Data = {
+      import _root_.proto.prism.ProtoCreateStorageEntry.Data
+      import com.google.protobuf.ByteString
+      this match
+        case DataEmpty()              => Data.Empty
+        case DataDeactivated(_)       => Data.Empty // This does not exist
+        case DataByteArray(byteArray) => Data.Bytes(ByteString.copyFrom(byteArray))
+        case DataIPFS(cid)            => Data.Ipfs(cid)
+        case DataStatusList(status)   => ??? // TODO Still not a protobuf
+    }
   }
-  sealed trait DataUpdateType
+  sealed trait DataUpdateType {
+    def toProtoUpdateStorageData: _root_.proto.prism.ProtoUpdateStorageEntry.Data = { // HACK
+      this.asInstanceOf[DataType].toProtoCreateStorageData.asInstanceOf[_root_.proto.prism.ProtoUpdateStorageEntry.Data]
+    }
+  }
+
   object DataType {
     given JsonDecoder[DataType] = DeriveJsonDecoder.gen[DataType]
     given JsonEncoder[DataType] = DeriveJsonEncoder.gen[DataType]

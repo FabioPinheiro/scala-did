@@ -17,6 +17,16 @@ enum PrismKeyUsage(val protoEnum: Int, val name: String):
   case VdrKeyUsage extends PrismKeyUsage(8, "VDR")
   // case UnrecognizedKeyUsage extends PrismKeyUsage()
 
+  def toProto: PrismKeyUsage.ProtoKeyUsage = this match
+    case MasterKeyUsage               => KeyUsage.MASTER_KEY
+    case IssuingKeyUsage              => KeyUsage.ISSUING_KEY
+    case KeyAgreementKeyUsage         => KeyUsage.KEY_AGREEMENT_KEY
+    case AuthenticationKeyUsage       => KeyUsage.AUTHENTICATION_KEY
+    case RevocationKeyUsage           => KeyUsage.REVOCATION_KEY
+    case CapabilityinvocationKeyUsage => KeyUsage.CAPABILITY_INVOCATION_KEY
+    case CapabilitydelegationKeyUsage => KeyUsage.CAPABILITY_DELEGATION_KEY
+    case VdrKeyUsage                  => KeyUsage.VDR_KEY
+
 object PrismKeyUsage {
   given decoder: JsonDecoder[PrismKeyUsage] = JsonDecoder.string.mapOrFail(e => safeValueOf(PrismKeyUsage.valueOf(e)))
   given encoder: JsonEncoder[PrismKeyUsage] = JsonEncoder.string.contramap((e: PrismKeyUsage) => e.toString)

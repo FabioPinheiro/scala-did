@@ -1,16 +1,27 @@
 package fmgp.did.method.prism.proto
 
+import com.google.protobuf.ByteString
 import zio.json.*
 import proto.prism.PublicKey
 import proto.prism.ECKeyData
 import proto.prism.CompressedECKeyData
+import proto.prism.KeyUsage
 import fmgp.did.VerificationMethodReferenced
 import fmgp.did.VerificationMethodEmbeddedJWK
 import fmgp.did.VerificationMethodEmbeddedMultibase
 import fmgp.util.hex2bytes
 import fmgp.crypto.SharedCryto
+import fmgp.did.method.prism.proto.PrismPublicKey.VoidKey
+import fmgp.did.method.prism.proto.PrismPublicKey.UncompressedECKey
+import fmgp.did.method.prism.proto.PrismPublicKey.CompressedECKey
 
-sealed trait PrismPublicKey { def id: String }
+sealed trait PrismPublicKey { self =>
+  def id: String
+  def toProtoOption: Option[proto.prism.PublicKey] = self match
+    case VoidKey(id, reason)  => None
+    case o: UncompressedECKey => Some(o.toProto)
+    case o: CompressedECKey   => Some(o.toProto)
+}
 object PrismPublicKey {
   import proto.prism.PublicKey.KeyData
   import proto.prism.KeyUsage.UNKNOWN_KEY
@@ -40,7 +51,13 @@ object PrismPublicKey {
         case k @ CompressedECKey(id, usage, curve, data)   => Some(k)
       }
 
-  case class VoidKey(id: String, reason: String) extends PrismPublicKey
+  case class VoidKey(id: String, reason: String) extends PrismPublicKey {
+    def toProto: proto.prism.PublicKey = proto.prism.PublicKey(
+      id = id,
+      usage = KeyUsage.UNKNOWN_KEY, // FIXME usage.toProto,
+      keyData = KeyData.Empty
+    )
+  }
 
   sealed trait PrismPublicKey_TMP extends PrismPublicKey { self =>
     import fmgp.did.*
@@ -71,13 +88,23 @@ object PrismPublicKey {
         x = fmgp.util.Base64.encode(x).urlBase64,
         y = fmgp.util.Base64.encode(y).urlBase64,
       )
+    def toProto = proto.prism.PublicKey(
+      id = id,
+      usage = usage.toProto,
+      keyData = KeyData.EcKeyData(value =
+        proto.prism.ECKeyData(
+          curve = curve,
+          x = ByteString.copyFrom(x),
+          y = ByteString.copyFrom(y)
+        )
+      )
+    )
   }
   case class CompressedECKey(id: String, usage: PrismKeyUsage, curve: String, data: Array[Byte])
       extends PrismPublicKey
       with PrismPublicKey_TMP {
     import fmgp.crypto.*
     def publicKey: fmgp.crypto.PublicKeyWithoutKid = {
-
       fmgp.crypto.Curve.valueOf(curve) match
         case c: fmgp.crypto.ECCurve =>
           val (x, y) = SharedCryto.getXY(data).getOrElse(???)
@@ -90,6 +117,16 @@ object PrismPublicKey {
         case c: fmgp.crypto.OKPCurve =>
           OKPPublicKeyWithoutKid(kty = KTY.OKP, crv = c, x = fmgp.util.Base64.encode(data).urlBase64)
     }
+    def toProto = proto.prism.PublicKey(
+      id = id,
+      usage = usage.toProto,
+      keyData = KeyData.CompressedEcKeyData(value =
+        proto.prism.CompressedECKeyData(
+          curve = curve,
+          data = ByteString.copyFrom(data),
+        )
+      )
+    )
 
   }
 
