@@ -648,7 +648,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
 
 lazy val cardanoPrismCli = project
   .in(file("cardano-prism-cli"))
-  .configure(notYetPublishedConfigure)
+  .configure(publishConfigure)
   .settings(
     name := "cardano-prism-cli",
     libraryDependencies += D.zioMunitTest.value,
