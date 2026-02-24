@@ -35,14 +35,27 @@ object PrismKeyUsage {
     KeyUsage.AUTHENTICATION_KEY.type | KeyUsage.REVOCATION_KEY.type | KeyUsage.CAPABILITY_INVOCATION_KEY.type |
     KeyUsage.CAPABILITY_DELEGATION_KEY.type | KeyUsage.VDR_KEY.type
 
-  def fromProto(p: PrismKeyUsage.ProtoKeyUsage) = p match
-    case KeyUsage.MASTER_KEY                => MasterKeyUsage
-    case KeyUsage.ISSUING_KEY               => IssuingKeyUsage
-    case KeyUsage.KEY_AGREEMENT_KEY         => KeyAgreementKeyUsage
-    case KeyUsage.AUTHENTICATION_KEY        => AuthenticationKeyUsage
-    case KeyUsage.REVOCATION_KEY            => RevocationKeyUsage
-    case KeyUsage.CAPABILITY_INVOCATION_KEY => CapabilityinvocationKeyUsage
-    case KeyUsage.CAPABILITY_DELEGATION_KEY => CapabilitydelegationKeyUsage
-    case KeyUsage.VDR_KEY                   => VdrKeyUsage
+  def fromProto(p: PrismKeyUsage.ProtoKeyUsage): PrismKeyUsage =
+    p match
+      case KeyUsage.MASTER_KEY                => MasterKeyUsage
+      case KeyUsage.ISSUING_KEY               => IssuingKeyUsage
+      case KeyUsage.KEY_AGREEMENT_KEY         => KeyAgreementKeyUsage
+      case KeyUsage.AUTHENTICATION_KEY        => AuthenticationKeyUsage
+      case KeyUsage.REVOCATION_KEY            => RevocationKeyUsage
+      case KeyUsage.CAPABILITY_INVOCATION_KEY => CapabilityinvocationKeyUsage
+      case KeyUsage.CAPABILITY_DELEGATION_KEY => CapabilitydelegationKeyUsage
+      case KeyUsage.VDR_KEY                   => VdrKeyUsage
+
+  def fromProtoEnum(enumPosition: Int): Either[String, PrismKeyUsage] =
+    enumPosition match
+      case 1 => Right(MasterKeyUsage)
+      case 2 => Right(IssuingKeyUsage)
+      case 3 => Right(KeyAgreementKeyUsage)
+      case 4 => Right(AuthenticationKeyUsage)
+      case 5 => Right(RevocationKeyUsage)
+      case 6 => Right(CapabilityinvocationKeyUsage)
+      case 7 => Right(CapabilitydelegationKeyUsage)
+      case 8 => Right(VdrKeyUsage)
+      case n => Left(s"'$n' is not a valid PrismKeyUsage")
 
 }
