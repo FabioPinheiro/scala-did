@@ -16,7 +16,7 @@ type NotRequired[A] = Option[A]
 type SetU[A] = A | Seq[A] // TODO https://github.com/FabioPinheiro/scala-did/issues/322
 // type SetMapU[A] = A | Seq[A] | Map[String, A]
 // type ServiceEndpoint = URI | Map[String, URI] | Seq[URI] | Seq[Map[String, URI]] //SetU[URI]
-type ServiceEndpoint = Json.Str | Json.Obj | Json.Arr
+type ServiceEndpoint = Json.Str | Json.Obj | Json.Arr // TODO More type safe - Json.Arr can only be an array of string
 type ServiceEndpointNoStr = Json.Obj | Json.Arr
 type Authentication = Option[Set[VerificationMethod]]
 
