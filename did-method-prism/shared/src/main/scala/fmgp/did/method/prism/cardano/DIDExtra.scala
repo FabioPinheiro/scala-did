@@ -22,14 +22,14 @@ object DIDExtra {
                   PublicKey(
                     id = keyName,
                     usage = KeyUsage.MASTER_KEY,
-                    keyData = pk.compressedEcKeyData
+                    keyData = pk.compressedKeyData
                   )
                 } ++
                 vdrKeys.map { (keyName, pk) =>
                   PublicKey(
                     id = keyName,
                     usage = KeyUsage.VDR_KEY,
-                    keyData = pk.compressedEcKeyData
+                    keyData = pk.compressedKeyData
                   )
                 },
               services = Seq.empty, // Seq[proto.prism.Service],
@@ -62,7 +62,7 @@ object DIDExtra {
                 PublicKey(
                   id = masterKey._1, // keyName
                   usage = KeyUsage.MASTER_KEY,
-                  keyData = masterKey._2.compressedEcKeyData
+                  keyData = masterKey._2.compressedKeyData
                 )
               ),
               services = Seq.empty, // Seq[proto.prism.Service],

@@ -46,7 +46,7 @@ final case class SSI(
         val point = pk.curvePoint
         point._1.sameElements(x) & point._2.sameElements(y)
       case CompressedECKey(id, PrismKeyUsage.VdrKeyUsage, `secp256k1`, data) =>
-        pk.compressedPublicKey.sameElements(data)
+        pk.compressedPublicKeyBytes.sameElements(data)
       case _ => false
     }
   }

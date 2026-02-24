@@ -85,7 +85,7 @@ object VDRUtilsTestExtra {
                     PublicKey(
                       id = vdrKeyName,
                       usage = KeyUsage.VDR_KEY,
-                      keyData = vdrKey.compressedEcKeyData
+                      keyData = vdrKey.compressedKeyData
                     )
                   )
                 )

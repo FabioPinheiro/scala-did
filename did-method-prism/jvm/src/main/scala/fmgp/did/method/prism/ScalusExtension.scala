@@ -5,8 +5,9 @@ import scalus.cardano.node.BlockfrostProvider
 
 import scalus.cardano.wallet.hd.*
 import org.hyperledger.identus.apollo.derivation.HDKey
-import fmgp.did.method.prism.proto.PrismKeyUsage
 import fmgp.did.method.prism.cardano.*
+import fmgp.did.method.prism.proto.PrismKeyUsage
+import fmgp.did.method.prism.proto.PrismPublicKey
 import fmgp.crypto.*
 import fmgp.util.Base64
 
@@ -47,4 +48,14 @@ import fmgp.util.Base64
 // }
 // }
 
-extension (hdKey: HdKeyPair) def publicKeyJWK = OKPPublicKey.makeEd25519(x = Base64.encode(hdKey.verificationKey.bytes))
+extension (hdKey: HdKeyPair)
+  def publicKeyJWK = OKPPublicKey.makeEd25519(x = Base64.encode(hdKey.verificationKey.bytes))
+  final def compressedKey(id: String, keyUsage: PrismKeyUsage): PrismPublicKey.CompressedECKey =
+    PrismPublicKey.CompressedECKey(id = id, usage = keyUsage, curve = "Ed25519", data = hdKey.verificationKey.bytes)
+  final def compressedKeyData: _root_.proto.prism.PublicKey.KeyData.CompressedEcKeyData =
+    _root_.proto.prism.PublicKey.KeyData.CompressedEcKeyData(
+      value = _root_.proto.prism.CompressedECKeyData(
+        curve = "Ed25519",
+        data = com.google.protobuf.ByteString.copyFrom(hdKey.verificationKey.bytes)
+      )
+    )

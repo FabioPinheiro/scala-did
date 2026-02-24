@@ -1,15 +1,20 @@
 package fmgp.crypto
 
 import org.hyperledger.identus.apollo.utils.KMMECSecp256k1PrivateKey
+import fmgp.did.method.prism.proto.PrismKeyUsage
+import fmgp.did.method.prism.proto.PrismPublicKey
 
 case class Secp256k1PrivateKey(rawBytes: Array[Byte]) {
   private val pk = KMMECSecp256k1PrivateKey.Companion.secp256k1FromByteArray(rawBytes)
-  final def compressedPublicKey: Array[Byte] = pk.getPublicKey().getCompressed()
-  final def compressedEcKeyData: proto.prism.PublicKey.KeyData.CompressedEcKeyData =
+  final def compressedPublicKeyBytes: Array[Byte] = pk.getPublicKey().getCompressed()
+  final def compressedKey(id: String, keyUsage: PrismKeyUsage): PrismPublicKey.CompressedECKey =
+    PrismPublicKey.CompressedECKey(id = id, usage = keyUsage, curve = "secp256k1", data = compressedPublicKeyBytes)
+
+  final def compressedKeyData: proto.prism.PublicKey.KeyData.CompressedEcKeyData =
     proto.prism.PublicKey.KeyData.CompressedEcKeyData(
       value = proto.prism.CompressedECKeyData(
         curve = "secp256k1",
-        data = com.google.protobuf.ByteString.copyFrom(this.compressedPublicKey)
+        data = com.google.protobuf.ByteString.copyFrom(this.compressedPublicKeyBytes)
       )
     )
   // final def curvePoint: (x: Array[Byte], y: Array[Byte]) = { TODO report BUG in compiler: this does not work in scala JS?
