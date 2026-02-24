@@ -92,6 +92,11 @@ object CMD {
       vdrKeyLabel: Option[String],
       vdrKeyRaw: Option[String]
   ) extends DIDCMD
+  final case class DIDCreateDeterministic(
+      setup: Setup,
+      keysLabels: Seq[String],
+      didCommServiceEndpoints: Seq[(String, String)],
+  ) extends DIDCMD
   final case class DIDUpdate(did: DIDPrism) extends DIDCMD
   final case class DIDDeactivate(did: DIDPrism) extends DIDCMD
   final case class DIDResolve(did: DIDPrism, network: PublicCardanoNetwork) extends DIDCMD

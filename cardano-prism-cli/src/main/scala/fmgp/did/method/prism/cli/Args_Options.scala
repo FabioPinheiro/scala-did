@@ -91,3 +91,7 @@ val indexerDBConnectionAgr =
     .??(
       "Indexer MongoDB connection to be used as a state storage. Ex: 'mongodb+srv://user:password@cluster0.bgnyyy1.mongodb.net/indexer'"
     )
+
+val keysLabels = Args.text("keyID").repeat.??("Label/name of keys to be used")
+val didCommServiceEndpoints =
+  (Args.text("serviceId") ++ Args.text("didCommEndpoint")).repeat.??("DIDComm service id + endpoint")

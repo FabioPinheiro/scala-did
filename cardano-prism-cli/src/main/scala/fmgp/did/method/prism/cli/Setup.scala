@@ -11,12 +11,16 @@ import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.did.method.prism.BlockfrostConfig
 import fmgp.did.method.prism.BlockfrostRyoConfig
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
+import fmgp.did.method.prism.cardano.Cip0000
 import fmgp.did.method.prism.cardano.PublicCardanoNetwork
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
 
-sealed trait Key
-case class KeySecp256k1(derivationPath: String, key: Secp256k1PrivateKey) extends Key
+sealed trait Key {
+  def derivationPath: String
+  def path: Cip0000 = Cip0000.fromPath(derivationPath).getOrElse(???) // FIXME
+}
+case class KeySecp256k1(derivationPath: String, key: Secp256k1PrivateKey) extends Key { def secp256k1PrivateKey = key }
 case class KeyEd25519(derivationPath: String, key: HdKeyPair) extends Key
 
 object Key {
