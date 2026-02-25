@@ -105,7 +105,8 @@ object AppServer extends ZIOAppDefault {
     // },
     Method.GET / trailing -> Handler
       .fromResource("index.html")
-      .map(_.setHeaders(Headers(Header.ContentType(MediaType.text.html)))),
+      .map(_.setHeaders(Headers(Header.ContentType(MediaType.text.html))))
+      .contramap { case (path: String, req: Request) => req },
     Method.GET / "index.html" -> handler { Response.redirect(URL.root) },
     Method.GET / "favicon.ico" -> Handler.fromResource("favicon.ico"),
     Method.GET / "manifest.webmanifest" -> Handler.fromResource("manifest.webmanifest"),
@@ -136,13 +137,15 @@ object AppServer extends ZIOAppDefault {
       // RoutesMiddleware
       // TODO https://zio.dev/reference/stream/zpipeline/#:~:text=ZPipeline.gzip%20%E2%80%94%20The%20gzip%20pipeline%20compresses%20a%20stream%20of%20bytes%20as%20using%20gzip%20method%3A
       val fullPath = s"assets/$path"
-      val classLoader = Thread.currentThread().getContextClassLoader()
       val headerContentType = fullPath match
         case s if s.endsWith(".html") => Header.ContentType(MediaType.text.html)
         case s if s.endsWith(".js")   => Header.ContentType(MediaType.text.javascript)
         case s if s.endsWith(".css")  => Header.ContentType(MediaType.text.css)
         case s                        => Header.ContentType(MediaType.text.plain)
-      Handler.fromResource(fullPath).map(_.addHeader(headerContentType))
+      Handler // .fromResource(fullPath).map(_.addHeader(headerContentType))
+        .fromResource(fullPath)
+        .map(_.addHeader(headerContentType))
+        .contramap { case (path: String, req: Request) => req }
     }.flatten
   ).sandbox
 
