@@ -23,6 +23,7 @@ enum PublicCardanoNetwork extends CardanoNetwork:
   }
 
 object PublicCardanoNetwork {
+  val TESTNET_NOT_AVAILABLE = "Testnet is no longer available"
   def fromBlockfrostToken(token: String) = token.slice(0, 7) match {
     case "mainnet" => PublicCardanoNetwork.Mainnet
     case "testnet" => PublicCardanoNetwork.Testnet

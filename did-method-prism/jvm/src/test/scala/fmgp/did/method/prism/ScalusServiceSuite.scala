@@ -114,7 +114,7 @@ class ScalusServiceSuite extends FunSuite {
 
     val prismObject = PrismObject(blockContent = Some(PrismBlock(events = prismEvents)))
 
-    val meta = ScalusService.makeMetadataPrism(prismObject)
+    val meta = AuxiliaryData.Metadata(Map(ScalusService.makeMetadataPrism(prismObject)))
     assertEquals(
       bytes2Hex(Cbor.encode(meta)),
       "a119534da261760161638f582022ca0312cf010a076d61737465723112473045022100fd1f2ea66ea9e7f378615820dbe1599fb12b7ca3297e9efa872504bfc5" +

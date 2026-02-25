@@ -187,10 +187,8 @@ object CardanoService {
   @deprecated("use ScalusService object instead")
   def addressesTotalAda(address: String): ZIO[BlockfrostConfig, Throwable, BigDecimal] =
     for {
-      _ <- ZIO.log(s"addressesTotal for $address")
-      backendService: BackendService <- ZIO.service[BlockfrostConfig].map(makeBFBackendService(_))
-      result <- ZIO.attempt(backendService.getAddressService().getAddressDetails(address))
-      _ <- ZIO.log(s"addressesTotal result = ${result.toString}")
+      bfConfig <- ZIO.service[BlockfrostConfig]
+      result <- ZIO.attempt(makeBFBackendService(bfConfig).getAddressService().getAddressDetails(address))
       receivedSum = result.getValue
         .getReceivedSum()
         .asScala
@@ -201,7 +199,8 @@ object CardanoService {
         .asScala
         .map(e => BigInt(e.getQuantity))
         .fold(BigInt(0))((a, b) => a + b)
-      total = BigDecimal(receivedSum - sentSum) / BigDecimal(1000000)
-      _ <- ZIO.log("total ADA found in address")
+      lovelaces = receivedSum - sentSum
+      total = BigDecimal(lovelaces) / BigDecimal(1000000)
+      _ <- ZIO.debug(s"Found $lovelaces Lovelaces ($total Ada) in ${bfConfig.network} for '$address'")
     } yield total
 }

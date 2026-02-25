@@ -19,6 +19,23 @@ extension (wallet: CardanoWalletConfig) {
     Secp256k1PrivateKey(HDKey(wallet.seed, depth, childIndex).getKMMSecp256k1PrivateKey().getEncoded())
 
   def account(index: Int = 0): HdAccount = HdAccount.fromMnemonic(wallet.mnemonicPhrase, wallet.passphrase, index)
+  def address(account: HdAccount, network: CardanoNetwork): ShelleyAddress =
+    network match
+      case PublicCardanoNetwork.Mainnet                        => account.baseAddress(Network.Mainnet)
+      case PublicCardanoNetwork.Testnet                        => account.baseAddress(Network.Testnet)
+      case PublicCardanoNetwork.Preprod                        => account.baseAddress(Network.Testnet)
+      case PublicCardanoNetwork.Preview                        => account.baseAddress(Network.Testnet)
+      case PrivateCardanoNetwork(blockfrostURL, protocolMagic) =>
+        throw RuntimeException("CardanoWalletConfig address (with HdAccount)")
+  def address(index: Int, network: CardanoNetwork): ShelleyAddress =
+    network match
+      case PublicCardanoNetwork.Mainnet                        => account(index).baseAddress(Network.Mainnet)
+      case PublicCardanoNetwork.Testnet                        => account(index).baseAddress(Network.Testnet)
+      case PublicCardanoNetwork.Preprod                        => account(index).baseAddress(Network.Testnet)
+      case PublicCardanoNetwork.Preview                        => account(index).baseAddress(Network.Testnet)
+      case PrivateCardanoNetwork(blockfrostURL, protocolMagic) =>
+        throw RuntimeException("CardanoWalletConfig address (with didIndex)")
+
   def addressMainnet(account: HdAccount): ShelleyAddress = account.baseAddress(Network.Mainnet)
   def addressTestnet(account: HdAccount): ShelleyAddress = account.baseAddress(Network.Testnet)
   def addressMainnet(index: Int = 0): ShelleyAddress = account(index).baseAddress(Network.Mainnet)

@@ -29,7 +29,12 @@ import scalus.cardano.node.UtxoQuery
 import scalus.cardano.node.UtxoSource
 
 object ScalusService {
-  val env: CardanoInfo = CardanoInfo.mainnet
+  def envProtocolParams(cardanoNetwork: CardanoNetwork): CardanoInfo = cardanoNetwork match
+    case PublicCardanoNetwork.Mainnet                        => CardanoInfo.mainnet
+    case PublicCardanoNetwork.Testnet                        => ???
+    case PublicCardanoNetwork.Preprod                        => CardanoInfo.preprod
+    case PublicCardanoNetwork.Preview                        => CardanoInfo.preview
+    case PrivateCardanoNetwork(blockfrostURL, protocolMagic) => ???
 
   object internal {
     import fmgp.did.method.prism.cardano.PRISM_LABEL_CIP_10
@@ -71,15 +76,12 @@ object ScalusService {
     //     .andThen(balanceTx(senderAccount.baseAddress, 1))
   }
 
-  def makeMetadataPrism(prismObject: PrismObject) =
-    AuxiliaryData.Metadata(
-      Map(Word64.fromUnsignedInt(PRISM_LABEL_CIP_10) -> internal.prismObject2metadata(prismObject))
-    )
+  /** To build the metadata warp woth AuxiliaryData.Metadata(Map(...)) */
+  def makeMetadataPrism(prismObject: PrismObject): (Word64, scalus.cardano.ledger.Metadatum) =
+    Word64.fromUnsignedInt(PRISM_LABEL_CIP_10) -> internal.prismObject2metadata(prismObject)
 
-  // def makeMetadataCIP20(msgCIP20: String) =
-  //   MetadataBuilder
-  //     .createMetadata()
-  //     .put(MSG_LABEL_CIP_20, msgCIP20)
+  def makeMetadataCIP20(msgCIP20: String): (Word64, scalus.cardano.ledger.Metadatum) =
+    Word64.fromUnsignedInt(MSG_LABEL_CIP_20) -> Metadatum.Text(msgCIP20)
 
   // def makeMetadataPrismWithCIP20(prismObject: PrismObject, msgCIP20: String = "PRISM VDR (by fmgp)") =
   //   MetadataBuilder
@@ -119,33 +121,35 @@ object ScalusService {
   def makeTrasation(
       prismEvents: Seq[SignedPrismEvent],
       maybeMsgCIP20: Option[String],
+  ): ZIO[BlockfrostConfig & CardanoWalletConfig, Throwable, Transaction] =
+    makeTrasation(
+      prismObject = PrismObject(blockContent = Some(PrismBlock(events = prismEvents))),
+      maybeMsgCIP20 = maybeMsgCIP20
+    )
+
+  def makeTrasation(
+      prismObject: PrismObject,
+      maybeMsgCIP20: Option[String],
   ): ZIO[BlockfrostConfig & CardanoWalletConfig, Throwable, Transaction] = {
 
-    // val senderAccount: Account = makeAccount(bfConfig, wallet)
-    // val backendService: BackendService = makeBFBackendService(bfConfig)
-    // val utxoSupplier: UtxoSupplier = new DefaultUtxoSupplier(backendService.getUtxoService())
-    // val protocolParamsSupplier: ProtocolParamsSupplier =
-    //   new DefaultProtocolParamsSupplier(backendService.getEpochService())
-    // val txBuilder = makeTxBuilder(bfConfig, wallet, prismEvents, maybeMsgCIP20)
+    val meta = AuxiliaryData.Metadata(
+      maybeMsgCIP20.map(makeMetadataCIP20(_)).toMap ++
+        Seq(makeMetadataPrism(prismObject))
+    )
 
-    // // Build and sign the transaction
-    // val signedTransaction: Transaction = TxBuilderContext
-    //   .init(utxoSupplier, protocolParamsSupplier)
-    //   .buildAndSign(txBuilder, signerFrom(senderAccount))
-    // signedTransaction
-
-    val meta = AuxiliaryData.Metadata(Map(Word64.fromUnsignedInt(999) -> Metadatum.Int(123)))
+    AuxiliaryData.Metadata(Map(Word64.fromUnsignedInt(999) -> Metadatum.Int(123)))
 
     for {
       bfConfig <- ZIO.service[BlockfrostConfig]
       wallet <- ZIO.service[CardanoWalletConfig]
+      cardanoNetwork = bfConfig.network
       nodeProvider: BlockfrostProvider <- bfConfig.nodeProvider
       tx <- ZIO.fromFuture(implicit ec =>
-        TxBuilder(env)
-          .payTo(wallet.addressMainnet(0), Value.lovelace(1))
+        TxBuilder(envProtocolParams(cardanoNetwork))
+          .payTo(wallet.address(0, cardanoNetwork), Value.lovelace(1))
           .metadata(meta)
           // Magic: sets inputs, collateral input/output, execution budgets, fee, handle change, etc.
-          .complete(reader = nodeProvider, sponsor = wallet.addressMainnet(0))
+          .complete(reader = nodeProvider, sponsor = wallet.address(0, cardanoNetwork))
       )
       ret = tx.sign(wallet.signer(0)).transaction
     } yield ret
@@ -189,7 +193,7 @@ object ScalusService {
 
   def addressesTotalAda(address: Address): ZIO[BlockfrostConfig, Throwable, BigDecimal] =
     for {
-      _ <- ZIO.log(s"addressesTotal for $address")
+      addressStr <- ZIO.fromTry(address.encode)
       bfConfig <- ZIO.service[BlockfrostConfig]
       nodeProvider: BlockfrostProvider <- bfConfig.nodeProvider
       // query = UtxoQuery(UtxoSource.FromAddress(Address.fromString(address)))
@@ -197,15 +201,16 @@ object ScalusService {
       utxos <- ZIO
         .fromFuture(implicit ec => nodeProvider.findUtxos(query))
         .flatMap {
-          case Left(value)  => ZIO.fail(new RuntimeException(value.toString)) // TODO new Exception type
-          case Right(value) => ZIO.succeed(value)
+          case Left(utxoQueryError)  => ZIO.fail(new RuntimeException(utxoQueryError.toString)) // TODO Exception type
+          case Right(inputOutputMap) => ZIO.succeed(inputOutputMap)
         }
-      coin = utxos.values
+      mCoin = utxos.values
         .map { case v: TransactionOutput => v.value.coin }
-        .reduce((l, r) => l + r)
-
-      _ <- ZIO.log(s"addressesTotal result = ${coin.value.toString} ADA")
-      total = BigDecimal(coin.value) / BigDecimal(1000000)
-      _ <- ZIO.log("total ADA found in address")
+        .reduceOption((l, r) => l + r)
+      total = mCoin.map(coin => BigDecimal(coin.value) / BigDecimal(1000000)).getOrElse(BigDecimal(0))
+      _ <- mCoin match
+        case Some(coin) =>
+          ZIO.debug(s"Found ${coin.value.toString} Lovelaces ($total Ada) in ${bfConfig.network} for '$addressStr'")
+        case None => ZIO.debug(s"Wallet '$addressStr' was no UTXOs in '$addressStr")
     } yield total
 }
