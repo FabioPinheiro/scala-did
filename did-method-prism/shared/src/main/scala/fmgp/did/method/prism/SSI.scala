@@ -58,13 +58,13 @@ final case class SSI(
         spo match
           case MySignedPrismEvent(tx, prismBlockIndex, prismEventIndex, signedWith, signature, pb) =>
             spo.event match
-              case CreateDidOP(publicKeys, services, context) =>
+              case CreateDidOP(publicKeys, _services, _context) =>
                 latestHash match
                   case Some(value) => self // The Identity already exists
                   case None        =>
                     publicKeys
                       .foldLeft(this) { (tmpSSI, key) => tmpSSI.addKey(key) }
-                      .copy(latestHash = Some(spo.opHash), services = services, context = context)
+                      .copy(latestHash = Some(spo.opHash), services = _services, context = _context)
                       .pipe(newSSI =>
                         newSSI.checkMasterSignature(spo) match // the signature is checked by itself
                           case false => self
@@ -83,10 +83,11 @@ final case class SSI(
                             case k @ PrismPublicKey.UncompressedECKey(id, usage, curve, x, y) => tmpSSI.addKey(k)
                             case k @ PrismPublicKey.CompressedECKey(id, usage, curve, data)   => tmpSSI.addKey(k)
                         case UpdateDidOP.RemoveKey(keyId)    => tmpSSI.copy(keys = tmpSSI.keys.filter(_.id != keyId))
-                        case UpdateDidOP.AddService(service) => tmpSSI.copy(services = services :+ service)
-                        case UpdateDidOP.RemoveService(sId)  => tmpSSI.copy(services = services.filter(_.id != sId))
+                        case UpdateDidOP.AddService(service) => tmpSSI.copy(services = tmpSSI.services :+ service)
+                        case UpdateDidOP.RemoveService(sId)  =>
+                          tmpSSI.copy(services = tmpSSI.services.filter(_.id != sId))
                         case UpdateDidOP.UpdateService(sId, newType, newServiceEndpoints) =>
-                          copy(services = services.map {
+                          copy(services = tmpSSI.services.map {
                             case s @ MyService(id, type_, serviceEndpoint) if id != sId => s
                             case MyService(id, type_, serviceEndpoint)                  =>
                               if (newType.isEmpty) MyService(id = id, `type` = type_, newServiceEndpoints)
