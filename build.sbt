@@ -151,7 +151,8 @@ lazy val V = new {
 
   // https://mvnrepository.com/artifact/dev.zio/zio
   val zio = "2.1.24"
-  val zioJson = "0.7.45"
+  val zioJson = "0.9.0"
+  val zioSchema = "1.8.1" // FIXME REMOVE dependencyOverrides. This is becuase of zioHttp to use "zio-json" % "0.9.0",
   val zioMunitTest = "0.4.0"
   val zioHttp = "3.8.1" // With fix CORS https://github.com/zio/zio-http/pull/2490
   val zioPrelude = "1.0.0-RC21"
@@ -211,7 +212,8 @@ lazy val D = new {
   val zio = Def.setting("dev.zio" %%% "zio" % V.zio)
   val zioStreams = Def.setting("dev.zio" %%% "zio-streams" % V.zio)
   val zioJson = Def.setting("dev.zio" %%% "zio-json" % V.zioJson)
-  val ziohttp = Def.setting("dev.zio" %% "zio-http" % V.zioHttp)
+  val zioSchema = Def.setting("dev.zio" %% "zio-schema-json" % V.zioSchema)
+  val zioHttp = sbt.Def.setting("dev.zio" %% "zio-http" % V.zioHttp)
   val zioPrelude = Def.setting("dev.zio" %%% "zio-prelude" % V.zioPrelude)
   val zioCLI = Def.setting("dev.zio" %% "zio-cli" % V.zioCLI)
   // val zioTest = Def.setting("dev.zio" %%% "zio-test" % V.zio % Test)
@@ -483,7 +485,10 @@ lazy val didFramework = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.zioMunitTest.value,
   )
   .dependsOn(did, didCommProtocols)
-  .jvmSettings(libraryDependencies += D.ziohttp.value)
+  .jvmSettings(
+    libraryDependencies += D.zioHttp.value,
+    dependencyOverrides += D.zioSchema.value,
+  )
   .jsSettings(libraryDependencies += D.scalajsDom.value)
   .jsConfigure(scalaJSLibConfigure) // Because of didJS now uses NPM libs
   .configure(docConfigure)
@@ -598,7 +603,10 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += compilerPlugin(D.scalusPlugin.value),
     libraryDependencies += D.scalusBloxbean.value,
   )
-  .jvmSettings(libraryDependencies += D.ziohttp.value)
+  .jvmSettings(
+    libraryDependencies += D.zioHttp.value,
+    dependencyOverrides += D.zioSchema.value,
+  )
   .jvmSettings( // Add JVM-specific settings here
     libraryDependencies += D.bouncycastle_bcprov.value,
     libraryDependencies += D.bouncycastle_bcpkix.value,
@@ -657,6 +665,7 @@ lazy val cardanoPrismCli = project
   )
   .settings( // PoC for a prism-cli tooling // TODO Move to a new repo
     libraryDependencies += D.zioCLI.value,
+    dependencyOverrides += D.zioSchema.value,
     libraryDependencies += D.reactivemongo.value,
     assembly / mainClass := Some("fmgp.did.method.prism.cli.PrismCli"),
     assembly / assemblyJarName := "cardano-prism.jar",
@@ -669,7 +678,8 @@ lazy val didPrismNode = project
   .settings((setupTestConfig): _*)
   .settings(
     name := "prism-node",
-    libraryDependencies += "dev.zio" %% "zio-logging-slf4j2-bridge" % "2.5.3"
+    libraryDependencies += "dev.zio" %% "zio-logging-slf4j2-bridge" % "2.5.3",
+    dependencyOverrides += D.zioSchema.value,
   )
   .settings(
     Compile / PB.targets := Seq(
@@ -702,7 +712,10 @@ lazy val didResolverWeb = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.munit.value,
     libraryDependencies += D.zioMunitTest.value,
   )
-  .jvmSettings(libraryDependencies += D.ziohttp.value)
+  .jvmSettings(
+    libraryDependencies += D.zioHttp.value,
+    dependencyOverrides += D.zioSchema.value,
+  )
   .jvmSettings( // FIXME https://github.com/zio/zio-http/issues/2280#issuecomment-2166894061
     Test / fork := true,
     Test / javaOptions := Seq("-Djava.net.preferIPv4Stack=true"),
@@ -720,7 +733,10 @@ lazy val didUniresolver = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.munit.value,
     libraryDependencies += D.zioMunitTest.value,
   )
-  .jvmSettings(libraryDependencies += D.ziohttp.value)
+  .jvmSettings(
+    libraryDependencies += D.zioHttp.value,
+    dependencyOverrides += D.zioSchema.value,
+  )
   // .enablePlugins(ScalaJSBundlerPlugin).jsSettings(Test / npmDependencies += "node-fetch" -> "3.3.0")
   .jsSettings( // TODO https://scalacenter.github.io/scalajs-bundler/reference.html#jsdom
     libraryDependencies += D.scalajsDom.value,
@@ -797,7 +813,8 @@ lazy val demo = crossProject(JSPlatform, JVMPlatform)
     reStart / mainClass := Some("fmgp.did.demo.AppServer"),
     assembly / mainClass := Some("fmgp.did.demo.AppServer"),
     assembly / assemblyJarName := "scala-did-demo-server.jar",
-    libraryDependencies += D.ziohttp.value,
+    libraryDependencies += D.zioHttp.value,
+    dependencyOverrides += D.zioSchema.value,
     Compile / unmanagedResourceDirectories += baseDirectory.value / "src" / "main" / "extra-resources",
     Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "scaladoc",
     // Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "mdoc"
