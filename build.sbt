@@ -155,6 +155,7 @@ lazy val V = new {
   val zioMunitTest = "0.4.0"
   val zioHttp = "3.8.1" // With fix CORS https://github.com/zio/zio-http/pull/2490
   val zioPrelude = "1.0.0-RC21"
+  val zioCLI = "0.8.0"
 
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time
   val scalaJavaTime = "2.5.0"
@@ -212,6 +213,7 @@ lazy val D = new {
   val zioJson = Def.setting("dev.zio" %%% "zio-json" % V.zioJson)
   val ziohttp = Def.setting("dev.zio" %% "zio-http" % V.zioHttp)
   val zioPrelude = Def.setting("dev.zio" %%% "zio-prelude" % V.zioPrelude)
+  val zioCLI = Def.setting("dev.zio" %% "zio-cli" % V.zioCLI)
   // val zioTest = Def.setting("dev.zio" %%% "zio-test" % V.zio % Test)
   // val zioTestSBT = Def.setting("dev.zio" %%% "zio-test-sbt" % V.zio % Test)
   // val zioTestMagnolia = Def.setting("dev.zio" %%% "zio-test-magnolia" % V.zio % Test)
@@ -654,7 +656,7 @@ lazy val cardanoPrismCli = project
     libraryDependencies += D.zioMunitTest.value,
   )
   .settings( // PoC for a prism-cli tooling // TODO Move to a new repo
-    libraryDependencies += "dev.zio" %% "zio-cli" % "0.7.5",
+    libraryDependencies += D.zioCLI.value,
     libraryDependencies += D.reactivemongo.value,
     assembly / mainClass := Some("fmgp.did.method.prism.cli.PrismCli"),
     assembly / assemblyJarName := "cardano-prism.jar",
