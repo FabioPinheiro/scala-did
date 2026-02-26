@@ -19,7 +19,7 @@ import fmgp.did.method.prism.proto.MyService
 object DIDCommand {
 
   val createCommand = Command(
-    "create",
+    "create-for-vdr",
     ConfigCommand.optionsDefualt
       ++ (Options.text("master").withDefault("master").??("this is the label/name of the master key to be used")
         ++ Options.text("master-raw").optional)
@@ -27,18 +27,18 @@ object DIDCommand {
         ++ Options.text("vdr-raw").optional)
   ).map { case (setup, (master, masterRaw), (vdr, vdrRaw)) =>
     CMD.DIDCreate(
-      /* setup =       */ setup,
-      /* masterLabel = */ master,
-      /* masterRaw =   */ masterRaw,
-      /* vdrLabel =    */ vdr,
-      /* vdrRaw =.     */ vdrRaw
+      setup = setup,
+      masterKeyLabel = master,
+      masterKeyRaw = masterRaw,
+      vdrKeyLabel = vdr,
+      vdrKeyRaw = vdrRaw,
     )
   }
   val createDeterministicCommand = Command(
     "create-deterministic",
-    ConfigCommand.optionsDefualt,
-    keysLabels ++ didCommServiceEndpoints
-  ).map { case (setup, (keysLabels, didCommServiceEndpoints)) =>
+    ConfigCommand.optionsDefualt ++ didCommServiceEndpoints,
+    keysLabels
+  ).map { case ((setup, didCommServiceEndpoints), (keysLabels)) =>
     CMD.DIDCreateDeterministic(
       setup = setup,
       keysLabels = keysLabels,
@@ -133,16 +133,17 @@ object DIDCommand {
         _ <- ZIO.log(s"PrismState: ${ssi.toJsonPretty}")
         _ <- Console.printLine(bytes2Hex(signedPrismEvent.toByteArray))
       } yield ()).provideLayer(setup.layer)
-    case CMD.DIDCreateDeterministic(setup, keysLabels, didCommServiceEndpoints) =>
+    case CMD.DIDCreateDeterministic(setup, keysLabels, didCommServiceEndpoints) => {
       for {
         _ <- ZIO.unit
+        _ <- ZIO.log(cmd.toString())
         allSelectedKeys = setup.mState.get.ssiPrivateKeys.view.filterKeys(label => keysLabels.contains(label)).toMap
-        (masterKeyLabel, masterKey) = allSelectedKeys.find { case (label, key) =>
+        (masterKeyLabel, masterKey) <- allSelectedKeys.find { case (label, key) =>
           key.path.keyUsage == PrismKeyUsage.MasterKeyUsage
         } match
-          case None                                            => ??? // Master key is missing
-          case Some((masterKeyLabel, masterKey: KeySecp256k1)) => (masterKeyLabel, masterKey.secp256k1PrivateKey)
-          case Some((masterKeyLabel, masterKey))               => ??? // wrong type
+          case None                                   => ZIO.fail("Master key is missing") // Master key is missing
+          case Some((label, masterKey: KeySecp256k1)) => ZIO.succeed(label, masterKey.secp256k1PrivateKey)
+          case Some((label, masterKey))               => ZIO.fail("Master key need to be of the type secp256k1")
         allOtherKeys = allSelectedKeys.view.filterKeys(_ != masterKeyLabel).toMap
         addKey = allOtherKeys.toSeq
           .map { case (id, key) =>
@@ -155,14 +156,11 @@ object DIDCommand {
           .map { compressedKey => UpdateDidOP.AddKey(compressedKey) }
         addDIDCommEndpoints = didCommServiceEndpoints.map { case (id, endpoint) =>
           UpdateDidOP.AddService(MyService.didCommSimpleEndpoint(id, endpoint))
-        }
+        }.toSeq
         (didPrism, createSignedPrismEvent, updateSignedPrismEvent) = DIDExtra.createDeterministicDID(
           masterKey = (masterKeyLabel, masterKey),
           actions = addDIDCommEndpoints ++ addKey
         )
-        _ <- ZIO.log(s"SSI: ${didPrism.string}")
-        _ <- ZIO.log(s"createSignedPrismEvent: ${createSignedPrismEvent.toByteArray}")
-        _ <- ZIO.log(s"updateSignedPrismEvent: ${updateSignedPrismEvent.toByteArray}")
         prismObject = _root_.proto.prism.PrismObject(blockContent =
           Some(
             _root_.proto.prism.PrismBlock(
@@ -170,16 +168,19 @@ object DIDCommand {
             )
           )
         )
-        _ <- ZIO.log(s"prismObject: ${prismObject.toByteArray}")
+        _ <- ZIO.log(s"prismObject: ${bytes2Hex(prismObject.toByteArray)}")
         maybeEvents = MaybeEvent.fromProto(prismObject, "tx-create", 0)
-        // _ <- ZIO.log(s"MaybeEvent: ${maybeEvent.toJsonPretty}")
-        _ <- ZIO.log(s"Simulate the PrismState")
         prismState <- PrismStateInMemory.empty
         _ <- ZIO.foreach(maybeEvents)(prismState.addMaybeEvent(_))
         ssi <- prismState.getSSI(didPrism)
-        _ <- ZIO.log(s"PrismState: ${ssi.toJsonPretty}")
-        _ <- Console.printLine(bytes2Hex(prismObject.toByteArray))
+        _ <- ZIO.log(s"Simulated the PrismState: ${ssi.toJsonPretty}")
+
+        _ <- Console.printLine(s"SSI: ${didPrism.string}")
+        _ <- Console.printLine(
+          s"create+update SignedPrismEvent:\n${bytes2Hex(createSignedPrismEvent.toByteArray)} ${bytes2Hex(updateSignedPrismEvent.toByteArray)}"
+        )
       } yield ()
+    }
     case CMD.DIDUpdate(did)           => PrismCli.notCurrentlyImplemented(cmd)
     case CMD.DIDDeactivate(did)       => PrismCli.notCurrentlyImplemented(cmd)
     case CMD.DIDResolve(did, network) =>

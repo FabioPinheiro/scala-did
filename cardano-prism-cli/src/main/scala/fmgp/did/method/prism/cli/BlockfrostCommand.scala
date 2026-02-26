@@ -9,7 +9,6 @@ import org.hyperledger.identus.apollo.derivation.MnemonicHelper
 import fmgp.did.method.prism.BlockfrostConfig
 import fmgp.did.method.prism.CardanoService
 import fmgp.did.method.prism.cardano.*
-import fmgp.did.method.prism.cli.CMD.BlockfrostSubmitEvents
 import fmgp.did.method.prism.proto.tryParseFrom
 import proto.prism.PrismEvent
 import proto.prism.SignedPrismEvent
@@ -19,8 +18,8 @@ import fmgp.did.method.prism.ScalusService
 
 object BlockfrostCommand {
 
-  val command: Command[CMD.BlockfrostCMD] = Command("bf")
-    .withHelp("Blockfrost API")
+  val command: Command[CMD.BlockfrostCMD] = Command("cardano")
+    .withHelp("Cardano (Blockfrost API)")
     .subcommands(
       saveTokenCommand,
       addressCommand,
@@ -28,7 +27,7 @@ object BlockfrostCommand {
     )
 
   def saveTokenCommand = Command(
-    "token",
+    "blockfrost-token",
     ConfigCommand.options,
     networkArgs ++ Args.text("token").map(token => BlockfrostConfig(token = token))
   ).map { case (setup, (network, mBlockfrostConfig)) =>
@@ -38,16 +37,16 @@ object BlockfrostCommand {
   def addressCommand = Command(
     "address",
     ConfigCommand.options ++
-      walletOpt.optional.orElse(walletTypeOpt).withDefault(WalletType.Cardano) ++
+      walletOpt.optional.orElse(walletTypeOpt).withDefault(WalletType.AdaWallet) ++
       networkFlag ++
       blockfrostConfig.optional
   )
     .map { case (setup, walletOrType, network, mBlockfrostConfig) =>
       walletOrType match
-        case Some(wallet)       => CMD.BlockfrostAddress(setup, network, mBlockfrostConfig, wallet)
-        case WalletType.SSI     => CMD.BlockfrostAddress(setup, network, mBlockfrostConfig, WalletType.SSI)
-        case WalletType.Cardano => CMD.BlockfrostAddress(setup, network, mBlockfrostConfig, WalletType.Cardano)
-        case None               => CMD.BlockfrostAddress(setup, network, mBlockfrostConfig, WalletType.Cardano)
+        case Some(wallet)         => CMD.BlockfrostAddress(setup, network, mBlockfrostConfig, wallet)
+        case WalletType.SSIWallet => CMD.BlockfrostAddress(setup, network, mBlockfrostConfig, WalletType.SSIWallet)
+        case WalletType.AdaWallet => CMD.BlockfrostAddress(setup, network, mBlockfrostConfig, WalletType.AdaWallet)
+        case None                 => CMD.BlockfrostAddress(setup, network, mBlockfrostConfig, WalletType.AdaWallet)
     }
 
   def eventArg = Args
@@ -99,54 +98,50 @@ object BlockfrostCommand {
       } yield ()).provideLayer(setup.layer)
     case CMD.BlockfrostAddress(setup, network, mBlockfrostConfig, walletOrType) =>
       (for {
-        _ <- ZIO.log(cmd.toString)
         wallet <- walletOrType match {
           case w: CardanoWalletConfig => ZIO.succeed(w)
-          case WalletType.SSI         =>
+          case WalletType.SSIWallet   =>
             setup.mState.flatMap(_.ssiWallet) match
               case None => ZIO.logError("SSI Wallet not found.") *> ZIO.fail(PrismCliError("SSI Wallet not found"))
-              case Some(ssiWallet) => ZIO.log(s"Lodding ssi wallet") *> ZIO.succeed(ssiWallet)
-          case WalletType.Cardano =>
+              case Some(ssiWallet) => ZIO.debug(s"Lodding ssi wallet") *> ZIO.succeed(ssiWallet)
+          case WalletType.AdaWallet =>
             setup.mState.flatMap(_.cardanoWallet) match
               case None =>
                 ZIO.logError("Cardano Wallet not found") *> ZIO.fail(PrismCliError("SSI Wallet not found"))
-              case Some(cardanoWallet) => ZIO.log(s"Lodding cardano wallet") *> ZIO.succeed(cardanoWallet)
+              case Some(cardanoWallet) => ZIO.debug(s"Lodding cardano wallet") *> ZIO.succeed(cardanoWallet)
         }
         account = wallet.account(0)
-        addresses = network match
+        address0 = network match
           case PublicCardanoNetwork.Mainnet => wallet.addressMainnet(0)
           case PublicCardanoNetwork.Testnet => wallet.addressTestnet(0)
           case PublicCardanoNetwork.Preprod => wallet.addressTestnet(0)
           case PublicCardanoNetwork.Preview => wallet.addressTestnet(0)
-        _ <- ZIO.log(s"Get addresses totals for $addresses")
+        addressStr <- ZIO.fromTry(address0.encode)
         mBFConfig <- mBlockfrostConfig match
           case None         => stateLen[BlockfrostConfig](_.blockfrost(network))
           case Some(config) => ZIO.succeed(Some(config))
-        _ <- ZIO.log(s"Get addresses totals for $addresses")
         totalAda <- mBFConfig match
           case None           => ZIO.fail(PrismCliError(s"Token not found ($network)"))
-          case Some(bfConfig) => ScalusService.addressesTotalAda(addresses).provideEnvironment(ZEnvironment(bfConfig))
-        _ <- Console.printLine(totalAda).orDie
+          case Some(bfConfig) => ScalusService.addressesTotalAda(address0).provideEnvironment(ZEnvironment(bfConfig))
+        _ <- Console.printLine(s"$totalAda ADA in $network for '$addressStr'").orDie
       } yield ()).provideLayer(setup.layer)
-    case cmd: BlockfrostSubmitEvents =>
+    case cmd: CMD.BlockfrostSubmitEvents =>
       for {
-        txId <- submitProgram(cmd)
-          .provideLayer(cmd.setup.layer)
-        _ <- Console.printLine(txId)
+        txHash <- submitProgram(cmd).provideLayer(cmd.setup.layer)
+        _ <- Console.printLine("Trasation Hash: " + txHash.hex)
       } yield ()
   }
 
   def submitProgram(
-      cmd: BlockfrostSubmitEvents
+      cmd: CMD.BlockfrostSubmitEvents
   ): ZIO[Ref[Setup], Throwable, TxHash] = {
     cmd match
-      case BlockfrostSubmitEvents(setup, network, events) => {
+      case CMD.BlockfrostSubmitEvents(setup, network, events) => {
         for {
-          _ <- ZIO.logError(s"CMD: $cmd") // TODO
           bfConfig <- {
             network match
               case PublicCardanoNetwork.Mainnet => stateLen(_.blockfrostMainnet)
-              case PublicCardanoNetwork.Testnet => ZIO.fail(PrismCliError("Testnet is no longer available"))
+              case PublicCardanoNetwork.Testnet => ZIO.fail(PrismCliError(PublicCardanoNetwork.TESTNET_NOT_AVAILABLE))
               case PublicCardanoNetwork.Preprod => stateLen(_.blockfrostPreprod)
               case PublicCardanoNetwork.Preview => stateLen(_.blockfrostPreview)
           }.flatMap {
@@ -164,6 +159,8 @@ object BlockfrostCommand {
           txHash <- ScalusService
             .submitTransaction(tx)
             .provideEnvironment(ZEnvironment(bfConfig))
+          _ <- Console
+            .printLine(s"See https://${bfConfig.network.name}.cardanoscan.io/transaction/${txHash.hex}?tab=metadata")
         } yield (txHash)
       }
   }

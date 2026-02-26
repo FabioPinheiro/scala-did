@@ -26,7 +26,7 @@ object CMD {
   final case class MnemonicSeed(setup: Setup, mWallet: Option[CardanoWalletConfig]) extends MnemonicCMD
   final case class MnemonicAddress(
       setup: Setup,
-      walletOrType: CardanoWalletConfig | WalletType.SSI.type | WalletType.Cardano.type,
+      walletOrType: CardanoWalletConfig | WalletType.SSIWallet.type | WalletType.AdaWallet.type,
       network: PublicCardanoNetwork,
   ) extends MnemonicCMD
 
@@ -40,7 +40,7 @@ object CMD {
       setup: Setup,
       network: PublicCardanoNetwork,
       mBlockfrostConfig: Option[BlockfrostConfig],
-      walletOrType: CardanoWalletConfig | WalletType.SSI.type | WalletType.Cardano.type,
+      walletOrType: CardanoWalletConfig | WalletType.SSIWallet.type | WalletType.AdaWallet.type,
   ) extends BlockfrostCMD
 
   final case class BlockfrostSubmitEvents(
@@ -95,7 +95,7 @@ object CMD {
   final case class DIDCreateDeterministic(
       setup: Setup,
       keysLabels: Seq[String],
-      didCommServiceEndpoints: Seq[(String, String)],
+      didCommServiceEndpoints: Map[String, String],
   ) extends DIDCMD
   final case class DIDUpdate(did: DIDPrism) extends DIDCMD
   final case class DIDDeactivate(did: DIDPrism) extends DIDCMD

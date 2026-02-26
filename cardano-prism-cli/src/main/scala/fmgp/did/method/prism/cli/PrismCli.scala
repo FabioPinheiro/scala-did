@@ -36,10 +36,10 @@ object PrismCli extends ZIOCliDefault {
     // command = finalCommand,
     command = Command("cardano-prism", Options.none, Args.none)
       .subcommands(
-        IndexerCommand.command,
         Command("version").map(_ => CMD.Version()),
         Command("pwd").map(_ => CMD.PWD()),
         ConfigCommand.command,
+        IndexerCommand.command,
         MnemonicCommand.command,
         KeyCommand.command,
         DIDCommand.command,
@@ -71,10 +71,12 @@ object PrismCli extends ZIOCliDefault {
       case cmd: CMD.Indexer       => IndexerCommand.program(cmd)
       case cmd: CMD.ServicesCMD   => ServicesCommand.program(cmd)
     }
-  }.catchAll { case error: java.io.IOException =>
-    ZIO.succeed(error.printStackTrace()) *>
-      ZIO.logError(error.getMessage()) *>
-      exit(ExitCode.failure)
+  }.catchAll {
+    case errorStr: String           => ZIO.logError(errorStr) *> Console.printError(errorStr).orDie
+    case error: java.io.IOException =>
+      ZIO.logError(error.getMessage()) *> ZIO.succeed(error.printStackTrace()) *> exit(ExitCode.failure)
+    case error: Throwable =>
+      ZIO.logError(error.getMessage()) *> ZIO.succeed(error.printStackTrace()) *> exit(ExitCode.failure)
   }
 }
 

@@ -19,7 +19,7 @@ object MnemonicCommand {
   val command: Command[CMD.MnemonicCMD] =
     Command("mnemonic")
       .subcommands(
-        Command("new", ConfigCommand.options ++ walletTypeOpt.withDefault(WalletType.SSI))
+        Command("new", ConfigCommand.options ++ walletTypeOpt.withDefault(WalletType.SSIWallet))
           .map { (setup, walletType) =>
             CMD.MnemonicCreate(setup, walletType)
           },
@@ -30,15 +30,15 @@ object MnemonicCommand {
         Command(
           "address",
           ConfigCommand.options ++
-            walletOpt.optional.orElse(walletTypeOpt).withDefault(WalletType.Cardano) ++
+            walletOpt.optional.orElse(walletTypeOpt).withDefault(WalletType.AdaWallet) ++
             networkFlag
         )
           .map { case (setup, walletOrType, network) =>
             walletOrType match
-              case Some(wallet)       => CMD.MnemonicAddress(setup, wallet, network)
-              case WalletType.SSI     => CMD.MnemonicAddress(setup, WalletType.SSI, network)
-              case WalletType.Cardano => CMD.MnemonicAddress(setup, WalletType.Cardano, network)
-              case None               => CMD.MnemonicAddress(setup, WalletType.Cardano, network) // D
+              case Some(wallet)         => CMD.MnemonicAddress(setup, wallet, network)
+              case WalletType.SSIWallet => CMD.MnemonicAddress(setup, WalletType.SSIWallet, network)
+              case WalletType.AdaWallet => CMD.MnemonicAddress(setup, WalletType.AdaWallet, network)
+              case None                 => CMD.MnemonicAddress(setup, WalletType.AdaWallet, network)
           },
       )
 
@@ -48,8 +48,8 @@ object MnemonicCommand {
         words <- ZIO.succeed(MnemonicHelper.Companion.createRandomMnemonics().asScala.toSeq)
         newWallet = CardanoWalletConfig(mnemonic = words, passphrase = "")
         _ <- walletType match {
-          case WalletType.SSI     => updateState(s => s.copy(ssiWallet = Some(newWallet)))
-          case WalletType.Cardano => updateState(s => s.copy(cardanoWallet = Some(newWallet)))
+          case WalletType.SSIWallet => updateState(s => s.copy(ssiWallet = Some(newWallet)))
+          case WalletType.AdaWallet => updateState(s => s.copy(cardanoWallet = Some(newWallet)))
         }
         _ <- Console.printLine(words.mkString(" ")).orDie
       } yield ()).provideLayer(setup.layer)
@@ -73,11 +73,11 @@ object MnemonicCommand {
         _ <- ZIO.log(cmd.toString)
         wallet <- walletOrType match {
           case w: CardanoWalletConfig => ZIO.succeed(w)
-          case WalletType.SSI         =>
+          case WalletType.SSIWallet   =>
             setup.mState.flatMap(_.ssiWallet) match
               case None => ZIO.logError("SSI Wallet not found.") *> ZIO.fail(PrismCliError("SSI Wallet not found"))
               case Some(ssiWallet) => ZIO.log(s"Lodding ssi wallet") *> ZIO.succeed(ssiWallet)
-          case WalletType.Cardano =>
+          case WalletType.AdaWallet =>
             setup.mState.flatMap(_.cardanoWallet) match
               case None =>
                 ZIO.logError("Cardano Wallet not found") *> ZIO.fail(PrismCliError("SSI Wallet not found"))

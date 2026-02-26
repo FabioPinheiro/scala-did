@@ -49,10 +49,10 @@ val walletOpt = (mnemonicWords ++ mnemonicPass).map { (walletWithNoPass, passphr
   walletWithNoPass.copy(passphrase = passphrase)
 }
 
-enum WalletType { case SSI extends WalletType; case Cardano extends WalletType }
+enum WalletType { case SSIWallet extends WalletType; case AdaWallet extends WalletType }
 
 val walletTypeOpt: Options[WalletType] = Options
-  .enumeration[WalletType]("wallet-type")(("ssi", WalletType.SSI), ("cardano", WalletType.Cardano))
+  .enumeration[WalletType]("wallet-type")(("ssi", WalletType.SSIWallet), ("ada", WalletType.AdaWallet))
 
 val didPrismArg: Args[DIDPrism] =
   Args
@@ -92,6 +92,17 @@ val indexerDBConnectionAgr =
       "Indexer MongoDB connection to be used as a state storage. Ex: 'mongodb+srv://user:password@cluster0.bgnyyy1.mongodb.net/indexer'"
     )
 
-val keysLabels = Args.text("keyID").repeat.??("Label/name of keys to be used")
+val keysLabels = Args.text("keyID").atLeast(1).??("Label/name of keys to be used")
+// val TEST = Options.keyValueMap(Options.Single("aa", Vector.empty, PrimType.Text))
 val didCommServiceEndpoints =
-  (Args.text("serviceId") ++ Args.text("didCommEndpoint")).repeat.??("DIDComm service id + endpoint")
+  Options
+    .keyValueMap("services")
+    .alias("S")
+    .optional
+    .map {
+      case Some(map) => map
+      case None      => Map.empty
+    }
+    .??("DIDComm service -S 'id=endpoint'")
+  // .map
+// (Args.text("serviceId") ++ Args.text("didCommEndpoint")).repeat.??("DIDComm service id + endpoint")
