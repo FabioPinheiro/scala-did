@@ -133,6 +133,21 @@ object UtilsJVM {
     }
   }
 
+  extension (header: JWTHeader) {
+    def makeJWSHeader: JWSHeader = {
+      val h = new JWSHeader.Builder(header.alg.toJWSAlgorithm)
+      header match
+        case JWTHeader(alg, jku, jwk, kid, typ, cty, crit) =>
+          jku.map(e => h.jwkURL(java.net.URI(e)))
+          jwk.map(e => h.jwk(e.toJWK))
+          kid.map(e => h.keyID(e))
+          typ.map(e => h.`type`(JOSEObjectType(e)))
+          cty.map(e => h.contentType(e))
+          crit.map(e => h.criticalParams(e.asJava))
+      h.build()
+    }
+  }
+
   // extension (ecKey: JWKECKey) {
   //   def verify(jwm: SignedMessage, alg: JWAAlgorithm): Boolean =
   //   def sign(payload: Array[Byte], alg: JWAAlgorithm): SignedMessage =
@@ -379,13 +394,12 @@ object UtilsJVM {
     jwt
   }
 
-  extension (key: OKP_EC_Key)
-    def toJWK: JWKECKey | OctetKeyPair = {
-      key match {
-        case ec: ECKey   => ec.toJWK
-        case okp: OKPKey => okpKey2JWK(okp)
-      }
+  extension (key: JWKObj)
+    def toJWK: JWKECKey | OctetKeyPair = key match {
+      case ec: ECKey   => ec.toJWK
+      case okp: OKPKey => okpKey2JWK(okp)
     }
+
   extension (okp: OKPKey) def toJWK: OctetKeyPair = okpKey2JWK(okp)
   extension (ec: ECKey) def toJWK: JWKECKey = ecKey2JWK(ec)
 

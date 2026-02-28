@@ -85,6 +85,7 @@ object ProtectedHeaderJWT {
 // ###########
 // ### JWS ###
 // ###########
+// Note: JWS and JWE are types of JWT
 
 opaque type SignatureJWT = Base64
 object SignatureJWT {
@@ -101,18 +102,19 @@ object SignatureJWT {
 // ### Utils ###
 // #############
 
+/** https://datatracker.ietf.org/doc/html/rfc7515 */
 final case class JWTHeader(
-    alg: Option[JWAAlgorithm], // Algorithm
-    jku: Option[String], // JWK Set URL
-    jwk: Option[String], // JSON Web Key
+    alg: JWAAlgorithm, // Algorithm
+    jku: Option[String], // JWK Set URL // TODO type URI
+    jwk: Option[PublicKey], // JSON Web Key //FIXME  MUST by public
     kid: Option[String], // Key ID
     // x5u: Option[String], // X.509 URL
     // x5c: Option[String], // X.509 Certificate Chain
     // x5t: Option[String], // X.509 Certificate SHA-1 Thumbprint
     // x5t#S256: Option[String], // X.509 Certificate SHA-256 Thumbprint
-    typ: Option[String], // Type
+    typ: Option[String], // Type IANA.MediaTypes https://www.iana.org/assignments/media-types/media-types.xhtml
     cty: Option[String], // Content Type
-    crit: Option[Seq[String]], // Critical
+    crit: Option[Set[String]], // Critical
 )
 object JWTHeader {
   given decoder: JsonDecoder[JWTHeader] = DeriveJsonDecoder.gen[JWTHeader]

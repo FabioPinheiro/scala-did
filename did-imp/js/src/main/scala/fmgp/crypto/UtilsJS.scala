@@ -13,6 +13,7 @@ import fmgp.typings.jose.typesMod.JWTHeaderParameters
 import fmgp.typings.jose.typesMod.JWTPayload
 import fmgp.typings.jose.typesMod.GeneralJWSInput
 import fmgp.typings.jose.mod.errors.JWSSignatureVerificationFailed
+import fmgp.typings.jose.anon.PickJWKktycrvxyen
 
 import fmgp.did.comm.*
 import fmgp.crypto.error.*
@@ -75,26 +76,58 @@ object UtilsJS {
   //   }
   // }
 
-  extension (key: OKP_EC_Key) {
+  // trait PickJWKktycrvxyen extends StObject {
 
-    private def toJWK: JWK = {
-      val keyJWK = JWK(kty = key.kty.toString)
-      keyJWK.setX(key.x)
-      key match {
-        case ec: ECKey   => keyJWK.setY(ec.y)
-        case okp: OKPKey => // ok
-      }
+  //   var crv: js.UndefOr[String] = js.undefined
 
-      keyJWK.setCrv(key.crv.toString)
-      keyJWK.setAlg(key.alg.toString)
-      key.maybeKid.foreach(id => keyJWK.setKid(id))
+  //   var e: js.UndefOr[String] = js.undefined
 
-      key match {
-        case _: PublicKey  => // ok
-        case k: PrivateKey => keyJWK.setD(k.d)
-      }
-      keyJWK
+  //   var kty: String
+
+  //   var n: js.UndefOr[String] = js.undefined
+
+  //   var x: js.UndefOr[String] = js.undefined
+
+  //   var y: js.UndefOr[String] = js.undefined
+  // }
+
+  extension (header: JWTHeader) {
+    def makeJWSHeader: JWTHeaderParameters = {
+      val h = JWTHeaderParameters(header.alg.symbol)
+      header match
+        case JWTHeader(alg, jku, jwk, kid, typ, cty, crit) =>
+          jku.map(e => h.setJku(e))
+          jwk.map(e => h.setJwk(e.toPickJWKktycrvxyen))
+          kid.map(e => h.setKid(e))
+          typ.map(e => h.setTyp(e))
+          cty.map(e => h.setCty(e))
+          crit.map(e => h.setCrit(e.toJSArray))
+      h
     }
+  }
+
+  extension (key: JWKObj) {
+
+    private def toJWK: JWK =
+      key match {
+        case k: OKP_EC_Key =>
+          val keyJWK = JWK(kty = k.kty.toString)
+          keyJWK.setX(k.x)
+          key match {
+            case ec: ECKey   => keyJWK.setY(ec.y)
+            case okp: OKPKey => // ok
+          }
+
+          keyJWK.setCrv(k.crv.symbol)
+          keyJWK.setAlg(k.alg.symbol)
+          k.maybeKid.foreach(id => keyJWK.setKid(id))
+
+          k match {
+            case _: PublicKey  => // ok
+            case k: PrivateKey => keyJWK.setD(k.d)
+          }
+          keyJWK
+      }
 
     // TODO make private
     def toKeyLike: IO[CryptoFailed, (KeyLike, String, String)] = {
@@ -227,5 +260,19 @@ object UtilsJS {
       } yield ret
 
     }
+  }
+
+  extension (key: PublicKey) {
+    def toPickJWKktycrvxyen: PickJWKktycrvxyen =
+      key match
+        case OKPPublicKeyWithKid(kty, crv, x, kid) =>
+          PickJWKktycrvxyen(kty.symbol).setCrv(key.crv.symbol).set("kid", kid).setX(key.x)
+        case OKPPublicKeyWithoutKid(kty, crv, x) =>
+          PickJWKktycrvxyen(kty.symbol).setCrv(key.crv.symbol).setX(key.x)
+        case ECPublicKeyWithKid(kty, crv, x, y, kid) =>
+          PickJWKktycrvxyen(kty.symbol).setCrv(key.crv.symbol).set("kid", kid).setX(key.x).setY(y)
+        case ECPublicKeyWithoutKid(kty, crv, x, y) =>
+          PickJWKktycrvxyen(kty.symbol).setCrv(key.crv.symbol).setX(key.x).setY(y)
+
   }
 }

@@ -48,6 +48,16 @@ class JWTSuite extends ZSuite {
   val jwtSignES256FromJS =
     "eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmFsaWNlI2tleS0yIn0.eyJhIjoxMjN9.BtzXIttKQQwE9dNomldInJOuv8g4SZoXCMN2kSwfnwMkJcrlujYtId7Vf9-7uEq3gN9Pt9ysK4GWBSLY1GvXLw"
 
+  val jwtHeader = JWTHeader(
+    alg = JWAAlgorithm.ES256K,
+    jku = Some("http://localhost"),
+    jwk = Some(JWKExamples.senderKeySecp256k1obj.toPublicKey),
+    kid = Some("did:example:123"),
+    typ = Some(MediaTypes.DIGITAL_CREDENTIAL_SDJWT.subType),
+    cty = None,
+    crit = None,
+  )
+
   testZ("EC ES256 (P_256 key) sign and verify JWT") {
     for {
       jwt <- CryptoOperationsImp.signJWT(
@@ -56,7 +66,7 @@ class JWTSuite extends ZSuite {
         // JWAAlgorithm.ES256
       )
       payload = jwt.protectedHeader.toJWTHeader.toOption
-      _ = assertEquals(payload.flatMap(_.alg), Some(JWAAlgorithm.ES256))
+      _ = assertEquals(payload.map(_.alg), Some(JWAAlgorithm.ES256))
       _ = assertEquals(payload.flatMap(_.kid), Some("did:example:alice#key-2"))
       // _ = println(jwt.base64JWTFormat)
       ret <- CryptoOperationsImp.verifyJWT(
@@ -88,7 +98,7 @@ class JWTSuite extends ZSuite {
         // JWAAlgorithm.ES256
       )
       payload = jwt.protectedHeader.toJWTHeader.toOption
-      _ = assertEquals(payload.flatMap(_.alg), Some(JWAAlgorithm.ES256))
+      _ = assertEquals(payload.map(_.alg), Some(JWAAlgorithm.ES256))
       _ = assertEquals(payload.flatMap(_.kid), Some("did:example:alice#key-2"))
       // _ = println(jwt.base64JWTFormat)
       keyWithFailKid = senderKeyP256_1.copy(kid = "did:example:alice#key-fail")
@@ -107,7 +117,7 @@ class JWTSuite extends ZSuite {
         // JWAAlgorithm.ES256
       )
       payload = jwt.protectedHeader.toJWTHeader.toOption
-      _ = assertEquals(payload.flatMap(_.alg), Some(JWAAlgorithm.ES256))
+      _ = assertEquals(payload.map(_.alg), Some(JWAAlgorithm.ES256))
       _ = assertEquals(payload.flatMap(_.kid), Some("did:example:alice#key-2"))
       // _ = println(jwt.base64JWTFormat)
       ret <- CryptoOperationsImp.verifyJWT(
@@ -125,7 +135,7 @@ class JWTSuite extends ZSuite {
         // JWAAlgorithm.EdDSA
       )
       payload = jwt.protectedHeader.toJWTHeader.toOption
-      _ = assertEquals(payload.flatMap(_.alg), Some(JWAAlgorithm.EdDSA))
+      _ = assertEquals(payload.map(_.alg), Some(JWAAlgorithm.EdDSA))
       _ = assertEquals(payload.flatMap(_.kid), Some("did:example:alice#key-1"))
       // _ = println(jwt.base64JWTFormat)
       ret <- CryptoOperationsImp.verifyJWT(
@@ -135,4 +145,22 @@ class JWTSuite extends ZSuite {
     } yield assertEquals(ret, true)
   }
 
+  test("(JWTUtils) JWTHeader - encode and decode (JSON)") {
+    val expected =
+      """{"alg":"ES256K","jku":"http://localhost","jwk":{"kty":"EC","crv":"secp256k1","x":"aToW5EaTq5mlAf8C5ECYDSkqsJycrW-e1SQ6_GJcAOk","y":"JAGX94caA21WKreXwYUaOCYTBMrqaX4KWIlsQZTHWCk","kid":"did:example:alice#key-3"},"kid":"did:example:123","typ":"dc+sd-jwt"}"""
+    assertEquals(jwtHeader.toJson, expected)
+    val obj = jwtHeader.toJson.fromJson[JWTHeader].getOrElse(fail("Fail to parse"))
+    assertEquals(obj, jwtHeader)
+  }
+
+  test("(JWTUtils) JWTHeader - encode and decode (JSON in BASE64)") {
+    val expected = Base64.fromBase64url(
+      "eyJqa3UiOiJodHRwOi8vbG9jYWxob3N0Iiwia2lkIjoiZGlkOmV4YW1wbGU6MTIzIiwidHlwIjoiZGMrc2Qtand0IiwiYWxnIjoiRVMyNTZLIiwiandrIjp7Imt0eSI6IkVDIiwiY3J2Ijoic2VjcDI1NmsxIiwia2lkIjoiZGlkOmV4YW1wbGU6YWxpY2Uja2V5LTMiLCJ4IjoiYVRvVzVFYVRxNW1sQWY4QzVFQ1lEU2txc0p5Y3JXLWUxU1E2X0dKY0FPayIsInkiOiJKQUdYOTRjYUEyMVdLcmVYd1lVYU9DWVRCTXJxYVg0S1dJbHNRWlRIV0NrIn19"
+    )
+    val data = jwtHeader.base64
+    // assertEquals(data.urlBase64, expected.urlBase64) // fail becuase of the order of field in the json
+    // assertEquals(data, expected)// fail becuase of the order of field in the json
+    val obj = data.decodeToString.fromJson[JWTHeader].getOrElse(fail("Fail to parse"))
+    assertEquals(obj, jwtHeader)
+  }
 }

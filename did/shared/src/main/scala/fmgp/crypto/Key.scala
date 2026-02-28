@@ -25,6 +25,12 @@ enum JWAAlgorithm {
     *   https://identity.foundation/didcomm-messaging/spec/#algorithms
     */
   case EdDSA extends JWAAlgorithm
+
+  // TODO  / ** Unsecured JWT - https://datatracker.ietf.org/doc/html/rfc7519#section-6 */ case none extends JWAAlgorithm
+
+  /** method alias toString (for type safe) */
+  def symbol = this.toString
+
 }
 object JWAAlgorithm {
   given decoder: JsonDecoder[JWAAlgorithm] = JsonDecoder.string.mapOrFail(e => safeValueOf(JWAAlgorithm.valueOf(e)))
@@ -35,6 +41,9 @@ enum KTY:
   // case RSA extends KTY
   case EC extends KTY // Elliptic Curve
   case OKP extends KTY // Edwards-curve Octet Key Pair
+
+  /** method alias toString (for type safe) */
+  def symbol = this.toString
 
 object KTY {
   given decoder: JsonDecoder[KTY] = JsonDecoder.string.mapOrFail(e => safeValueOf(KTY.valueOf(e)))
@@ -63,6 +72,9 @@ enum Curve: // TODO make it type safe!
   case X25519 extends Curve //  used for key exchange
   /** Edwards Digital Signature Algorithm using a curve which is birationally equivalent to Curve25519. */
   case Ed25519 extends Curve //  used for digital signatures
+
+  /** method alias toString (for type safe) */
+  def symbol = this.toString
 
 // sealed trait ECCurve // Elliptic Curve
 type ECCurve = Curve.`P-256`.type | Curve.`P-384`.type | Curve.`P-521`.type | Curve.secp256k1.type
@@ -130,11 +142,19 @@ object Curve {
   val okpCurveSet = Set(Curve.X25519, Curve.Ed25519)
 }
 
-/** https://www.rfc-editor.org/rfc/rfc7638 */
+/** JWK https://www.rfc-editor.org/rfc/rfc7638
+  *
+  * TODO RENAME to just JWK?
+  */
 sealed trait JWKObj extends MaybeKid {
   def kty: KTY
   def alg: JWAAlgorithm
 }
+object JWKObj {
+  given decoder: JsonDecoder[JWKObj] = OKP_EC_Key.decoder.map(e => e)
+  given encoder: JsonEncoder[JWKObj] = OKP_EC_Key.encoder.contramap[JWKObj] { case e: OKP_EC_Key => e }
+}
+
 sealed trait MaybeKid {
   def withKid(kid: String): WithKid
   def withoutKid: WithoutKid
