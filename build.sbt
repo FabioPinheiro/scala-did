@@ -419,6 +419,7 @@ lazy val root = project
   .aggregate(didResolverWeb.js, didResolverWeb.jvm) // publish
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
   .aggregate(docs) // just to aggregate the command clean
+  .aggregate(demo.jvm) // NOT publish
 
 // Move to a new repository
 lazy val all = project

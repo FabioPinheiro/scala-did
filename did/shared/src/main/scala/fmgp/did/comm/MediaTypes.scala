@@ -4,7 +4,9 @@ import zio.json.*
 
 /** IANA Media Types
   *
-  * https://identity.foundation/didcomm-messaging/spec/#iana-media-types
+  * DIDCommMediaTypes = https://identity.foundation/didcomm-messaging/spec/#iana-media-types
+  *
+  * TODO MOVE out of fmgp.did.comm
   */
 enum MediaTypes(val subType: String) {
   def mainType: String = MediaTypes.mainType
@@ -52,9 +54,20 @@ enum MediaTypes(val subType: String) {
     */
   case ANONCRYPT_AUTHCRYPT extends MediaTypes("didcomm-encrypted+json") // anoncrypt(authcrypt(plaintext))
 
+  /** Digital Credential SD-JWT (OLD - becuase conflict with W3C's Verifiable Credentials vc media type) */
+  case DIGITAL_CREDENTIAL_SDJWT_OLD extends MediaTypes("vc+sd-jwt")
+
+  /** Digital Credential SD-JWT */
+  case DIGITAL_CREDENTIAL_SDJWT extends MediaTypes("dc+sd-jwt")
+
+  /** Key Binding JWT //https://datatracker.ietf.org/doc/rfc9901/ */
+  case BINDING_JWT extends MediaTypes("kb+jwt")
 }
 
 object MediaTypes {
+  // type DIDCommMediaTypes = PLAINTEXT.type | SIGNED.type | ENCRYPTED.type | ANONCRYPT.type | AUTHCRYPT.type |
+  //  ANONCRYPT_SIGN.type | AUTHCRYPT_SIGN.type | ANONCRYPT_AUTHCRYPT.type
+
   def mainType: String = "application"
 
   given decoder: JsonDecoder[MediaTypes] = JsonDecoder.string

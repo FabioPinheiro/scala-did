@@ -24,10 +24,10 @@ case class SignProtectedHeader(
     alg: JWAAlgorithm,
     typ: Option[MediaTypes], // MediaTypes.SIGNED
 ) {
-  assert(
-    !typ.exists(_ != MediaTypes.SIGNED),
-    s"The field 'typ' if present MUST be ${MediaTypes.SIGNED} instead of ${typ.get}"
-  )
+  // assert( // Also not safe
+  //   !typ.exists(_ != MediaTypes.SIGNED),
+  //   s"The field 'typ' if present MUST be ${MediaTypes.SIGNED} instead of ${typ.get}"
+  // )
 }
 
 object SignProtectedHeader {
@@ -35,6 +35,7 @@ object SignProtectedHeader {
   given encoder: JsonEncoder[SignProtectedHeader] = DeriveJsonEncoder.gen[SignProtectedHeader]
 }
 
+// Header for JWS and JWE
 sealed trait ProtectedHeaderTMP {
   // def epk: Option[PublicKey]
   def apv: APV
