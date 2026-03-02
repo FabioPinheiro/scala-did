@@ -171,7 +171,7 @@ lazy val V = new {
   val bouncycastle = "1.80"
   val nimbusJoseJwt = "10.8"
 
-  val laika = "1.0.0"
+  val laika = "1.0.1"
 
   val laminar = "16.0.0"
   val waypoint = "7.0.0"
