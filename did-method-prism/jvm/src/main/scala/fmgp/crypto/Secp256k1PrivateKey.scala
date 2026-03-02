@@ -1,11 +1,24 @@
 package fmgp.crypto
 
+import fmgp.util.Base64
 import org.hyperledger.identus.apollo.utils.KMMECSecp256k1PrivateKey
 import fmgp.did.method.prism.proto.PrismKeyUsage
 import fmgp.did.method.prism.proto.PrismPublicKey
 
 case class Secp256k1PrivateKey(rawBytes: Array[Byte]) {
   private val pk = KMMECSecp256k1PrivateKey.Companion.secp256k1FromByteArray(rawBytes)
+
+  final def toECPrivateKey = {
+    val (x, y) = curvePoint
+    ECPrivateKeyWithoutKid(
+      kty = KTY.EC,
+      crv = Curve.secp256k1,
+      d = Base64.encode(rawBytes).basicBase64,
+      x = Base64.encode(x).basicBase64,
+      y = Base64.encode(y).basicBase64,
+    )
+  }
+
   final def compressedPublicKeyBytes: Array[Byte] = pk.getPublicKey().getCompressed()
   final def compressedKey(id: String, keyUsage: PrismKeyUsage): PrismPublicKey.CompressedECKey =
     PrismPublicKey.CompressedECKey(id = id, usage = keyUsage, curve = "secp256k1", data = compressedPublicKeyBytes)
