@@ -727,8 +727,7 @@ lazy val didResolverWeb = crossProject(JSPlatform, JVMPlatform)
 //https://dev.uniresolver.io/
 lazy val didUniresolver = crossProject(JSPlatform, JVMPlatform)
   .in(file("did-uniresolver"))
-  .settings(publish / skip := true) // FIXME
-  .configure(notYetPublishedConfigure)
+  .configure(publishConfigure)
   .settings(
     name := "did-uniresolver",
     libraryDependencies += D.munit.value,
