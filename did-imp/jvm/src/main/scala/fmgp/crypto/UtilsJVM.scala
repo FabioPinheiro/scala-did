@@ -21,7 +21,6 @@ import com.nimbusds.jose.crypto.Ed25519Signer
 import com.nimbusds.jose.jwk.OctetKeyPair
 import com.nimbusds.jose.jwk.{Curve as JWKCurve}
 import com.nimbusds.jose.jwk.{ECKey as JWKECKey}
-import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jose.util.StandardCharset
 
 import zio.json.*
@@ -30,43 +29,7 @@ import fmgp.did.VerificationMethodReferenced
 import fmgp.did.comm.EncryptedMessageGeneric
 import fmgp.did.comm.*
 import fmgp.util.*
-import fmgp.crypto.UtilsJVM.toJWK
 import fmgp.crypto.error.*
-
-given Conversion[Base64Obj[ProtectedHeader], JWEHeader] with
-  def apply(x: Base64Obj[ProtectedHeader]) = {
-    val encryptionMethod = x.obj.enc match
-      case ENCAlgorithm.XC20P           => EncryptionMethod.XC20P
-      case ENCAlgorithm.A256GCM         => EncryptionMethod.A256GCM
-      case ENCAlgorithm.`A256CBC-HS512` => EncryptionMethod.A256CBC_HS512
-
-    val algorithm = x.obj.alg match
-      case KWAlgorithm.`ECDH-ES+A256KW`  => JWEAlgorithm.ECDH_ES_A256KW
-      case KWAlgorithm.`ECDH-1PU+A256KW` => JWEAlgorithm.ECDH_1PU_A256KW
-
-    x match
-      case Base64Obj(_, Some(original)) =>
-        JWEHeader.parse(Base64URL.from(original.urlBase64))
-      case Base64Obj(obj, None) =>
-        obj match
-          case AnonProtectedHeader(epk, apv, typ, enc, alg) =>
-            val aux = new JWEHeader.Builder(algorithm, encryptionMethod)
-              .agreementPartyVInfo(apv.base64)
-              .ephemeralPublicKey(epk.toJWK)
-            typ.map(e => aux.`type`(JOSEObjectType(e.typ)))
-            aux.build()
-          case AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) =>
-            val aux = new JWEHeader.Builder(algorithm, encryptionMethod)
-              .agreementPartyVInfo(apv.base64)
-              .ephemeralPublicKey(epk.toJWK)
-              .senderKeyID(skid.value)
-              .agreementPartyUInfo(apu.base64)
-            typ.map(e => aux.`type`(JOSEObjectType(e.typ)))
-            aux.build()
-  }
-
-given Conversion[Base64, com.nimbusds.jose.util.Base64URL] with
-  def apply(x: Base64) = new com.nimbusds.jose.util.Base64URL(x.urlBase64)
 
 object UtilsJVM {
 
@@ -114,7 +77,7 @@ object UtilsJVM {
   type Base64URLString = String // FIXME
 
   extension (alg: JWAAlgorithm) {
-    def toJWSAlgorithm = alg match {
+    def asNimbusds = alg match {
       case JWAAlgorithm.ES256K => JWSAlgorithm.ES256K
       case JWAAlgorithm.ES256  => JWSAlgorithm.ES256
       case JWAAlgorithm.ES384  => JWSAlgorithm.ES384
@@ -135,7 +98,7 @@ object UtilsJVM {
 
   extension (header: JWTHeader) {
     def makeJWSHeader: JWSHeader = {
-      val h = new JWSHeader.Builder(header.alg.toJWSAlgorithm)
+      val h = new JWSHeader.Builder(header.alg.asNimbusds)
       header match
         case JWTHeader(alg, jku, jwk, kid, typ, cty, crit) =>
           jku.map(e => h.jwkURL(java.net.URI(e)))
@@ -170,7 +133,7 @@ object UtilsJVM {
     signatureObjs.exists { obj =>
       val base64noSignature = obj.`protected`.base64url + "." + jwm.payload.base64url
       val header = {
-        val h = new JWSHeader.Builder(obj.`protected`.obj.alg.toJWSAlgorithm)
+        val h = new JWSHeader.Builder(obj.`protected`.obj.alg.asNimbusds)
         maybeKeyID.foreach(h.keyID(_))
         h.build()
       }
@@ -201,7 +164,7 @@ object UtilsJVM {
         case JWAAlgorithm.ES512  => Right(algorithmTmp)
         case JWAAlgorithm.EdDSA  => Left(s"This method do not support algorithm '$algorithmTmp'")
       header = {
-        val h = new JWSHeader.Builder(algorithm.toJWSAlgorithm)
+        val h = new JWSHeader.Builder(algorithm.asNimbusds)
         Option(ecKey.getKeyID()).foreach(h.keyID(_))
         h.build()
       }
@@ -247,7 +210,7 @@ object UtilsJVM {
 
     val signer: JWSSigner = new ECDSASigner(ecKey) // Create the EC signer
     signer.getJCAContext().setProvider(CryptoProvider.provider)
-    val header: JWSHeader = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(ecKey.getKeyID()).build()
+    val header: JWSHeader = new JWSHeader.Builder(alg.asNimbusds).keyID(ecKey.getKeyID()).build()
     val payloadObj = new JosePayload(payload)
     val jwsObject: JWSObject = new JWSObject(header, payloadObj) // Creates the JWS object with payload
 
@@ -291,7 +254,7 @@ object UtilsJVM {
     signatureObjs.exists { obj =>
       val base64noSignature = obj.`protected`.base64url + "." + jwm.payload.base64url
       val header = {
-        val h = new JWSHeader.Builder(obj.`protected`.obj.alg.toJWSAlgorithm)
+        val h = new JWSHeader.Builder(obj.`protected`.obj.alg.asNimbusds)
         maybeKeyID.foreach(h.keyID(_))
         h.build()
       }
@@ -328,7 +291,7 @@ object UtilsJVM {
         case JWAAlgorithm.ES512  => Left(s"This method can only be call with JWAAlgorithm.EdDSA (got '$algorithmTmp')")
         case JWAAlgorithm.EdDSA  => Right(JWAAlgorithm.EdDSA)
       header = {
-        val h = new JWSHeader.Builder(algorithm.toJWSAlgorithm)
+        val h = new JWSHeader.Builder(algorithm.asNimbusds)
         Option(okpKey.getKeyID()).foreach(h.keyID(_))
         h.build()
       }
@@ -382,10 +345,12 @@ object UtilsJVM {
 
     val signer: JWSSigner = new Ed25519Signer(okpKey) // Create the OKP signer
     signer.getJCAContext().setProvider(CryptoProvider.provider)
-    val header: JWSHeader = new JWSHeader.Builder(alg.toJWSAlgorithm).keyID(okpKey.getKeyID()).build()
+    val header: JWSHeader = new JWSHeader.Builder(alg.asNimbusds)
+      .keyID(okpKey.getKeyID())
+      // .`type`(JOSEObjectType)
+      .build()
     val payloadObj = new JosePayload(payload)
     val jwsObject: JWSObject = new JWSObject(header, payloadObj) // Creates the JWS object with payload
-
     jwsObject.sign(signer)
     val jwt = JWT.unsafeFromEncodedJWT(jwsObject.serialize())
     assert(jwt.payload.base64url == payloadObj.toBase64URL.toString) // redundant check
