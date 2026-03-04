@@ -36,10 +36,29 @@ object SignatureJWM:
   given decoder: JsonDecoder[SignatureJWM] = JsonDecoder.string.map(SignatureJWM(_))
   given encoder: JsonEncoder[SignatureJWM] = JsonEncoder.string.contramap[SignatureJWM](_.value)
 
+opaque type JWTUnsigned = (ProtectedHeaderJWT, Payload)
+extension (jwtUnsigned: JWTUnsigned)
+  inline def protectedHeader: ProtectedHeaderJWT = jwtUnsigned._1
+  inline def payload: Payload = jwtUnsigned._2
+
+  /** value to be digned */
+  def base64JWTFormatWithNoSignature =
+    jwtUnsigned.protectedHeader.urlBase64WithoutPadding + "." + jwtUnsigned.payload.urlBase64WithoutPadding
+
+object JWTUnsigned {
+  def apply(header: ProtectedHeaderJWT, payload: Payload): JWTUnsigned = (header, payload)
+  def fromBase64(protectedHeader: String, payload: String): JWTUnsigned =
+    apply(ProtectedHeaderJWT.fromBase64url(protectedHeader), Payload.fromBase64url(payload))
+  def unsafeFromEncodedJWT(str: String): JWTUnsigned = str.split('.') match {
+    case Array(protectedHeader: String, payload: String) => JWTUnsigned.fromBase64(protectedHeader, payload)
+  }
+}
+
 opaque type JWT = (ProtectedHeaderJWT, Payload, SignatureJWT)
 object JWT {
   def apply(protectedHeader: ProtectedHeaderJWT, payload: Payload, signature: SignatureJWT): JWT =
     (protectedHeader, payload, signature)
+  // FIXME Rename to fromBase64
   def fromStrings(protectedHeader: String, payload: String, signature: String): JWT =
     apply(
       ProtectedHeaderJWT.fromBase64url(protectedHeader),

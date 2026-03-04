@@ -5,8 +5,11 @@ import zio.json.ast.Json
 import zio.json.ast.JsonCursor
 import fmgp.util.{Base64, safeValueOf}
 
-/** Header Parameter Values for JWS https://datatracker.ietf.org/doc/html/rfc7518#section-3.1 */
-enum JWAAlgorithm {
+/** Header Parameter Values for JWS https://datatracker.ietf.org/doc/html/rfc7518#section-3.1
+  *
+  * TODO RENAME to JWSAlgorithm
+  */
+enum JWAAlgorithm { // FIXME this is a JWS or JWA?
 
   /** ECDSA using secp256k1 and SHA-256 */
   case ES256K extends JWAAlgorithm
@@ -179,7 +182,13 @@ sealed trait OKP_EC_Key extends JWKObj {
   def xBase64Url = Base64.fromBase64url(x)
   def xNumbre = xBase64Url.decodeToBigInt
 
-  /** https://identity.foundation/didcomm-messaging/spec/#algorithms */
+  /** The Algorithmto used for Signing
+    *
+    * https://identity.foundation/didcomm-messaging/spec/#algorithms
+    */
+  def jwsAlgorithmto: JWAAlgorithm = jwaAlgorithmtoSign
+
+  /** use jwsAlgorithmtoSign This might be deprecated in the future. */
   def jwaAlgorithmtoSign: JWAAlgorithm = crv match {
     case Curve.secp256k1 => JWAAlgorithm.ES256K
     case Curve.`P-256`   => JWAAlgorithm.ES256
@@ -623,6 +632,8 @@ object OKPPublicKey {
     OKPPublicKeyWithKid(kty = kty, crv = crv, x = x, kid = kid)
   def apply(kty: KTY.OKP.type, crv: OKPCurve, x: String): OKPPublicKeyWithoutKid =
     OKPPublicKeyWithoutKid(kty = kty, crv = crv, x = x)
+  def makeEd25519Private(d: Base64, x: Base64) =
+    OKPPrivateKey(kty = KTY.OKP, crv = Curve.Ed25519, d = d.urlBase64WithoutPadding, x = x.urlBase64WithoutPadding)
   def makeEd25519(x: Base64) = OKPPublicKey(kty = KTY.OKP, crv = Curve.Ed25519, x = x.urlBase64WithoutPadding)
   def unapply(key: OKPPublicKey): Option[(KTY, OKPCurve, String, Option[String])] =
     Some((key.kty, key.crv, key.x, key.maybeKid))
