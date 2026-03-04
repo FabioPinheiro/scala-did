@@ -8,6 +8,8 @@ import fmgp.util.safeValueOf
 enum PrismKeyUsage(val protoEnum: Int, val name: String):
   // case UnknownKeyUsage extends PrismKeyUsage
   case MasterKeyUsage extends PrismKeyUsage(1, "Master")
+
+  /** assertionMethod */
   case IssuingKeyUsage extends PrismKeyUsage(2, "Issuing")
   case KeyAgreementKeyUsage extends PrismKeyUsage(3, "KeyAgreement")
   case AuthenticationKeyUsage extends PrismKeyUsage(4, "Authentication")
@@ -30,6 +32,8 @@ enum PrismKeyUsage(val protoEnum: Int, val name: String):
 object PrismKeyUsage {
   given decoder: JsonDecoder[PrismKeyUsage] = JsonDecoder.string.mapOrFail(e => safeValueOf(PrismKeyUsage.valueOf(e)))
   given encoder: JsonEncoder[PrismKeyUsage] = JsonEncoder.string.contramap((e: PrismKeyUsage) => e.toString)
+
+  def AssertionMethodKeyUsage = PrismKeyUsage.IssuingKeyUsage
 
   type ProtoKeyUsage = KeyUsage.MASTER_KEY.type | KeyUsage.ISSUING_KEY.type | KeyUsage.KEY_AGREEMENT_KEY.type |
     KeyUsage.AUTHENTICATION_KEY.type | KeyUsage.REVOCATION_KEY.type | KeyUsage.CAPABILITY_INVOCATION_KEY.type |

@@ -48,8 +48,16 @@ import fmgp.util.Base64
 // }
 // }
 
+/** FIXME move to shared folder */
 extension (hdKey: HdKeyPair)
-  def publicKeyJWK = OKPPublicKey.makeEd25519(x = Base64.encode(hdKey.verificationKey.bytes))
+  def publicJWK: OKPPublicKeyWithoutKid = OKPPublicKey.makeEd25519(x = Base64.encode(hdKey.verificationKey.bytes))
+
+  /** Convert HdKeyPair (Ed25519) to OKPPrivateKeyWithoutKid */
+  def privateJWK: OKPPrivateKeyWithoutKid = OKPPublicKey.makeEd25519Private(
+    d = Base64.encode(hdKey.extendedKey.extendedSecretKey),
+    x = Base64.encode(hdKey.verificationKey.bytes)
+  )
+
   final def compressedKey(id: String, keyUsage: PrismKeyUsage): PrismPublicKey.CompressedECKey =
     PrismPublicKey.CompressedECKey(id = id, usage = keyUsage, curve = "Ed25519", data = hdKey.verificationKey.bytes)
   final def compressedKeyData: _root_.proto.prism.PublicKey.KeyData.CompressedEcKeyData =

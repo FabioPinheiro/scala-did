@@ -6,7 +6,7 @@ import fmgp.did.method.prism.proto.PrismKeyUsage
 
 case class Secp256k1PrivateKey(rawBytes: Array[Byte]) { // TODO
 
-  final def toECPrivateKey = {
+  final def privateJWK = {
     val (x, y) = curvePoint
     ECPrivateKeyWithoutKid(
       kty = KTY.EC,
