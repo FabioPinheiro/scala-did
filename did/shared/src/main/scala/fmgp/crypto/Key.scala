@@ -173,7 +173,7 @@ sealed trait WithoutKid extends MaybeKid { override final def maybeKid: Option[S
 
 // @jsonDiscriminator("kty")
 sealed trait OKP_EC_Key extends JWKObj {
-  def kty: KTY // EC.type = KTY.EC
+  override def kty: KTY // EC.type = KTY.EC
   def crv: Curve
   // def kid: Option[String]
 
@@ -198,7 +198,7 @@ sealed trait OKP_EC_Key extends JWKObj {
     case Curve.Ed25519   => JWAAlgorithm.EdDSA
   }
 
-  def alg = crv match {
+  override def alg = crv match {
     case Curve.secp256k1 => JWAAlgorithm.ES256K
     case Curve.`P-256`   => JWAAlgorithm.ES256
     case Curve.`P-384`   => JWAAlgorithm.ES384

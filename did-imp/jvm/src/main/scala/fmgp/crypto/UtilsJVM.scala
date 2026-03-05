@@ -96,26 +96,6 @@ object UtilsJVM {
     }
   }
 
-  extension (header: JWTHeader) {
-    def makeJWSHeader: JWSHeader = {
-      val h = new JWSHeader.Builder(header.alg.asNimbusds)
-      header match
-        case JWTHeader(alg, jku, jwk, kid, typ, cty, crit) =>
-          jku.map(e => h.jwkURL(java.net.URI(e)))
-          jwk.map(e => h.jwk(e.toJWK))
-          kid.map(e => h.keyID(e))
-          typ.map(e => h.`type`(JOSEObjectType(e)))
-          cty.map(e => h.contentType(e))
-          crit.map(e => h.criticalParams(e.asJava))
-      h.build()
-    }
-  }
-
-  // extension (ecKey: JWKECKey) {
-  //   def verify(jwm: SignedMessage, alg: JWAAlgorithm): Boolean =
-  //   def sign(payload: Array[Byte], alg: JWAAlgorithm): SignedMessage =
-  // }
-
   def ecKeyVerifyJWM(ecKey: JWKECKey, jwm: SignedMessage, alg: JWAAlgorithm): Boolean = {
     val maybeKeyID = Option(ecKey.getKeyID())
     val _key = ecKey.toPublicJWK
@@ -213,7 +193,6 @@ object UtilsJVM {
     val header: JWSHeader = new JWSHeader.Builder(alg.asNimbusds).keyID(ecKey.getKeyID()).build()
     val payloadObj = new JosePayload(payload)
     val jwsObject: JWSObject = new JWSObject(header, payloadObj) // Creates the JWS object with payload
-
     jwsObject.sign(signer)
     val jwt = JWT.unsafeFromEncodedJWT(jwsObject.serialize())
     assert(jwt.payload.base64url == payloadObj.toBase64URL.toString) // redundant check

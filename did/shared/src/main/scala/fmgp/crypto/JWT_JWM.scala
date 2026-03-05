@@ -16,6 +16,8 @@ import scala.util.Success
 
 opaque type Payload = Base64
 object Payload:
+  def apply(base64: Base64): Payload = base64
+  def fromBytes(bytes: Array[Byte]): Payload = Base64.encode(bytes)
   def fromBase64url(data: String): Payload = Base64.fromBase64url(data)
   extension (data: Payload)
     /** decode the base64url to a string */
@@ -36,21 +38,29 @@ object SignatureJWM:
   given decoder: JsonDecoder[SignatureJWM] = JsonDecoder.string.map(SignatureJWM(_))
   given encoder: JsonEncoder[SignatureJWM] = JsonEncoder.string.contramap[SignatureJWM](_.value)
 
-opaque type JWTUnsigned = (ProtectedHeaderJWT, Payload)
+opaque type JWTUnsigned = (JWTHeader, Payload)
 extension (jwtUnsigned: JWTUnsigned)
-  inline def protectedHeader: ProtectedHeaderJWT = jwtUnsigned._1
+  inline def header: JWTHeader = jwtUnsigned._1
+  // use export header.{toProtectedHeader as protectedHeader}
+  inline def protectedHeader: ProtectedHeaderJWT = header.toProtectedHeader
   inline def payload: Payload = jwtUnsigned._2
+  def toJWT(signature: SignatureJWT): JWT = JWT(protectedHeader, payload, signature)
 
   /** value to be digned */
   def base64JWTFormatWithNoSignature =
-    jwtUnsigned.protectedHeader.urlBase64WithoutPadding + "." + jwtUnsigned.payload.urlBase64WithoutPadding
+    (jwtUnsigned.protectedHeader).urlBase64WithoutPadding + "." + jwtUnsigned.payload.urlBase64WithoutPadding
 
 object JWTUnsigned {
-  def apply(header: ProtectedHeaderJWT, payload: Payload): JWTUnsigned = (header, payload)
-  def fromBase64(protectedHeader: String, payload: String): JWTUnsigned =
-    apply(ProtectedHeaderJWT.fromBase64url(protectedHeader), Payload.fromBase64url(payload))
-  def unsafeFromEncodedJWT(str: String): JWTUnsigned = str.split('.') match {
+  def apply(header: JWTHeader, payload: Payload): JWTUnsigned = (header, payload)
+  def fromProtectedHeaderAndPayload(header: ProtectedHeaderJWT, payload: Payload): Either[String, JWTUnsigned] =
+    header.decodeToString.fromJson[JWTHeader] match
+      case Left(error) => Left(error)
+      case Right(h)    => Right(apply(h, payload))
+  def fromBase64(protectedHeader: String, payload: String): Either[String, JWTUnsigned] =
+    fromProtectedHeaderAndPayload(ProtectedHeaderJWT.fromBase64url(protectedHeader), Payload.fromBase64url(payload))
+  def fromEncodedJWT(str: String): Either[String, JWTUnsigned] = str.split('.') match {
     case Array(protectedHeader: String, payload: String) => JWTUnsigned.fromBase64(protectedHeader, payload)
+    case _                                               => Left("fail to split input  by '.' in two parts")
   }
 }
 
@@ -92,13 +102,16 @@ object JWT {
 
 opaque type ProtectedHeaderJWT = Base64
 object ProtectedHeaderJWT {
+  def apply(base64: Base64): ProtectedHeaderJWT = base64
   def fromBase64url(data: String): Payload = Base64.fromBase64url(data)
-  extension (header: ProtectedHeaderJWT)
+  extension (header: ProtectedHeaderJWT) {
+
     /** decode the base64url to a string */
     def content: String = header.decodeToString
     def base64url: String = header.urlBase64
     def base64: Base64 = header
     def toJWTHeader: Either[String, JWTHeader] = header.asObj[JWTHeader].map(_.obj)
+  }
 }
 
 // ###########
@@ -108,12 +121,16 @@ object ProtectedHeaderJWT {
 
 opaque type SignatureJWT = Base64
 object SignatureJWT {
-  def fromBase64url(data: String): Payload = Base64.fromBase64url(data)
-  extension (signature: SignatureJWT)
+  def apply(base64: Base64): SignatureJWT = base64
+  def fromBase64url(data: String): SignatureJWT = Base64.fromBase64url(data)
+
+  extension (signature: SignatureJWT) {
+
     /** decode the base64url to a string */
     def content: String = signature.decodeToString
     def base64url: String = signature.urlBase64
     def base64: Base64 = signature
+  }
 
 }
 
@@ -124,17 +141,19 @@ object SignatureJWT {
 /** https://datatracker.ietf.org/doc/html/rfc7515 */
 final case class JWTHeader(
     alg: JWAAlgorithm, // Algorithm
-    jku: Option[String], // JWK Set URL // TODO type URI
-    jwk: Option[PublicKey], // JSON Web Key //FIXME  MUST by public
-    kid: Option[String], // Key ID
+    jku: Option[String] = None, // JWK Set URL // TODO type URI
+    jwk: Option[PublicKey] = None, // JSON Web Key //FIXME  MUST by public
+    kid: Option[String] = None, // Key ID
     // x5u: Option[String], // X.509 URL
     // x5c: Option[String], // X.509 Certificate Chain
     // x5t: Option[String], // X.509 Certificate SHA-1 Thumbprint
     // x5t#S256: Option[String], // X.509 Certificate SHA-256 Thumbprint
-    typ: Option[String], // Type IANA.MediaTypes https://www.iana.org/assignments/media-types/media-types.xhtml
-    cty: Option[String], // Content Type
-    crit: Option[Set[String]], // Critical
-)
+    typ: Option[String] = None, // Type IANA.MediaTypes https://www.iana.org/assignments/media-types/media-types.xhtml
+    cty: Option[String] = None, // Content Type
+    crit: Option[Set[String]] = None, // Critical
+) {
+  def toProtectedHeader = ProtectedHeaderJWT(Base64.encode(this.toJson))
+}
 object JWTHeader {
   given decoder: JsonDecoder[JWTHeader] = DeriveJsonDecoder.gen[JWTHeader]
   given encoder: JsonEncoder[JWTHeader] = DeriveJsonEncoder.gen[JWTHeader]

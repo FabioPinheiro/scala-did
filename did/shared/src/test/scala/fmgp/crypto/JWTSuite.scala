@@ -55,9 +55,10 @@ class JWTSuite extends ZSuite {
   }
 
   test(s"JWTUnsigned create") {
-    val jwtUnsigned = JWTUnsigned.fromBase64(headerBase64, payloadBase64)
-    assertEquals(jwtUnsigned.base64JWTFormatWithNoSignature, expetedBase64JWTFormatWithNoSignature)
-
+    JWTUnsigned.fromBase64(headerBase64, payloadBase64) match
+      case Left(value)        => fail(value)
+      case Right(jwtUnsigned) =>
+        assertEquals(jwtUnsigned.base64JWTFormatWithNoSignature, expetedBase64JWTFormatWithNoSignature)
   }
 
   // test(s"JWTUnsigned HMAC") {
