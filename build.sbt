@@ -152,7 +152,7 @@ lazy val V = new {
   // https://mvnrepository.com/artifact/dev.zio/zio
   val zio = "2.1.24"
   val zioJson = "0.9.0"
-  val zioSchema = "1.8.1" // FIXME REMOVE dependencyOverrides. This is becuase of zioHttp to use "zio-json" % "0.9.0",
+  val zioSchema = "1.8.2" // FIXME REMOVE dependencyOverrides. This is becuase of zioHttp to use "zio-json" % "0.9.0",
   val zioMunitTest = "0.4.0"
   val zioHttp = "3.8.1" // With fix CORS https://github.com/zio/zio-http/pull/2490
   val zioPrelude = "1.0.0-RC21"
