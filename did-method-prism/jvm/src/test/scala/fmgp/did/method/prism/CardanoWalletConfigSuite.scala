@@ -8,6 +8,8 @@ import fmgp.did.method.prism.cardano.*
 import fmgp.did.method.prism.proto.PrismKeyUsage
 import org.hyperledger.identus.apollo.derivation.HDKey
 import fmgp.util.bytes2Hex
+import fmgp.crypto.{given, *}
+import fmgp.crypto.UtilsJVM.*
 
 /** didResolverPrismJVM/testOnly fmgp.did.method.prism.CardanoWalletConfigSuite */
 class CardanoWalletConfigSuite extends FunSuite {
@@ -83,4 +85,22 @@ class CardanoWalletConfigSuite extends FunSuite {
     }
   }
 
+  test("OKP EdDSA (BIP32-Ed25519 key) sign via signJWT and verify via Extensions") {
+    val hdKeyPair = CardanoWalletConfig
+      .fromMnemonicPhrase(
+        "year degree tiger isolate notice barely indicate journey female citizen general begin speak brass abandon appear owner planet giraffe document syrup just final parent"
+      )
+      .getOrElse(???)
+      .ed25519DerivePrism(0, PrismKeyUsage.AssertionMethodKeyUsage, 0)
+
+    val walletEd25519PublicKey = hdKeyPair.publicJWK.withoutKid.withKid(kid = "wallet-key-Ed25519")
+
+    val jwtUnsigned = JWTUnsigned(
+      header = JWTHeader(alg = JWAAlgorithm.EdDSA, kid = Some(walletEd25519PublicKey.kid)),
+      payload = Payload.fromBytes("hello world".getBytes),
+    )
+    jwtUnsigned.signWithExtendedKey(hdKeyPair) match
+      case Left(error) => fail(error)
+      case Right(jwt)  => assert(jwt.verifyWith(walletEd25519PublicKey), "verify failed")
+  }
 }

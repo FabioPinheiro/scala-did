@@ -91,21 +91,6 @@ object UtilsJS {
   //   var y: js.UndefOr[String] = js.undefined
   // }
 
-  extension (header: JWTHeader) {
-    def makeJWSHeader: JWTHeaderParameters = {
-      val h = JWTHeaderParameters(header.alg.symbol)
-      header match
-        case JWTHeader(alg, jku, jwk, kid, typ, cty, crit) =>
-          jku.map(e => h.setJku(e))
-          jwk.map(e => h.setJwk(e.toPickJWKktycrvxyen))
-          kid.map(e => h.setKid(e))
-          typ.map(e => h.setTyp(e))
-          cty.map(e => h.setCty(e))
-          crit.map(e => h.setCrit(e.toJSArray))
-      h
-    }
-  }
-
   extension (key: JWKObj) {
 
     private def toJWK: JWK =

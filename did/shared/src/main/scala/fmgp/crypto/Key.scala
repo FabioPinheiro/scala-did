@@ -30,6 +30,11 @@ enum JWAAlgorithm { // FIXME this is a JWS or JWA?
   case EdDSA extends JWAAlgorithm
 
   // TODO  / ** Unsecured JWT - https://datatracker.ietf.org/doc/html/rfc7519#section-6 */ case none extends JWAAlgorithm
+  /** HS256 is HMAC using SHA-256.
+    *
+    * This is Required by RFC7518 and it used by Symmetric key.
+    */
+  case HS256 extends JWAAlgorithm
 
   /** method alias toString (for type safe) */
   def symbol = this.toString

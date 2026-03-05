@@ -9,6 +9,7 @@ import fmgp.did.comm.KWAlgorithm
 import scala.util.Try
 import scala.util.Failure
 import scala.util.Success
+import fmgp.crypto.JWT_JWM$package.ProtectedHeaderJWT.toJWTHeader
 
 // ###########
 // ### JWT ###
@@ -38,29 +39,34 @@ object SignatureJWM:
   given decoder: JsonDecoder[SignatureJWM] = JsonDecoder.string.map(SignatureJWM(_))
   given encoder: JsonEncoder[SignatureJWM] = JsonEncoder.string.contramap[SignatureJWM](_.value)
 
-opaque type JWTUnsigned = (JWTHeader, Payload)
-extension (jwtUnsigned: JWTUnsigned)
-  inline def header: JWTHeader = jwtUnsigned._1
-  // use export header.{toProtectedHeader as protectedHeader}
-  inline def protectedHeader: ProtectedHeaderJWT = header.toProtectedHeader
-  inline def payload: Payload = jwtUnsigned._2
-  def toJWT(signature: SignatureJWT): JWT = JWT(protectedHeader, payload, signature)
-
-  /** value to be digned */
-  def base64JWTFormatWithNoSignature =
-    (jwtUnsigned.protectedHeader).urlBase64WithoutPadding + "." + jwtUnsigned.payload.urlBase64WithoutPadding
+opaque type JWTUnsigned = (ProtectedHeaderJWT, Payload)
 
 object JWTUnsigned {
-  def apply(header: JWTHeader, payload: Payload): JWTUnsigned = (header, payload)
-  def fromProtectedHeaderAndPayload(header: ProtectedHeaderJWT, payload: Payload): Either[String, JWTUnsigned] =
-    header.decodeToString.fromJson[JWTHeader] match
-      case Left(error) => Left(error)
-      case Right(h)    => Right(apply(h, payload))
+  def apply(header: JWTHeader, payload: Payload): JWTUnsigned = (header.toProtectedHeader, payload)
+  def apply(header: ProtectedHeaderJWT, payload: Payload): JWTUnsigned = (header, payload)
+  // def fromProtectedHeaderAndPayload(header: ProtectedHeaderJWT, payload: Payload): Either[String, JWTUnsigned] =
+  //   header.decodeToString.fromJson[JWTHeader] match
+  //     case Left(error) => Left(s"Fail to parse JWTHeader because: $error")
+  //     case Right(h)    => Right(apply(h, payload))
+
   def fromBase64(protectedHeader: String, payload: String): Either[String, JWTUnsigned] =
-    fromProtectedHeaderAndPayload(ProtectedHeaderJWT.fromBase64url(protectedHeader), Payload.fromBase64url(payload))
+    ProtectedHeaderJWT.fromBase64url(protectedHeader).map(h => JWTUnsigned(h, Payload.fromBase64url(payload)))
+
   def fromEncodedJWT(str: String): Either[String, JWTUnsigned] = str.split('.') match {
     case Array(protectedHeader: String, payload: String) => JWTUnsigned.fromBase64(protectedHeader, payload)
     case _                                               => Left("fail to split input  by '.' in two parts")
+  }
+
+  extension (jwtUnsigned: JWTUnsigned) {
+    inline def protectedHeader: ProtectedHeaderJWT = jwtUnsigned._1
+    inline def payload: Payload = jwtUnsigned._2
+    // use export header.{toProtectedHeader as protectedHeader}
+    inline def header: Either[String, JWTHeader] = jwtUnsigned._1.toJWTHeader
+    def toJWT(signature: SignatureJWT): JWT = JWT(protectedHeader, payload, signature)
+
+    /** value to be digned */
+    def base64JWTFormatWithNoSignature =
+      (jwtUnsigned.protectedHeader).urlBase64WithoutPadding + "." + jwtUnsigned.payload.urlBase64WithoutPadding
   }
 }
 
@@ -71,9 +77,9 @@ object JWT {
   // FIXME Rename to fromBase64
   def fromStrings(protectedHeader: String, payload: String, signature: String): JWT =
     apply(
-      ProtectedHeaderJWT.fromBase64url(protectedHeader),
+      ProtectedHeaderJWT.unsafeFromBase64url(protectedHeader), // FIXME unsafe
       Payload.fromBase64url(payload),
-      SignatureJWT.fromBase64url(signature)
+      SignatureJWT.unsafeFromBase64url(signature) // FIXME unsafe
     )
   def unsafeFromEncodedJWT(str: String): JWT = str.split('.') match {
     case Array(protectedHeader: String, payload: String, signature: String) =>
@@ -100,10 +106,14 @@ object JWT {
     def base64: Base64 = Base64.encode(jwt.base64JWTFormat)
 }
 
+// FIXME UserBase64Obj
 opaque type ProtectedHeaderJWT = Base64
+
 object ProtectedHeaderJWT {
   def apply(base64: Base64): ProtectedHeaderJWT = base64
-  def fromBase64url(data: String): Payload = Base64.fromBase64url(data)
+  def fromBase64url(data: String): Either[String, Payload] = Base64.safeBase64url(data)
+  def unsafeFromBase64url(data: String): Payload = Base64.unsafeBase64url(data)
+
   extension (header: ProtectedHeaderJWT) {
 
     /** decode the base64url to a string */
@@ -122,7 +132,8 @@ object ProtectedHeaderJWT {
 opaque type SignatureJWT = Base64
 object SignatureJWT {
   def apply(base64: Base64): SignatureJWT = base64
-  def fromBase64url(data: String): SignatureJWT = Base64.fromBase64url(data)
+  def fromBase64url(data: String): Either[String, SignatureJWT] = Base64.safeBase64url(data)
+  def unsafeFromBase64url(data: String): SignatureJWT = Base64.unsafeBase64url(data)
 
   extension (signature: SignatureJWT) {
 

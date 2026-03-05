@@ -5,11 +5,14 @@ import scalus.cardano.node.BlockfrostProvider
 
 import scalus.cardano.wallet.hd.*
 import org.hyperledger.identus.apollo.derivation.HDKey
+import com.bloxbean.cardano.client.crypto.config.CryptoConfiguration
+import com.nimbusds.jose.util.StandardCharset
 import fmgp.did.method.prism.cardano.*
 import fmgp.did.method.prism.proto.PrismKeyUsage
 import fmgp.did.method.prism.proto.PrismPublicKey
 import fmgp.crypto.*
 import fmgp.util.Base64
+import scalus.cardano.wallet.hd.Bip32Ed25519.ExtendedKey
 
 // object HdAccountPRISM {
 
@@ -52,11 +55,17 @@ import fmgp.util.Base64
 extension (hdKey: HdKeyPair)
   def publicJWK: OKPPublicKeyWithoutKid = OKPPublicKey.makeEd25519(x = Base64.encode(hdKey.verificationKey.bytes))
 
-  /** Convert HdKeyPair (Ed25519) to OKPPrivateKeyWithoutKid */
-  def privateJWK: OKPPrivateKeyWithoutKid = OKPPublicKey.makeEd25519Private(
-    d = Base64.encode(hdKey.extendedKey.extendedSecretKey),
-    x = Base64.encode(hdKey.verificationKey.bytes)
-  )
+  // REMOVE
+  // /** Convert HdKeyPair (Ed25519) to OKPPrivateKeyWithoutKid */
+  // def privateJWK: OKPPrivateKeyWithoutKid = OKPPublicKey.makeEd25519Private(
+  //   // BIP32-Ed25519 uses an extended private key for signing, not just kL.
+  //   // The standard Ed25519Signer in Nimbus (which uses Google Tink) expects a regular 32-byte Ed25519 seed/scalar.
+  //   // But these are Cardano BIP32-Ed25519 keys where kL is the clamped scalar (not a seed).
+  //   // Using kL directly as the signing key would work for signing but may not produce signatures verifiable with the standard algorithm using the public key.
+  //   // kL IS the private scalar (already clamped), and the public key is kL * B. Standard Ed25519Signer in Nimbus takes the 32-byte private scalar directly. So using kL should work correctly.
+  //   d = Base64.encode(hdKey.extendedKey.kL),
+  //   x = Base64.encode(hdKey.verificationKey.bytes)
+  // )
 
   final def compressedKey(id: String, keyUsage: PrismKeyUsage): PrismPublicKey.CompressedECKey =
     PrismPublicKey.CompressedECKey(id = id, usage = keyUsage, curve = "Ed25519", data = hdKey.verificationKey.bytes)
@@ -67,3 +76,21 @@ extension (hdKey: HdKeyPair)
         data = com.google.protobuf.ByteString.copyFrom(hdKey.verificationKey.bytes)
       )
     )
+
+extension (jwtUnsigned: JWTUnsigned) {
+
+  def signWithExtendedKey(hdKey: HdKeyPair): Either[String, JWT] = signWithExtendedKey(hdKey.extendedKey)
+  def signWithExtendedKey(extendedKey: ExtendedKey): Either[String, JWT] = {
+    val signingInput: Array[Byte] =
+      jwtUnsigned.base64JWTFormatWithNoSignature.getBytes(StandardCharset.UTF_8)
+    val signature: Array[Byte] =
+      CryptoConfiguration.INSTANCE.getSigningProvider.signExtended(
+        signingInput,
+        extendedKey.extendedSecretKey // kL ++ kR (64 bytes)
+      )
+    SignatureJWT
+      .fromBase64url(Base64.encode(signature).urlBase64WithoutPadding)
+      .map(s => jwtUnsigned.toJWT(signature = s))
+
+  }
+}

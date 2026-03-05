@@ -83,6 +83,7 @@ object UtilsJVM {
       case JWAAlgorithm.ES384  => JWSAlgorithm.ES384
       case JWAAlgorithm.ES512  => JWSAlgorithm.ES512
       case JWAAlgorithm.EdDSA  => JWSAlgorithm.EdDSA
+      case JWAAlgorithm.HS256  => JWSAlgorithm.HS256
     }
   }
   extension (curve: Curve) {
@@ -143,6 +144,8 @@ object UtilsJVM {
         case JWAAlgorithm.ES384  => Right(algorithmTmp)
         case JWAAlgorithm.ES512  => Right(algorithmTmp)
         case JWAAlgorithm.EdDSA  => Left(s"This method do not support algorithm '$algorithmTmp'")
+        case JWAAlgorithm.HS256  => Left(s"This method '$algorithmTmp' can only be call with symmetric keys")
+
       header = {
         val h = new JWSHeader.Builder(algorithm.asNimbusds)
         Option(ecKey.getKeyID()).foreach(h.keyID(_))
@@ -269,6 +272,7 @@ object UtilsJVM {
         case JWAAlgorithm.ES384  => Left(s"This method can only be call with JWAAlgorithm.EdDSA (got '$algorithmTmp')")
         case JWAAlgorithm.ES512  => Left(s"This method can only be call with JWAAlgorithm.EdDSA (got '$algorithmTmp')")
         case JWAAlgorithm.EdDSA  => Right(JWAAlgorithm.EdDSA)
+        case JWAAlgorithm.HS256  => Left(s"This method '$algorithmTmp' can only be call with symmetric keys")
       header = {
         val h = new JWSHeader.Builder(algorithm.asNimbusds)
         Option(okpKey.getKeyID()).foreach(h.keyID(_))
