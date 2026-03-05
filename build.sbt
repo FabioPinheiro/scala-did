@@ -655,6 +655,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
   //   stIgnore += "node",
   // )
   .dependsOn(did % "compile;test->test", multiformats) // test->test for the fmgp.IntregrationTest
+  .jvmConfigure(_.dependsOn(didImp.jvm % Test)) // For fmgp.did.method.prism.CardanoWalletConfigSuite (import UtilsJVM)
   .configure(docConfigure)
 
 lazy val cardanoPrismCli = project
