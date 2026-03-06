@@ -168,8 +168,10 @@ lazy val V = new {
   val logbackClassic = "1.2.10"
   val scalaLogging = "3.9.4"
 
-  val bouncycastle = "1.80"
-  val nimbusJoseJwt = "10.8"
+  val bouncycastle = "1.80" // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
+  val nimbusJoseJwt = "10.8" // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt
+
+  val sdjwt = "1.7" // https://mvnrepository.com/artifact/com.authlete/sd-jwt
 
   val laika = "1.0.1"
 
@@ -256,6 +258,8 @@ lazy val D = new {
   val nimbusJoseJwt = Def.setting("com.nimbusds" % "nimbus-jose-jwt" % V.nimbusJoseJwt)
 
   val apollo = "org.hyperledger.identus" % "apollo-jvm" % V.identusApollo
+
+  val sdjwt = Def.setting("com.authlete" % "sd-jwt" % V.sdjwt)
 
   // For munit https://scalameta.org/munit/docs/getting-started.html#scalajs-setup
   val munit = Def.setting("org.scalameta" %%% "munit" % V.munit % Test)
@@ -420,6 +424,7 @@ lazy val root = project
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
   .aggregate(docs) // just to aggregate the command clean
   .aggregate(demo.jvm) // NOT publish
+  .aggregate(vc) // NOT publish
 
 // Move to a new repository
 lazy val all = project
@@ -673,6 +678,17 @@ lazy val cardanoPrismCli = project
     assembly / assemblyJarName := "cardano-prism.jar",
   )
   .dependsOn(did.jvm, didResolverPrism.jvm, didResolverPeer.jvm, didUniresolver.jvm)
+
+// FOR TEST ONLY
+lazy val vc = project
+  .in(file("vc"))
+  .settings(publish / skip := true)
+  .settings((setupTestConfig): _*)
+  .settings(
+    libraryDependencies += D.sdjwt.value,
+    dependencyOverrides += D.zioSchema.value,
+  )
+  .dependsOn(did.jvm, didImp.jvm, didResolverPrism.jvm)
 
 lazy val didPrismNode = project
   .in(file("did-method-prism-node"))
