@@ -42,7 +42,19 @@ addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.4") // sbt> dependencyUpd
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.4.4") // Needs scala version 3.2.2
 
 // PUBLISH
-addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.11.2")
+libraryDependencies ++= {
+  if (baseDirectory.value / "../.git" isDirectory) {
+    // addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.11.2")
+    // See https://stackoverflow.com/questions/35699543/how-to-load-dynamically-a-sbt-plugin
+    val dependency = "com.github.sbt" % "sbt-ci-release" % "1.11.2"
+    val sbtV = (update / sbtBinaryVersion).value // (pluginCrossBuild / sbtBinaryVersion).value
+    val scalaV = (update / scalaBinaryVersion).value
+    Seq(Defaults.sbtPluginExtra(dependency, sbtV, scalaV))
+  } else {
+    println("WARNING: sbt-ci-release plugin not loaded because git worktree")
+    Seq[ModuleID]()
+  }
+}
 // addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.17")
 // addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.2.1") //https://github.com/sbt/sbt-pgp#sbt-pgp
 
