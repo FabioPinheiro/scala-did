@@ -22,6 +22,8 @@ sealed trait OP {
       Right(this.asInstanceOf[OP.TypeStorageEntryEvent])
     else Left("OP is not a StorageEntryEvent type")
 
+  def asDebugJson = this.toJsonPretty
+
   def toPrismEvent: PrismEvent = {
     import proto.prism.PrismEvent.Event
     val event = this match

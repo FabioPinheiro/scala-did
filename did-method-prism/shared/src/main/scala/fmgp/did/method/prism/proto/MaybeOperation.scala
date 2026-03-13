@@ -60,7 +60,7 @@ case class SignedPrismEventView[+T <: OP](
     o: Int,
     signedWith: String,
     signature: Array[Byte],
-    operation: OP,
+    operation: T,
     protobuf: PrismEvent
 ) //extends SignedPrismEventTrait
 
