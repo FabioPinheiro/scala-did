@@ -61,12 +61,9 @@ extension (wallet: CardanoWalletConfig) {
     secp256k1DerivePrism(didIndex = didIndex, keyUsage = PrismKeyUsage.VdrKeyUsage, keyIndex = keyIndex)
   def prismDeriveAuthentication(didIndex: Int = 0, keyIndex: Int = 0): HdKeyPair =
     ed25519DerivePrism(didIndex = didIndex, keyUsage = PrismKeyUsage.AuthenticationKeyUsage, keyIndex = keyIndex)
-
-  def ed25519DerivePrism(
-      didIndex: Int = 0,
-      keyUsage: PrismKeyUsage = PrismKeyUsage.MasterKeyUsage,
-      keyIndex: Int = 0
-  ): HdKeyPair = ed25519DerivePath(Cip0000.didPath(didIndex, keyUsage, keyIndex))
+  def ed25519DerivePrism(didIndex: Int = 0, keyUsage: PrismKeyUsage, keyIndex: Int = 0): HdKeyPair = ed25519DerivePath(
+    Cip0000.didPath(didIndex, keyUsage, keyIndex)
+  )
   def ed25519DerivePath(path: String) =
     HdKeyPair.fromMnemonic(mnemonic = wallet.mnemonicPhrase, passphrase = wallet.passphrase, path = path)
 }

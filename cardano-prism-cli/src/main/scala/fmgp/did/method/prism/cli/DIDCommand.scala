@@ -158,13 +158,13 @@ object DIDCommand {
           UpdateDidOP.AddService(MyService.didCommSimpleEndpoint(id, endpoint))
         }.toSeq
         (didPrism, createSignedPrismEvent, updateSignedPrismEvent) = DIDExtra.createDeterministicDID(
-          masterKey = (masterKeyLabel, masterKey),
+          masterKey = masterKey,
           actions = addDIDCommEndpoints ++ addKey
         )
         prismObject = _root_.proto.prism.PrismObject(blockContent =
           Some(
             _root_.proto.prism.PrismBlock(
-              events = Seq(createSignedPrismEvent, updateSignedPrismEvent)
+              events = Seq(createSignedPrismEvent) ++ updateSignedPrismEvent
             )
           )
         )
@@ -177,7 +177,10 @@ object DIDCommand {
 
         _ <- Console.printLine(s"SSI: ${didPrism.string}")
         _ <- Console.printLine(
-          s"create+update SignedPrismEvent:\n${bytes2Hex(createSignedPrismEvent.toByteArray)} ${bytes2Hex(updateSignedPrismEvent.toByteArray)}"
+          s"create SignedPrismEvent:\n${bytes2Hex(createSignedPrismEvent.toByteArray)}"
+        )
+        _ <- Console.printLine(
+          s"update SignedPrismEvent:\n${updateSignedPrismEvent.map(e => bytes2Hex(e.toByteArray)).getOrElse(" Pure identifier (No extra actions no update)")}"
         )
       } yield ()
     }

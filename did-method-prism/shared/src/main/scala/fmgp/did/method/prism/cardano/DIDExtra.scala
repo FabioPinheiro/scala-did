@@ -5,6 +5,7 @@ import com.google.protobuf.ByteString
 import fmgp.crypto.Secp256k1PrivateKey
 import fmgp.did.method.prism.DIDPrism
 import fmgp.did.method.prism.proto.*
+import fmgp.util.bytes2Hex
 
 object DIDExtra {
 
@@ -50,9 +51,9 @@ object DIDExtra {
 
   /* https://github.com/input-output-hk/prism-did-method-spec/blob/main/extensions/deterministic-prism-did-generation-proposal.md */
   def createDeterministicDID(
-      masterKey: (String /*keyName*/, Secp256k1PrivateKey),
+      masterKey: Secp256k1PrivateKey,
       actions: Seq[UpdateDidOP.Action],
-  ): (DIDPrism, SignedPrismEvent, SignedPrismEvent) = {
+  ): (DIDPrism, SignedPrismEvent, Option[SignedPrismEvent]) = {
     val createEvent: PrismEvent = PrismEvent(
       event = PrismEvent.Event.CreateDid(
         value = ProtoCreateDID(
@@ -60,9 +61,9 @@ object DIDExtra {
             ProtoCreateDID.DIDCreationData(
               publicKeys = Seq(
                 PublicKey(
-                  id = masterKey._1, // keyName
+                  id = Cip0000.keyLabel, // keyName
                   usage = KeyUsage.MASTER_KEY,
-                  keyData = masterKey._2.compressedKeyData
+                  keyData = masterKey.compressedKeyData
                 )
               ),
               services = Seq.empty, // Seq[proto.prism.Service],
@@ -73,27 +74,39 @@ object DIDExtra {
       )
     )
     val signedPrismCreateEventDID = SignedPrismEvent(
-      signedWith = masterKey._1,
-      signature = ByteString.copyFrom(masterKey._2.sign(createEvent.toByteArray)),
+      signedWith = Cip0000.keyLabel,
+      signature = ByteString.copyFrom(masterKey.sign(createEvent.toByteArray)),
       event = Some(createEvent)
     )
-    val updateEvent: PrismEvent =
-      PrismEvent(
-        event = PrismEvent.Event.UpdateDid(
-          value = ProtoUpdateDID(
-            previousEventHash = createEvent.getEventHash.byteString,
-            id = "", // defualt (not in use)
-            actions = actions.map(_.toProto)
-          )
-        )
-      )
-    val signedPrismUpdateEventDID = SignedPrismEvent(
-      signedWith = masterKey._1,
-      signature = ByteString.copyFrom(masterKey._2.sign(updateEvent.toByteArray)),
-      event = Some(updateEvent)
-    )
-
     val didPrism: DIDPrism = createEvent.didPrism.getOrElse(???) // '???' is ok
+
+    val signedPrismUpdateEventDID =
+      if (actions.isEmpty) None
+      else
+        Some {
+          val updateEvent: PrismEvent =
+            PrismEvent(
+              event = PrismEvent.Event.UpdateDid(
+                value = ProtoUpdateDID(
+                  previousEventHash = createEvent.getEventHash.byteString,
+                  id = { // id = "", // defualt (not in use)
+                    // See https://github.com/input-output-hk/prism-did-method-spec/issues/70
+                    assert(didPrism.specificId == bytes2Hex(createEvent.getEventHash.byteArray))
+                    didPrism.specificId
+                  },
+                  actions = actions.map(_.toProto)
+                )
+              )
+            )
+
+          val signedPrismUpdateEventDID = SignedPrismEvent(
+            signedWith = Cip0000.keyLabel,
+            signature = ByteString.copyFrom(masterKey.sign(updateEvent.toByteArray)),
+            event = Some(updateEvent)
+          )
+          // println(MaybeEvent.fromProtoForce2DIDEvent(signedPrismUpdateEventDID).view.operation.asDebugJson)
+          signedPrismUpdateEventDID
+        }
 
     (didPrism, signedPrismCreateEventDID, signedPrismUpdateEventDID)
   }
