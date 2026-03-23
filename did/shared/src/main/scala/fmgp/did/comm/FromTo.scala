@@ -27,7 +27,7 @@ private[comm] object FromTo {
     */
   inline def pattern = """^did:([^\s:]+):([^\/\?\#\s]+)(\/[^\?\#\s]*)?(\?[^\#\s]*)?(?![^\#\s]+)$""".r
 
-  /** @throws AssertionError if not a valid DIDURL with no fragment */
+  /** @throws java.lang.AssertionError if not a valid DIDURL with no fragment */
   inline def unsafe_parse(did: String) = did match {
     case pattern(namespace, subject, path, query) =>
       DIDURL(
@@ -69,7 +69,7 @@ object FROMTO {
     if (s.fragment.isEmpty) Right(unsafe_apply(s.string))
     else Left(FailToParse(s"MUST be DID URL with no fragment '$s'"))
   def fromForcedDIDURL(s: DIDURL) = s.toFROMTO // REMOVE
-  /** FIXME REMOVE method @throws AssertionError if not a valid DIDSubject */
+  /** FIXME REMOVE method @throws java.lang.AssertionError if not a valid DIDSubject */
   def force(s: String) = fromForcedDIDURL(DIDURL.unsafeParseString(s))
 
   given decoder: JsonDecoder[FROMTO] = JsonDecoder.string.mapOrFail(s => FROMTO.either(s).left.map(_.error))
@@ -101,7 +101,7 @@ object FROM {
   /** Like apply but for optimization (no runtime code hopefully) */
   private[did] inline def unsafe_apply(s: String): FROM = s
 
-  /** @throws AssertionError
+  /** @throws java.lang.AssertionError
     *   if not a valid DIDSubjectQ
     */
   def apply(s: String): FROM = s.tap(e => FromTo.unsafe_parse(e)) // 'tap' is to throws as soon as possible
@@ -137,7 +137,7 @@ object TO {
   /** Like apply but for optimization (no runtime code hopefully) */
   private[did] inline def unsafe_apply(s: String): TO = s
 
-  /** @throws AssertionError
+  /** @throws java.lang.AssertionError
     *   if not a valid DIDSubjectQ
     */
   def apply(s: String): TO = s.tap(e => FromTo.unsafe_parse(e)) // 'tap' is to throws as soon as possible

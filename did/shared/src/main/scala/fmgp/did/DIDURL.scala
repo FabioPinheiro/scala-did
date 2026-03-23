@@ -19,7 +19,7 @@ object DIDURL {
     case _ => Left(s"Fail to parse DIDURL: '$id'")
   }
 
-  /** @throws AssertionError if not a valid DIDSubject */
+  /** @throws java.lang.AssertionError if not a valid DIDSubject */
   inline def unsafeParseString(id: String): DIDURL = parseString(id) match
     case Right(value) => value
     case Left(fail)   => throw new java.lang.AssertionError(fail)

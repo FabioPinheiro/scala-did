@@ -630,6 +630,11 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     )
   )
   .jsConfigure(scalaJSLibConfigure)
+  .jsSettings(
+    // Skip ScalalyTyped generated package (fmgp.typings) from Scaladoc to avoid unresolvable
+    // JSDoc-style link queries like {TypeError} that ScalalyTyped copies from TypeScript definitions
+    Compile / doc / scalacOptions += "-skip-by-regex:fmgp\\.typings.*",
+  )
   .jsSettings( // Add JS-specific settings here
     // stReactEnableTreeShaking := Selection.NoneExcept("@noble/curves"),
     // stFlavour := Flavour.Slinky,

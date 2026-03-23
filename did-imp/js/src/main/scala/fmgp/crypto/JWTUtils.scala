@@ -21,7 +21,9 @@ extension (header: JWTHeader) {
     h
   }
 
-  def jsonStr: String = js.JSON.stringify(header.makeJWTHeader)
+  // NOTE: Using js.Dynamic.global.JSON instead of js.JSON to avoid Scaladoc TASTy resolution error:
+  // "undefined: scala.scalajs.js.JSON.stringify # -1: TermRef(...) at readTasty"
+  def jsonStr: String = js.Dynamic.global.JSON.stringify(header.makeJWTHeader.asInstanceOf[js.Any]).asInstanceOf[String]
 
   /** JWT uses base64url */
   def base64: Base64 = Base64.encode(jsonStr)

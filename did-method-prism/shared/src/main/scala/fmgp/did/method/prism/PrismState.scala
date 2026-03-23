@@ -16,11 +16,13 @@ import fmgp.did.method.prism.cardano.EventCursor
   *
   * ==Key Concepts==
   *
-  * '''SSI (Self-Sovereign Identity):''' A PRISM DID (e.g., `did:prism:xxx`) managed through [[CreateDidOP]],
-  * [[UpdateDidOP]], and [[DeactivateDidOP]] events. SSIs represent identity with keys and services.
+  * '''SSI (Self-Sovereign Identity):''' A PRISM DID (e.g., `did:prism:xxx`) managed through
+  * [[fmgp.did.method.prism.proto.CreateDidOP]], [[fmgp.did.method.prism.proto.UpdateDidOP]], and
+  * [[fmgp.did.method.prism.proto.DeactivateDidOP]] events. SSIs represent identity with keys and services.
   *
-  * '''VDR (Verifiable Data Registry):''' Storage entries owned by a DID, managed through [[CreateStorageEntryOP]],
-  * [[UpdateStorageEntryOP]], and [[DeactivateStorageEntryOP]] events. Used for storing arbitrary data on-chain.
+  * '''VDR (Verifiable Data Registry):''' Storage entries owned by a DID, managed through
+  * [[fmgp.did.method.prism.proto.CreateStorageEntryOP]], [[fmgp.did.method.prism.proto.UpdateStorageEntryOP]], and
+  * [[fmgp.did.method.prism.proto.DeactivateStorageEntryOP]] events. Used for storing arbitrary data on-chain.
   *
   * '''Event Chains:''' Operations form chains via `previousEventHash` references. Create operations start chains;
   * update/deactivate operations reference previous events. All events in a chain share the same root hash.
@@ -90,7 +92,7 @@ trait PrismStateRead {
     *
     * @return
     *   ZIO effect that may fail with `Throwable` (RuntimeException if event hash missing or type validation fails) and
-    *   succeeds with sequence of DID-related [[MySignedPrismEvent]]
+    *   succeeds with sequence of DID-related [[fmgp.did.method.prism.proto.MySignedPrismEvent]]
     */
   def getEventsForSSI(ssi: DIDSubject): ZIO[Any, Throwable, Seq[MySignedPrismEvent[
     CreateDidOP | UpdateDidOP | DeactivateDidOP
@@ -114,7 +116,7 @@ trait PrismStateRead {
     *   The VDR reference to query
     * @return
     *   ZIO effect that may fail with `Throwable` (RuntimeException if event hash missing or type validation fails) and
-    *   succeeds with sequence of storage-related [[MySignedPrismEvent]]
+    *   succeeds with sequence of storage-related [[fmgp.did.method.prism.proto.MySignedPrismEvent]]
     */
   def getEventsForVDR(
       refVDR: RefVDR
@@ -148,7 +150,7 @@ trait PrismStateRead {
   /** Gets the [[VDR]] state with full ownership validation. */
   def getVDR(ref: RefVDR): zio.ZIO[Any, Throwable, VDR] = getEventsForVDR(ref)
     .flatMap { events =>
-      events.headOption match
+      events.headOption match {
         case None            => ZIO.succeed(VDR.init(ref)) // owner is missing
         case Some(headEvent) =>
           headEvent.event match {
@@ -161,6 +163,7 @@ trait PrismStateRead {
             case event => // this should never happen
               ZIO.fail(new RuntimeException("The first event of the VDR MUST be a CreateStorageEntry"))
           }
+      }
     }
 
 }
@@ -171,7 +174,7 @@ object PrismState {
     MySignedPrismEvent[CreateDidOP | UpdateDidOP | DeactivateDidOP]
   ]] = {
     ZIO.foldLeft(seq)(Seq.empty[MySignedPrismEvent[OP.TypeDIDEvent]]) { (s, sEvent) =>
-      sEvent.event match
+      sEvent.event match {
         case _: CreateDidOP =>
           ZIO.succeed(s :+ sEvent.asInstanceOf[MySignedPrismEvent[OP.TypeDIDEvent]])
         case _: UpdateDidOP =>
@@ -179,6 +182,7 @@ object PrismState {
         case _: DeactivateDidOP =>
           ZIO.succeed(s :+ sEvent.asInstanceOf[MySignedPrismEvent[OP.TypeDIDEvent]])
         case sEvent => ZIO.fail(new RuntimeException("This Event is not a DID Event")) // FIXME
+      }
     }
   }
 
@@ -186,7 +190,7 @@ object PrismState {
     MySignedPrismEvent[CreateStorageEntryOP | UpdateStorageEntryOP | DeactivateStorageEntryOP]
   ]] = {
     ZIO.foldLeft(seq)(Seq.empty[MySignedPrismEvent[OP.TypeStorageEntryEvent]]) { (s, sEvent) =>
-      sEvent.event match
+      sEvent.event match {
         case _: CreateStorageEntryOP =>
           ZIO.succeed(s :+ sEvent.asInstanceOf[MySignedPrismEvent[OP.TypeStorageEntryEvent]])
         case _: UpdateStorageEntryOP =>
@@ -194,6 +198,7 @@ object PrismState {
         case _: DeactivateStorageEntryOP =>
           ZIO.succeed(s :+ sEvent.asInstanceOf[MySignedPrismEvent[OP.TypeStorageEntryEvent]])
         case sEvent => ZIO.fail(new RuntimeException("This Event is not a Storage Entry")) // FIXME
+      }
     }
   }
 
@@ -226,20 +231,23 @@ trait PrismState extends PrismStateRead { self =>
     *   Events with negative coordinates are fake (e.g. produced by [[proto.MaybeEvent.fromProtoForce]] without an
     *   explicit [[cardano.EventCursor]]).
     */
-  final def addEvent(event: MySignedPrismEvent[OP]): ZIO[Any, Exception, Unit] =
+  final def addEvent(event: MySignedPrismEvent[OP]): ZIO[Any, Exception, Unit] = {
     val c = event.eventCursor
-    if c.b < 0 || c.o < 0 then
+    if (c.b < 0 || c.o < 0) then {
       ZIO.fail(Exception(s"Refusing to add event with negative cursor $c — pass an explicit EventCursor"))
-    else addEventImpl(event)
+    } else addEventImpl(event)
+  }
 
   protected def addEventImpl(event: MySignedPrismEvent[OP]): ZIO[Any, Exception, Unit]
 
   /** Adds an event after filtering out invalid ones.
     *
-    * Only valid [[MySignedPrismEvent]] instances are added; invalid objects are silently ignored.
+    * Only valid [[fmgp.did.method.prism.proto.MySignedPrismEvent]] instances are added; invalid objects are silently
+    * ignored.
     */
-  def addMaybeEvent(maybeEvent: MaybeEvent[OP]): ZIO[Any, Exception, Unit] = maybeEvent match
+  def addMaybeEvent(maybeEvent: MaybeEvent[OP]): ZIO[Any, Exception, Unit] = maybeEvent match {
     case _: InvalidPrismObject       => ZIO.unit // self
     case _: InvalidSignedPrismEvent  => ZIO.unit // self
     case aux: MySignedPrismEvent[OP] => addEvent(aux)
+  }
 }

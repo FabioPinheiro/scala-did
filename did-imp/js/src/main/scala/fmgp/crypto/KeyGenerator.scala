@@ -56,7 +56,9 @@ trait KeyGeneratorWeb {
       jwk <- ZIO
         .fromPromiseJS(exportKey(format = KeyFormat.jwk, key = keyPair.privateKey))
         .catchAll { case ex => ZIO.fail(FailToGenerateKey(SomeThrowable(ex))) }
-      str = js.JSON.stringify(jwk)
+      // NOTE: Using js.Dynamic.global.JSON instead of js.JSON to avoid Scaladoc TASTy resolution error:
+      // "undefined: scala.scalajs.js.JSON.stringify # -1: TermRef(...) at readTasty"
+      str = js.Dynamic.global.JSON.stringify(jwk.asInstanceOf[js.Any]).asInstanceOf[String]
       ret <- str.fromJson[ECPrivateKey] match
         case Left(fail)   => ZIO.fail(FailToGenerateKey(CryptoFailToParse(fail)))
         case Right(value) => ZIO.succeed(value)
@@ -92,7 +94,9 @@ trait KeyGeneratorWeb {
       jwk <- ZIO
         .fromPromiseJS(exportKey(format = KeyFormat.jwk, key = keyPair.privateKey))
         .catchAll { case ex => ZIO.fail(FailToGenerateKey(SomeThrowable(ex))) }
-      str = js.JSON.stringify(jwk)
+      // NOTE: Using js.Dynamic.global.JSON instead of js.JSON to avoid Scaladoc TASTy resolution error:
+      // "undefined: scala.scalajs.js.JSON.stringify # -1: TermRef(...) at readTasty"
+      str = js.Dynamic.global.JSON.stringify(jwk.asInstanceOf[js.Any]).asInstanceOf[String]
       ret <- str.fromJson[OKPPrivateKey] match
         case Left(fail)   => ZIO.fail(FailToGenerateKey(CryptoFailToParse(fail)))
         case Right(value) => ZIO.succeed(value)
@@ -118,7 +122,9 @@ trait KeyGeneratorJose {
       jwk <- ZIO
         .fromPromiseJS(exportJWK(keyPair.privateKey))
         .catchAll { case ex => ZIO.fail(FailToGenerateKey(SomeThrowable(ex))) }
-      str = js.JSON.stringify(jwk)
+      // NOTE: Using js.Dynamic.global.JSON instead of js.JSON to avoid Scaladoc TASTy resolution error:
+      // "undefined: scala.scalajs.js.JSON.stringify # -1: TermRef(...) at readTasty"
+      str = js.Dynamic.global.JSON.stringify(jwk.asInstanceOf[js.Any]).asInstanceOf[String]
       ret <- str.fromJson[ECPrivateKey] match
         case Left(fail)   => ZIO.fail(FailToGenerateKey(CryptoFailToParse(fail)))
         case Right(value) => ZIO.succeed(value)
@@ -136,7 +142,9 @@ trait KeyGeneratorJose {
       jwk <- ZIO
         .fromPromiseJS(exportJWK(keyPair.privateKey))
         .catchAll { case ex => ZIO.fail(FailToGenerateKey(SomeThrowable(ex))) }
-      str = js.JSON.stringify(jwk)
+      // NOTE: Using js.Dynamic.global.JSON instead of js.JSON to avoid Scaladoc TASTy resolution error:
+      // "undefined: scala.scalajs.js.JSON.stringify # -1: TermRef(...) at readTasty"
+      str = js.Dynamic.global.JSON.stringify(jwk.asInstanceOf[js.Any]).asInstanceOf[String]
       ret <- str.fromJson[OKPPrivateKey] match
         case Left(fail)   => ZIO.fail(FailToGenerateKey(CryptoFailToParse(fail)))
         case Right(value) => ZIO.succeed(value)

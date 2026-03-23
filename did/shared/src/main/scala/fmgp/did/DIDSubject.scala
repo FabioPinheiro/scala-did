@@ -14,7 +14,7 @@ import fmgp.crypto.error.*
 opaque type DIDSubject = String
 object DIDSubject {
 
-  /** @throws AssertionError if not a valid DIDSubject */
+  /** @throws java.lang.AssertionError if not a valid DIDSubject */
   inline def unsafeParseString(id: String) = parseString(id) match
     case Right(value) => value // (namespace, specificId)
     case Left(error)  => throw new java.lang.AssertionError(error)
@@ -50,7 +50,7 @@ object DIDSubject {
 
   /** unsave TODO rename to maybe instead of apply
     *
-    * @throws AssertionError
+    * @throws java.lang.AssertionError
     *   if not a valid DIDSubject
     */
   def apply(s: String): DIDSubject = s.tap(e => unsafeParseString(e)) // 'tap' is to throws as soon as possible
@@ -103,7 +103,7 @@ object DIDSubjectQ {
     */
   val pattern = """^did:([^\s:]+):([^\?\#\s]+)(\?[^\#\s:]*)?(?!\#.*)$""".r
 
-  /** @throws AssertionError if not a valid DIDSubjectQ */
+  /** @throws java.lang.AssertionError if not a valid DIDSubjectQ */
   inline def unsafeParseString(id: String) = parseString(id) match
     case Right(value) => value // (namespace, subject, query)
     case Left(error)  => throw new java.lang.AssertionError(error)
@@ -141,7 +141,7 @@ object DIDSubjectQ {
 
   /** unsave TODO rename to maybe instead of apply
     *
-    * @throws AssertionError
+    * @throws java.lang.AssertionError
     *   if not a valid DIDSubjectQ
     */
   def apply(s: String): DIDSubjectQ = s.tap(e => unsafeParseString(e)) // 'tap' is to throws as soon as possible
