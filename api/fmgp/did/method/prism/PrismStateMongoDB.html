@@ -171,62 +171,6 @@ node8 -> node2;
          <button class="icon-button show-content expand"></button>
          <h4 class="groupHeader h200">Concrete methods</h4>
         </div>
-        <div class="documentableElement" id="addEvent-fffff6de" data-f-keywords="override">
-         <div class="documentableElement-expander">
-          <button class="icon-button ar show-content"></button>
-          <div class="header monospace mono-medium">
-           <div class="signature">
-            <span class="modifiers"><span t="k">override </span></span><span class="kind"><span t="k">def </span></span><a href="PrismStateMongoDB.html#addEvent-fffff6de" t="n" class="documentableName ">addEvent</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">event</span>: <a href="proto/MySignedPrismEvent.html" t="t">MySignedPrismEvent</a>[<a href="proto/OP.html" t="t">OP</a>]): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Exception" t="t">Exception</a>, <a href="https://www.scala-lang.org/api/2.13.16/scala/Unit.html" t="t">Unit</a>]
-           </div>
-          </div>
-         </div>
-         <div class="docs">
-          <span class="modifiers"></span>
-          <div>
-           <div class="originInfo"></div>
-           <div class="memberDocumentation">
-            <div class="documentableBrief doc">
-             <p>Adds event to MongoDB with automatic rootRef tracking.</p>
-            </div>
-            <div class="cover">
-             <div class="doc">
-              <p>Adds event to MongoDB with automatic rootRef tracking.</p>
-              <p>Implements two-collection strategy:</p>
-              <ul>
-               <li>Events with no <code>previousEventHash</code> (Create ops) go to main collection with <code>rootRef = eventHash</code></li>
-               <li>Events with <code>previousEventHash</code> look up the parent: 
-                <ul>
-                 <li>If parent exists, event goes to main collection with parent's <code>rootRef</code></li>
-                 <li>If parent missing, event goes to lost collection</li>
-                </ul></li>
-              </ul>
-             </div>
-             <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Note
-              </dt>
-              <dd class="body-medium">
-               <div>
-                <div>
-                 <p>VoidOP operations are not supported and will fail with RuntimeException</p>
-                </div>
-               </div>
-              </dd>
-              <dt class="body-small">
-               Definition Classes
-              </dt>
-              <dd class="body-medium">
-               <div>
-                <a href="PrismState.html">PrismState</a>
-               </div>
-              </dd>
-             </dl>
-            </div>
-           </div>
-          </div>
-         </div>
-        </div>
         <div class="documentableElement" id="cursor-0" data-f-keywords="override">
          <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>
@@ -328,6 +272,48 @@ node8 -> node2;
         <div class="documentableList-expander">
          <button class="icon-button show-content expand"></button>
          <h4 class="groupHeader h200">Inherited methods</h4>
+        </div>
+        <div class="documentableElement" id="addEvent-fffff6de" data-f-keywords="final" data-f-inherited="PrismState">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="PrismStateMongoDB.html#addEvent-fffff6de" t="n" class="documentableName ">addEvent</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">event</span>: <a href="proto/MySignedPrismEvent.html" t="t">MySignedPrismEvent</a>[<a href="proto/OP.html" t="t">OP</a>]): <span data-unresolved-link="" t="t">ZIO</span>[<span data-unresolved-link="" t="t">Any</span>, <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Exception" t="t">Exception</a>, <a href="https://www.scala-lang.org/api/2.13.16/scala/Unit.html" t="t">Unit</a>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Adds a signed PRISM event to the state.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Adds a signed PRISM event to the state.</p>
+              <p>Events are indexed without validation. Implementations may handle out-of-order events differently.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>Fails with <a href="https://www.scala-lang.org/api/2.13.16/scala.html#Exception">Exception</a> if the event has negative cursor coordinates. Real blockchain indices are always &gt;= 0. Events with negative coordinates are fake (e.g. produced by <a href="proto/MaybeEvent$.html#fromProtoForce-fb3">proto.MaybeEvent.fromProtoForce</a> without an explicit <a href="cardano/EventCursor.html">cardano.EventCursor</a>).</p>
+              </dd>
+              <dt class="body-small">
+               Inherited from:
+              </dt>
+              <dd class="body-medium">
+               <a href="PrismState.html#addEvent-fffff6de">PrismState</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="addMaybeEvent-fffff58d" data-f-inherited="PrismState">
          <div class="documentableElement-expander">
