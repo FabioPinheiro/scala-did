@@ -145,7 +145,7 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
     *
     * Validation is then when it's been resolved.
     */
-  override def addEvent(op: MySignedPrismEvent[OP]): ZIO[Any, Nothing, Unit] = op match
+  override protected def addEventImpl(op: MySignedPrismEvent[OP]): ZIO[Any, Nothing, Unit] = op match
     case MySignedPrismEvent(tx, prismBlockIndex, prismEventIndex, signedWith, signature, pb) => {
       val opId = op.eventRef // rename to eventRef
 

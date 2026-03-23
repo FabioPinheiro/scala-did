@@ -320,7 +320,7 @@ case class PrismStateMongoDB(reactiveMongoApi: ReactiveMongoApi) extends PrismSt
     * @note
     *   VoidOP operations are not supported and will fail with RuntimeException
     */
-  override def addEvent(event: MySignedPrismEvent[OP]): ZIO[Any, Exception, Unit] = {
+  override protected def addEventImpl(event: MySignedPrismEvent[OP]): ZIO[Any, Exception, Unit] = {
     for {
       _ <- ZIO.logInfo(s"inserting event '${event.eventHash.hex}'")
       coll <- collection

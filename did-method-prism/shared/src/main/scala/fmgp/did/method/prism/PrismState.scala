@@ -220,8 +220,19 @@ trait PrismState extends PrismStateRead { self =>
   /** Adds a signed PRISM event to the state.
     *
     * Events are indexed without validation. Implementations may handle out-of-order events differently.
+    *
+    * @return
+    *   Fails with [[Exception]] if the event has negative cursor coordinates. Real blockchain indices are always >= 0.
+    *   Events with negative coordinates are fake (e.g. produced by [[proto.MaybeEvent.fromProtoForce]] without an
+    *   explicit [[cardano.EventCursor]]).
     */
-  def addEvent(event: MySignedPrismEvent[OP]): ZIO[Any, Exception, Unit]
+  final def addEvent(event: MySignedPrismEvent[OP]): ZIO[Any, Exception, Unit] =
+    val c = event.eventCursor
+    if c.b < 0 || c.o < 0 then
+      ZIO.fail(Exception(s"Refusing to add event with negative cursor $c — pass an explicit EventCursor"))
+    else addEventImpl(event)
+
+  protected def addEventImpl(event: MySignedPrismEvent[OP]): ZIO[Any, Exception, Unit]
 
   /** Adds an event after filtering out invalid ones.
     *

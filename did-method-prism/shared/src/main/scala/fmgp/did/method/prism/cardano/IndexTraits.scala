@@ -34,6 +34,9 @@ case class EventCursor(b: Int, o: Int) extends PrismEventIndex {
 }
 object EventCursor {
   def init: EventCursor = EventCursor(-1, -1)
+
+  /** Fake cursor for events with no real blockchain position (e.g. offline/test tooling). */
+  def fake: EventCursor = EventCursor(-1, -1)
   given Ordering[EventCursor] = Ordering.by(e => (e.b, e.o))
   given decoder: JsonDecoder[EventCursor] = DeriveJsonDecoder.gen[EventCursor]
   given encoder: JsonEncoder[EventCursor] = DeriveJsonEncoder.gen[EventCursor]
