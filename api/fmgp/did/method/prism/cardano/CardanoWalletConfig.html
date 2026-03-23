@@ -463,6 +463,56 @@ node6 -> node2;
           </div>
          </div>
         </div>
+        <div class="documentableElement" id="x25519DerivePrism-e65" data-f-extension="from fmgp.did.method.prism.cardano">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="../cardano.html#x25519DerivePrism-e65" t="n" class="documentableName ">x25519DerivePrism</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">didIndex</span>: <a href="https://www.scala-lang.org/api/2.13.16/scala/Int.html" t="t">Int</a> = ..., <span t="k"></span><span data-unresolved-link="" t="n">keyUsage</span>: <a href="../proto/PrismKeyUsage.html" t="t">PrismKeyUsage</a> = ..., <span t="k"></span><span data-unresolved-link="" t="n">keyIndex</span>: <a href="https://www.scala-lang.org/api/2.13.16/scala/Int.html" t="t">Int</a> = ...): <a href="https://doc.did.fmgp.app/api/fmgp/crypto/OKPPrivateKeyWithoutKid.html" t="t">OKPPrivateKeyWithoutKid</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo">
+            Extension method from <a href="../cardano.html">fmgp.did.method.prism.cardano</a>
+           </div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Derives an X25519 key-agreement key from the HD wallet.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Derives an X25519 key-agreement key from the HD wallet.</p>
+              <p>Ed25519 (Twisted Edwards) and X25519 (Montgomery) are birationally equivalent forms of Curve25519. In BIP32-Ed25519, <code>kL</code> (the left 32 bytes of the extended key) is already a clamped scalar - identical to what X25519 scalar multiplication requires per RFC 7748. Passing <code>kL</code> directly to <code>X25519.publicFromPrivate</code> (which re-clamps internally) is idempotent and correct.</p>
+              <p>This is '''not''' equivalent to libsodium's <code>crypto_sign_ed25519_sk_to_curve25519</code>, which expects a standard RFC 8032 seed and SHA-512 hashes it first. BIP32-Ed25519 <code>kL</code> is already the scalar, not a seed, so no hashing is applied here.</p>
+              <p>Key separation: the X25519 key uses <code>KeyAgreementKeyUsage</code> (path <code>3'</code>), while Ed25519 signing keys use distinct paths (<code>4'</code>, <code>6'</code>, ...). Different paths produce different <code>kL</code> values, so there is no scalar reuse between signing and key-agreement keys.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               See also
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p><a href="https://datatracker.ietf.org/doc/html/rfc7748">RFC 7748 - X25519</a></p>
+                </div>
+                <div>
+                 <p><a href="https://input-output-hk.github.io/adrestia/static/Ed25519_BIP.pdf">BIP32-Ed25519 (Khovratovich &amp;amp; Law 2017)</a></p>
+                </div>
+                <div>
+                 <p><a href="https://eprint.iacr.org/2021/509.pdf">Thormarker 2021 - Joint Ed25519+X25519 security</a></p>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
        </div>
       </section>
       <section id="Inherited-methods">
