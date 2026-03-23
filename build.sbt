@@ -178,7 +178,7 @@ lazy val V = new {
   val upickle = "4.3.2"
 
   val identusApollo = "1.8.0" // "1.7.1"
-  val scalus = "0.15.1"
+  val scalus = "0.16.0"
 }
 
 /** NPM Dependencies */
