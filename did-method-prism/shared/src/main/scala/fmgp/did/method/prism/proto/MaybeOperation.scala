@@ -188,16 +188,25 @@ object MaybeEvent {
               protobuf = prismEvent,
             )
 
-  def fromProtoForce(signedPrismEvent: SignedPrismEvent): MySignedPrismEvent[OP] =
-    fromProto(signedPrismEvent = signedPrismEvent, tx = "fake_tx", blockIndex = -1, opIndex = -1) match
+  def fromProtoForce(
+      signedPrismEvent: SignedPrismEvent,
+      cursor: EventCursor = EventCursor.fake,
+  ): MySignedPrismEvent[OP] =
+    fromProto(signedPrismEvent = signedPrismEvent, tx = "fake_tx", blockIndex = cursor.b, opIndex = cursor.o) match
       case InvalidPrismObject(tx, b, reason)                                   => ???
       case InvalidSignedPrismEvent(tx, b, o, reason)                           => ???
       case obj @ MySignedPrismEvent(tx, b, o, signedWith, signature, protobuf) => obj
 
-  def fromProtoForce2DIDEvent(signedPrismEvent: SignedPrismEvent): MySignedPrismEvent[OP.TypeDIDEvent] =
-    fromProtoForce(signedPrismEvent).asSignedPrismDIDEvent.getOrElse(???)
+  def fromProtoForce2DIDEvent(
+      signedPrismEvent: SignedPrismEvent,
+      cursor: EventCursor = EventCursor.fake,
+  ): MySignedPrismEvent[OP.TypeDIDEvent] =
+    fromProtoForce(signedPrismEvent, cursor).asSignedPrismDIDEvent.getOrElse(???)
 
-  def fromProtoForce2StorageEntry(signedPrismEvent: SignedPrismEvent): MySignedPrismEvent[OP.TypeStorageEntryEvent] =
-    fromProtoForce(signedPrismEvent).asSignedPrismStorageEntryEvent.getOrElse(???)
+  def fromProtoForce2StorageEntry(
+      signedPrismEvent: SignedPrismEvent,
+      cursor: EventCursor = EventCursor.fake,
+  ): MySignedPrismEvent[OP.TypeStorageEntryEvent] =
+    fromProtoForce(signedPrismEvent, cursor).asSignedPrismStorageEntryEvent.getOrElse(???)
 
 }
