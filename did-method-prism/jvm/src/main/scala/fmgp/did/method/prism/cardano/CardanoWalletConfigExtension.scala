@@ -8,8 +8,9 @@ import scalus.cardano.wallet.hd.*
 import scalus.cardano.txbuilder.TransactionSigner
 import scalus.crypto.ed25519.given
 
-import fmgp.crypto.Secp256k1PrivateKey
+import fmgp.crypto.{Secp256k1PrivateKey, OKPPrivateKeyWithoutKid, KTY, Curve}
 import fmgp.did.method.prism.proto.PrismKeyUsage
+import fmgp.util.Base64
 
 extension (wallet: CardanoWalletConfig) {
 
@@ -66,4 +67,42 @@ extension (wallet: CardanoWalletConfig) {
   )
   def ed25519DerivePath(path: String) =
     HdKeyPair.fromMnemonic(mnemonic = wallet.mnemonicPhrase, passphrase = wallet.passphrase, path = path)
+
+  /** Derives an X25519 key-agreement key from the HD wallet.
+    *
+    * Ed25519 (Twisted Edwards) and X25519 (Montgomery) are birationally equivalent forms of Curve25519. In
+    * BIP32-Ed25519, `kL` (the left 32 bytes of the extended key) is already a clamped scalar - identical to what X25519
+    * scalar multiplication requires per RFC 7748. Passing `kL` directly to `X25519.publicFromPrivate` (which re-clamps
+    * internally) is idempotent and correct.
+    *
+    * This is '''not''' equivalent to libsodium's `crypto_sign_ed25519_sk_to_curve25519`, which expects a standard RFC
+    * 8032 seed and SHA-512 hashes it first. BIP32-Ed25519 `kL` is already the scalar, not a seed, so no hashing is
+    * applied here.
+    *
+    * Key separation: the X25519 key uses `KeyAgreementKeyUsage` (path `3'`), while Ed25519 signing keys use distinct
+    * paths (`4'`, `6'`, ...). Different paths produce different `kL` values, so there is no scalar reuse between
+    * signing and key-agreement keys.
+    *
+    * @see
+    *   [[https://datatracker.ietf.org/doc/html/rfc7748 RFC 7748 - X25519]]
+    * @see
+    *   [[https://input-output-hk.github.io/adrestia/static/Ed25519_BIP.pdf BIP32-Ed25519 (Khovratovich & Law 2017)]]
+    * @see
+    *   [[https://eprint.iacr.org/2021/509.pdf Thormarker 2021 - Joint Ed25519+X25519 security]]
+    */
+  def x25519DerivePrism(
+      didIndex: Int = 0,
+      keyUsage: PrismKeyUsage = PrismKeyUsage.KeyAgreementKeyUsage,
+      keyIndex: Int = 0
+  ): OKPPrivateKeyWithoutKid = {
+    val hdKeyPair: HdKeyPair = ed25519DerivePath(Cip0000.didPath(didIndex, keyUsage, keyIndex))
+    val kL: Array[Byte] = hdKeyPair.extendedKey.kL
+    val pubBytes: Array[Byte] = com.google.crypto.tink.subtle.X25519.publicFromPrivate(kL)
+    OKPPrivateKeyWithoutKid(
+      kty = KTY.OKP,
+      crv = Curve.X25519,
+      d = Base64.encode(kL).urlBase64WithoutPadding,
+      x = Base64.encode(pubBytes).urlBase64WithoutPadding,
+    )
+  }
 }
