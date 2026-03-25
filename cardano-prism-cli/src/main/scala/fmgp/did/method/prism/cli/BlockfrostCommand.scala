@@ -159,6 +159,12 @@ object BlockfrostCommand {
           txHash <- ScalusService
             .submitTransaction(tx)
             .provideEnvironment(ZEnvironment(bfConfig))
+          _ <- bfConfig.network match
+            case PublicCardanoNetwork.Mainnet =>
+              Console.printLine(s"See https://neoprism.patlo.dev/resolver?did=did:prism:???")
+            case PublicCardanoNetwork.Preprod =>
+              Console.printLine(s"See https://neoprism-preprod.patlo.dev/resolver?did=did:prism:???")
+            case _ => ZIO.unit
           _ <- Console
             .printLine(s"See https://${bfConfig.network.name}.cardanoscan.io/transaction/${txHash.hex}?tab=metadata")
         } yield (txHash)

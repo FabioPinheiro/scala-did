@@ -26,14 +26,17 @@ case class Uniresolver(uniresolverServer: String, client: Client, scope: Scope) 
     // if (!methods.contains(did.toDID.namespace)) ZIO.fail(DidMethodNotSupported(did.toDID.namespace))
     // else
     for {
+      _ <- ZIO.unit
+      path = uniresolverServer + did
       res <- Client
-        .batched(Request.get(path = uniresolverServer + did))
+        .batched(Request.get(path = path))
         .provideEnvironment(ZEnvironment(client) ++ ZEnvironment(scope))
         .mapError(ex => DIDresolutionFail.fromThrowable(ex))
       data <- res.body.asString
         .mapError(ex => DIDresolutionFail.fromThrowable(ex))
       didResolutionResult <- data.fromJson[DIDResolutionResult] match
-        case Left(error)  => ZIO.fail(DIDresolutionFail.fromParseError("DIDResolutionResult", error))
+        case Left(error) =>
+          ZIO.fail(DIDresolutionFail.fromParseError("DIDResolutionResult", error + s" from '${path}'"))
         case Right(value) => ZIO.succeed(value.didDocument)
     } yield (didResolutionResult)
   }

@@ -180,6 +180,8 @@ object VDRCommand {
                 case Some(KeySecp256k1(derivationPath, key)) => ZIO.succeed(key)
                 case Some(KeyEd25519(derivationPath, key))   =>
                   ZIO.fail(PrismCliError(s"Key '$vdrKeyLabel' found but is not of the type secp256k1"))
+                case Some(KeyX25519(derivationPath, key)) =>
+                  ZIO.fail(PrismCliError(s"Key '$vdrKeyLabel' found but is not of the type secp256k1"))
                 case None => ZIO.fail(PrismCliError(s"No Key found with label '$vdrKeyLabel'"))
               }
         driver = GenericVDRDriver(

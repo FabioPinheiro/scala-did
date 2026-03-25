@@ -4,18 +4,18 @@ import scala.jdk.CollectionConverters.*
 import scala.util.Try
 
 import zio.*
+import zio.json.*
 import zio.cli.*
 
 import fmgp.util.bytes2Hex
-import fmgp.crypto.Secp256k1PrivateKey
+import fmgp.crypto.*
 import org.hyperledger.identus.apollo.derivation.MnemonicHelper
 import org.hyperledger.identus.apollo.derivation.HDKey
 import fmgp.did.method.prism.*
 import fmgp.did.method.prism.cardano.*
 import fmgp.did.method.prism.cardano.DIDExtra
 import fmgp.did.method.prism.proto.PrismKeyUsage
-import fmgp.did.method.prism.cli.CMD.KeyEd25519FromMnemonic
-import fmgp.did.method.prism.cli.CMD.Keysepc256k1FromMnemonic
+import fmgp.did.method.prism.cli.CMD.*
 import fmgp.util.hex2bytes
 
 object KeyCommand {
@@ -94,15 +94,16 @@ object KeyCommand {
           .map { case (mWallet, derivationPath, keyLabel) =>
             (setup: Setup) => CMD.Mnemonic2Key(setup, mWallet, derivationPath, keyLabel)
           },
-        Command(
-          "did-deterministic",
-          Options.none ++ walletOpt.optional,
-          Args.integer("DID index").??("index of the DID (starts in 0)")
-        )
-          .withHelp("Make Test Vector for the Deterministic PRISM DID Generation Proposal")
-          .map { case (mWallet, index) =>
-            (setup: Setup) => CMD.Mnemonic2Key2SSITestVector(setup, mWallet, index.toInt)
-          }
+        // TODO REMOVE
+        // Command(
+        //   "did-deterministic",
+        //   Options.none ++ walletOpt.optional,
+        //   Args.integer("DID index").??("index of the DID (starts in 0)")
+        // )
+        //   .withHelp("Make Test Vector for the Deterministic PRISM DID Generation Proposal")
+        //   .map { case (mWallet, index) =>
+        //     (setup: Setup) => CMD.Mnemonic2Key2SSITestVector(setup, mWallet, index.toInt)
+        //   }
       )
       .map { case (setup, f) => f(setup) }
 
@@ -120,6 +121,22 @@ object KeyCommand {
           )
         }
         text = s"Key Ed25519 From Mnemonic with path $path '${bytes2Hex(keyBytes)}'"
+        _ <- ZIO.log(text)
+        _ <- Console.printLine(text)
+      } yield ()).provideLayer(cmd.setup.layer).orDie
+    case KeyX25519FromMnemonic(setup, ssiWallet, didIndex, keyUsage, keyIndex, keyLabel) =>
+      (for {
+        _ <- ZIO.unit
+        path = Cip0000.didPath(didIndex, keyUsage, keyIndex)
+        key = ssiWallet.x25519DerivePrism(didIndex, keyUsage, keyIndex)
+        // keyBytes = key.extendedKey.extendedSecretKey
+        _ <- forceStateUpdateAtEnd
+        _ <- updateState { stagingState =>
+          stagingState.copy(ssiPrivateKeys =
+            stagingState.ssiPrivateKeys.+(keyLabel -> KeyX25519(derivationPath = path, key = key))
+          )
+        }
+        text = s"Key X25519 From Mnemonic with path $path '${(key: OKP_EC_Key).toJson}'"
         _ <- ZIO.log(text)
         _ <- Console.printLine(text)
       } yield ()).provideLayer(cmd.setup.layer).orDie
@@ -179,59 +196,60 @@ object KeyCommand {
         }
         _ <- Console.printLine(bytes2Hex(key.getEncoded())).orDie
       } yield ()).provideLayer(setup.layer)
-    case CMD.Mnemonic2Key2SSITestVector(setup, mWallet, index) =>
-      val (info, wallet) = mWallet.orElse(setup.mState.flatMap(_.ssiWallet)) match
-        case Some(wallet) => (s"Lodding wallett: $wallet", wallet)
-        case None         => { val tmp = MnemonicCommand.newWallet; (s"Generateing new wallet: $tmp", tmp) }
-      (for {
-        _ <- Console.printLine("# Deterministic PRISM DID")
-        seed = MnemonicHelper.Companion.createSeed(wallet.mnemonic.asJava, wallet.passphrase)
-        _ <- Console.printLine(s"mnemonic= ${wallet.mnemonic.mkString(" ")}")
-        _ <- Console.printLine(s"seed='${bytes2Hex(seed)}'")
-        master0derivationPath = s"m/29'/29'/$index'/1'/0'"
-        master1derivationPath = s"m/29'/29'/$index'/1'/1'"
-        vdr0derivationPath = s"m/29'/29'/$index'/8'/0'"
-        _ <- Console.printLine(s"derivationPath=$master0derivationPath")
-        masterkey <- Try(HDKey(seed, 0, 0).derive(master0derivationPath))
-          .map(ZIO.succeed(_))
-          .recover { ex =>
-            ex.printStackTrace();
-            ZIO.fail(ex)
-          }
-          .get
-        key = masterkey.getKMMSecp256k1PrivateKey()
-        _ <- Console.printLine("PrivateKey=" + bytes2Hex(key.getRaw()))
-        _ <- Console.printLine("PublicKey=" + bytes2Hex(key.getPublicKey().getCompressed()))
+    // TODO REMOVE
+    // case CMD.Mnemonic2Key2SSITestVector(setup, mWallet, index) =>
+    //   val (info, wallet) = mWallet.orElse(setup.mState.flatMap(_.ssiWallet)) match
+    //     case Some(wallet) => (s"Lodding wallett: $wallet", wallet)
+    //     case None         => { val tmp = MnemonicCommand.newWallet; (s"Generateing new wallet: $tmp", tmp) }
+    //   (for {
+    //     _ <- Console.printLine("# Deterministic PRISM DID")
+    //     seed = MnemonicHelper.Companion.createSeed(wallet.mnemonic.asJava, wallet.passphrase)
+    //     _ <- Console.printLine(s"mnemonic= ${wallet.mnemonic.mkString(" ")}")
+    //     _ <- Console.printLine(s"seed='${bytes2Hex(seed)}'")
+    //     master0derivationPath = s"m/29'/29'/$index'/1'/0'"
+    //     master1derivationPath = s"m/29'/29'/$index'/1'/1'"
+    //     vdr0derivationPath = s"m/29'/29'/$index'/8'/0'"
+    //     _ <- Console.printLine(s"derivationPath=$master0derivationPath")
+    //     masterkey <- Try(HDKey(seed, 0, 0).derive(master0derivationPath))
+    //       .map(ZIO.succeed(_))
+    //       .recover { ex =>
+    //         ex.printStackTrace();
+    //         ZIO.fail(ex)
+    //       }
+    //       .get
+    //     key = masterkey.getKMMSecp256k1PrivateKey()
+    //     _ <- Console.printLine("PrivateKey=" + bytes2Hex(key.getRaw()))
+    //     _ <- Console.printLine("PublicKey=" + bytes2Hex(key.getPublicKey().getCompressed()))
 
-        _ <- Try(HDKey(seed, 0, 0).derive(master1derivationPath))
-          .map(ZIO.succeed(_))
-          .recover { ex =>
-            ex.printStackTrace();
-            ZIO.fail(ex)
-          }
-          .get
-          .flatMap { k =>
-            Console.printLine(s"derivationPath=$master1derivationPath") *>
-              Console.printLine("PrivateKey=" + bytes2Hex(k.getKMMSecp256k1PrivateKey().getRaw()))
-          }
-        _ <- Try(HDKey(seed, 0, 0).derive(vdr0derivationPath))
-          .map(ZIO.succeed(_))
-          .recover { ex =>
-            ex.printStackTrace();
-            ZIO.fail(ex)
-          }
-          .get
-          .flatMap { k =>
-            Console.printLine(s"derivationPath=$vdr0derivationPath") *>
-              Console.printLine("PrivateKey=" + bytes2Hex(k.getKMMSecp256k1PrivateKey().getRaw()))
-          }
-        (didPrism, signedPrismEvent) = DIDExtra.createDID(
-          masterKeys = Seq(("master", Secp256k1PrivateKey(key.getRaw()))),
-          vdrKeys = Seq.empty,
-        )
-        _ <- Console.printLine(s"SSI: ${didPrism.string}")
-        _ <- Console.printLine(s"Protobuf: ${bytes2Hex(signedPrismEvent.toByteArray)}")
-        _ <- Console.printLine("You can you inspect the Protobuf in https://protobuf-decoder.netlify.app/")
-      } yield ()).orDie
+    //     _ <- Try(HDKey(seed, 0, 0).derive(master1derivationPath))
+    //       .map(ZIO.succeed(_))
+    //       .recover { ex =>
+    //         ex.printStackTrace();
+    //         ZIO.fail(ex)
+    //       }
+    //       .get
+    //       .flatMap { k =>
+    //         Console.printLine(s"derivationPath=$master1derivationPath") *>
+    //           Console.printLine("PrivateKey=" + bytes2Hex(k.getKMMSecp256k1PrivateKey().getRaw()))
+    //       }
+    //     _ <- Try(HDKey(seed, 0, 0).derive(vdr0derivationPath))
+    //       .map(ZIO.succeed(_))
+    //       .recover { ex =>
+    //         ex.printStackTrace();
+    //         ZIO.fail(ex)
+    //       }
+    //       .get
+    //       .flatMap { k =>
+    //         Console.printLine(s"derivationPath=$vdr0derivationPath") *>
+    //           Console.printLine("PrivateKey=" + bytes2Hex(k.getKMMSecp256k1PrivateKey().getRaw()))
+    //       }
+    //     (didPrism, signedPrismEvent) = DIDExtra.createDID(
+    //       masterKeys = Seq(("master", Secp256k1PrivateKey(key.getRaw()))),
+    //       vdrKeys = Seq.empty,
+    //     )
+    //     _ <- Console.printLine(s"SSI: ${didPrism.string}")
+    //     _ <- Console.printLine(s"Protobuf: ${bytes2Hex(signedPrismEvent.toByteArray)}")
+    //     _ <- Console.printLine("You can you inspect the Protobuf in https://protobuf-decoder.netlify.app/")
+    //   } yield ()).orDie
   }
 }
