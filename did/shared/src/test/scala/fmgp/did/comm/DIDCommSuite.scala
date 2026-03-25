@@ -69,4 +69,15 @@ class DIDCommSuite extends FunSuite {
     }
   }
 
+  test("Example parse NeoPrism DIDDocument") {
+    val ret = DIDCommExamples.neoPrismDIDDocument.fromJson[DIDDocument]
+    ret match {
+      case Left(error) => fail(error)
+      case Right(obj)  =>
+        assertEquals(obj.id.did, "did:prism:aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff0326422")
+        assert(obj.authentication.isDefined)
+        assertEquals(obj.assertionMethod.size, 1)
+    }
+  }
+
 }

@@ -22,6 +22,15 @@ val networkFlag =
     .enumeration[PublicCardanoNetwork]("network")(PublicCardanoNetwork.values.toSeq.map(e => (e.name, e))*)
     .withDefault(PublicCardanoNetwork.Mainnet)
 
+val networkMainnePreprodFlag = {
+  type AUX = PublicCardanoNetwork.Mainnet.type | PublicCardanoNetwork.Preprod.type
+  Options
+    .enumeration[AUX]("network")(
+      Seq[AUX](PublicCardanoNetwork.Mainnet, PublicCardanoNetwork.Preprod).map(e => (e.name, e))*
+    )
+    .withDefault(PublicCardanoNetwork.Mainnet)
+}
+
 val networkOnlineFlag =
   Options
     .enumeration[PublicCardanoNetwork]("network")(

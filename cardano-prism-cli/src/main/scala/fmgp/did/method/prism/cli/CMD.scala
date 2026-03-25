@@ -22,11 +22,12 @@ object CMD {
   final case class ConfigCMD(config: Setup, createFlag: Boolean) extends CMD
 
   sealed trait MnemonicCMD extends CMD
-  final case class MnemonicCreate(setup: Setup, walletTypeOpt: WalletType) extends MnemonicCMD
+  final case class MnemonicCreate(setup: Setup, walletTypeOpt: WalletType, wallet: Option[CardanoWalletConfig])
+      extends MnemonicCMD
   final case class MnemonicSeed(setup: Setup, mWallet: Option[CardanoWalletConfig]) extends MnemonicCMD
   final case class MnemonicAddress(
       setup: Setup,
-      walletOrType: CardanoWalletConfig | WalletType.SSIWallet.type | WalletType.AdaWallet.type,
+      walletOrType: CardanoWalletConfig | WalletType.AdaWallet.type,
       network: PublicCardanoNetwork,
   ) extends MnemonicCMD
 
@@ -62,6 +63,15 @@ object CMD {
       keyLabel: String,
   ) extends KeyCMD
 
+  final case class KeyX25519FromMnemonic(
+      override val setup: Setup,
+      ssiWallet: CardanoWalletConfig,
+      didIndex: Int,
+      keyUsage: PrismKeyUsage,
+      keyIndex: Int,
+      keyLabel: String,
+  ) extends KeyCMD
+
   final case class Keysepc256k1FromMnemonic(
       override val setup: Setup,
       ssiWallet: CardanoWalletConfig,
@@ -78,11 +88,12 @@ object CMD {
       keyLabel: Option[String]
   ) extends KeyCMD
 
-  final case class Mnemonic2Key2SSITestVector(
-      setup: Setup,
-      mWallet: Option[CardanoWalletConfig],
-      index: Int
-  ) extends KeyCMD
+// TODO REMOVE
+//   final case class Mnemonic2Key2SSITestVector(
+//       setup: Setup,
+//       mWallet: Option[CardanoWalletConfig],
+//       index: Int
+//   ) extends KeyCMD
 
   sealed trait DIDCMD extends CMD
   final case class DIDCreate(
@@ -103,6 +114,7 @@ object CMD {
   final case class DIDResolveFromFS(did: DIDPrism, workdir: Path, network: PublicCardanoNetwork) extends DIDCMD
   final case class DIDResolveFromEndpoint(did: DID, resolverEndpoint: URL) extends DIDCMD
   final case class DIDResolveFromUniresolver(did: DID, baseEndpoint: Option[String]) extends DIDCMD
+  final case class DIDResolveFromNeoPrism(did: DIDPrism, network: PublicCardanoNetwork) extends DIDCMD
 
   sealed trait VDRCMD extends CMD
   final case class VDRCreateBytes(

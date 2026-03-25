@@ -15,6 +15,8 @@ import fmgp.did.Resolver
 import fmgp.did.method.prism.proto.PrismKeyUsage
 import fmgp.did.method.prism.proto.UpdateDidOP
 import fmgp.did.method.prism.proto.MyService
+import fmgp.did.method.prism.proto.PrismPublicKey
+import fmgp.did.method.prism.cardano.PublicCardanoNetwork
 
 object DIDCommand {
 
@@ -80,7 +82,11 @@ object DIDCommand {
       .withHelp(HelpDoc.p("Resolve DIDs (using the 'https://dev.uniresolver.io/')"))
       .map { case (endpointValue, did) => CMD.DIDResolveFromUniresolver(did, endpointValue) }
 
-    c1 | c2 | c3 | c4
+    val c5 = Command("resolve-neoprism", networkMainnePreprodFlag, didPrismArg)
+      .withHelp(HelpDoc.p("Resolve DID PRISM (with NeoPrism)"))
+      .map { case (network, did) => CMD.DIDResolveFromNeoPrism(did, network) }
+
+    c1 | c2 | c3 | c4 | c5
   }
 
   val command: Command[CMD.DIDCMD] =
@@ -98,6 +104,7 @@ object DIDCommand {
             .map {
               case KeySecp256k1(derivationPath, key) => key
               case KeyEd25519(derivationPath, key)   => ??? // TODO fail becuase type type is not supported
+              case KeyX25519(derivationPath, key)    => ??? // TODO fail becuase type type is not supported
             }
         )
         master = masterRaw
@@ -114,6 +121,7 @@ object DIDCommand {
                   .map {
                     case KeySecp256k1(derivationPath, key) => key
                     case KeyEd25519(derivationPath, key)   => ??? // TODO fail becuase type type is not supported
+                    case KeyX25519(derivationPath, key)    => ??? // TODO fail becuase type type is not supported
                   }
               )
               key = vdrRaw.map(rawHex => Utils.secp256k1FromRaw(rawHex)).orElse(alternative)
@@ -152,6 +160,13 @@ object DIDCommand {
                 secp256k1PrivateKey.compressedKey(id = id, keyUsage = key.path.keyUsage)
               case KeyEd25519(derivationPath, hdKeyPair) =>
                 hdKeyPair.compressedKey(id = id, keyUsage = key.path.keyUsage)
+              case KeyX25519(derivationPath, opkKey) =>
+                PrismPublicKey.CompressedECKey(
+                  id = id,
+                  usage = key.path.keyUsage,
+                  curve = "X25519",
+                  data = opkKey.toPublicKey.xBase64Url.decode
+                )
           }
           .map { compressedKey => UpdateDidOP.AddKey(compressedKey) }
         addDIDCommEndpoints = didCommServiceEndpoints.map { case (id, endpoint) =>
@@ -220,5 +235,26 @@ object DIDCommand {
         _ <- Console.printLine(diddoc.toJsonPretty) // .mapError(error => SomeThrowable(error))
       } yield ()
       program.provideSomeLayer(aux)
+    case CMD.DIDResolveFromNeoPrism(did, network) =>
+      for {
+        maybeResolver <- network match
+          case PublicCardanoNetwork.Mainnet =>
+            ZIO.some(DIDResolverProxy.layer("https://neoprism.patlo.dev/api/dids/"))
+          case PublicCardanoNetwork.Preprod =>
+            ZIO.some(DIDResolverProxy.layer("https://neoprism-preprod.patlo.dev/api/dids/"))
+          case _ => ZIO.logError(s"$network not suported") *> ZIO.none
+        program =
+          for {
+            _ <- ZIO.log(s"NeoPrism-Resolve ${did.string} on $network")
+            resolver <- ZIO.service[Resolver]
+            diddoc <- resolver.didDocument(did.asFROMTO).orDieWith(error => new RuntimeException(error.toString()))
+            _ <- Console.printLine(diddoc.toJsonPretty) // .mapError(error => SomeThrowable(error))
+          } yield (diddoc)
+        _ <- maybeResolver match
+          case None           => ZIO.unit
+          case Some(resolver) =>
+            val aux = (Client.default ++ Scope.default >>> HttpUtils.layer) >>> resolver
+            program.provideSomeLayer(aux)
+      } yield ()
 
 }

@@ -7,7 +7,7 @@ import java.nio.file.Path
 import scalus.cardano.wallet.hd.HdKeyPair
 import scalus.cardano.wallet.hd.Bip32Ed25519
 import scalus.crypto.ed25519.given
-import fmgp.crypto.Secp256k1PrivateKey
+import fmgp.crypto.*
 import fmgp.did.method.prism.BlockfrostConfig
 import fmgp.did.method.prism.BlockfrostRyoConfig
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
@@ -22,6 +22,7 @@ sealed trait Key {
 }
 case class KeySecp256k1(derivationPath: String, key: Secp256k1PrivateKey) extends Key { def secp256k1PrivateKey = key }
 case class KeyEd25519(derivationPath: String, key: HdKeyPair) extends Key
+case class KeyX25519(derivationPath: String, key: OKPPrivateKeyWithoutKid) extends Key
 
 object Key {
   given decoder: JsonDecoder[Key] = {

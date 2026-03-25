@@ -303,4 +303,7 @@ object DIDCommExamples {
       }
    ]
 }""".stripMargin
+
+  val neoPrismDIDDocument =
+    """{"@context":["https://www.w3.org/ns/did/v1"],"id":"did:prism:aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff0326422","alsoKnownAs":null,"verificationMethod":[{"id":"did:prism:aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff0326422#key-0-Issuing-0","type":"JsonWebKey2020","controller":"did:prism:aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff0326422","publicKeyJwk":{"kty":"OKP","crv":"Ed25519","x":"GKJfOkIImunUHy6kBUm_BFwSAhkjpLdgSH0CN-DjbkA","y":null}}],"authentication":[],"assertionMethod":["did:prism:aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff0326422#key-0-Issuing-0"],"keyAgreement":[],"capabilityInvocation":[],"capabilityDelegation":[],"service":[{"id":"did:prism:aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff0326422#endpoint1","type":"DIDCommMessaging","serviceEndpoint":{"uri":"https://did.fabiopinheiro.com/"}}]}"""
 }
