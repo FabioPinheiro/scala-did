@@ -611,8 +611,8 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
     libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.6",
     // https://oss.sonatype.org/#nexus-search;quick~com.bloxbean.cardano
-    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.8.0-pre2",
-    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.8.0-pre2",
+    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.8.0-pre3",
+    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.8.0-pre3",
     libraryDependencies += D.reactivemongoProvided.value,
   )
   .settings(
