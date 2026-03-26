@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Typelevel Laika + Helium Theme" />
+  <title>Cardano PRISM CLI</title>
+  
+  
+  <meta name="description" content="Scala-did a DID Comm library for scala"/>
+  
+  
+  
+  <link rel="icon"  type="32x32" href="https://did.fmgp.app/favicon.ico"/>
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700">
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono:500">
+  
+  <link rel="stylesheet" type="text/css" href="../helium/site/icofont.min.css" />
+    <link rel="stylesheet" type="text/css" href="../helium/site/laika-helium.css" />
+  <script src="../helium/site/laika-helium.js"></script>
+  
+  
+  <script> /* for avoiding page load transitions */ </script>
+</head>
+
+  <body>
+
+    <header id="top-bar" class="light-default dark-default">
+
+  <div class="row">
+    <a id="nav-icon">
+      <i class="icofont-laika navigationMenu" title="Navigation">&#xefa2;</i>
+    </a>
+    
+    
+  </div>
+
+  <a class="icon-link glyph-link" href="../"><i class="icofont-laika home" title="Home">&#xef47;</i></a>
+
+  <div class="row links">
+    
+    <a class="icon-link svg-link" href="https://github.com/FabioPinheiro/scala-did"><span class="github" title="Source Code"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M49.995,1c-27.609,-0 -49.995,22.386 -49.995,50.002c-0,22.09 14.325,40.83 34.194,47.444c2.501,0.458 3.413,-1.086 3.413,-2.412c0,-1.185 -0.043,-4.331 -0.067,-8.503c-13.908,3.021 -16.843,-6.704 -16.843,-6.704c-2.274,-5.773 -5.552,-7.311 -5.552,-7.311c-4.54,-3.103 0.344,-3.042 0.344,-3.042c5.018,0.356 7.658,5.154 7.658,5.154c4.46,7.64 11.704,5.433 14.552,4.156c0.454,-3.232 1.744,-5.436 3.174,-6.685c-11.102,-1.262 -22.775,-5.553 -22.775,-24.713c-0,-5.457 1.949,-9.92 5.147,-13.416c-0.516,-1.265 -2.231,-6.348 0.488,-13.233c0,0 4.199,-1.344 13.751,5.126c3.988,-1.108 8.266,-1.663 12.518,-1.682c4.245,0.019 8.523,0.574 12.517,1.682c9.546,-6.47 13.736,-5.126 13.736,-5.126c2.728,6.885 1.013,11.968 0.497,13.233c3.204,3.496 5.141,7.959 5.141,13.416c0,19.209 -11.691,23.436 -22.83,24.673c1.795,1.544 3.394,4.595 3.394,9.26c0,6.682 -0.061,12.076 -0.061,13.715c0,1.338 0.899,2.894 3.438,2.406c19.853,-6.627 34.166,-25.354 34.166,-47.438c-0,-27.616 -22.389,-50.002 -50.005,-50.002"/>
+  </g>
+</svg></span></a>
+    
+    <a class="icon-link svg-link" href="https://javadoc.io/doc/app.fmgp"><span class="api" title="API"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M75,47.5c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm-50,-0c13.246,-0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,-0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm2.705,16.735l7.239,0l0.622,-4.904l-21.833,0l-0,4.904l7.589,0l0,22.067l6.383,0l-0,-22.067Zm58.076,7.265c-0,-8.757 -3.698,-14.166 -10.781,-14.166c-7.083,-0 -10.781,5.604 -10.781,14.166c0,8.757 3.698,14.166 10.781,14.166c7.083,0 10.781,-5.604 10.781,-14.166Zm-6.539,0c0,6.538 -1.128,9.496 -4.242,9.496c-2.997,0 -4.242,-2.88 -4.242,-9.496c-0,-6.616 1.206,-9.496 4.242,-9.496c3.036,-0 4.242,2.88 4.242,9.496Zm-29.242,-67c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm0.512,9.834c-7.122,-0 -12.609,5.098 -12.609,14.127c-0,9.263 5.215,14.205 12.532,14.205c4.164,0 7.083,-1.634 9.068,-3.658l-2.88,-3.697c-1.518,1.206 -3.153,2.413 -5.838,2.413c-3.697,-0 -6.266,-2.763 -6.266,-9.263c-0,-6.616 2.724,-9.379 6.149,-9.379c2.102,-0 3.892,0.778 5.371,1.984l3.113,-3.775c-2.257,-1.868 -4.748,-2.957 -8.64,-2.957Z"/>
+  </g>
+</svg></span></a>
+    
+    <a class="icon-link glyph-link" href="https://did.fmgp.app"><i class="icofont-laika demo" title="Demo">&#xeeea;</i></a>
+    
+    <a class="icon-link glyph-link" href="https://discord.gg/atala"><i class="icofont-laika chat" title="Chat">&#xeed5;</i></a>
+    
+  </div>  
+
+</header>
+    
+    <nav id="sidebar">
+
+  <div class="row">
+    
+    <a class="icon-link svg-link" href="https://github.com/FabioPinheiro/scala-did"><span class="github" title="Source Code"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M49.995,1c-27.609,-0 -49.995,22.386 -49.995,50.002c-0,22.09 14.325,40.83 34.194,47.444c2.501,0.458 3.413,-1.086 3.413,-2.412c0,-1.185 -0.043,-4.331 -0.067,-8.503c-13.908,3.021 -16.843,-6.704 -16.843,-6.704c-2.274,-5.773 -5.552,-7.311 -5.552,-7.311c-4.54,-3.103 0.344,-3.042 0.344,-3.042c5.018,0.356 7.658,5.154 7.658,5.154c4.46,7.64 11.704,5.433 14.552,4.156c0.454,-3.232 1.744,-5.436 3.174,-6.685c-11.102,-1.262 -22.775,-5.553 -22.775,-24.713c-0,-5.457 1.949,-9.92 5.147,-13.416c-0.516,-1.265 -2.231,-6.348 0.488,-13.233c0,0 4.199,-1.344 13.751,5.126c3.988,-1.108 8.266,-1.663 12.518,-1.682c4.245,0.019 8.523,0.574 12.517,1.682c9.546,-6.47 13.736,-5.126 13.736,-5.126c2.728,6.885 1.013,11.968 0.497,13.233c3.204,3.496 5.141,7.959 5.141,13.416c0,19.209 -11.691,23.436 -22.83,24.673c1.795,1.544 3.394,4.595 3.394,9.26c0,6.682 -0.061,12.076 -0.061,13.715c0,1.338 0.899,2.894 3.438,2.406c19.853,-6.627 34.166,-25.354 34.166,-47.438c-0,-27.616 -22.389,-50.002 -50.005,-50.002"/>
+  </g>
+</svg></span></a>
+    
+    <a class="icon-link svg-link" href="https://javadoc.io/doc/app.fmgp"><span class="api" title="API"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M75,47.5c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm-50,-0c13.246,-0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,-0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm2.705,16.735l7.239,0l0.622,-4.904l-21.833,0l-0,4.904l7.589,0l0,22.067l6.383,0l-0,-22.067Zm58.076,7.265c-0,-8.757 -3.698,-14.166 -10.781,-14.166c-7.083,-0 -10.781,5.604 -10.781,14.166c0,8.757 3.698,14.166 10.781,14.166c7.083,0 10.781,-5.604 10.781,-14.166Zm-6.539,0c0,6.538 -1.128,9.496 -4.242,9.496c-2.997,0 -4.242,-2.88 -4.242,-9.496c-0,-6.616 1.206,-9.496 4.242,-9.496c3.036,-0 4.242,2.88 4.242,9.496Zm-29.242,-67c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm0.512,9.834c-7.122,-0 -12.609,5.098 -12.609,14.127c-0,9.263 5.215,14.205 12.532,14.205c4.164,0 7.083,-1.634 9.068,-3.658l-2.88,-3.697c-1.518,1.206 -3.153,2.413 -5.838,2.413c-3.697,-0 -6.266,-2.763 -6.266,-9.263c-0,-6.616 2.724,-9.379 6.149,-9.379c2.102,-0 3.892,0.778 5.371,1.984l3.113,-3.775c-2.257,-1.868 -4.748,-2.957 -8.64,-2.957Z"/>
+  </g>
+</svg></span></a>
+    
+    <a class="icon-link glyph-link" href="https://did.fmgp.app"><i class="icofont-laika demo" title="Demo">&#xeeea;</i></a>
+    
+    <a class="icon-link glyph-link" href="https://discord.gg/atala"><i class="icofont-laika chat" title="Chat">&#xeed5;</i></a>
+    
+  </div>
+
+  <ul class="nav-list">
+    <li class="level1 nav-header">About Scala-DID</li>
+    <li class="level2 nav-leaf"><a href="../01-about/01-scala-did.html">Scala DID</a></li>
+    <li class="level2 nav-leaf"><a href="../01-about/09-external-documentation.html">External documentation</a></li>
+    <li class="level1 nav-header">Quickstart Guides</li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/01-setup-environment.html">Setup environment</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/02-install-dependency.html">Import Library</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/03-imports.html">Config imports</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/04-basic-examples.html">Basic Example</a></li>
+    <li class="level2 nav-leaf"><a href="../02-quickstart/05-did-comm-examples.html">Getting Started with DIDComm Messaging</a></li>
+    <li class="level1 nav-header">03-reference</li>
+    <li class="level2 nav-leaf"><a href="../03-reference/didcomm-protocols.html">DID Comm Protocols</a></li>
+    <li class="level1 nav-header">Troubleshooting and Limitations</li>
+    <li class="level2 nav-leaf"><a href="../08-others/limitations.html">Limitations</a></li>
+    <li class="level2 nav-leaf"><a href="../08-others/test-coverage.html">Test coverage</a></li>
+    <li class="level2 nav-leaf"><a href="../08-others/troubleshooting.html">Troubleshooting</a></li>
+    <li class="level1 nav-header">09-cardano-prism-cli</li>
+    <li class="level2 active nav-leaf"><a href="#">Cardano PRISM CLI</a></li>
+  </ul>
+
+</nav>
+
+    <div id="container">
+
+      
+<nav id="page-nav">
+  <p class="header"><a href="#">Cardano PRISM CLI</a></p>
+
+  <ul class="nav-list">
+    <li class="level1 nav-node"><a href="#install">Install</a></li>
+    <li class="level2 nav-leaf"><a href="#install-with-coursier">Install with Coursier</a></li>
+    <li class="level2 nav-leaf"><a href="#install-with-homebrew">Install with Homebrew</a></li>
+    <li class="level1 nav-node"><a href="#configuration-file">Configuration File</a></li>
+    <li class="level2 nav-leaf"><a href="#create-the-config-file">Create the config file</a></li>
+    <li class="level2 nav-leaf"><a href="#view-the-current-config">View the current config</a></li>
+    <li class="level1 nav-node"><a href="#mnemonic-management-mnemonic">Mnemonic Management (<code>mnemonic</code>)</a></li>
+    <li class="level2 nav-leaf"><a href="#generate-a-new-mnemonic">Generate a new mnemonic</a></li>
+    <li class="level2 nav-leaf"><a href="#display-the-seed-hex">Display the seed (hex)</a></li>
+    <li class="level2 nav-leaf"><a href="#derive-a-cardano-address">Derive a Cardano address</a></li>
+    <li class="level1 nav-node"><a href="#key-management-key">Key Management (<code>key</code>)</a></li>
+    <li class="level2 nav-leaf"><a href="#derive-a-secp256k1-key">Derive a Secp256k1 key</a></li>
+    <li class="level2 nav-leaf"><a href="#derive-an-ed25519-key">Derive an Ed25519 key</a></li>
+    <li class="level2 nav-leaf"><a href="#derive-a-key-from-a-custom-derivation-path">Derive a key from a custom derivation path</a></li>
+    <li class="level1 nav-node"><a href="#did-management-did">DID Management (<code>did</code>)</a></li>
+    <li class="level2 nav-leaf"><a href="#create-a-deterministic-did-recommended">Create a deterministic DID (recommended)</a></li>
+    <li class="level2 nav-leaf"><a href="#create-a-did-for-vdr">Create a DID for VDR</a></li>
+    <li class="level2 nav-leaf"><a href="#resolve-a-did">Resolve a DID</a></li>
+    <li class="level1 nav-node"><a href="#cardano-blockfrost-cardano">Cardano / Blockfrost (<code>cardano</code>)</a></li>
+    <li class="level2 nav-leaf"><a href="#save-a-blockfrost-api-token">Save a Blockfrost API token</a></li>
+    <li class="level2 nav-leaf"><a href="#check-wallet-balance">Check wallet balance</a></li>
+    <li class="level2 nav-leaf"><a href="#submit-events">Submit Events</a></li>
+    <li class="level1 nav-node"><a href="#indexer-indexer">Indexer (<code>indexer</code>)</a></li>
+    <li class="level2 nav-leaf"><a href="#file-system-mode-in-memory-indexer">File system mode (in-memory indexer)</a></li>
+    <li class="level2 nav-leaf"><a href="#mongodb-mode-database-mode">MongoDB mode (database mode)</a></li>
+    <li class="level1 nav-node"><a href="#vdr-verifiable-data-registry-vdr">VDR — Verifiable Data Registry (<code>vdr</code>)</a></li>
+    <li class="level2 nav-leaf"><a href="#create-a-bytes-entry">Create a bytes entry</a></li>
+    <li class="level2 nav-leaf"><a href="#create-an-ipfs-entry">Create an IPFS entry</a></li>
+    <li class="level2 nav-leaf"><a href="#update-a-bytes-entry">Update a bytes entry</a></li>
+    <li class="level2 nav-leaf"><a href="#update-an-ipfs-entry">Update an IPFS entry</a></li>
+    <li class="level2 nav-leaf"><a href="#deactivate-an-entry">Deactivate an entry</a></li>
+    <li class="level2 nav-leaf"><a href="#fetch-an-entry">Fetch an entry</a></li>
+    <li class="level2 nav-leaf"><a href="#generate-proof-for-an-entry">Generate proof for an entry</a></li>
+    <li class="level1 nav-leaf"><a href="#end-to-end-example-create-and-publish-a-did">End-to-End Example: Create and Publish a DID</a></li>
+    <li class="level1 nav-leaf"><a href="#example-to-create-a-did">Example to create a DID</a></li>
+  </ul>
+
+  <p class="footer"><a href="https://github.com/FabioPinheiro/scala-did/blob/master/docs/src/09-cardano-prism-cli/01-cardano-prism-cli.md"><i class="icofont-laika edit" title="Edit">&#xef10;</i>Source for this page</a></p>
+</nav>
+
+
+      <main class="content">
+
+        <h1 id="cardano-prism-cli" class="title">Cardano PRISM CLI</h1>
+        <p>The <code>cardano-prism</code> CLI is a tool for managing <a href="https://github.com/input-output-hk/prism-did-method-spec">PRISM DIDs</a> on the Cardano blockchain. It supports key management, DID creation and resolution, VDR (Verifiable Data Registry) operations, and blockchain submission via the Blockfrost API.</p>
+        
+        <h2 id="install" class="section"><a class="anchor-link left" href="#install"><i class="icofont-laika link">&#xef71;</i></a>Install</h2>
+        
+        <h3 id="install-with-coursier" class="section"><a class="anchor-link left" href="#install-with-coursier"><i class="icofont-laika link">&#xef71;</i></a>Install with Coursier</h3>
+        <p>Install <a href="https://get-coursier.io/">Coursier</a> (a pure Scala artifact fetching tool), then set up the alias:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">alias</span><span> cardano-prism=</span><span class="string-literal">&#39;cs launch app.fmgp::cardano-prism-cli:0.1.0-M42 -M fmgp.did.method.prism.cli.PrismCli --&#39;</span><span>
+
+</span><span class="comment"># Or with fewer JVM warnings
+</span><span class="identifier">alias</span><span> cardano-prism=</span><span class="string-literal">&#39;cs launch --java-opt --sun-misc-unsafe-memory-access=allow app.fmgp::cardano-prism-cli:0.1.0-M42 -M fmgp.did.method.prism.cli.PrismCli --&#39;</span><span>
+
+cardano-prism --help</span></code></pre>
+        
+        <h3 id="install-with-homebrew" class="section"><a class="anchor-link left" href="#install-with-homebrew"><i class="icofont-laika link">&#xef71;</i></a>Install with Homebrew</h3>
+        <p>A brew tap (<code>homebrew-fmgp</code>) is available for installing <code>cardano-prism</code>:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span>brew install FabioPinheiro/fmgp/cardano-prism
+cardano-prism --help</span></code></pre>
+        
+        <h2 id="configuration-file" class="section"><a class="anchor-link left" href="#configuration-file"><i class="icofont-laika link">&#xef71;</i></a>Configuration File</h2>
+        <p>The CLI uses a JSON configuration file (staging state) to persist keys, wallets, and Blockfrost API tokens between commands.</p>
+        <p><strong>Default location:</strong> <code>~/.cardano-prism-config.json</code></p>
+        
+        <h3 id="create-the-config-file" class="section"><a class="anchor-link left" href="#create-the-config-file"><i class="icofont-laika link">&#xef71;</i></a>Create the config file</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span>cardano-prism config-file --create</span></code></pre>
+        
+        <h3 id="view-the-current-config" class="section"><a class="anchor-link left" href="#view-the-current-config"><i class="icofont-laika link">&#xef71;</i></a>View the current config</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span>cardano-prism config-file</span></code></pre>
+        <p>The config file stores:</p>
+        <ul>
+          <li>SSI and Cardano wallet mnemonics</li>
+          <li>Derived private keys (Secp256k1, Ed25519, X25519)</li>
+          <li>Blockfrost API tokens per network</li>
+        </ul>
+        <p>Most commands automatically load the config file. Use the <code>-s</code> flag to enable automatic saving of state changes at the end of a command.</p>
+        <hr>
+        
+        <h2 id="mnemonic-management-mnemonic" class="section"><a class="anchor-link left" href="#mnemonic-management-mnemonic"><i class="icofont-laika link">&#xef71;</i></a>Mnemonic Management (<code>mnemonic</code>)</h2>
+        <p>Mnemonics are BIP-39 seed phrases used to deterministically derive keys for both the SSI (DID) wallet and the Cardano (ADA) payment wallet.</p>
+        
+        <h3 id="generate-a-new-mnemonic" class="section"><a class="anchor-link left" href="#generate-a-new-mnemonic"><i class="icofont-laika link">&#xef71;</i></a>Generate a new mnemonic</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># Generate and save a new SSI wallet mnemonic (saves with -s flag)
+</span><span>cardano-prism mnemonic new -s
+
+</span><span class="comment"># Generate a new ADA wallet mnemonic
+</span><span>cardano-prism mnemonic new -s --wallet-</span><span class="identifier">type</span><span> ada
+
+</span><span class="comment"># Import an existing mnemonic
+</span><span>cardano-prism mnemonic new -s --mnemonic </span><span class="string-literal">&quot;word1 word2 ... word24&quot;</span></code></pre>
+        
+        <h3 id="display-the-seed-hex" class="section"><a class="anchor-link left" href="#display-the-seed-hex"><i class="icofont-laika link">&#xef71;</i></a>Display the seed (hex)</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># Show seed from stored SSI wallet
+</span><span>cardano-prism mnemonic seed
+
+</span><span class="comment"># Show seed from a specific mnemonic
+</span><span>cardano-prism mnemonic seed --mnemonic </span><span class="string-literal">&quot;word1 word2 ... word24&quot;</span></code></pre>
+        
+        <h3 id="derive-a-cardano-address" class="section"><a class="anchor-link left" href="#derive-a-cardano-address"><i class="icofont-laika link">&#xef71;</i></a>Derive a Cardano address</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># Show address for the stored Cardano wallet (mainnet)
+</span><span>cardano-prism mnemonic address
+
+</span><span class="comment"># Show address for a specific network
+</span><span>cardano-prism mnemonic address --network preprod</span></code></pre>
+        <hr>
+        
+        <h2 id="key-management-key" class="section"><a class="anchor-link left" href="#key-management-key"><i class="icofont-laika link">&#xef71;</i></a>Key Management (<code>key</code>)</h2>
+        <p>Keys are derived from the SSI wallet mnemonic using the <a href="https://hyperledger-identus.github.io/docs/adrs/decisions/2023-05-16-hierarchical-deterministic-key-generation-algorithm">Identus HD key derivation</a> (based on CIP-1852).</p>
+        <p>The derivation path follows the pattern: <code>m/29&#39;/29&#39;/&lt;DID-index&gt;&#39;/&lt;key-usage&gt;&#39;/&lt;key-index&gt;&#39;</code></p>
+        <p>Key usages: <code>Master</code>, <code>Issuing</code>, <code>Keyagreement</code>, <code>Authentication</code>, <code>Revocation</code>, <code>Capabilityinvocation</code>, <code>Capabilitydelegation</code>, <code>Vdr</code></p>
+        
+        <h3 id="derive-a-secp256k1-key" class="section"><a class="anchor-link left" href="#derive-a-secp256k1-key"><i class="icofont-laika link">&#xef71;</i></a>Derive a Secp256k1 key</h3>
+        <p>The Master key <strong>must</strong> be of type <code>secp256k1</code>.</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># cardano-prism key secp256k1 [--label &lt;name&gt;] &lt;DID-index&gt; &lt;keyUsage&gt; &lt;key-index&gt;
+</span><span>cardano-prism key sepc256k</span><span class="number-literal">1</span><span> </span><span class="number-literal">0</span><span> Master </span><span class="number-literal">0</span><span>
+</span><span class="comment"># Saves key as &quot;key-0-Master-0&quot;
+</span><span>
+cardano-prism key sepc256k</span><span class="number-literal">1</span><span> --label my-master-key </span><span class="number-literal">0</span><span> Master </span><span class="number-literal">0</span></code></pre>
+        
+        <h3 id="derive-an-ed25519-key" class="section"><a class="anchor-link left" href="#derive-an-ed25519-key"><i class="icofont-laika link">&#xef71;</i></a>Derive an Ed25519 key</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># cardano-prism key Ed25519 [--label &lt;name&gt;] &lt;DID-index&gt; &lt;keyUsage&gt; &lt;key-index&gt;
+</span><span>cardano-prism key Ed</span><span class="number-literal">25519</span><span> </span><span class="number-literal">0</span><span> Issuing </span><span class="number-literal">0</span><span>
+</span><span class="comment"># Saves key as &quot;key-0-Issuing-0&quot;
+</span><span>
+cardano-prism key Ed</span><span class="number-literal">25519</span><span> </span><span class="number-literal">0</span><span> Authentication </span><span class="number-literal">0</span></code></pre>
+        
+        <h3 id="derive-a-key-from-a-custom-derivation-path" class="section"><a class="anchor-link left" href="#derive-a-key-from-a-custom-derivation-path"><i class="icofont-laika link">&#xef71;</i></a>Derive a key from a custom derivation path</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># cardano-prism key derivation-path [--mnemonic &lt;phrase&gt;] [--derivation-path &lt;path&gt;] [--label &lt;name&gt;]
+</span><span>cardano-prism key derivation-path --derivation-path </span><span class="string-literal">&quot;m/29&#39;/29&#39;/0&#39;/1&#39;/0&#39;&quot;</span><span> --label my-key</span></code></pre>
+        <hr>
+        
+        <h2 id="did-management-did" class="section"><a class="anchor-link left" href="#did-management-did"><i class="icofont-laika link">&#xef71;</i></a>DID Management (<code>did</code>)</h2>
+        
+        <h3 id="create-a-deterministic-did-recommended" class="section"><a class="anchor-link left" href="#create-a-deterministic-did-recommended"><i class="icofont-laika link">&#xef71;</i></a>Create a deterministic DID (recommended)</h3>
+        <p>Creates a PRISM DID following the <a href="https://github.com/input-output-hk/prism-did-method-spec/blob/main/extensions/deterministic-prism-did-generation-proposal.md">deterministic PRISM DID generation proposal</a>. Requires at least the Master key. Outputs the DID and the encoded PRISM events to submit to the blockchain.</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># cardano-prism did create-deterministic [-S &lt;id&gt;=&lt;endpoint&gt;] &lt;keyID&gt;...
+</span><span>cardano-prism did create-deterministic key-</span><span class="number-literal">0</span><span>-Master-</span><span class="number-literal">0</span><span>
+
+</span><span class="comment"># With a DIDComm service endpoint
+</span><span>cardano-prism did create-deterministic -S e</span><span class="number-literal">1</span><span>=https://did.example.com key-</span><span class="number-literal">0</span><span>-Master-</span><span class="number-literal">0</span><span>
+
+</span><span class="comment"># With multiple keys and a service
+</span><span>cardano-prism did create-deterministic -S e</span><span class="number-literal">1</span><span>=https://did.example.com key-</span><span class="number-literal">0</span><span>-Master-</span><span class="number-literal">0</span><span> key-</span><span class="number-literal">0</span><span>-Issuing-</span><span class="number-literal">0</span></code></pre>
+        <p><strong>Example output:</strong></p>
+        <pre><code>SSI: did:prism:d2ffaf9f8d7fa754d0e008649d29f3de8ac63699b263d4080b3450ac3c0ebdec
+create SignedPrismEvent:
+0a0e6b65792d302d4d61737465722d30...
+update SignedPrismEvent:
+0a0e6b65792d302d4d61737465722d30...</code></pre>
+        <p>The output events are hex-encoded protobuf payloads that must be submitted to the Cardano blockchain (see <a href="#submit-events">Submit Events</a>).</p>
+        
+        <h3 id="create-a-did-for-vdr" class="section"><a class="anchor-link left" href="#create-a-did-for-vdr"><i class="icofont-laika link">&#xef71;</i></a>Create a DID for VDR</h3>
+        <p>Creates a DID with a master key and optional VDR key.</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span>cardano-prism did create-</span><span class="keyword">for</span><span>-vdr --master key-</span><span class="number-literal">0</span><span>-Master-</span><span class="number-literal">0</span><span> --vdr key-</span><span class="number-literal">0</span><span>-Vdr-</span><span class="number-literal">0</span></code></pre>
+        
+        <h3 id="resolve-a-did" class="section"><a class="anchor-link left" href="#resolve-a-did"><i class="icofont-laika link">&#xef71;</i></a>Resolve a DID</h3>
+        <pre><code class="nohighlight"><span class="comment"># Resolve from the PRISM VDR (GitHub-hosted)
+</span><span>cardano-prism did resolve-prism did:prism:&lt;hash&gt;
+cardano-prism did resolve-prism --network preprod did:prism:&lt;hash&gt;
+
+</span><span class="comment"># Resolve from a custom endpoint
+</span><span>cardano-prism did resolve did:prism:&lt;hash&gt; https://my-resolver.example.com/
+
+</span><span class="comment"># Resolve using the Universal Resolver (https://dev.uniresolver.io/)
+</span><span>cardano-prism did resolve-universal did:prism:&lt;hash&gt;
+cardano-prism did resolve-universal --endpoint https://my-uniresolver.example.com/ did:prism:&lt;hash&gt;
+
+</span><span class="comment"># Resolve using NeoPrism
+</span><span>cardano-prism did resolve-neoprism did:prism:&lt;hash&gt;
+cardano-prism did resolve-neoprism --network preprod did:prism:&lt;hash&gt;</span></code></pre>
+        <hr>
+        
+        <h2 id="cardano-blockfrost-cardano" class="section"><a class="anchor-link left" href="#cardano-blockfrost-cardano"><i class="icofont-laika link">&#xef71;</i></a>Cardano / Blockfrost (<code>cardano</code>)</h2>
+        <p>Commands for interacting with the Cardano blockchain via the <a href="https://blockfrost.io/">Blockfrost API</a>.</p>
+        
+        <h3 id="save-a-blockfrost-api-token" class="section"><a class="anchor-link left" href="#save-a-blockfrost-api-token"><i class="icofont-laika link">&#xef71;</i></a>Save a Blockfrost API token</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># cardano-prism cardano blockfrost-token [-s] &lt;network&gt; &lt;token&gt;
+</span><span>cardano-prism cardano blockfrost-token -s preprod preprod&lt;YOUR_API_TOKEN&gt;
+cardano-prism cardano blockfrost-token -s mainnet mainnet&lt;YOUR_API_TOKEN&gt;</span></code></pre>
+        <p>Networks: <code>mainnet</code>, <code>preprod</code>, <code>preview</code></p>
+        
+        <h3 id="check-wallet-balance" class="section"><a class="anchor-link left" href="#check-wallet-balance"><i class="icofont-laika link">&#xef71;</i></a>Check wallet balance</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># Check ADA balance of the stored Cardano wallet
+</span><span>cardano-prism cardano address --network preprod</span></code></pre>
+        
+        <h3 id="submit-events" class="section"><a class="anchor-link left" href="#submit-events"><i class="icofont-laika link">&#xef71;</i></a>Submit Events</h3>
+        <p>Submit hex-encoded PRISM signed events to the Cardano blockchain. Requires both a Cardano wallet (for fees) and a Blockfrost token for the target network.</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># cardano-prism cardano submit --network &lt;network&gt; &lt;event-hex&gt;...
+</span><span>cardano-prism cardano submit --network preprod &lt;create-event-hex&gt; &lt;update-event-hex&gt;</span></code></pre>
+        <p>On success, outputs a transaction hash and a link to Cardanoscan.</p>
+        <hr>
+        
+        <h2 id="indexer-indexer" class="section"><a class="anchor-link left" href="#indexer-indexer"><i class="icofont-laika link">&#xef71;</i></a>Indexer (<code>indexer</code>)</h2>
+        <p>The indexer continuously fetches PRISM events from the Cardano blockchain and indexes them locally, enabling offline DID resolution.</p>
+        
+        <h3 id="file-system-mode-in-memory-indexer" class="section"><a class="anchor-link left" href="#file-system-mode-in-memory-indexer"><i class="icofont-laika link">&#xef71;</i></a>File system mode (in-memory indexer)</h3>
+        <p>Reads and writes state to the local file system. Suitable for lightweight deployments and CI/CD workflows.</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># cardano-prism indexer in-memory [--token &lt;BLOCKFROST_APIKEY&gt;] &lt;work-directory&gt;
+</span><span>cardano-prism indexer </span><span class="keyword">in</span><span>-memory --token preprod&lt;YOUR_API_TOKEN&gt; ./prism-vdr/preprod</span></code></pre>
+        <p>See a real-world example: <a href="https://github.com/FabioPinheiro/prism-vdr/blob/main/.github/workflows/indexer.yml">indexer.yml</a></p>
+        
+        <h3 id="mongodb-mode-database-mode" class="section"><a class="anchor-link left" href="#mongodb-mode-database-mode"><i class="icofont-laika link">&#xef71;</i></a>MongoDB mode (database mode)</h3>
+        <p>Stores state in a MongoDB database. Suitable for production deployments.</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># cardano-prism indexer mongodb --token &lt;BLOCKFROST_APIKEY&gt; &lt;mongodb-connection&gt;
+</span><span>cardano-prism indexer mongodb \
+  --token preprod&lt;YOUR_API_TOKEN&gt; \
+  </span><span class="string-literal">&#39;mongodb+srv://user:password@cluster0.example.mongodb.net/indexer&#39;</span></code></pre>
+        <hr>
+        
+        <h2 id="vdr-verifiable-data-registry-vdr" class="section"><a class="anchor-link left" href="#vdr-verifiable-data-registry-vdr"><i class="icofont-laika link">&#xef71;</i></a>VDR — Verifiable Data Registry (<code>vdr</code>)</h2>
+        <p>VDR commands manage anchored data entries on the Cardano blockchain, linked to a PRISM DID via a VDR key.</p>
+        <p>All VDR commands require:</p>
+        <ul>
+          <li><code>--network</code> — target Cardano network (<code>mainnet</code>, <code>preprod</code>, <code>preview</code>)</li>
+          <li><code>--work-directory</code> — local indexer directory</li>
+          <li><code>--owner</code> — PRISM DID that owns the entry</li>
+          <li><code>--vdr</code> — label of the VDR private key (default: <code>vdr</code>)</li>
+        </ul>
+        
+        <h3 id="create-a-bytes-entry" class="section"><a class="anchor-link left" href="#create-a-bytes-entry"><i class="icofont-laika link">&#xef71;</i></a>Create a bytes entry</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span>cardano-prism vdr create-bytes \
+  --network preprod \
+  --work-directory ./prism-vdr/preprod \
+  --owner did:prism:&lt;hash&gt; \
+  --vdr key-</span><span class="number-literal">0</span><span>-Vdr-</span><span class="number-literal">0</span><span> \
+  &lt;hex-encoded-bytes&gt;</span></code></pre>
+        
+        <h3 id="create-an-ipfs-entry" class="section"><a class="anchor-link left" href="#create-an-ipfs-entry"><i class="icofont-laika link">&#xef71;</i></a>Create an IPFS entry</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span>cardano-prism vdr create-ipfs \
+  --network preprod \
+  --work-directory ./prism-vdr/preprod \
+  --owner did:prism:&lt;hash&gt; \
+  &lt;IPFS-CID&gt;</span></code></pre>
+        
+        <h3 id="update-a-bytes-entry" class="section"><a class="anchor-link left" href="#update-a-bytes-entry"><i class="icofont-laika link">&#xef71;</i></a>Update a bytes entry</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span>cardano-prism vdr update-bytes \
+  --network preprod \
+  --work-directory ./prism-vdr/preprod \
+  &lt;vdr-entry-ref&gt; \
+  &lt;new-hex-encoded-bytes&gt;</span></code></pre>
+        
+        <h3 id="update-an-ipfs-entry" class="section"><a class="anchor-link left" href="#update-an-ipfs-entry"><i class="icofont-laika link">&#xef71;</i></a>Update an IPFS entry</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span>cardano-prism vdr update-ipfs \
+  --network preprod \
+  --work-directory ./prism-vdr/preprod \
+  &lt;vdr-entry-ref&gt; \
+  &lt;new-IPFS-CID&gt;</span></code></pre>
+        
+        <h3 id="deactivate-an-entry" class="section"><a class="anchor-link left" href="#deactivate-an-entry"><i class="icofont-laika link">&#xef71;</i></a>Deactivate an entry</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span>cardano-prism vdr deactivate \
+  --network preprod \
+  --work-directory ./prism-vdr/preprod \
+  &lt;vdr-entry-ref&gt;</span></code></pre>
+        
+        <h3 id="fetch-an-entry" class="section"><a class="anchor-link left" href="#fetch-an-entry"><i class="icofont-laika link">&#xef71;</i></a>Fetch an entry</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span>cardano-prism vdr fetch \
+  --network preprod \
+  --work-directory ./prism-vdr/preprod \
+  &lt;vdr-entry-ref&gt;</span></code></pre>
+        
+        <h3 id="generate-proof-for-an-entry" class="section"><a class="anchor-link left" href="#generate-proof-for-an-entry"><i class="icofont-laika link">&#xef71;</i></a>Generate proof for an entry</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span>cardano-prism vdr proof \
+  --network preprod \
+  --work-directory ./prism-vdr/preprod \
+  &lt;vdr-entry-ref&gt;</span></code></pre>
+        <hr>
+        
+        <h2 id="end-to-end-example-create-and-publish-a-did" class="section"><a class="anchor-link left" href="#end-to-end-example-create-and-publish-a-did"><i class="icofont-laika link">&#xef71;</i></a>End-to-End Example: Create and Publish a DID</h2>
+        <pre><code class="nohighlight"><span class="comment"># 1. Create the config file
+</span><span>cardano-prism config-file --create
+
+</span><span class="comment"># 2. Generate a new SSI mnemonic and save it
+</span><span>cardano-prism mnemonic new -s
+
+</span><span class="comment"># 3. Derive a Master key (secp256k1 required for master)
+</span><span>cardano-prism key sepc256k</span><span class="number-literal">1</span><span> </span><span class="number-literal">0</span><span> Master </span><span class="number-literal">0</span><span>
+</span><span class="comment"># =&gt; saves as &quot;key-0-Master-0&quot;
+</span><span>
+</span><span class="comment"># 4. Derive additional keys (optional)
+</span><span>cardano-prism key Ed</span><span class="number-literal">25519</span><span> </span><span class="number-literal">0</span><span> Issuing </span><span class="number-literal">0</span><span>
+</span><span class="comment"># =&gt; saves as &quot;key-0-Issuing-0&quot;
+</span><span>
+</span><span class="comment"># 5. Generate a new Cardano payment wallet (for transaction fees)
+</span><span>cardano-prism mnemonic new -s --wallet-</span><span class="identifier">type</span><span> ada
+
+</span><span class="comment"># 6. Save the Blockfrost API token for preprod
+</span><span>cardano-prism cardano blockfrost-token -s preprod preprod&lt;YOUR_TOKEN&gt;
+
+</span><span class="comment"># 7. Create the deterministic DID
+</span><span>cardano-prism did create-deterministic \
+  -S endpoint</span><span class="number-literal">1</span><span>=https://my-didcomm-endpoint.example.com \
+  key-</span><span class="number-literal">0</span><span>-Master-</span><span class="number-literal">0</span><span> key-</span><span class="number-literal">0</span><span>-Issuing-</span><span class="number-literal">0</span><span>
+</span><span class="comment"># =&gt; prints the DID and the create/update SignedPrismEvent hex values
+</span><span>
+</span><span class="comment"># 8. Submit events to the blockchain
+</span><span>cardano-prism cardano submit --network preprod &lt;event</span><span class="number-literal">1</span><span>-hex&gt; &lt;event</span><span class="number-literal">2</span><span>-hex&gt;
+</span><span class="comment"># =&gt; prints the transaction hash</span></code></pre>
+        <p>After the transaction is confirmed, you can resolve the DID:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span>cardano-prism did resolve-prism --network preprod did:prism:&lt;hash&gt;</span></code></pre>
+        
+        <h2 id="example-to-create-a-did" class="section"><a class="anchor-link left" href="#example-to-create-a-did"><i class="icofont-laika link">&#xef71;</i></a>Example to create a DID</h2>
+        <p>cardano-prism mnemonic new -s
+        cardano-prism key sepc256k1 0 Master 0
+        cardano-prism key Ed25519 0 Issuing 0
+        cardano-prism did create-deterministi -S e1=https://did.fabiopinheiro.com/ key-0-Master-0 key-0-Issuing-0
+        cardano-prism cardano blockfrost-token -s preprod preprod9EGSSMf6oWb81qoi8eW65iWaQuHJ1HwB
+        cardano-prism cardano submit --network preprod 0a066d617374657212473045022100b32b3dfc1fb47dc102038c1cbc1571b955f0ee7bab27e8b9626f8da62c50a4d6022050dfa98afdfe7503dbe58ed9ae20addb6d52a182521cd67e9d4bb6b79629b0f41a400a3e0a3c123a0a066d617374657210014a2e0a09736563703235366b31122103ebe0934672da51ca01da94d278376a204e0e73a8d235c290bc2d5f1a629f8aec 0a066d6173746572124730450221008c036641c84c182aba386e004803684b069004e192b860542a23f16de023351102201e66c385924c88ac26aeaea76140df6fcb3d8de926091b72b983bf864305a8801afa0112f7010a20aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff03264221240616162386431346662363063303335656335383931393562343037393738643665633133313665313833626136666262393230613061376666303332363432321a4b1a490a470a09656e64706f696e74311210444944436f6d6d4d6573736167696e671a287b22757269223a2268747470733a2f2f6469642e666162696f70696e686569726f2e636f6d2f227d1a440a420a400a0f6b65792d302d49737375696e672d3010024a2b0a0745643235353139122018a25f3a42089ae9d41f2ea40549bf045c12021923a4b760487d0237e0e36e40</p>
+        <p>SSI: did:prism:aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff0326422
+        create SignedPrismEvent:
+        0a066d617374657212473045022100b32b3dfc1fb47dc102038c1cbc1571b955f0ee7bab27e8b9626f8da62c50a4d6022050dfa98afdfe7503dbe58ed9ae20addb6d52a182521cd67e9d4bb6b79629b0f41a400a3e0a3c123a0a066d617374657210014a2e0a09736563703235366b31122103ebe0934672da51ca01da94d278376a204e0e73a8d235c290bc2d5f1a629f8aec
+        update SignedPrismEvent:
+        0a066d6173746572124730450221008c036641c84c182aba386e004803684b069004e192b860542a23f16de023351102201e66c385924c88ac26aeaea76140df6fcb3d8de926091b72b983bf864305a8801afa0112f7010a20aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff03264221240616162386431346662363063303335656335383931393562343037393738643665633133313665313833626136666262393230613061376666303332363432321a4b1a490a470a09656e64706f696e74311210444944436f6d6d4d6573736167696e671a287b22757269223a2268747470733a2f2f6469642e666162696f70696e686569726f2e636f6d2f227d1a440a420a400a0f6b65792d302d49737375696e672d3010024a2b0a0745643235353139122018a25f3a42089ae9d41f2ea40549bf045c12021923a4b760487d0237e0e36e40</p>
+        <p><a href="https://preprod.cardanoscan.io/transaction/f404044f00cae9146d3e9f451e7e26eb2aba80ce6f0fe9a50c57b48d0e0ad9fa?tab=metadata">https://preprod.cardanoscan.io/transaction/f404044f00cae9146d3e9f451e7e26eb2aba80ce6f0fe9a50c57b48d0e0ad9fa?tab=metadata</a>
+        <a href="https://neoprism-preprod.patlo.dev/explorer">https://neoprism-preprod.patlo.dev/explorer</a>
+        <a href="https://neoprism-preprod.patlo.dev/resolver?did=did:prism:aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff0326422">https://neoprism-preprod.patlo.dev/resolver?did=did:prism:aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff0326422</a>
+        <a href="https://neoprism.patlo.dev/explorer">https://neoprism.patlo.dev/explorer</a></p>
+
+        
+<hr class="footer-rule"/>
+<footer>
+  Documentation website for <em>Scala-DID</em> a DID Comm library for scala.
+</footer>
+
+
+      </main>
+
+    </div>
+
+  </body>
+
+</html>
