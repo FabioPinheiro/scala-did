@@ -6,7 +6,7 @@ Made for developers by developers.
 
 [**LIVE DEMO (DIDComm's Sandbox)**](https://did.fmgp.app/)
 
-[**Scala-DID Documentation**](./docs/readme.md)
+[**Scala-DID Documentation**](./docs/src/01-about/01-scala-did.md)
 
 ![Maven Central](https://img.shields.io/maven-central/v/app.fmgp/did_3)
 [![CI](https://github.com/FabioPinheiro/scala-did/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioPinheiro/scala-did/actions/workflows/ci.yml)
@@ -60,7 +60,7 @@ Want to see your project here? [Submit a PR](https://github.com/FabioPinheiro/sc
 
 ## DID Comm - Protocols
 
-See specifications of the implemented [DID Comm Protocols](./docs/src/03-reference/01-didcomm-protocols.md)
+See specifications of the implemented [DID Comm Protocols](./docs/src/03-reference/didcomm-protocols.md)
 
 ## TODO/WIP
 
