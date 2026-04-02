@@ -65,6 +65,24 @@ object KeyCommand {
               )
           },
         Command(
+          "X25519",
+          Options.text("label").??("Key label/name. key will be save staging with that name.").optional,
+          didIndexAgr ++ keyUsageAgr ++ keyIndexAgr
+        )
+          .map { case (mLabel, (didIndex, keyUsage, keyIndex)) =>
+            (setup: Setup) =>
+              val wallet = setup.stateLen(_.ssiWallet).get // FIXME
+              CMD.KeyX25519FromMnemonic(
+                setup = setup,
+                wallet,
+                didIndex = didIndex.toInt,
+                keyUsage = keyUsage,
+                keyIndex = keyIndex.toInt,
+                keyLabel = mLabel.getOrElse(s"key-$didIndex-${keyUsage.name}-$keyIndex")
+                // getOrElse(s"key${stagingState.privateKeys.size}"
+              )
+          },
+        Command(
           "sepc256k1",
           Options.text("label").??("Key label/name. key will be save staging with that name.").optional,
           didIndexAgr ++ keyUsageAgr ++ keyIndexAgr

@@ -23,7 +23,7 @@ import fmgp.did.method.prism.cardano.PublicCardanoNetwork
   */
 object PrismCli extends ZIOCliDefault {
 
-  val version = "0.5.0" // FIXME version MUST come from the build pipeline
+  def version = fmgp.did.method.prism.cli.BuildInfo.version
 
   def notCurrentlyImplemented(cmd: CMD) = Console.printLine(
     s"Command `$cmd` support is not currently implemented. If you are interested in adding support, please open a pull request at https://github.com/FabioPinheiro/scala-did."

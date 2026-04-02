@@ -102,12 +102,11 @@ Key usages: `Master`, `Issuing`, `Keyagreement`, `Authentication`, `Revocation`,
 
 ### Derive a Secp256k1 key
 
-The Master key **must** be of type `secp256k1`.
+The Master and VDR keys **MUST** be of type `secp256k1`.
 
 ```bash
 # cardano-prism key secp256k1 [--label <name>] <DID-index> <keyUsage> <key-index>
-cardano-prism key sepc256k1 0 Master 0
-# Saves key as "key-0-Master-0"
+cardano-prism key sepc256k1 0 Master 0 # Saves key as "key-0-Master-0"
 
 cardano-prism key sepc256k1 --label my-master-key 0 Master 0
 ```
@@ -116,10 +115,16 @@ cardano-prism key sepc256k1 --label my-master-key 0 Master 0
 
 ```bash
 # cardano-prism key Ed25519 [--label <name>] <DID-index> <keyUsage> <key-index>
-cardano-prism key Ed25519 0 Issuing 0
-# Saves key as "key-0-Issuing-0"
+cardano-prism key Ed25519 0 Issuing 0 # Saves key as "key-0-Issuing-0"
 
 cardano-prism key Ed25519 0 Authentication 0
+```
+
+### Derive an X25519 key
+
+```bash
+# cardano-prism key X25519 [--label <name>] <DID-index> <keyUsage> <key-index>
+cardano-prism key X25519 0 Keyagreement 0 # Saves key as "key-0-KeyAgreement-0"
 ```
 
 ### Derive a key from a custom derivation path
