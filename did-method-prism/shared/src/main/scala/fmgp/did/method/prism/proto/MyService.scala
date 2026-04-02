@@ -11,9 +11,9 @@ case class MyService(
     serviceEndpoint: String, // (3)
 ) {
   import fmgp.did.*
-  def toDIDService =
+  def toDIDService(did: DIDSubject) =
     DIDServiceGeneric(
-      id = id,
+      id = s"$did#$id", // Fix https://github.com/FabioPinheiro/scala-did/issues/474
       `type` = `type`,
       serviceEndpoint = MyService.decodeProtoServiceEndpoint(serviceEndpoint)
     )
