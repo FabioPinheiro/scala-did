@@ -131,7 +131,7 @@ final case class SSI(
       .map(k => k.getVerificationMethod(id = s"$did#${k.id}", controller = did.string))
 
     val services = this.services
-      .map(s => DIDServiceGeneric(id = s.id, `type` = s.`type`, serviceEndpoint = ast.Json.Str(s.serviceEndpoint)))
+      .map(s => s.toDIDService) // Use toDIDService to properly decode protobuf serviceEndpoint (JSON string → AST)
       .toSet[DIDService]
 
     DIDDocumentClass(
