@@ -1,10 +1,14 @@
 package fmgp.crypto
 
+import zio.*
 import scala.scalajs.js.typedarray.*
 import scala.scalajs.js.JSConverters.*
 import fmgp.typings.nobleCurves.secp256k1ModAUX
 import fmgp.typings.nobleCurves.esmUtilsMod.Hex
 import fmgp.did.method.prism.proto.PrismPublicKey.*
+import scala.util.Try
+import scala.util.Failure
+import scala.util.Success
 
 object SharedCryto {
   def getXY(com: Array[Byte]): Either[String, (String, String)] = ???
@@ -23,12 +27,21 @@ object SharedCryto {
         val message: Hex = Uint8Array.from(msg.map(_.toShort).toJSArray)
         val publicKey: Hex = Uint8Array.from(data.map(_.toShort).toJSArray)
 
-        secp256k1ModAUX.schnorr.verify(
-          signature = signature,
-          message = message,
-          publicKey = publicKey // Error: publicKey of length 32 expected, got 33 FIXME
+        if (data.length != 32) {
+          println(s"FIXME: publicKey of length 32 expected, got ${data.length}")
+          false
+        } else {
+          Try(
+            secp256k1ModAUX.schnorr.verify(
+              signature = signature,
+              message = message,
+              publicKey = publicKey // Error: publicKey of length 32 expected, got 33 FIXME
+            )
+          ) match
+            case Failure(exception) => println(s"FIXME: $exception"); false
+            case Success(value)     => value
 
-        )
+        }
   }
 
 }
