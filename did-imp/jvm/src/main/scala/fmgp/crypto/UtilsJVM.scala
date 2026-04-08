@@ -151,7 +151,12 @@ object UtilsJVM {
         Option(ecKey.getKeyID()).foreach(h.keyID(_))
         h.build()
       }
-      ret = new ECDSAVerifier(ecKey.toPublicJWK.toPublicJWK).verify(
+      verifier = {
+        val v = new ECDSAVerifier(ecKey.toPublicJWK.toPublicJWK)
+        v.getJCAContext().setProvider(CryptoProvider.provider)
+        v
+      }
+      ret = verifier.verify(
         header,
         jwt.base64JWTFormatWithNoSignature.getBytes(StandardCharset.UTF_8),
         jwt.signature.base64

@@ -12,6 +12,23 @@ import fmgp.crypto.error.*
 
 object PlatformSpecificOperations {
 
+  // #################
+  // ### RAW Bytes ###
+  // #################
+
+  def signBytes(key: PrivateKey, payload: Array[Byte]): IO[CryptoFailed, Array[Byte]] =
+    key match {
+      case okp: OKPPrivateKey => ZIO.succeed(CryptoRawBytesOperationsJVM.okpKeySignBytesWithEd25519(okp, payload))
+      case ec: ECPrivateKey   => ZIO.succeed(CryptoRawBytesOperationsJVM.ecKeySignBytesWithEC(ec, payload))
+    }
+
+  def verifyBytes(key: PublicKey, payload: Array[Byte], signature: Array[Byte]): IO[CryptoFailed, Boolean] =
+    key match {
+      case okp: OKPPublicKey =>
+        ZIO.succeed(CryptoRawBytesOperationsJVM.okpKeyVerifyBytesWithEd25519(okp, payload, signature))
+      case ec: ECPublicKey => ZIO.succeed(CryptoRawBytesOperationsJVM.ecKeyVerifyBytesWithEC(ec, payload, signature))
+    }
+
   // ###########
   // ### JWT ###
   // ###########

@@ -653,7 +653,8 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
   //   Compile / npmDependencies ++= Seq(NPM.appoloJS),
   //   stIgnore += "node",
   // )
-  .dependsOn(did % "compile;test->test", multiformats) // test->test for the fmgp.IntregrationTest
+  .dependsOn(did % "compile;test->test", multiformats, didImp) // test->test for the fmgp.IntregrationTest
+  .dependsOn(didImp) // not ideal to depends
   .jvmConfigure(_.dependsOn(didImp.jvm % Test)) // For fmgp.did.method.prism.CardanoWalletConfigSuite (import UtilsJVM)
   .configure(docConfigure)
 

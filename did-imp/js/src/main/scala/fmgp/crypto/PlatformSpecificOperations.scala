@@ -9,6 +9,16 @@ import fmgp.crypto.error.*
 
 object PlatformSpecificOperations {
 
+  // #################
+  // ### RAW Bytes ###
+  // #################
+
+  def signBytes(key: PrivateKey, payload: Array[Byte]): IO[CryptoFailed, Array[Byte]] =
+    ???
+
+  def verifyBytes(key: PublicKey, payload: Array[Byte], signature: Array[Byte]): IO[CryptoFailed, Boolean] =
+    ???
+
   // ###########
   // ### JWT ###
   // ###########

@@ -8,7 +8,21 @@ import fmgp.did.comm.*
 import fmgp.crypto.error.*
 
 /** Raw crypto operations */
-trait CryptoOperations extends CryptoDIDCommOperations with CryptoJWTOperations
+trait CryptoOperations extends CryptoDIDCommOperations, CryptoJWTOperations, CryptoRawBytesOperations
+
+/** Raw crypto operations for raw bytes */
+trait CryptoRawBytesOperations {
+  def signBytes(
+      key: PrivateKey,
+      payload: Array[Byte]
+  ): IO[CryptoFailed, Array[Byte]]
+
+  def verifyBytes(
+      key: PublicKey,
+      payload: Array[Byte],
+      signature: Array[Byte]
+  ): IO[CryptoFailed, Boolean]
+}
 
 /** Raw crypto operations for JWT */
 trait CryptoJWTOperations {

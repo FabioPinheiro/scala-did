@@ -13,9 +13,9 @@ case class Secp256k1PrivateKey(rawBytes: Array[Byte]) {
     ECPrivateKeyWithoutKid(
       kty = KTY.EC,
       crv = Curve.secp256k1,
-      d = Base64.encode(rawBytes).basicBase64,
-      x = Base64.encode(x).basicBase64,
-      y = Base64.encode(y).basicBase64,
+      d = Base64.encode(rawBytes).urlBase64WithoutPadding,
+      x = Base64.encode(x).urlBase64WithoutPadding,
+      y = Base64.encode(y).urlBase64WithoutPadding,
     )
   }
 
@@ -37,5 +37,9 @@ case class Secp256k1PrivateKey(rawBytes: Array[Byte]) {
   }
 
   final def sign(data: Array[Byte]): Array[Byte] = pk.sign(data)
-  final def verify(signature: Array[Byte], data: Array[Byte]): Boolean = pk.verify(signature, data)
+  //   CryptoRawBytesOperationsJVM.ecKeySignBytesWithEC(privateJWK, payload) // TODO FIXME fix tests
+  final def verify(signature: Array[Byte], data: Array[Byte]): Boolean = // pk.verify(signature, data)
+    CryptoRawBytesOperationsJVM.ecKeyVerifyBytesWithEC(privateJWK.toPublicKey, data, signature)
+  // final def verify(signature: Array[Byte], data: Array[Byte]): Boolean = pk.verify(signature, data)
+
 }

@@ -4,7 +4,7 @@ import zio.*
 import zio.cli.*
 import zio.json.*
 import fmgp.util.hex2bytes
-import fmgp.crypto.Secp256k1PrivateKey
+import fmgp.crypto.*
 import fmgp.did.method.prism.RefVDR
 import fmgp.did.method.prism.DIDPrism
 import fmgp.did.method.prism.BlockfrostConfig
