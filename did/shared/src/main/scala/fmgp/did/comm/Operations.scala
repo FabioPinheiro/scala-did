@@ -107,11 +107,6 @@ object Operations {
   def authDecryptRaw(msg: EncryptedMessage): ZIO[Operations & Agent & Resolver, DidFail, Array[Byte]] =
     ZIO.serviceWithZIO[Operations](_.authDecryptRaw(msg))
 
-  // REMOVE ?
-  def metaData(msg: EncryptedMessage) = msg.`protected`.obj match
-    case AnonProtectedHeader(epk, apv, typ, enc, alg)            =>
-    case AuthProtectedHeader(epk, apv, skid, apu, typ, enc, alg) =>
-
   def parseMessage(data: Array[Byte]): ZIO[Any, FailToParse, Message] =
     ZIO.fromEither {
       String(data)

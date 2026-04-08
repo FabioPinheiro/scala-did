@@ -31,6 +31,12 @@ import fmgp.did.comm.*
 import fmgp.util.*
 import fmgp.crypto.error.*
 
+/** This object provides low-level cryptographic methods.
+  *
+  * (Not intended to be used directly.)
+  *
+  * TODO Move to a package called internal
+  */
 object UtilsJVM {
 
   object unsafe {
@@ -181,7 +187,7 @@ object UtilsJVM {
 
   // TODO return ZIO
   def ecKeySignJWT(
-      ecKey: ECKey,
+      ecKey: ECPrivateKey,
       payload: Array[Byte]
   ): JWT = ecKeySignJWT(
     ecKey = ecKey.toJWK,
@@ -312,7 +318,7 @@ object UtilsJVM {
 
   // TODO return ZIO
   def okpKeySignJWTWithEd25519(
-      okpKey: OKPKey,
+      okpKey: OKPPrivateKey,
       payload: Array[Byte]
   ): JWT = okpKeySignJWTWithEd25519(
     okpKey = okpKey.toJWK,
@@ -374,16 +380,37 @@ object UtilsJVM {
   }
 
   def okpKey2JWK(okp: OKPKey): OctetKeyPair = {
-    val builder = okp.getCurve match {
-      case c: Curve.Ed25519.type => OctetKeyPair.Builder(c.toJWKCurve, Base64.fromBase64url(okp.x))
-      case c: Curve.X25519.type  => OctetKeyPair.Builder(c.toJWKCurve, Base64.fromBase64url(okp.x))
+
+    okp.getCurve match {
+      case c: Curve.Ed25519.type =>
+        okp match { // for private key
+          case _: PublicKey => // ok (just the public key)
+            val builder = OctetKeyPair.Builder(c.toJWKCurve, Base64.fromBase64url(okp.x))
+            okp.maybeKid.foreach(builder.keyID)
+            builder.build()
+          case k: PrivateKey if Base64.fromBase64url(k.d).bytesArray.size == 64 => // Expanded key (scalar||nonce) or (seed||pubkey) convention
+            throw RuntimeException("Ed25591 Expanded private key is not supported")
+          case k: PrivateKey if Base64.fromBase64url(k.d).bytesArray.size == 96 => // BIP32-Ed25519 extended key -> (kL||kR||chain_code)
+            throw RuntimeException("BIP32-Ed25519 Expanded private key is not supported")
+          case k: PrivateKey => // if Base64.fromBase64url(k.d).bytesArray.size == 32 =>
+            val builder = OctetKeyPair.Builder(c.toJWKCurve, Base64.fromBase64url(okp.x))
+            okp.maybeKid.foreach(builder.keyID)
+            builder.d(Base64.fromBase64url(k.d))
+            builder.build()
+          // case k: PrivateKey => // BIP32-Ed25519 extended key -> (kL||kR||chain_code)
+          //   throw RuntimeException(s"Ed25519 with unexpected 'd' size (${Base64.fromBase64url(k.d).bytesArray.size})")
+        }
+      case c: Curve.X25519.type => {
+        val builder = OctetKeyPair.Builder(c.toJWKCurve, Base64.fromBase64url(okp.x))
+        okp.maybeKid.foreach(builder.keyID)
+        okp match { // for private key
+          case _: PublicKey  => // ok (just the public key)
+          case k: PrivateKey => builder.d(Base64.fromBase64url(k.d))
+        }
+        builder.build()
+      }
     }
-    okp.maybeKid.foreach(builder.keyID)
-    okp match { // for private key
-      case _: PublicKey  => // ok (just the public key)
-      case k: PrivateKey => builder.d(Base64.fromBase64url(k.d))
-    }
-    builder.build()
+
   }
 
   extension (key: PublicKey) {

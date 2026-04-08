@@ -1,3 +1,4 @@
+/* TODO REMOVE CLEANUP
 package fmgp.did.method.prism
 
 import zio.*
@@ -18,15 +19,15 @@ import _root_.proto.prism.SignedPrismEvent
 import _root_.proto.prism.PrismObject
 
 /** https://cardano-client.dev/docs/gettingstarted/simple-transfer
-  *
-  * didResolverPrismJVM/Test/runMain fmgp.did.method.prism.CardanoClient
-  */
+ *
+ * didResolverPrismJVM/Test/runMain fmgp.did.method.prism.CardanoClient
+ */
 object CardanoClient extends ZIOAppDefault {
 
   override def run: ZIO[Any & (ZIOAppArgs & Scope), Any, Any] =
     for {
       _ <- Console.printLine(
-        """██████╗ ██████╗ ██╗███████╗███╗   ███╗    ██╗   ██╗██████╗ ██████╗ 
+        """██████╗ ██████╗ ██╗███████╗███╗   ███╗    ██╗   ██╗██████╗ ██████╗
           |██╔══██╗██╔══██╗██║██╔════╝████╗ ████║    ██║   ██║██╔══██╗██╔══██╗
           |██████╔╝██████╔╝██║███████╗██╔████╔██║    ██║   ██║██║  ██║██████╔╝
           |██╔═══╝ ██╔══██╗██║╚════██║██║╚██╔╝██║    ╚██╗ ██╔╝██║  ██║██╔══██╗
@@ -80,3 +81,4 @@ object CardanoClient extends ZIOAppDefault {
     } yield ()
 
 }
+ */
