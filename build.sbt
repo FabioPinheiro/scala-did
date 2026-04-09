@@ -74,13 +74,10 @@ lazy val docConfigure: Project => Project =
 
 // Test Framework config
 inThisBuild {
-  val MUnitFramework = new TestFramework("munit.Framework")
   val testConfig: Tests.Argument =
     if (sys.env.get("SKIP_INTEGRATION_TEST").isDefined)
-      Tests.Argument(MUnitFramework, "--exclude-tags=IntregrationTest")
-    else
-      Tests.Argument(MUnitFramework)
-
+      Tests.Argument("--exclude-tags=IntregrationTest")
+    else Tests.Argument()
   Seq(Test / testOptions += testConfig)
 }
 
