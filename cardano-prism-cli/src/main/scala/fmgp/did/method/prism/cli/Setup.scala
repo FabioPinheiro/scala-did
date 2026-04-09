@@ -4,59 +4,22 @@ import zio.*
 import zio.cli.*
 import zio.json.*
 import java.nio.file.Path
-import scalus.cardano.wallet.hd.HdKeyPair
-import scalus.cardano.wallet.hd.Bip32Ed25519
 import scalus.crypto.ed25519.given
 import fmgp.crypto.*
 import fmgp.did.method.prism.BlockfrostConfig
 import fmgp.did.method.prism.BlockfrostRyoConfig
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
-import fmgp.did.method.prism.cardano.Cip0000
 import fmgp.did.method.prism.cardano.PublicCardanoNetwork
 import fmgp.util.hex2bytes
 import fmgp.util.bytes2Hex
 
-sealed trait Key {
-  def derivationPath: String
-  def path: Cip0000 = Cip0000.fromPath(derivationPath).getOrElse(???) // FIXME
-}
-case class KeySecp256k1(derivationPath: String, key: Secp256k1PrivateKey) extends Key { def secp256k1PrivateKey = key }
-case class KeyEd25519(derivationPath: String, key: HdKeyPair) extends Key
-case class KeyX25519(derivationPath: String, key: OKPPrivateKeyWithoutKid) extends Key
-
-object Key {
-  given decoder: JsonDecoder[Key] = {
-    given JsonDecoder[Array[Byte]] = Utils.decoderArrayByte
-    given JsonDecoder[Secp256k1PrivateKey] = JsonDecoder.string.map(hex => Utils.secp256k1FromRaw(hex))
-    given extendedKeyDecoder: JsonDecoder[Bip32Ed25519.ExtendedKey] = DeriveJsonDecoder.gen[Bip32Ed25519.ExtendedKey]
-    given JsonDecoder[HdKeyPair] = extendedKeyDecoder.map(ek => HdKeyPair.fromExtendedKey(ek))
-    DeriveJsonDecoder.gen[Key]
-  }
-  given encoder: JsonEncoder[Key] = {
-    given JsonEncoder[Array[Byte]] = Utils.encoderArrayByte
-    given JsonEncoder[Secp256k1PrivateKey] = JsonEncoder.string.contramap(key => bytes2Hex(key.rawBytes))
-    given extendedKeyEncoder: JsonEncoder[Bip32Ed25519.ExtendedKey] = DeriveJsonEncoder.gen[Bip32Ed25519.ExtendedKey]
-    given JsonEncoder[HdKeyPair] = extendedKeyEncoder.contramap(hd => hd.extendedKey)
-    DeriveJsonEncoder.gen[Key]
-  }
-
-  def apply(derivationPath: String, key: Secp256k1PrivateKey): KeySecp256k1 = KeySecp256k1(derivationPath, key)
-  def apply(derivationPath: String, key: HdKeyPair): KeyEd25519 = KeyEd25519(derivationPath, key)
-}
-
-object Utils {
-  def decoderArrayByte: JsonDecoder[Array[Byte]] = JsonDecoder.string.map(hex => hex2bytes(hex))
-  def encoderArrayByte: JsonEncoder[Array[Byte]] = JsonEncoder.string.contramap(bytes => bytes2Hex(bytes))
-
-  def secp256k1FromRaw(hex: String) = Secp256k1PrivateKey(hex2bytes(hex))
-}
 case class StagingState(
     loadStateFileByDefault: Boolean = true,
     updateStateFileByDefault: Boolean = false,
     ssiWallet: Option[CardanoWalletConfig] = None,
     cardanoWallet: Option[CardanoWalletConfig] = None,
     // seed: Option[Array[Byte]] = None,
-    ssiPrivateKeys: Map[String, Key] = Map.empty,
+    ssiPrivateKeys: Map[String, DerivedKey] = Map.empty,
     blockfrostMainnet: Option[BlockfrostConfig] = None,
     blockfrostTestnet: Option[BlockfrostConfig] = None,
     blockfrostPreprod: Option[BlockfrostConfig] = None,
@@ -72,13 +35,13 @@ case class StagingState(
 object StagingState {
 
   given decoder: JsonDecoder[StagingState] = {
-    given JsonDecoder[Array[Byte]] = Utils.decoderArrayByte
+    given JsonDecoder[Array[Byte]] = DerivedKey.decoderArrayByte
     given decoder: JsonDecoder[BlockfrostConfig] = DeriveJsonDecoder.gen[BlockfrostConfig]
     given ryoDecoder: JsonDecoder[BlockfrostRyoConfig] = DeriveJsonDecoder.gen[BlockfrostRyoConfig]
     DeriveJsonDecoder.gen[StagingState]
   }
   given encoder: JsonEncoder[StagingState] = {
-    given JsonEncoder[Array[Byte]] = Utils.encoderArrayByte
+    given JsonEncoder[Array[Byte]] = DerivedKey.encoderArrayByte
     given encoder: JsonEncoder[BlockfrostConfig] = DeriveJsonEncoder.gen[BlockfrostConfig]
     given ryoEncoder: JsonEncoder[BlockfrostRyoConfig] = DeriveJsonEncoder.gen[BlockfrostRyoConfig]
     DeriveJsonEncoder.gen[StagingState]

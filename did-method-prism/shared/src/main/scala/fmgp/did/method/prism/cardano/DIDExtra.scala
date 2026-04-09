@@ -42,7 +42,7 @@ object DIDExtra {
     )
     def signedPrismCreateEventDID = SignedPrismEvent(
       signedWith = masterKeys.head._1,
-      signature = ByteString.copyFrom(masterKeys.head._2.sign(op.toByteArray)),
+      signature = ByteString.copyFrom(masterKeys.head._2.signWithApollo(op.toByteArray)),
       event = Some(op)
     )
     def didPrism: DIDPrism = op.didPrism.getOrElse(???)
@@ -75,7 +75,7 @@ object DIDExtra {
     )
     val signedPrismCreateEventDID = SignedPrismEvent(
       signedWith = Cip0000.keyLabel,
-      signature = ByteString.copyFrom(masterKey.sign(createEvent.toByteArray)),
+      signature = ByteString.copyFrom(masterKey.signWithApollo(createEvent.toByteArray)),
       event = Some(createEvent)
     )
     val didPrism: DIDPrism = createEvent.didPrism.getOrElse(???) // '???' is ok
@@ -101,7 +101,7 @@ object DIDExtra {
 
           val signedPrismUpdateEventDID = SignedPrismEvent(
             signedWith = Cip0000.keyLabel,
-            signature = ByteString.copyFrom(masterKey.sign(updateEvent.toByteArray)),
+            signature = ByteString.copyFrom(masterKey.signWithApollo(updateEvent.toByteArray)),
             event = Some(updateEvent)
           )
           // println(MaybeEvent.fromProtoForce2DIDEvent(signedPrismUpdateEventDID).view.operation.asDebugJson)

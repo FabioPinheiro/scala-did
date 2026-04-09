@@ -207,7 +207,7 @@ object KeyCommand {
           val keys = stagingState.ssiPrivateKeys.+(
             (
               keyLabel.getOrElse(s"key${stagingState.ssiPrivateKeys.size}"),
-              Key(derivationPath = derivationPath, key = Secp256k1PrivateKey(key.getEncoded()))
+              DerivedKey(derivationPath = derivationPath, key = Secp256k1PrivateKey(key.getEncoded()))
             )
           )
           stagingState.copy(ssiWallet = Some(wallet), ssiPrivateKeys = keys)

@@ -4,6 +4,7 @@ import zio.*
 import zio.cli.*
 import zio.json.*
 import zio.http.*
+import fmgp.crypto.*
 import fmgp.did.method.prism.*
 import fmgp.did.method.prism.cli.*
 import fmgp.did.method.prism.cardano.DIDExtra
@@ -108,7 +109,7 @@ object DIDCommand {
             }
         )
         master = masterRaw
-          .map(rawHex => Utils.secp256k1FromRaw(rawHex))
+          .map(rawHex => DerivedKey.secp256k1FromRaw(rawHex))
           .orElse(mkAlternative)
           .map(k => (masterLabel, k))
         mVDR <- vdrLabel match
@@ -124,7 +125,7 @@ object DIDCommand {
                     case KeyX25519(derivationPath, key)    => ??? // TODO fail becuase type type is not supported
                   }
               )
-              key = vdrRaw.map(rawHex => Utils.secp256k1FromRaw(rawHex)).orElse(alternative)
+              key = vdrRaw.map(rawHex => DerivedKey.secp256k1FromRaw(rawHex)).orElse(alternative)
             } yield key.map(k => (label, k))
         (didPrism, signedPrismEvent) = DIDExtra.createDID(
           masterKeys = master.toSeq,

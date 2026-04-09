@@ -36,10 +36,14 @@ case class Secp256k1PrivateKey(rawBytes: Array[Byte]) {
     (point.getX(), point.getY())
   }
 
-  final def sign(data: Array[Byte]): Array[Byte] = pk.sign(data)
-  //   CryptoRawBytesOperationsJVM.ecKeySignBytesWithEC(privateJWK, payload) // TODO FIXME fix tests
-  final def verify(signature: Array[Byte], data: Array[Byte]): Boolean = // pk.verify(signature, data)
-    CryptoRawBytesOperationsJVM.ecKeyVerifyBytesWithEC(privateJWK.toPublicKey, data, signature)
-  // final def verify(signature: Array[Byte], data: Array[Byte]): Boolean = pk.verify(signature, data)
+  final def sign(payload: Array[Byte]): Array[Byte] =
+    CryptoRawBytesOperationsJVM.ecKeySignBytesWithEC(privateJWK, payload)
+  final def verify(signature: Array[Byte], payload: Array[Byte]): Boolean =
+    CryptoRawBytesOperationsJVM.ecKeyVerifyBytesWithEC(privateJWK.toPublicKey, payload, signature)
+
+  final def signWithApollo(payload: Array[Byte]): Array[Byte] = pk.sign(payload)
+
+  /** user verify instade */
+  final def verifyWithApollo(signature: Array[Byte], payload: Array[Byte]): Boolean = pk.verify(signature, payload)
 
 }

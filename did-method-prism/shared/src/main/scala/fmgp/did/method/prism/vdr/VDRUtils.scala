@@ -29,7 +29,7 @@ protected[vdr] object VDRUtils {
     )
     def signedPrismCreateEventVDR = SignedPrismEvent(
       signedWith = keyName,
-      signature = ByteString.copyFrom(vdrKey.sign(op.toByteArray)),
+      signature = ByteString.copyFrom(vdrKey.signWithApollo(op.toByteArray)),
       event = Some(op)
     )
     (RefVDR.fromEventHash(op.getEventHash), signedPrismCreateEventVDR)
@@ -68,7 +68,7 @@ protected[vdr] object VDRUtils {
     )
     def signedPrismUpdateEventVDR = SignedPrismEvent(
       signedWith = keyName,
-      signature = ByteString.copyFrom(vdrKey.sign(op.toByteArray)),
+      signature = ByteString.copyFrom(vdrKey.signWithApollo(op.toByteArray)),
       event = Some(op)
     )
     (op.getEventHash, signedPrismUpdateEventVDR)
@@ -101,7 +101,7 @@ protected[vdr] object VDRUtils {
     )
     def signedPrismUpdateEventVDR = SignedPrismEvent(
       signedWith = keyName,
-      signature = ByteString.copyFrom(vdrKey.sign(op.toByteArray)),
+      signature = ByteString.copyFrom(vdrKey.signWithApollo(op.toByteArray)),
       event = Some(op)
     )
     (op.getEventHash, signedPrismUpdateEventVDR)

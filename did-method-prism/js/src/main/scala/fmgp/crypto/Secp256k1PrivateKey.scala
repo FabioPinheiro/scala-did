@@ -30,6 +30,8 @@ case class Secp256k1PrivateKey(rawBytes: Array[Byte]) { // TODO
 
   final def curvePoint: (Array[Byte], Array[Byte]) = (???, ???)
 
-  final def sign(data: Array[Byte]): Array[Byte] = ???
-  final def verify(signature: Array[Byte], data: Array[Byte]): Boolean = ???
+  final def sign(payload: Array[Byte]): Array[Byte] = ???
+  final def verify(signature: Array[Byte], payload: Array[Byte]): Boolean = ???
+  final def signWithApollo(payload: Array[Byte]): Array[Byte] = ???
+  final def verifyWithApollo(signature: Array[Byte], payload: Array[Byte]): Boolean = ???
 }

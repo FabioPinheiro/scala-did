@@ -14,7 +14,7 @@ import fmgp.crypto.{given, *}
 import fmgp.crypto.UtilsJVM.*
 
 /** didResolverPrismJVM/testOnly fmgp.did.method.prism.CardanoWalletConfigSuite */
-class CardanoWalletConfigSuite extends FunSuite {
+class CardanoWalletConfigSuite extends ZSuite {
 
   test("Cip0000.didPath follows the deterministic-prism-did-generation-proposal") {
     val path = Cip0000.didPath(didIndex = 0, keyUsage = PrismKeyUsage.MasterKeyUsage, keyIndex = 0)
@@ -64,6 +64,78 @@ class CardanoWalletConfigSuite extends FunSuite {
       assertEquals(hexApollo, expectedPrivateKeyRaw)
       assertEquals(pk_rawBytes, expectedPrivateKeyRaw)
     }
+  }
+
+  test("secp256k1 (Apollo/HDKey) sign and verify via did-imp") {
+    val secp256k1Key = TestPeer.cw.secp256k1DerivePrism(0, PrismKeyUsage.MasterKeyUsage, 0)
+    val data = "interoperability test payload".getBytes
+
+    // Sign with Apollo's native sign (produces DER-encoded signature)
+    val derSignature = secp256k1Key.signWithApollo(data)
+
+    // Verify with Apollo's native verify
+    assert(secp256k1Key.verifyWithApollo(derSignature, data), "Apollo native verify should succeed")
+    assert(secp256k1Key.verify(derSignature, data), "Defualt verify should succeed")
+    val jwk: ECPrivateKeyWithoutKid = secp256k1Key.privateJWK
+
+    assert(
+      CryptoRawBytesOperationsJVM.ecKeyVerifyBytesWithEC(jwk.toPublicKey, data, derSignature),
+      "CryptoRawBytesOperationsJVM verify should succeed"
+    )
+
+    // Cross-verify via did-imp: convert to JWK and use Nimbus ECDSAVerifier
+    val nimbusKey = jwk.toJWK
+    val verifier = new com.nimbusds.jose.crypto.ECDSAVerifier(nimbusKey.toPublicJWK)
+    verifier.getJCAContext().setProvider(CryptoProvider.provider)
+
+    // Apollo sign() returns DER-encoded ECDSA signature; Nimbus verify() expects JWS compact (R||S)
+    val jwsSignature = com.nimbusds.jose.crypto.impl.ECDSA.transcodeSignatureToConcat(derSignature, 32)
+    val header = new com.nimbusds.jose.JWSHeader.Builder(com.nimbusds.jose.JWSAlgorithm.ES256K).build()
+    assert(
+      verifier.verify(header, data, com.nimbusds.jose.util.Base64URL.encode(jwsSignature)),
+      "did-imp (Nimbus ECDSAVerifier) should verify Apollo-produced signature"
+    )
+  }
+
+  test("secp256k1 (Apollo/HDKey) JWT sign via did-imp signWith and verify via verifyWith") {
+    val secp256k1Key = TestPeer.cw.secp256k1DerivePrism(0, PrismKeyUsage.MasterKeyUsage, 0)
+
+    val ecPrivateKey = secp256k1Key.privateJWK.withKid("wallet-key-secp256k1")
+    val ecPublicKey = ecPrivateKey.toPublicKey
+
+    val jwtUnsigned = JWTUnsigned(
+      header = JWTHeader(alg = JWAAlgorithm.ES256K, kid = Some(ecPublicKey.kid)),
+      payload = Payload.fromBytes("hello world".getBytes),
+    )
+
+    jwtUnsigned.signWith(ecPrivateKey) match
+      case Left(error) => fail(s"JWT signing failed: $error")
+      case Right(jwt)  => assert(jwt.verifyWith(ecPublicKey), "JWT verification failed")
+  }
+
+  testZ("secp256k1 (Apollo/HDKey) sign and verify via CryptoOperationsImp") {
+    val secp256k1Key = TestPeer.cw.secp256k1DerivePrism(0, PrismKeyUsage.MasterKeyUsage, 0)
+    val ecPrivateKey = secp256k1Key.privateJWK.withKid("wallet-key-secp256k1")
+    val ecPublicKey = ecPrivateKey.toPublicKey
+    val data = "interoperability test payload".getBytes
+
+    for {
+      signed <- CryptoOperationsImp.sign(ecPrivateKey, data)
+      verified <- CryptoOperationsImp.verify(ecPublicKey, signed)
+    } yield assert(verified, "CryptoOperationsImp.verify should succeed for Apollo-derived secp256k1 key")
+
+  }
+
+  testZ("secp256k1 (Apollo/HDKey) JWT sign and verify via CryptoOperationsImp") {
+    val secp256k1Key = TestPeer.cw.secp256k1DerivePrism(0, PrismKeyUsage.MasterKeyUsage, 0)
+    val ecPrivateKey = secp256k1Key.privateJWK.withKid("wallet-key-secp256k1")
+    val ecPublicKey = ecPrivateKey.toPublicKey
+
+    for {
+      jwt <- CryptoOperationsImp.signJWT(ecPrivateKey, "hello world".getBytes)
+      verified <- CryptoOperationsImp.verifyJWT(ecPublicKey, jwt)
+    } yield assert(verified, "CryptoOperationsImp.verifyJWT should succeed for Apollo-derived secp256k1 key")
+
   }
 
   test("ed25519 test vector") {
@@ -146,9 +218,16 @@ class CardanoWalletConfigSuite extends FunSuite {
     )
 
     val result = for {
-      encrypted     <- ECDH_AnonOKP.encrypt(Seq((kid, key.toPublicKey)), header, clearText)
-      jweRecipients  = encrypted.recipients.map(r => JWERecipient(r.header.kid, r.encrypted_key))
-      decrypted     <- ECDH_AnonOKP.decrypt(Seq((kid, key)), encrypted.`protected`, jweRecipients, encrypted.iv, encrypted.ciphertext, encrypted.tag)
+      encrypted <- ECDH_AnonOKP.encrypt(Seq((kid, key.toPublicKey)), header, clearText)
+      jweRecipients = encrypted.recipients.map(r => JWERecipient(r.header.kid, r.encrypted_key))
+      decrypted <- ECDH_AnonOKP.decrypt(
+        Seq((kid, key)),
+        encrypted.`protected`,
+        jweRecipients,
+        encrypted.iv,
+        encrypted.ciphertext,
+        encrypted.tag
+      )
     } yield decrypted
 
     result match
@@ -172,9 +251,17 @@ class CardanoWalletConfigSuite extends FunSuite {
     )
 
     val result = for {
-      encrypted     <- ECDH_AuthOKP.encrypt(senderKey, Seq((recipientKid, recipientKey.toPublicKey)), header, clearText)
-      jweRecipients  = encrypted.recipients.map(r => JWERecipient(r.header.kid, r.encrypted_key))
-      decrypted     <- ECDH_AuthOKP.decrypt(senderKey.toPublicKey, Seq((recipientKid, recipientKey)), encrypted.`protected`, jweRecipients, encrypted.iv, encrypted.ciphertext, encrypted.tag)
+      encrypted <- ECDH_AuthOKP.encrypt(senderKey, Seq((recipientKid, recipientKey.toPublicKey)), header, clearText)
+      jweRecipients = encrypted.recipients.map(r => JWERecipient(r.header.kid, r.encrypted_key))
+      decrypted <- ECDH_AuthOKP.decrypt(
+        senderKey.toPublicKey,
+        Seq((recipientKid, recipientKey)),
+        encrypted.`protected`,
+        jweRecipients,
+        encrypted.iv,
+        encrypted.ciphertext,
+        encrypted.tag
+      )
     } yield decrypted
 
     result match
@@ -195,9 +282,16 @@ class CardanoWalletConfigSuite extends FunSuite {
     )
 
     val result = for {
-      encrypted     <- ECDH_AnonOKP.encrypt(Seq((kid, correctKey.toPublicKey)), header, clearText)
-      jweRecipients  = encrypted.recipients.map(r => JWERecipient(r.header.kid, r.encrypted_key))
-      decrypted     <- ECDH_AnonOKP.decrypt(Seq((kid, wrongKey)), encrypted.`protected`, jweRecipients, encrypted.iv, encrypted.ciphertext, encrypted.tag)
+      encrypted <- ECDH_AnonOKP.encrypt(Seq((kid, correctKey.toPublicKey)), header, clearText)
+      jweRecipients = encrypted.recipients.map(r => JWERecipient(r.header.kid, r.encrypted_key))
+      decrypted <- ECDH_AnonOKP.decrypt(
+        Seq((kid, wrongKey)),
+        encrypted.`protected`,
+        jweRecipients,
+        encrypted.iv,
+        encrypted.ciphertext,
+        encrypted.tag
+      )
     } yield decrypted
 
     assert(result.isLeft, "decrypting with a wrong key should fail")

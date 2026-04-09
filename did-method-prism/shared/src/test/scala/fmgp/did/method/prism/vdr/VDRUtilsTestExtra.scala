@@ -97,7 +97,7 @@ object VDRUtilsTestExtra {
     )
     def signedPrismCreateEventDID = SignedPrismEvent(
       signedWith = masterKeyName,
-      signature = ByteString.copyFrom(masterKey.sign(op.toByteArray)),
+      signature = ByteString.copyFrom(masterKey.signWithApollo(op.toByteArray)),
       event = Some(op)
     )
     signedPrismCreateEventDID
@@ -132,7 +132,7 @@ object VDRUtilsTestExtra {
     )
     def signedPrismUpdateEventVDR = SignedPrismEvent(
       signedWith = keyName,
-      signature = ByteString.copyFrom(vdrKey.sign(op.toByteArray)),
+      signature = ByteString.copyFrom(vdrKey.signWithApollo(op.toByteArray)),
       event = Some(op)
     )
     signedPrismUpdateEventVDR
