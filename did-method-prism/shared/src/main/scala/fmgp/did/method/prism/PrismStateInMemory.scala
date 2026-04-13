@@ -57,8 +57,8 @@ object PrismStateInMemory {
   *
   * ==Thread Safety==
   *
-  * All state updates use ZIO [[zio.Ref]] for lock-free, thread-safe mutations. Multiple concurrent operations are safely
-  * handled without explicit locking.
+  * All state updates use ZIO [[zio.Ref]] for lock-free, thread-safe mutations. Multiple concurrent operations are
+  * safely handled without explicit locking.
   *
   * @constructor
   *   Creates in-memory state with ZIO Ref
