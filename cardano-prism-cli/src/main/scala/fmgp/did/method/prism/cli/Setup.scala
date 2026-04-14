@@ -25,7 +25,6 @@ case class StagingState(
     blockfrostPreprod: Option[BlockfrostConfig] = None,
     blockfrostPreview: Option[BlockfrostConfig] = None,
 ) {
-  ssiPrivateKeys.get("")
   def blockfrost(network: PublicCardanoNetwork): Option[BlockfrostConfig] = network match
     case PublicCardanoNetwork.Mainnet => this.blockfrostMainnet
     case PublicCardanoNetwork.Testnet => this.blockfrostTestnet

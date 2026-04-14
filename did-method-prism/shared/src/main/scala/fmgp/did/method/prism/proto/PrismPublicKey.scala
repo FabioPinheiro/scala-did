@@ -10,7 +10,7 @@ import fmgp.did.VerificationMethodReferenced
 import fmgp.did.VerificationMethodEmbeddedJWK
 import fmgp.did.VerificationMethodEmbeddedMultibase
 import fmgp.util.hex2bytes
-import fmgp.crypto.SharedCryto
+import fmgp.crypto.*
 import fmgp.did.method.prism.proto.PrismPublicKey.VoidKey
 import fmgp.did.method.prism.proto.PrismPublicKey.UncompressedECKey
 import fmgp.did.method.prism.proto.PrismPublicKey.CompressedECKey
@@ -127,8 +127,14 @@ object PrismPublicKey {
         )
       )
     )
-
   }
+
+  // object CompressedECKey {
+  //   def fromJWK(key: OKPPrivateKey, label: String) = key match
+  //     case okp @ OKPPrivateKeyWithoutKid(kty, crv, d, x) =>
+
+  //     case okp @ OKPPrivateKeyWithoutKid(kty, crv: Curve.Ed25519.type, d, x) =>
+  // }
 
   def fromProto(key: proto.prism.PublicKey) = {
     key match
