@@ -17,6 +17,7 @@ import fmgp.did.method.prism.cardano.DIDExtra
 import fmgp.did.method.prism.proto.PrismKeyUsage
 import fmgp.did.method.prism.cli.CMD.*
 import fmgp.util.hex2bytes
+import fmgp.crypto.KeyGenerator
 
 object KeyCommand {
 
@@ -102,16 +103,39 @@ object KeyCommand {
               )
           },
         Command(
-          "derivation-path",
-          Options.none
-            ++ walletOpt.optional
-            ++ derivationPathOpt
-            ++ Options.text("label").??("Key label/name. key will be save staging with that name.").optional
+          "random-Ed25519",
+          Options.text("label").??("Key label/name. key will be save staging with that name."),
         )
-          .withHelp("Make a private Secp256k1 key")
-          .map { case (mWallet, derivationPath, keyLabel) =>
-            (setup: Setup) => CMD.Mnemonic2Key(setup, mWallet, derivationPath, keyLabel)
+          .map { keyLabel =>
+            (setup: Setup) =>
+              CMD.KeyEd25519Random(
+                setup = setup,
+                keyLabel = keyLabel,
+              )
           },
+        Command(
+          "random-X25519",
+          Options.text("label").??("Key label/name. key will be save staging with that name."),
+        )
+          .map { keyLabel =>
+            (setup: Setup) =>
+              CMD.KeyX25519Random(
+                setup = setup,
+                keyLabel = keyLabel,
+              )
+          },
+        // TODO REMOVE CLEANUP
+        // Command(
+        //   "derivation-path",
+        //   Options.none
+        //     ++ walletOpt.optional
+        //     ++ derivationPathOpt
+        //     ++ Options.text("label").??("Key label/name. key will be save staging with that name.").optional
+        // )
+        //   .withHelp("Make a private Secp256k1 key")
+        //   .map { case (mWallet, derivationPath, keyLabel) =>
+        //     (setup: Setup) => CMD.Mnemonic2Key(setup, mWallet, derivationPath, keyLabel)
+        //   },
         // TODO REMOVE
         // Command(
         //   "did-deterministic",
@@ -177,43 +201,72 @@ object KeyCommand {
         _ <- Console.printLine(text)
       } yield ()).provideLayer(cmd.setup.layer).orDie
 
-    case CMD.Mnemonic2Key(setup, mWallet, derivationPath, keyLabel) =>
-      val (info, wallet) = mWallet.orElse(setup.mState.flatMap(_.ssiWallet)) match
-        case Some(wallet) => (s"Lodding wallett: $wallet", wallet)
-        case None         => { val tmp = MnemonicCommand.newWallet; (s"Generateing new wallet: $tmp", tmp) }
+    case KeyEd25519Random(setup, keyLabel) =>
       (for {
-        _ <- ZIO.log(info)
+        key <- KeyGenerator.makeEd25519.orDieWith(e => RuntimeException(e.toString))
         _ <- forceStateUpdateAtEnd
-        seed = MnemonicHelper.Companion.createSeed(wallet.mnemonic.asJava, wallet.passphrase)
-        _ <- ZIO.log(s"derivationPath=$derivationPath keyLabel=$keyLabel seed='${bytes2Hex(seed)}'")
-        hdkey <- Try(HDKey(seed, 0, 0).derive(derivationPath))
-          .map(ZIO.succeed(_))
-          .recover { ex =>
-            ex.printStackTrace();
-            ZIO.fail(ex)
-          }
-          .get
-          .orDie // FIXME
-        _ <- ZIO.log("seed: ------------------ " + bytes2Hex(seed))
-        _ <- ZIO.log("getChainCode: ---------- " + bytes2Hex(hdkey.getChainCode()))
-        key = hdkey.getKMMSecp256k1PrivateKey()
-        _ <- ZIO.log("PrivateKey raw --------- " + bytes2Hex(key.getRaw()))
-        _ <- ZIO.log("PrivateKey encoded ----- " + bytes2Hex(key.getEncoded()))
-        _ <- ZIO.log("PublicKey raw ---------- " + bytes2Hex(key.getPublicKey().getRaw()))
-        _ <- ZIO.log("PublicKey Compressed --- " + bytes2Hex(key.getPublicKey().getCompressed()))
-        _ <- ZIO.log("PublicKey CurvePoint X - " + bytes2Hex(key.getPublicKey().getCurvePoint().getX()))
-        _ <- ZIO.log("PublicKey CurvePoint Y - " + bytes2Hex(key.getPublicKey().getCurvePoint().getY()))
         _ <- updateState { stagingState =>
-          val keys = stagingState.ssiPrivateKeys.+(
-            (
-              keyLabel.getOrElse(s"key${stagingState.ssiPrivateKeys.size}"),
-              DerivedKey(derivationPath = derivationPath, key = Secp256k1PrivateKey(key.getEncoded()))
-            )
+          stagingState.copy(ssiPrivateKeys =
+            stagingState.ssiPrivateKeys.+(keyLabel -> key)
           )
-          stagingState.copy(ssiWallet = Some(wallet), ssiPrivateKeys = keys)
         }
-        _ <- Console.printLine(bytes2Hex(key.getEncoded())).orDie
-      } yield ()).provideLayer(setup.layer)
+        text = s"Random Ed25519 key generated and saved as '$keyLabel'"
+        _ <- ZIO.log(text)
+        _ <- Console.printLine(text)
+      } yield ()).provideLayer(cmd.setup.layer).orDie
+
+    case KeyX25519Random(setup, keyLabel) =>
+      (for {
+        key <- KeyGenerator.makeX25519.orDieWith(e => RuntimeException(e.toString))
+        _ <- forceStateUpdateAtEnd
+        _ <- updateState { stagingState =>
+          stagingState.copy(ssiPrivateKeys =
+            stagingState.ssiPrivateKeys.+(keyLabel -> key)
+          )
+        }
+        text = s"Random X25519 key generated and saved as '$keyLabel'"
+        _ <- ZIO.log(text)
+        _ <- Console.printLine(text)
+      } yield ()).provideLayer(cmd.setup.layer).orDie
+
+    // TODO REMOVE CLEANUP
+    // case CMD.Mnemonic2Key(setup, mWallet, derivationPath, keyLabel) =>
+    //   val (info, wallet) = mWallet.orElse(setup.mState.flatMap(_.ssiWallet)) match
+    //     case Some(wallet) => (s"Lodding wallett: $wallet", wallet)
+    //     case None         => { val tmp = MnemonicCommand.newWallet; (s"Generateing new wallet: $tmp", tmp) }
+    //   (for {
+    //     _ <- ZIO.log(info)
+    //     _ <- forceStateUpdateAtEnd
+    //     seed = MnemonicHelper.Companion.createSeed(wallet.mnemonic.asJava, wallet.passphrase)
+    //     _ <- ZIO.log(s"derivationPath=$derivationPath keyLabel=$keyLabel seed='${bytes2Hex(seed)}'")
+    //     hdkey <- Try(HDKey(seed, 0, 0).derive(derivationPath))
+    //       .map(ZIO.succeed(_))
+    //       .recover { ex =>
+    //         ex.printStackTrace();
+    //         ZIO.fail(ex)
+    //       }
+    //       .get
+    //       .orDie // FIXME
+    //     _ <- ZIO.log("seed: ------------------ " + bytes2Hex(seed))
+    //     _ <- ZIO.log("getChainCode: ---------- " + bytes2Hex(hdkey.getChainCode()))
+    //     key = hdkey.getKMMSecp256k1PrivateKey()
+    //     _ <- ZIO.log("PrivateKey raw --------- " + bytes2Hex(key.getRaw()))
+    //     _ <- ZIO.log("PrivateKey encoded ----- " + bytes2Hex(key.getEncoded()))
+    //     _ <- ZIO.log("PublicKey raw ---------- " + bytes2Hex(key.getPublicKey().getRaw()))
+    //     _ <- ZIO.log("PublicKey Compressed --- " + bytes2Hex(key.getPublicKey().getCompressed()))
+    //     _ <- ZIO.log("PublicKey CurvePoint X - " + bytes2Hex(key.getPublicKey().getCurvePoint().getX()))
+    //     _ <- ZIO.log("PublicKey CurvePoint Y - " + bytes2Hex(key.getPublicKey().getCurvePoint().getY()))
+    //     _ <- updateState { stagingState =>
+    //       val keys = stagingState.ssiPrivateKeys.+(
+    //         (
+    //           keyLabel.getOrElse(s"key${stagingState.ssiPrivateKeys.size}"),
+    //           DerivedKey(derivationPath = derivationPath, key = Secp256k1PrivateKey(key.getEncoded()))
+    //         )
+    //       )
+    //       stagingState.copy(ssiWallet = Some(wallet), ssiPrivateKeys = keys)
+    //     }
+    //     _ <- Console.printLine(bytes2Hex(key.getEncoded())).orDie
+    //   } yield ()).provideLayer(setup.layer)
     // TODO REMOVE
     // case CMD.Mnemonic2Key2SSITestVector(setup, mWallet, index) =>
     //   val (info, wallet) = mWallet.orElse(setup.mState.flatMap(_.ssiWallet)) match

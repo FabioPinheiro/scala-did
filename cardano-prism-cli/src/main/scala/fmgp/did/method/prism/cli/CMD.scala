@@ -81,12 +81,23 @@ object CMD {
       keyLabel: String,
   ) extends KeyCMD
 
-  final case class Mnemonic2Key(
-      setup: Setup,
-      mWallet: Option[CardanoWalletConfig],
-      derivationPath: String,
-      keyLabel: Option[String]
+  final case class KeyEd25519Random(
+      override val setup: Setup,
+      keyLabel: String,
   ) extends KeyCMD
+
+  final case class KeyX25519Random(
+      override val setup: Setup,
+      keyLabel: String,
+  ) extends KeyCMD
+
+// TODO REMOVE CLEANUP
+//   final case class Mnemonic2Key(
+//       setup: Setup,
+//       mWallet: Option[CardanoWalletConfig],
+//       derivationPath: String,
+//       keyLabel: Option[String]
+//   ) extends KeyCMD
 
 // TODO REMOVE
 //   final case class Mnemonic2Key2SSITestVector(

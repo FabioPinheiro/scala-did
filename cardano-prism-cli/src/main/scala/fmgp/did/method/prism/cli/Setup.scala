@@ -19,7 +19,7 @@ case class StagingState(
     ssiWallet: Option[CardanoWalletConfig] = None,
     cardanoWallet: Option[CardanoWalletConfig] = None,
     // seed: Option[Array[Byte]] = None,
-    ssiPrivateKeys: Map[String, DerivedKey] = Map.empty,
+    ssiPrivateKeys: Map[String, DerivedKey | PrivateKey] = Map.empty,
     blockfrostMainnet: Option[BlockfrostConfig] = None,
     blockfrostTestnet: Option[BlockfrostConfig] = None,
     blockfrostPreprod: Option[BlockfrostConfig] = None,
@@ -34,12 +34,21 @@ case class StagingState(
 object StagingState {
 
   given decoder: JsonDecoder[StagingState] = {
+    given JsonDecoder[DerivedKey | PrivateKey] = // unionDecoder[DerivedKey, PrivateKey]
+      DerivedKey.decoder <> PrivateKey.decoder.widen[DerivedKey | PrivateKey]
     given JsonDecoder[Array[Byte]] = DerivedKey.decoderArrayByte
     given decoder: JsonDecoder[BlockfrostConfig] = DeriveJsonDecoder.gen[BlockfrostConfig]
     given ryoDecoder: JsonDecoder[BlockfrostRyoConfig] = DeriveJsonDecoder.gen[BlockfrostRyoConfig]
     DeriveJsonDecoder.gen[StagingState]
   }
   given encoder: JsonEncoder[StagingState] = {
+    given JsonEncoder[DerivedKey | PrivateKey] = new JsonEncoder[DerivedKey | PrivateKey] {
+      def unsafeEncode(eab: DerivedKey | PrivateKey, indent: Option[Int], out: zio.json.internal.Write): Unit =
+        eab match {
+          case a: DerivedKey => JsonEncoder[DerivedKey].unsafeEncode(a, indent, out)
+          case b: PrivateKey => JsonEncoder[PrivateKey].unsafeEncode(b, indent, out)
+        }
+    }
     given JsonEncoder[Array[Byte]] = DerivedKey.encoderArrayByte
     given encoder: JsonEncoder[BlockfrostConfig] = DeriveJsonEncoder.gen[BlockfrostConfig]
     given ryoEncoder: JsonEncoder[BlockfrostRyoConfig] = DeriveJsonEncoder.gen[BlockfrostRyoConfig]

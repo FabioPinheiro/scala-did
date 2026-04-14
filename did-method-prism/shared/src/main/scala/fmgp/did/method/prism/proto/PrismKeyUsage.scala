@@ -11,7 +11,11 @@ enum PrismKeyUsage(val protoEnum: Int, val name: String):
 
   /** assertionMethod */
   case IssuingKeyUsage extends PrismKeyUsage(2, "Issuing")
+
+  /** Have key like X25519 */
   case KeyAgreementKeyUsage extends PrismKeyUsage(3, "KeyAgreement")
+
+  /** Have keys like Ed25519 */
   case AuthenticationKeyUsage extends PrismKeyUsage(4, "Authentication")
   case RevocationKeyUsage extends PrismKeyUsage(5, "Revocation")
   case CapabilityinvocationKeyUsage extends PrismKeyUsage(6, "CapabilityInvocation")

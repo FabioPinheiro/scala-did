@@ -18,6 +18,7 @@ import fmgp.did.method.prism.proto.UpdateDidOP
 import fmgp.did.method.prism.proto.MyService
 import fmgp.did.method.prism.proto.PrismPublicKey
 import fmgp.did.method.prism.cardano.PublicCardanoNetwork
+import fmgp.did.method.prism.proto.PrismPublicKey.CompressedECKey
 
 object DIDCommand {
 
@@ -106,6 +107,7 @@ object DIDCommand {
               case KeySecp256k1(derivationPath, key) => key
               case KeyEd25519(derivationPath, key)   => ??? // TODO fail becuase type type is not supported
               case KeyX25519(derivationPath, key)    => ??? // TODO fail becuase type type is not supported
+              case _: PrivateKey                     => ??? // TODO fail becuase type type is not supported
             }
         )
         master = masterRaw
@@ -123,6 +125,7 @@ object DIDCommand {
                     case KeySecp256k1(derivationPath, key) => key
                     case KeyEd25519(derivationPath, key)   => ??? // TODO fail becuase type type is not supported
                     case KeyX25519(derivationPath, key)    => ??? // TODO fail becuase type type is not supported
+                    case _: PrivateKey                     => ??? // TODO fail becuase type type is not supported
                   }
               )
               key = vdrRaw.map(rawHex => DerivedKey.secp256k1FromRaw(rawHex)).orElse(alternative)
@@ -147,29 +150,48 @@ object DIDCommand {
         _ <- ZIO.unit
         _ <- ZIO.log(cmd.toString())
         allSelectedKeys = setup.mState.get.ssiPrivateKeys.view.filterKeys(label => keysLabels.contains(label)).toMap
-        (masterKeyLabel, masterKey) <- allSelectedKeys.find { case (label, key) =>
-          key.path.keyUsage == PrismKeyUsage.MasterKeyUsage
+        (masterKeyLabel, masterKey) <- allSelectedKeys.find {
+          case (label, key: DerivedKey) => key.path.keyUsage == PrismKeyUsage.MasterKeyUsage
+          case _                        => false
         } match
           case None                                   => ZIO.fail("Master key is missing") // Master key is missing
           case Some((label, masterKey: KeySecp256k1)) => ZIO.succeed(label, masterKey.secp256k1PrivateKey)
           case Some((label, masterKey))               => ZIO.fail("Master key need to be of the type secp256k1")
         allOtherKeys = allSelectedKeys.view.filterKeys(_ != masterKeyLabel).toMap
-        addKey = allOtherKeys.toSeq
-          .map { case (id, key) =>
-            key match
-              case KeySecp256k1(derivationPath, secp256k1PrivateKey) =>
-                secp256k1PrivateKey.compressedKey(id = id, keyUsage = key.path.keyUsage)
-              case KeyEd25519(derivationPath, hdKeyPair) =>
-                hdKeyPair.compressedKey(id = id, keyUsage = key.path.keyUsage)
-              case KeyX25519(derivationPath, opkKey) =>
-                PrismPublicKey.CompressedECKey(
-                  id = id,
-                  usage = key.path.keyUsage,
-                  curve = "X25519",
-                  data = opkKey.toPublicKey.xBase64Url.decode
-                )
+        addKey <- ZIO
+          .foreach(allOtherKeys.toSeq) {
+            case (id, key: DerivedKey) =>
+              ZIO.succeed(
+                key match
+                  case KeySecp256k1(derivationPath, secp256k1PrivateKey) =>
+                    secp256k1PrivateKey.compressedKey(id = id, keyUsage = key.path.keyUsage)
+                  case KeyEd25519(derivationPath, hdKeyPair) =>
+                    hdKeyPair.compressedKey(id = id, keyUsage = key.path.keyUsage)
+                  case KeyX25519(derivationPath, opkKey) =>
+                    PrismPublicKey.CompressedECKey(
+                      id = id,
+                      usage = key.path.keyUsage,
+                      curve = "X25519",
+                      data = opkKey.toPublicKey.xBase64Url.decode
+                    )
+              )
+            case (label, key: PrivateKey) =>
+              key match
+                case okp: OKPPrivateKey =>
+                  ZIO.succeed(
+                    CompressedECKey(
+                      id = label,
+                      usage = okp.crv match
+                        case Curve.X25519  => PrismKeyUsage.KeyAgreementKeyUsage
+                        case Curve.Ed25519 => PrismKeyUsage.AuthenticationKeyUsage
+                      ,
+                      curve = okp.crv.name,
+                      data = okp.toPublicKey.xBase64Url.decode
+                    )
+                  )
+                case k => ZIO.fail(s"This key is not support currently: '${k.toJson}'")
           }
-          .map { compressedKey => UpdateDidOP.AddKey(compressedKey) }
+          .map(_.map { compressedKey => UpdateDidOP.AddKey(compressedKey) })
         addDIDCommEndpoints = didCommServiceEndpoints.map { case (id, endpoint) =>
           UpdateDidOP.AddService(MyService.didCommSimpleEndpoint(id, endpoint))
         }.toSeq
@@ -190,6 +212,7 @@ object DIDCommand {
         _ <- ZIO.foreach(maybeEvents)(prismState.addMaybeEvent(_))
         ssi <- prismState.getSSI(didPrism)
         _ <- ZIO.log(s"Simulated the PrismState: ${ssi.toJsonPretty}")
+        _ <- ZIO.log(s"Simulated the DIDDocument: ${ssi.didDocument.map(_.toJsonPretty).getOrElse("NO DOCUMENT")}")
 
         _ <- Console.printLine(s"SSI: ${didPrism.string}")
         _ <- Console.printLine(
