@@ -185,7 +185,12 @@ object ScalusService {
       // _ <- ZIO.log(s"submitTransaction txPayload = ${bytes2Hex(tx.serialize())}")
       // result <- ZIO.attempt(backendService.getTransactionService().submitTransaction(txPayload))
       _ <- ZIO.log(s"submitTransaction result = ${hash.toHex}")
-      _ <- ZIO.log(s"See https://${bfConfig.network.name}.cardanoscan.io/transaction/${hash.toHex}?tab=metadata")
+      _ <- {
+        val base =
+          if (bfConfig.network == PublicCardanoNetwork.Mainnet) "https://cardanoscan.io"
+          else s"https://${bfConfig.network.name}.cardanoscan.io"
+        ZIO.log(s"See $base/transaction/${hash.toHex}?tab=metadata")
+      }
     } yield TxHash.fromHex(hash.toHex)
 
   def addressesTotalAda(address: String): ZIO[BlockfrostConfig, Throwable, BigDecimal] =

@@ -180,7 +180,12 @@ object CardanoService {
       _ <- ZIO.log(s"submitTransaction txPayload = ${bytes2Hex(tx.serialize())}")
       result <- ZIO.attempt(backendService.getTransactionService().submitTransaction(txPayload))
       _ <- ZIO.log(s"submitTransaction result = ${result.toString}")
-      _ <- ZIO.log(s"See https://${bfConfig.network.name}.cardanoscan.io/transaction/${result.getValue}?tab=metadata")
+      _ <- {
+        val base =
+          if (bfConfig.network == PublicCardanoNetwork.Mainnet) "https://cardanoscan.io"
+          else s"https://${bfConfig.network.name}.cardanoscan.io"
+        ZIO.log(s"See $base/transaction/${result.getValue}?tab=metadata")
+      }
       // TODO If result.code(),  <= 200 < 300 return error
     } yield TxHash.fromHex(result.getValue)
 

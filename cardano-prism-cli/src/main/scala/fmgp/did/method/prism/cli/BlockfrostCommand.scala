@@ -165,8 +165,12 @@ object BlockfrostCommand {
             case PublicCardanoNetwork.Preprod =>
               Console.printLine(s"See https://neoprism-preprod.patlo.dev/resolver?did=did:prism:???")
             case _ => ZIO.unit
-          _ <- Console
-            .printLine(s"See https://${bfConfig.network.name}.cardanoscan.io/transaction/${txHash.hex}?tab=metadata")
+          _ <- {
+            val base =
+              if (bfConfig.network == PublicCardanoNetwork.Mainnet) "https://cardanoscan.io"
+              else s"https://${bfConfig.network.name}.cardanoscan.io"
+            Console.printLine(s"See $base/transaction/${txHash.hex}?tab=metadata")
+          }
         } yield (txHash)
       }
   }
