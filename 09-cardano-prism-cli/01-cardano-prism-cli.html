@@ -99,6 +99,8 @@
     <li class="level1 nav-header">03-reference</li>
     <li class="level2 nav-leaf"><a href="../03-reference/didcomm-protocols.html">DID Comm Protocols</a></li>
     <li class="level1 nav-header">Troubleshooting and Limitations</li>
+    <li class="level2 nav-leaf"><a href="../08-others/crush-gemma4.html">Running Crush with Gemma 4</a></li>
+    <li class="level2 nav-leaf"><a href="../08-others/documentation-guide.html">Documentation Guide: How to Write and Improve Docs</a></li>
     <li class="level2 nav-leaf"><a href="../08-others/limitations.html">Limitations</a></li>
     <li class="level2 nav-leaf"><a href="../08-others/test-coverage.html">Test coverage</a></li>
     <li class="level2 nav-leaf"><a href="../08-others/troubleshooting.html">Troubleshooting</a></li>
@@ -129,6 +131,8 @@
     <li class="level2 nav-leaf"><a href="#derive-a-secp256k1-key">Derive a Secp256k1 key</a></li>
     <li class="level2 nav-leaf"><a href="#derive-an-ed25519-key">Derive an Ed25519 key</a></li>
     <li class="level2 nav-leaf"><a href="#derive-an-x25519-key">Derive an X25519 key</a></li>
+    <li class="level2 nav-leaf"><a href="#generate-a-random-ed25519-key">Generate a random Ed25519 key</a></li>
+    <li class="level2 nav-leaf"><a href="#generate-a-random-x25519-key">Generate a random X25519 key</a></li>
     <li class="level2 nav-leaf"><a href="#derive-a-key-from-a-custom-derivation-path">Derive a key from a custom derivation path</a></li>
     <li class="level1 nav-node"><a href="#did-management-did">DID Management (<code>did</code>)</a></li>
     <li class="level2 nav-leaf"><a href="#create-a-deterministic-did-recommended">Create a deterministic DID (recommended)</a></li>
@@ -160,7 +164,8 @@
       <main class="content">
 
         <h1 id="cardano-prism-cli" class="title">Cardano PRISM CLI</h1>
-        <p>The <code>cardano-prism</code> CLI is a tool for managing <a href="https://github.com/input-output-hk/prism-did-method-spec">PRISM DIDs</a> on the Cardano blockchain. It supports key management, DID creation and resolution, VDR (Verifiable Data Registry) operations, and blockchain submission via the Blockfrost API.</p>
+        <p>The <code>cardano-prism</code> CLI is a tool for managing <a href="https://github.com/input-output-hk/prism-did-method-spec">PRISM DIDs</a> on the Cardano blockchain. It supports key management, DID creation/resolution, VDR (Verifiable Data Registry) operations, and blockchain submission via the Blockfrost API.
+        The CLI is structured around modules: <code>mnemonic</code>, <code>key</code>, <code>did</code>, <code>cardano</code>, <code>indexer</code>, and <code>vdr</code>.</p>
         
         <h2 id="install" class="section"><a class="anchor-link left" href="#install"><i class="icofont-laika link">&#xef71;</i></a>Install</h2>
         
@@ -190,7 +195,7 @@ cardano-prism --help</span></code></pre>
         <p>The config file stores:</p>
         <ul>
           <li>SSI and Cardano wallet mnemonics</li>
-          <li>Derived private keys (Secp256k1, Ed25519, X25519)</li>
+          <li>Derived private keys (Secp256k1, Ed25519, X25519) and randomly generated keys</li>
           <li>Blockfrost API tokens per network</li>
         </ul>
         <p>Most commands automatically load the config file. Use the <code>-s</code> flag to enable automatic saving of state changes at the end of a command.</p>
@@ -245,6 +250,16 @@ cardano-prism key Ed</span><span class="number-literal">25519</span><span> </spa
         <h3 id="derive-an-x25519-key" class="section"><a class="anchor-link left" href="#derive-an-x25519-key"><i class="icofont-laika link">&#xef71;</i></a>Derive an X25519 key</h3>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># cardano-prism key X25519 [--label &lt;name&gt;] &lt;DID-index&gt; &lt;keyUsage&gt; &lt;key-index&gt;
 </span><span>cardano-prism key X</span><span class="number-literal">25519</span><span> </span><span class="number-literal">0</span><span> Keyagreement </span><span class="number-literal">0</span><span> </span><span class="comment"># Saves key as &quot;key-0-KeyAgreement-0&quot;</span></code></pre>
+        
+        <h3 id="generate-a-random-ed25519-key" class="section"><a class="anchor-link left" href="#generate-a-random-ed25519-key"><i class="icofont-laika link">&#xef71;</i></a>Generate a random Ed25519 key</h3>
+        <p>Generates a random Ed25519 private key (not derived from a mnemonic) and saves it to the config.</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># cardano-prism key random-Ed25519 --label &lt;name&gt;
+</span><span>cardano-prism key random-Ed</span><span class="number-literal">25519</span><span> --label my-ed</span><span class="number-literal">25519</span><span>-key</span></code></pre>
+        
+        <h3 id="generate-a-random-x25519-key" class="section"><a class="anchor-link left" href="#generate-a-random-x25519-key"><i class="icofont-laika link">&#xef71;</i></a>Generate a random X25519 key</h3>
+        <p>Generates a random X25519 private key (not derived from a mnemonic) and saves it to the config.</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># cardano-prism key random-X25519 --label &lt;name&gt;
+</span><span>cardano-prism key random-X</span><span class="number-literal">25519</span><span> --label my-x</span><span class="number-literal">25519</span><span>-key</span></code></pre>
         
         <h3 id="derive-a-key-from-a-custom-derivation-path" class="section"><a class="anchor-link left" href="#derive-a-key-from-a-custom-derivation-path"><i class="icofont-laika link">&#xef71;</i></a>Derive a key from a custom derivation path</h3>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># cardano-prism key derivation-path [--mnemonic &lt;phrase&gt;] [--derivation-path &lt;path&gt;] [--label &lt;name&gt;]

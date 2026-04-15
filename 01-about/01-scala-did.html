@@ -99,6 +99,8 @@
     <li class="level1 nav-header">03-reference</li>
     <li class="level2 nav-leaf"><a href="../03-reference/didcomm-protocols.html">DID Comm Protocols</a></li>
     <li class="level1 nav-header">Troubleshooting and Limitations</li>
+    <li class="level2 nav-leaf"><a href="../08-others/crush-gemma4.html">Running Crush with Gemma 4</a></li>
+    <li class="level2 nav-leaf"><a href="../08-others/documentation-guide.html">Documentation Guide: How to Write and Improve Docs</a></li>
     <li class="level2 nav-leaf"><a href="../08-others/limitations.html">Limitations</a></li>
     <li class="level2 nav-leaf"><a href="../08-others/test-coverage.html">Test coverage</a></li>
     <li class="level2 nav-leaf"><a href="../08-others/troubleshooting.html">Troubleshooting</a></li>
@@ -152,8 +154,8 @@
         
         <h3 id="purely-functional" class="section"><a class="anchor-link left" href="#purely-functional"><i class="icofont-laika link">&#xef71;</i></a>Purely Functional</h3>
         <p>The Library API is <strong>purely functional</strong>.
-        The internal implementetion tries also to be <strong>purely functional</strong>, and any call to the dependency libory (for cryptography) encapsulates and handel the error in a Functional way.
-        All the error are value so the user know exactly what to expect by the signatures of the methods. </p>
+        The internal implementation also aims to be purely functional, encapsulating and handling errors from dependency libraries (for cryptography) in a functional manner.
+        All errors are represented as values, allowing the user to know exactly what to expect from method signatures.</p>
         
         <h3 id="simples-to-use" class="section"><a class="anchor-link left" href="#simples-to-use"><i class="icofont-laika link">&#xef71;</i></a>Simples to use</h3>
         <p><code>&quot;But I just want to send/read a message!&quot;</code> - We are create a Framework to facilitate some of the mundane tasks and boilerplate code. Like to open ws connections or making http calls.</p>
