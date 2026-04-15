@@ -30,8 +30,8 @@ We tryied to follow the [DID Comm Specification](https://identity.foundation/did
 ### Purely Functional
 
 The Library API is **purely functional**.
-The internal implementetion tries also to be **purely functional**, and any call to the dependency libory (for cryptography) encapsulates and handel the error in a Functional way.
-All the error are value so the user know exactly what to expect by the signatures of the methods. 
+The internal implementation also aims to be purely functional, encapsulating and handling errors from dependency libraries (for cryptography) in a functional manner.
+All errors are represented as values, allowing the user to know exactly what to expect from method signatures.
 
 ### Simples to use
 

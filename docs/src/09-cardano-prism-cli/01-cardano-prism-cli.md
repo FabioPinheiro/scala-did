@@ -1,6 +1,7 @@
 # Cardano PRISM CLI
 
-The `cardano-prism` CLI is a tool for managing [PRISM DIDs](https://github.com/input-output-hk/prism-did-method-spec) on the Cardano blockchain. It supports key management, DID creation and resolution, VDR (Verifiable Data Registry) operations, and blockchain submission via the Blockfrost API.
+The `cardano-prism` CLI is a tool for managing [PRISM DIDs](https://github.com/input-output-hk/prism-did-method-spec) on the Cardano blockchain. It supports key management, DID creation/resolution, VDR (Verifiable Data Registry) operations, and blockchain submission via the Blockfrost API.
+The CLI is structured around modules: `mnemonic`, `key`, `did`, `cardano`, `indexer`, and `vdr`.
 
 ## Install
 
@@ -46,7 +47,7 @@ cardano-prism config-file
 
 The config file stores:
 - SSI and Cardano wallet mnemonics
-- Derived private keys (Secp256k1, Ed25519, X25519)
+- Derived private keys (Secp256k1, Ed25519, X25519) and randomly generated keys
 - Blockfrost API tokens per network
 
 Most commands automatically load the config file. Use the `-s` flag to enable automatic saving of state changes at the end of a command.
@@ -125,6 +126,24 @@ cardano-prism key Ed25519 0 Authentication 0
 ```bash
 # cardano-prism key X25519 [--label <name>] <DID-index> <keyUsage> <key-index>
 cardano-prism key X25519 0 Keyagreement 0 # Saves key as "key-0-KeyAgreement-0"
+```
+
+### Generate a random Ed25519 key
+
+Generates a random Ed25519 private key (not derived from a mnemonic) and saves it to the config.
+
+```bash
+# cardano-prism key random-Ed25519 --label <name>
+cardano-prism key random-Ed25519 --label my-ed25519-key
+```
+
+### Generate a random X25519 key
+
+Generates a random X25519 private key (not derived from a mnemonic) and saves it to the config.
+
+```bash
+# cardano-prism key random-X25519 --label <name>
+cardano-prism key random-X25519 --label my-x25519-key
 ```
 
 ### Derive a key from a custom derivation path
