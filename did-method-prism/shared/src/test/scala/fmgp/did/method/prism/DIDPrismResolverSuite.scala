@@ -10,8 +10,6 @@ import zio.json.*
 /** didResolverPrismJVM/testOnly fmgp.did.method.prism.DIDPrismResolverSuite */
 class DIDPrismResolverSuite extends ZSuite {
 
-  val intregrationTest = new munit.Tag("IntregrationTest")
-
   import fmgp.did.method.prism.proto.*
 
   val a792dc68_did = DIDSubject("did:prism:a792dc6872a76bcbf96f6fbb73a06e07c32a042d55e7a8bc9131a542697e1138")
@@ -53,7 +51,9 @@ class DIDPrismResolverSuite extends ZSuite {
     )
   }
 
-  testZ("Resolver 'did:prism:00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae'".tag(intregrationTest)) {
+  testZ(
+    "Resolver 'did:prism:00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae'".tag(fmgp.IntregrationTest)
+  ) {
     {
       for {
         resolver <- ZIO.service[Resolver]
@@ -88,7 +88,9 @@ class DIDPrismResolverSuite extends ZSuite {
       )
   }
 
-  testZ("Resolver 'did:prism:0108edf719cb2e42aed1fd2b70435da12a77291eb25c294d6095cdfe874607b8'".tag(intregrationTest)) {
+  testZ(
+    "Resolver 'did:prism:0108edf719cb2e42aed1fd2b70435da12a77291eb25c294d6095cdfe874607b8'".tag(fmgp.IntregrationTest)
+  ) {
     {
       for {
         resolver <- ZIO.service[Resolver]

@@ -482,7 +482,7 @@ lazy val didFramework = crossProject(JSPlatform, JVMPlatform)
     name := "did-framework",
     libraryDependencies += D.zioMunitTest.value,
   )
-  .dependsOn(did, didCommProtocols)
+  .dependsOn(did % "compile;test->test", didCommProtocols)
   .jvmSettings(libraryDependencies += D.zioHttp.value)
   .jsSettings(libraryDependencies += D.scalajsDom.value)
   .jsConfigure(scalaJSLibConfigure) // Because of didJS now uses NPM libs
@@ -718,7 +718,7 @@ lazy val didResolverWeb = crossProject(JSPlatform, JVMPlatform)
     Test / fork := true,
     Test / javaOptions := Seq("-Djava.net.preferIPv4Stack=true"),
   )
-  .dependsOn(did)
+  .dependsOn(did % "compile;test->test")
   .configure(docConfigure)
 
 //https://dev.uniresolver.io/

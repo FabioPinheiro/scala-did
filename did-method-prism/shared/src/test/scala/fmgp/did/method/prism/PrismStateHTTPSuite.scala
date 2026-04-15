@@ -13,10 +13,12 @@ import fmgp.did.method.prism.*
   */
 class PrismStateHTTPSuite extends ZSuite {
 
-  val intregrationTest = new munit.Tag("IntregrationTest")
+  override val munitTimeout = fmgp.ShowTestTimeout
 
   testZ(
-    "Get events for did:prism:00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae".tag(intregrationTest)
+    "Get events for did:prism:00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae".tag(
+      fmgp.IntregrationTest
+    )
   ) {
     {
       for {

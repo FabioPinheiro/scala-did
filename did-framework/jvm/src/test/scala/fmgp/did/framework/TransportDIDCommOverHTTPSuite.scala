@@ -13,6 +13,8 @@ import fmgp.did.comm.*
 /** didFrameworkJVM/testOnly fmgp.did.framework.TransportDIDCommOverHTTPSuite */
 class TransportDIDCommOverHTTPSuite extends ZSuite {
 
+  override val munitTimeout = fmgp.ShowTestTimeout
+
   // A valid SignedMessage JSON (from the DIDComm spec examples)
   val signedMessageJson = """{
    "payload":"eyJpZCI6IjEyMzQ1Njc4OTAiLCJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXBsYWluK2pzb24iLCJ0eXBlIjoiaHR0cDovL2V4YW1wbGUuY29tL3Byb3RvY29scy9sZXRzX2RvX2x1bmNoLzEuMC9wcm9wb3NhbCIsImZyb20iOiJkaWQ6ZXhhbXBsZTphbGljZSIsInRvIjpbImRpZDpleGFtcGxlOmJvYiJdLCJjcmVhdGVkX3RpbWUiOjE1MTYyNjkwMjIsImV4cGlyZXNfdGltZSI6MTUxNjM4NTkzMSwiYm9keSI6eyJtZXNzYWdlc3BlY2lmaWNhdHRyaWJ1dGUiOiJhbmQgaXRzIHZhbHVlIn19",
@@ -91,7 +93,7 @@ class TransportDIDCommOverHTTPSuite extends ZSuite {
   }
 
   // R1: Outbound sends HTTP POST to destination
-  testZ("R1 - outbound sends HTTP POST to destination") {
+  testZ("R1 - outbound sends HTTP POST to destination".tag(fmgp.ShowTest)) {
 
     val echoRoutes = Routes(
       Method.POST / trailing -> handler { (_: Request) =>
@@ -117,7 +119,7 @@ class TransportDIDCommOverHTTPSuite extends ZSuite {
   }
 
   // Issue #596: HTTP response containing a DIDComm message should be published to inbound
-  testZ("Issue #596 - HTTP response with DIDComm message is published to inbound") {
+  testZ("Issue #596 - HTTP response with DIDComm message is published to inbound".tag(fmgp.ShowTest)) {
 
     val echoRoutes = Routes(
       Method.POST / trailing -> handler { (_: Request) =>

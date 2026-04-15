@@ -15,11 +15,9 @@ import scala.util.matching.Regex
 /** didResolverPrismJVM/testOnly fmgp.did.method.prism.HttpUtilsSuite */
 class HttpUtilsSuite extends ZSuite {
 
-  override val munitTimeout = scala.concurrent.duration.Duration(5, "s")
+  override val munitTimeout = fmgp.ShowTestTimeout
 
-  val intregrationTest = new munit.Tag("IntregrationTest")
-
-  testZ("Get DIDDocument for a DID".tag(intregrationTest)) {
+  testZ("Get DIDDocument for a DID".tag(fmgp.IntregrationTest)) {
     {
       for {
         proxy <- ZIO.service[HttpUtils]
