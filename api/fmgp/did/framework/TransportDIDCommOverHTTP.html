@@ -14,7 +14,21 @@
  </div>
 </div>
 <div class="cover">
- <div class="doc"></div>
+ <div class="doc">
+  <p>Client-side HTTP transport for DIDComm messaging.</p>
+  <p>Implements the Transport abstraction over HTTP. Outbound and inbound are independent, unrelated message flows — they are NOT coupled as HTTP request-response pairs.</p>
+  <p>==Features==</p>
+  <ul>
+   <li>R1 — Outbound delivery: POST the DIDComm message as JSON to <code>destination</code> with the correct Content-Type header (application/didcomm-signed+json or application/didcomm-encrypted+json).</li>
+   <li>R2 — Inbound via Hub (broadcast): <code>inbound</code> supports multiple concurrent subscribers (pub-sub / broadcast semantics via Hub). Every subscriber receives every message published after their subscription.</li>
+   <li>R3 — No late subscriber guarantee: Hub does not replay past messages. Subscribers that connect after a message was published will not receive it. This is by design.</li>
+   <li>R4 — HTTP response parsing: After each outbound POST, the HTTP response body is parsed. If it contains a valid DIDComm message (SignedMessage or EncryptedMessage), it is published to the inbound Hub. If the body is empty, not valid JSON, or not a DIDComm message, it is logged and ignored.</li>
+   <li>R5 — TransportID: Uses <code>TransportID.http</code>.</li>
+   <li>R6 — Error handling: HTTP errors (non-2xx status) are logged but not delivered to <code>inbound</code>. Network/connection failures are logged and the effect dies (orDie).</li>
+   <li>R7 — SingleTransmission semantics: TransmissionType is SingleTransmission, unlike WebSocket's MultiTransmissions.</li>
+   <li>R8 — Environment: Requires <code>Client &amp; Scope</code> from zio-http. The companion object provides <code>makeWithEnvironment</code> to pre-inject the environment and return a <code>TransportDIDComm[Any]</code>.</li>
+  </ul>
+ </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
