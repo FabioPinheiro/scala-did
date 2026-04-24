@@ -718,6 +718,7 @@ lazy val didResolverWeb = crossProject(JSPlatform, JVMPlatform)
     Test / fork := true,
     Test / javaOptions := Seq("-Djava.net.preferIPv4Stack=true"),
   )
+  .jsConfigure(scalaJSLibConfigure) // Needed because tests transitively use did/js SHA256 (js-sha256 NPM module)
   .dependsOn(did % "compile;test->test")
   .configure(docConfigure)
 
