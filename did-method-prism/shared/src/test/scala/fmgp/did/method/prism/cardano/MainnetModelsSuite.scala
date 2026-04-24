@@ -3,7 +3,7 @@ package fmgp.did.method.prism.cardano
 import munit.*
 import zio.json.*
 
-/** didResolverPrismJVM/testOnly fmgp.prism.MainnetModelsSuite */
+/** didResolverPrismJVM/testOnly fmgp.did.method.prism.cardano.MainnetModelsSuite */
 class MainnetModelsSuite extends FunSuite {
   test("CardanoMetadata 6418") {
     assert(MainnetExamples.metadata_6418.toCardanoPrismEntry.isRight)
@@ -113,6 +113,21 @@ class MainnetModelsSuite extends FunSuite {
       MainnetExamples.metadata_6452_cbor.toCardanoPrismEntry,
       Left(
         "Expected ByteString or Array of bytes but got Text (input position 8)"
+      )
+    )
+  }
+
+  test("CardanoMetadata 6814") {
+    assert(
+      MainnetExamples.metadata_6814_cbor.toCardanoPrismEntry.isRight,
+    )
+  }
+
+  test("CardanoMetadata 6817") {
+    assertEquals(
+      MainnetExamples.metadata_6817_cbor.toCardanoPrismEntry,
+      Left(
+        "Expected `MapHeader` with the PRISM structure but got Array-Header(5) (input position 4)"
       )
     )
   }
