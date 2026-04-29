@@ -1,7 +1,7 @@
 # Cardano PRISM CLI
 
-The `cardano-prism` CLI is a tool for managing [PRISM DIDs](https://github.com/input-output-hk/prism-did-method-spec) on the Cardano blockchain. It supports key management, DID creation/resolution, VDR (Verifiable Data Registry) operations, and blockchain submission via the Blockfrost API.
-The CLI is structured around modules: `mnemonic`, `key`, `did`, `cardano`, `indexer`, and `vdr`.
+The `cardano-prism` CLI is a tool for managing [PRISM DIDs](https://github.com/input-output-hk/prism-did-method-spec) on the Cardano blockchain. It supports key management, DID creation/resolution, VDR (Verifiable Data Registry) operations, and two ways of submitting to the chain — either directly via the Blockfrost API, or by handing the transaction off to a [CIP-30](https://cips.cardano.org/cip/CIP-30) browser wallet (Lace, Eternl, Nami, Yoroi, …).
+The CLI is structured around modules: `mnemonic`, `key`, `did`, `cardano`, `website`, `indexer`, and `vdr`.
 
 ## Install
 
@@ -235,14 +235,45 @@ cardano-prism cardano address --network preprod
 
 ### Submit Events
 
-Submit hex-encoded PRISM signed events to the Cardano blockchain. Requires both a Cardano wallet (for fees) and a Blockfrost token for the target network.
+Submit hex-encoded PRISM signed events to the Cardano blockchain. This path requires:
+- a Cardano payment wallet stored in the config (covers transaction fees), and
+- a Blockfrost API token saved for the target network.
 
 ```bash
 # cardano-prism cardano submit --network <network> <event-hex>...
 cardano-prism cardano submit --network preprod <create-event-hex> <update-event-hex>
 ```
 
-On success, outputs a transaction hash and a link to Cardanoscan.
+On success, prints the transaction hash and links to Cardanoscan and NeoPrism.
+
+If you'd rather not store a wallet mnemonic or Blockfrost token, see [Submit Events via a browser wallet (CIP-30)](#submit-events-via-a-browser-wallet-cip-30) below.
+
+---
+
+## Website (`website`)
+
+Local-website driven flows. Spawns a one-shot HTTP server on `localhost`, opens a browser page, and exits as soon as the page reports back. Decoupled from Blockfrost — useful when you'd rather sign and submit through your existing browser wallet than store a mnemonic and a Blockfrost token in the config.
+
+### Submit Events via a browser wallet (CIP-30)
+
+Submit PRISM events through a CIP-30 browser wallet (Lace, Eternl, Nami, Yoroi, …). The browser builds the Cardano transaction, the wallet signs it, and the wallet's own backend submits it. **No Blockfrost token is needed** and **no Cardano wallet mnemonic is read from the config** — the only thing the CLI knows is the events you pass in.
+
+```bash
+# cardano-prism website submit-cip30 [--port <integer>] <event-hex>...
+cardano-prism website submit-cip30 <create-event-hex> <update-event-hex>
+
+# Custom port (default is 8088)
+cardano-prism website submit-cip30 --port 9090 <create-event-hex>
+```
+
+Flow:
+
+1. The CLI starts a local HTTP server and prints `Open http://localhost:8088 in your browser to submit.`
+2. Open that URL. The page lists the DID(s) that will be created and shows a wallet picker.
+3. Click **Submit**. The wallet asks you to approve the transaction.
+4. As soon as the wallet returns a transaction hash, the CLI prints the hash + a CardanoScan link and exits.
+
+The network the transaction lands on is whichever network your wallet is currently set to (mainnet / preprod / preview).
 
 ---
 
@@ -356,63 +387,82 @@ cardano-prism vdr proof \
 
 ## End-to-End Example: Create and Publish a DID
 
+This walkthrough creates a PRISM DID with one master key, one issuing key, and a DIDComm service endpoint, then anchors it on Cardano preprod.
+
+### 1. Set up keys and a DID
+
 ```bash
-# 1. Create the config file
+# Create the config file (one-time)
 cardano-prism config-file --create
 
-# 2. Generate a new SSI mnemonic and save it
+# Generate and save an SSI wallet mnemonic
 cardano-prism mnemonic new -s
 
-# 3. Derive a Master key (secp256k1 required for master)
+# Master key — must be secp256k1
 cardano-prism key sepc256k1 0 Master 0
 # => saves as "key-0-Master-0"
 
-# 4. Derive additional keys (optional)
+# Issuing key — Ed25519
 cardano-prism key Ed25519 0 Issuing 0
 # => saves as "key-0-Issuing-0"
 
-# 5. Generate a new Cardano payment wallet (for transaction fees)
-cardano-prism mnemonic new -s --wallet-type ada
-
-# 6. Save the Blockfrost API token for preprod
-cardano-prism cardano blockfrost-token -s preprod preprod<YOUR_TOKEN>
-
-# 7. Create the deterministic DID
+# Build the deterministic DID (with a DIDComm service endpoint)
 cardano-prism did create-deterministic \
-  -S endpoint1=https://my-didcomm-endpoint.example.com \
+  -S e1=https://did.fabiopinheiro.com/ \
   key-0-Master-0 key-0-Issuing-0
-# => prints the DID and the create/update SignedPrismEvent hex values
-
-# 8. Submit events to the blockchain
-cardano-prism cardano submit --network preprod <event1-hex> <event2-hex>
-# => prints the transaction hash
 ```
 
-After the transaction is confirmed, you can resolve the DID:
+Output:
 
-```bash
-cardano-prism did resolve-prism --network preprod did:prism:<hash>
 ```
-
-
-
-## Example to create a DID
-cardano-prism mnemonic new -s
-cardano-prism key sepc256k1 0 Master 0
-cardano-prism key Ed25519 0 Issuing 0
-cardano-prism did create-deterministi -S e1=https://did.fabiopinheiro.com/ key-0-Master-0 key-0-Issuing-0
-cardano-prism cardano blockfrost-token -s preprod preprod9EGSSMf6oWb81qoi8eW65iWaQuHJ1HwB
-cardano-prism cardano submit --network preprod 0a066d617374657212473045022100b32b3dfc1fb47dc102038c1cbc1571b955f0ee7bab27e8b9626f8da62c50a4d6022050dfa98afdfe7503dbe58ed9ae20addb6d52a182521cd67e9d4bb6b79629b0f41a400a3e0a3c123a0a066d617374657210014a2e0a09736563703235366b31122103ebe0934672da51ca01da94d278376a204e0e73a8d235c290bc2d5f1a629f8aec 0a066d6173746572124730450221008c036641c84c182aba386e004803684b069004e192b860542a23f16de023351102201e66c385924c88ac26aeaea76140df6fcb3d8de926091b72b983bf864305a8801afa0112f7010a20aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff03264221240616162386431346662363063303335656335383931393562343037393738643665633133313665313833626136666262393230613061376666303332363432321a4b1a490a470a09656e64706f696e74311210444944436f6d6d4d6573736167696e671a287b22757269223a2268747470733a2f2f6469642e666162696f70696e686569726f2e636f6d2f227d1a440a420a400a0f6b65792d302d49737375696e672d3010024a2b0a0745643235353139122018a25f3a42089ae9d41f2ea40549bf045c12021923a4b760487d0237e0e36e40
-
-
 SSI: did:prism:aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff0326422
 create SignedPrismEvent:
 0a066d617374657212473045022100b32b3dfc1fb47dc102038c1cbc1571b955f0ee7bab27e8b9626f8da62c50a4d6022050dfa98afdfe7503dbe58ed9ae20addb6d52a182521cd67e9d4bb6b79629b0f41a400a3e0a3c123a0a066d617374657210014a2e0a09736563703235366b31122103ebe0934672da51ca01da94d278376a204e0e73a8d235c290bc2d5f1a629f8aec
 update SignedPrismEvent:
 0a066d6173746572124730450221008c036641c84c182aba386e004803684b069004e192b860542a23f16de023351102201e66c385924c88ac26aeaea76140df6fcb3d8de926091b72b983bf864305a8801afa0112f7010a20aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff03264221240616162386431346662363063303335656335383931393562343037393738643665633133313665313833626136666262393230613061376666303332363432321a4b1a490a470a09656e64706f696e74311210444944436f6d6d4d6573736167696e671a287b22757269223a2268747470733a2f2f6469642e666162696f70696e686569726f2e636f6d2f227d1a440a420a400a0f6b65792d302d49737375696e672d3010024a2b0a0745643235353139122018a25f3a42089ae9d41f2ea40549bf045c12021923a4b760487d0237e0e36e40
+```
 
+The DID is now defined locally; the next step anchors the create + update events on Cardano. Pick **one** of the two paths below.
 
+### 2a. Submit via Blockfrost (CLI-only)
+
+Requires a Cardano payment wallet in the config and a Blockfrost API token.
+
+```bash
+# One-time setup: payment wallet + Blockfrost token
+cardano-prism mnemonic new -s --wallet-type ada
+cardano-prism cardano blockfrost-token -s preprod preprod<YOUR_TOKEN>
+
+# Submit the two events from step 1
+cardano-prism cardano submit --network preprod \
+  <create-event-hex> \
+  <update-event-hex>
+```
+
+### 2b. Submit via a browser wallet (CIP-30)
+
+No Cardano wallet mnemonic, no Blockfrost token. The CLI opens a local web page; your existing browser wallet (Lace, Eternl, Nami, Yoroi, …) does the signing and submission.
+
+```bash
+cardano-prism website submit-cip30 \
+  <create-event-hex> \
+  <update-event-hex>
+```
+
+Open `http://localhost:8088` in the browser, pick your wallet, approve the transaction. Make sure the wallet is on the network you intend to publish to.
+
+### 3. Verify
+
+Either path prints the transaction hash and explorer URLs. Example output:
+
+```
 https://preprod.cardanoscan.io/transaction/f404044f00cae9146d3e9f451e7e26eb2aba80ce6f0fe9a50c57b48d0e0ad9fa?tab=metadata
-https://neoprism-preprod.patlo.dev/explorer
 https://neoprism-preprod.patlo.dev/resolver?did=did:prism:aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff0326422
-https://neoprism.patlo.dev/explorer
+```
+
+After the transaction is confirmed (~1 block), resolve the DID:
+
+```bash
+cardano-prism did resolve-neoprism --network preprod \
+  did:prism:aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff0326422
+```

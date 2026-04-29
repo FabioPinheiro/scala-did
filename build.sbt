@@ -412,6 +412,7 @@ lazy val root = project
   .aggregate(didResolverPeer.js, didResolverPeer.jvm) // publish
   .aggregate(didResolverPrism.js, didResolverPrism.jvm) // publish
   .aggregate(cardanoPrismCli) // NOT publish (yet)
+  .aggregate(cardanoPrismCip30Webapp) // NOT publish
   .aggregate(didPrismNode) // NOT publish
   .aggregate(didResolverWeb.js, didResolverWeb.jvm) // publish
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
@@ -670,6 +671,21 @@ lazy val cardanoPrismCli = project
     assembly / mainClass := Some("fmgp.did.method.prism.cli.PrismCli"),
     assembly / assemblyJarName := "cardano-prism.jar",
   )
+  .settings(
+    // Bundle the CIP-30 webapp (Scala.js + esbuild) and embed it as a classpath resource at `cip30/bundle.js` so `cardano-prism.jar` is self-contained.
+    Compile / resourceGenerators += Def.task {
+      val bundleJs = (cardanoPrismCip30Webapp / cip30Bundle).value
+      val bundleMap = file(bundleJs.getPath + ".map")
+      val resourceDir = (Compile / resourceManaged).value / "cip30"
+      IO.createDirectory(resourceDir)
+      val outJs = resourceDir / "bundle.js"
+      IO.copyFile(bundleJs, outJs)
+      val outMap = resourceDir / "bundle.js.map"
+      val maps = if (bundleMap.isFile) { IO.copyFile(bundleMap, outMap); Seq(outMap) }
+      else Seq.empty
+      Seq(outJs) ++ maps
+    }.taskValue,
+  )
   .dependsOn(did.jvm, didResolverPrism.jvm, didResolverPeer.jvm, didUniresolver.jvm)
 
 lazy val didPrismNode = project
@@ -791,6 +807,61 @@ lazy val webapp = project
   .dependsOn(didExample.js)
   .dependsOn(serviceworker)
 
+lazy val cip30Bundle =
+  taskKey[File]("Build the esbuild bundle of the cardano-prism CIP-30 webapp")
+
+lazy val cardanoPrismCip30Webapp = project
+  .in(file("cardano-prism-cip30-webapp"))
+  .settings(publish / skip := true)
+  .settings(name := "cardano-prism-cip30-webapp")
+  .enablePlugins(ScalaJSPlugin)
+  .settings(
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withJSHeader(jsHeader) },
+    scalaJSLinkerConfig ~= {
+      _.withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("fmgp.did.method.prism.cip30")))
+    },
+    Compile / scalaJSModuleInitializers += {
+      ModuleInitializer
+        .mainMethod("fmgp.did.method.prism.cip30.Cip30App", "main")
+        .withModuleID("cip30webapp")
+    },
+  )
+  .settings(
+    libraryDependencies ++= Seq(D.laminar.value),
+    libraryDependencies += D.scalajsDom.value,
+    libraryDependencies += D.scalusCardanoLedger.value,
+  )
+  .settings(
+    cip30Bundle := {
+      val log = streams.value.log
+      // Use fullLinkJS (production-optimized) so the published bundle is small.
+      // fastLinkJS would produce a much larger, dev-only bundle.
+      val _ = (Compile / fullLinkJS).value
+      val scalaJsDir = (Compile / fullLinkJS / scalaJSLinkerOutputDirectory).value
+      val bundleDir = baseDirectory.value
+      val bundleJs = bundleDir / "dist" / "bundle.js"
+      val env = Seq("CIP30_SCALAJS_DIR" -> scalaJsDir.getAbsolutePath)
+      log.info(s"cip30Bundle: npm install in $bundleDir")
+      val install = Process(Seq("npm", "install"), bundleDir, env *)
+      if ((install !) != 0) sys.error(s"cip30Bundle: npm install failed in $bundleDir")
+      log.info(s"cip30Bundle: node build.js in $bundleDir (scalajs=$scalaJsDir)")
+      val build = Process(Seq("node", "build.js"), bundleDir, env *)
+      if ((build !) != 0) sys.error(s"cip30Bundle: esbuild bundle failed in $bundleDir")
+      if (!bundleJs.isFile) sys.error(s"cip30Bundle: expected $bundleJs to exist after build")
+      log.success(s"cip30Bundle: ${bundleJs}")
+      bundleJs
+    },
+    // Make `sbt clean` wipe the esbuild outputs and the small generated entry/stub files build.js writes into the project base dir.
+    cleanFiles ++= Seq(
+      baseDirectory.value / "dist",
+      baseDirectory.value / ".entry.generated.js",
+      baseDirectory.value / ".empty-stub.js",
+      baseDirectory.value / "package-lock.json",
+      baseDirectory.value / "node_modules",
+    ),
+  )
+  .dependsOn(didResolverPrism.js)
+
 lazy val didExample = crossProject(JSPlatform, JVMPlatform)
   .in(file("did-example"))
   .settings(publish / skip := true)
@@ -841,6 +912,10 @@ ThisBuild / assemblyMergeStrategy := {
   case bouncycastlePattern4(file) => MergeStrategy.preferProject // because of a Apollo is using very old version
   case protobufPattern1(file)     => MergeStrategy.preferProject // because of a Apollo is using very old version
   case protobufPattern2(file)     => MergeStrategy.preferProject // because of a Apollo is using very old version
+  // GraalVM native-image hints (reflect-config.json etc) — read only by `native-image`,
+  // not at runtime on the JVM. netty-transport ships them and reactivemongo-shaded
+  // bundles its own (different) copy of the same files. Pick first.
+  case PathList("META-INF", "native-image", _*) => MergeStrategy.first
 //   case PathList("javax", "servlet", xs @ _*)         => MergeStrategy.first
 //   case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
 //   case "application.conf"                            => MergeStrategy.concat

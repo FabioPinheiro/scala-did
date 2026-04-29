@@ -46,6 +46,7 @@ object PrismCli extends ZIOCliDefault {
         BlockfrostCommand.command,
         ServicesCommand.command,
         VDRCommand.command,
+        WebsiteCommand.command,
       ),
     config = CliConfig(
       caseSensitive = true,
@@ -70,6 +71,7 @@ object PrismCli extends ZIOCliDefault {
       case cmd: CMD.CommCMD       => CommCommand.program(cmd)
       case cmd: CMD.Indexer       => IndexerCommand.program(cmd)
       case cmd: CMD.ServicesCMD   => ServicesCommand.program(cmd)
+      case cmd: CMD.WebsiteCMD    => WebsiteCommand.program(cmd)
     }
   }.catchAll {
     case errorStr: String           => ZIO.logError(errorStr) *> Console.printError(errorStr).orDie
