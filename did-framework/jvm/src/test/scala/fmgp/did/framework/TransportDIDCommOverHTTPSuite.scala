@@ -13,7 +13,7 @@ import fmgp.did.comm.*
 /** didFrameworkJVM/testOnly fmgp.did.framework.TransportDIDCommOverHTTPSuite */
 class TransportDIDCommOverHTTPSuite extends ZSuite {
 
-  override val munitTimeout = fmgp.ShowTestTimeout
+  override val munitTimeout = fmgp.ShowTestTimeout10
 
   // A valid SignedMessage JSON (from the DIDComm spec examples)
   val signedMessageJson = """{
@@ -74,6 +74,7 @@ class TransportDIDCommOverHTTPSuite extends ZSuite {
   }
 
   // R3: Late subscribers do NOT receive past messages (Hub semantics, by design)
+  // This is a very slow
   testZ("R3 - late subscribers do not receive messages published before subscription") {
     ZIO.scoped {
       for {

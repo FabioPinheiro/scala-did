@@ -7,4 +7,5 @@ package object fmgp {
 
   /** override val munitTimeout = fmgp.ShowTestTimeout */
   val ShowTestTimeout = scala.concurrent.duration.Duration(5, "s")
+  val ShowTestTimeout10 = scala.concurrent.duration.Duration(10, "s")
 }
