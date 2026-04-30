@@ -59,7 +59,7 @@ object ResolverTool {
       " ",
       code(child.text <-- didVar.signal.map(_.map(_.string).getOrElse("custom")))
     ),
-    div(child <-- didVar.signal.flatMap {
+    div(child <-- didVar.signal.flatMapSwitch {
       case Some(agent) => Signal.fromValue(div())
       case None        =>
         resolverPagePageSignal.map(e =>
