@@ -10,15 +10,15 @@ The CLI is structured around modules: `mnemonic`, `key`, `did`, `cardano`, `webs
 Install [Coursier](https://get-coursier.io/) (a pure Scala artifact fetching tool), then set up the alias:
 
 ```bash
-alias cardano-prism='cs launch app.fmgp::cardano-prism-cli:0.1.0-M42 -M fmgp.did.method.prism.cli.PrismCli --'
+alias cardano-prism='cs launch app.fmgp::cardano-prism-cli:0.1.0-M46 -M fmgp.did.method.prism.cli.PrismCli --'
 
 # Or with fewer JVM warnings
-alias cardano-prism='cs launch --java-opt --sun-misc-unsafe-memory-access=allow app.fmgp::cardano-prism-cli:0.1.0-M42 -M fmgp.did.method.prism.cli.PrismCli --'
+alias cardano-prism='cs launch --java-opt --sun-misc-unsafe-memory-access=allow app.fmgp::cardano-prism-cli:0.1.0-M46 -M fmgp.did.method.prism.cli.PrismCli --'
 
 cardano-prism --help
 ```
 
-### Install with Homebrew
+### Install with Homebrew (deprecated)
 
 A brew tap (`homebrew-fmgp`) is available for installing `cardano-prism`:
 
@@ -29,24 +29,19 @@ cardano-prism --help
 
 ## Configuration File
 
-The CLI uses a JSON configuration file (staging state) to persist keys, wallets, and Blockfrost API tokens between commands.
-
-**Default location:** `~/.cardano-prism-config.json`
-
-### Create the config file
+The CLI uses a JSON configuration file. **Default location:** `~/.cardano-prism-config.json`
 
 ```bash
+# Create the config file
 cardano-prism config-file --create
-```
 
-### View the current config
-
-```bash
+# View the current config
 cardano-prism config-file
 ```
 
 The config file stores:
 - SSI and Cardano wallet mnemonics
+- Blockfrost API tokens
 - Derived private keys (Secp256k1, Ed25519, X25519) and randomly generated keys
 - Blockfrost API tokens per network
 
@@ -99,7 +94,12 @@ Keys are derived from the SSI wallet mnemonic using the [Identus HD key derivati
 
 The derivation path follows the pattern: `m/29'/29'/<DID-index>'/<key-usage>'/<key-index>'`
 
-Key usages: `Master`, `Issuing`, `Keyagreement`, `Authentication`, `Revocation`, `Capabilityinvocation`, `Capabilitydelegation`, `Vdr`
+Key usages: `Master`, `Issuing`, `Keyagreement`, `Authentication`, `Revocation`, `Capabilityinvocation`, `Capabilitydelegation`, Master
+
+Ex:
+- Secp256k1 - for `Master` and `Vdr`
+- Ed25519 - `Issuing` (for issuing CVs) and `Authentication`  (for login)
+- X25519 - `Keyagreement` (for communication)
 
 ### Derive a Secp256k1 key
 
@@ -397,72 +397,59 @@ cardano-prism config-file --create
 
 # Generate and save an SSI wallet mnemonic
 cardano-prism mnemonic new -s
+cardano-prism mnemonic new -s uniform uniform index inner limb joy weapon business slim truck seed order call monster mad tattoo any hospital finger tourist jar video east earn
 
 # Master key — must be secp256k1
-cardano-prism key sepc256k1 0 Master 0
-# => saves as "key-0-Master-0"
+cardano-prism key sepc256k1 1 Master 0 # => saves as "key-1-Master-0"
+cardano-prism key random-Ed25519 --label iss
+cardano-prism key random-Ed25519 --label auth
+cardano-prism key random-X25519 --label comm
 
-# Issuing key — Ed25519
-cardano-prism key Ed25519 0 Issuing 0
-# => saves as "key-0-Issuing-0"
+# the keys Ex:
+# "ssiPrivateKeys" : {
+#   "key-1-Master-0" : {
+#     "KeySecp256k1" : {
+#       "derivationPath" : "m/29'/29'/1'/1'/0'",
+#       "key" : "cceec531e0fbb4a2004cf64cdd781327198c7906256d7de58ceed561e4f66d4c"
+#     }
+#   },
+#   "iss" : {
+#     "kty" : "OKP",
+#     "crv" : "Ed25519",
+#     "d" : "eEkeNXtrON4FnDjboznLl1kP4QJx9KMVxZ19mUnc3eY",
+#     "x" : "lHFqJEvTZ39HA3cS1T_tKO2jQ4-bNKJlLQl5MmJf8bw"
+#   },
+#   "auth" : {
+#     "kty" : "OKP",
+#     "crv" : "Ed25519",
+#     "d" : "jcRFhJLb37C7qAGEIOoVI5TJ7BmCbTjG4ss-J4YuqHk",
+#     "x" : "PvkqmJr98yeivaf9nJb8sQJSao0wJNKyg1ksI0llpbg"
+#   },
+#   "comm" : {
+#     "kty" : "OKP",
+#     "crv" : "X25519",
+#     "d" : "_6FVXdgJ-4LQYaQZzYITJbRIhgtOy2cMNKq3_CWWno0",
+#     "x" : "RBY7U6cbUzdQmXM6VymSwFzEeGpG6ZRMhzWP115hpCo"
+#   }
+# }
+
 
 # Build the deterministic DID (with a DIDComm service endpoint)
-cardano-prism did create-deterministic \
-  -S e1=https://did.fabiopinheiro.com/ \
-  key-0-Master-0 key-0-Issuing-0
-```
+cardano-prism did create-deterministic -S e1=https://kyc.fabiopinheiro.com/ key-1-Master-0 iss auth comm
 
-Output:
 
-```
-SSI: did:prism:aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff0326422
-create SignedPrismEvent:
-0a066d617374657212473045022100b32b3dfc1fb47dc102038c1cbc1571b955f0ee7bab27e8b9626f8da62c50a4d6022050dfa98afdfe7503dbe58ed9ae20addb6d52a182521cd67e9d4bb6b79629b0f41a400a3e0a3c123a0a066d617374657210014a2e0a09736563703235366b31122103ebe0934672da51ca01da94d278376a204e0e73a8d235c290bc2d5f1a629f8aec
-update SignedPrismEvent:
-0a066d6173746572124730450221008c036641c84c182aba386e004803684b069004e192b860542a23f16de023351102201e66c385924c88ac26aeaea76140df6fcb3d8de926091b72b983bf864305a8801afa0112f7010a20aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff03264221240616162386431346662363063303335656335383931393562343037393738643665633133313665313833626136666262393230613061376666303332363432321a4b1a490a470a09656e64706f696e74311210444944436f6d6d4d6573736167696e671a287b22757269223a2268747470733a2f2f6469642e666162696f70696e686569726f2e636f6d2f227d1a440a420a400a0f6b65792d302d49737375696e672d3010024a2b0a0745643235353139122018a25f3a42089ae9d41f2ea40549bf045c12021923a4b760487d0237e0e36e40
-```
+# Output:
+#SSI: did:prism:9f124ca5da81662f247774c40bb2b47780d7a778703715d0772f6897d63644df
+#create SignedPrismEvent:
+#0a066d617374657212473045022100d0d03578a8993588a5a92e8294c0468c8ed990a58aad93bb5b75057e9ab2604b022071d52713dce85d01e07e307e769105eadb7abe3a92e90fc94af6e3d2ecd3e5101a400a3e0a3c123a0a066d617374657210014a2e0a09736563703235366b31122102494c75fc7e4ef3197f33c12ac52f53da76cda32c2e58ee36dff45465f77ca2ca
+#update SignedPrismEvent:
+#0a066d617374657212463044022031d278e449375e5d0830f6047f6f50b95da36203fb38126814d863fb22d6af4b02201c783eb600dafc187f002df73f1514b7ecb2c0cd401c19e6da2cfe01c4e0a60f1adc0212d9020a209f124ca5da81662f247774c40bb2b47780d7a778703715d0772f6897d63644df1240396631323463613564613831363632663234373737346334306262326234373738306437613737383730333731356430373732663638393764363336343464661a441a420a400a0265311210444944436f6d6d4d6573736167696e671a287b22757269223a2268747470733a2f2f6b79632e666162696f70696e686569726f2e636f6d2f227d1a380a360a340a0369737310044a2b0a0745643235353139122094716a244bd3677f47037712d53fed28eda3438f9b34a2652d097932625ff1bc1a390a370a350a046175746810044a2b0a074564323535313912203ef92a989afdf327a2bda7fd9c96fcb102526a8d3024d2b283592c234965a5b81a380a360a340a04636f6d6d10034a2a0a06583235353139122044163b53a71b53375099733a572992c05cc4786a46e9944c87358fd75e61a42a
 
-The DID is now defined locally; the next step anchors the create + update events on Cardano. Pick **one** of the two paths below.
+cardano-prism website submit-cip30  --port 8888 0a066d617374657212473045022100d0d03578a8993588a5a92e8294c0468c8ed990a58aad93bb5b75057e9ab2604b022071d52713dce85d01e07e307e769105eadb7abe3a92e90fc94af6e3d2ecd3e5101a400a3e0a3c123a0a066d617374657210014a2e0a09736563703235366b31122102494c75fc7e4ef3197f33c12ac52f53da76cda32c2e58ee36dff45465f77ca2ca 0a066d617374657212463044022031d278e449375e5d0830f6047f6f50b95da36203fb38126814d863fb22d6af4b02201c783eb600dafc187f002df73f1514b7ecb2c0cd401c19e6da2cfe01c4e0a60f1adc0212d9020a209f124ca5da81662f247774c40bb2b47780d7a778703715d0772f6897d63644df1240396631323463613564613831363632663234373737346334306262326234373738306437613737383730333731356430373732663638393764363336343464661a441a420a400a0265311210444944436f6d6d4d6573736167696e671a287b22757269223a2268747470733a2f2f6b79632e666162696f70696e686569726f2e636f6d2f227d1a380a360a340a0369737310044a2b0a0745643235353139122094716a244bd3677f47037712d53fed28eda3438f9b34a2652d097932625ff1bc1a390a370a350a046175746810044a2b0a074564323535313912203ef92a989afdf327a2bda7fd9c96fcb102526a8d3024d2b283592c234965a5b81a380a360a340a04636f6d6d10034a2a0a06583235353139122044163b53a71b53375099733a572992c05cc4786a46e9944c87358fd75e61a42a
 
-### 2a. Submit via Blockfrost (CLI-only)
-
-Requires a Cardano payment wallet in the config and a Blockfrost API token.
-
-```bash
-# One-time setup: payment wallet + Blockfrost token
-cardano-prism mnemonic new -s --wallet-type ada
-cardano-prism cardano blockfrost-token -s preprod preprod<YOUR_TOKEN>
-
-# Submit the two events from step 1
-cardano-prism cardano submit --network preprod \
-  <create-event-hex> \
-  <update-event-hex>
-```
-
-### 2b. Submit via a browser wallet (CIP-30)
-
-No Cardano wallet mnemonic, no Blockfrost token. The CLI opens a local web page; your existing browser wallet (Lace, Eternl, Nami, Yoroi, …) does the signing and submission.
-
-```bash
-cardano-prism website submit-cip30 \
-  <create-event-hex> \
-  <update-event-hex>
-```
-
-Open `http://localhost:8088` in the browser, pick your wallet, approve the transaction. Make sure the wallet is on the network you intend to publish to.
-
-### 3. Verify
-
-Either path prints the transaction hash and explorer URLs. Example output:
-
-```
-https://preprod.cardanoscan.io/transaction/f404044f00cae9146d3e9f451e7e26eb2aba80ce6f0fe9a50c57b48d0e0ad9fa?tab=metadata
-https://neoprism-preprod.patlo.dev/resolver?did=did:prism:aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff0326422
-```
-
-After the transaction is confirmed (~1 block), resolve the DID:
-
-```bash
-cardano-prism did resolve-neoprism --network preprod \
-  did:prism:aab8d14fb60c035ec589195b407978d6ec1316e183ba6fbb920a0a7ff0326422
+# Verify 
+# https://cardanoscan.io/transaction/419b1ba119beb855c8229e17940cc5c01cede9431a3db6b51691984e183293cb?tab=utxo
+# https://neoprism.patlo.dev/resolver?did=did:prism:9f124ca5da81662f247774c40bb2b47780d7a778703715d0772f6897d63644df
+cardano-prism did resolve-prism --network mainnet did:prism:9f124ca5da81662f247774c40bb2b47780d7a778703715d0772f6897d63644df
+cardano-prism did resolve-neoprism --network mainnet did:prism:9f124ca5da81662f247774c40bb2b47780d7a778703715d0772f6897d63644df
 ```
