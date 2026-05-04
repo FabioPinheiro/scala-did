@@ -61,6 +61,12 @@ object CMD {
       port: Int,
   ) extends WebsiteCMD
 
+  /** Open the cardano-prism webapp on the Home page. Server runs until Ctrl-C. */
+  final case class OpenWebsite(port: Int) extends WebsiteCMD
+
+  /** Open the cardano-prism webapp on the Simulate page. Server runs until Ctrl-C. */
+  final case class SimulateOnWebsite(port: Int) extends WebsiteCMD
+
   sealed trait KeyCMD extends CMD {
     def setup: Setup
   }

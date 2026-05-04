@@ -1,6 +1,6 @@
 # Cardano PRISM CLI
 
-The `cardano-prism` CLI is a tool for managing [PRISM DIDs](https://github.com/input-output-hk/prism-did-method-spec) on the Cardano blockchain. It supports key management, DID creation/resolution, VDR (Verifiable Data Registry) operations, and two ways of submitting to the chain — either directly via the Blockfrost API, or by handing the transaction off to a [CIP-30](https://cips.cardano.org/cip/CIP-30) browser wallet (Lace, Eternl, Nami, Yoroi, …).
+The `cardano-prism` CLI is a tool for managing [PRISM DIDs](https://github.com/input-output-hk/prism-did-method-spec) on the Cardano blockchain. It supports key management, DID creation/resolution, VDR (Verifiable Data Registry) operations, and two ways of submitting to the chain — either directly via the Blockfrost API, or by handing the transaction off to a [CIP-30](https://cips.cardano.org/cip/CIP-30) browser wallet (Lace, Eternl, Nami, Yoroi, …). It also ships with a local browser playground for inspecting / simulating PRISM events without writing to the chain.
 The CLI is structured around modules: `mnemonic`, `key`, `did`, `cardano`, `website`, `indexer`, and `vdr`.
 
 ## Install
@@ -252,7 +252,50 @@ If you'd rather not store a wallet mnemonic or Blockfrost token, see [Submit Eve
 
 ## Website (`website`)
 
-Local-website driven flows. Spawns a one-shot HTTP server on `localhost`, opens a browser page, and exits as soon as the page reports back. Decoupled from Blockfrost — useful when you'd rather sign and submit through your existing browser wallet than store a mnemonic and a Blockfrost token in the config.
+Local-website driven flows. The CLI starts an HTTP server on `localhost`, auto-opens your default browser, and serves a small Laminar SPA bundled into the CLI. Decoupled from Blockfrost — useful when you'd rather sign and submit through your existing browser wallet than store a mnemonic and a Blockfrost token in the config, or when you just want to inspect / simulate PRISM events visually.
+
+The SPA has three pages, reachable directly via URL fragment:
+
+- **Home** (`#/`) — overview with quick links to Submit and Simulate.
+- **Submit** (`#/submit`) — the CIP-30 wallet submission flow (only meaningful when the CLI has injected events).
+- **Simulate** (`#/simulate`) — paste raw events or a Cardano metadata-map and see the resulting `SSI` and DID Document, all client-side.
+
+Three subcommands pick the landing page:
+
+| Command | Lands on | Lifecycle |
+| --- | --- | --- |
+| `cardano-prism website open` | Home | runs until Ctrl-C |
+| `cardano-prism website simulate` | Simulate | runs until Ctrl-C |
+| `cardano-prism website submit-cip30 <events>` | Submit | exits after the wallet posts the tx hash |
+
+All three accept `--port <integer>` (default `8088`).
+
+### Open the playground
+
+```bash
+# cardano-prism website open [--port <integer>]
+cardano-prism website open
+cardano-prism website open --port 9090
+```
+
+The browser opens at `http://localhost:8088/#/`. From the Home page you can navigate to Simulate or Submit. The server stays up until you hit Ctrl-C.
+
+### Simulate events from text
+
+Opens directly on the Simulate page. Paste hex into the textarea, press **Simulate**, and the page runs the events through `PrismStateInMemory` in the browser and renders the resulting SSI plus DID Document JSON.
+
+```bash
+# cardano-prism website simulate [--port <integer>]
+cardano-prism website simulate
+```
+
+The textarea accepts (one item per line, mixing allowed):
+
+- `SignedPrismEvent` protobuf hex — what `did create-deterministic` prints to stdout.
+- `PrismObject` protobuf hex — its inner block events are extracted.
+- Cardano metadata-map CBOR hex — the `{ 21325: { v, c } }` blob CardanoScan shows on a PRISM transaction's metadata tab. Useful for inspecting an existing on-chain DID.
+
+The server stays up until Ctrl-C.
 
 ### Submit Events via a browser wallet (CIP-30)
 
@@ -268,8 +311,8 @@ cardano-prism website submit-cip30 --port 9090 <create-event-hex>
 
 Flow:
 
-1. The CLI starts a local HTTP server and prints `Open http://localhost:8088 in your browser to submit.`
-2. Open that URL. The page lists the DID(s) that will be created and shows a wallet picker.
+1. The CLI starts a local HTTP server and prints `Open http://localhost:8088 in your browser to submit.`, then opens the browser automatically.
+2. The page lands on Submit, lists the DID(s) that will be created, shows a "Simulated state" preview (same client-side simulation as the Simulate page), and presents a wallet picker.
 3. Click **Submit**. The wallet asks you to approve the transaction.
 4. As soon as the wallet returns a transaction hash, the CLI prints the hash + a CardanoScan link and exits.
 

@@ -827,7 +827,7 @@ lazy val cardanoPrismCip30Webapp = project
     },
   )
   .settings(
-    libraryDependencies ++= Seq(D.laminar.value),
+    libraryDependencies ++= Seq(D.laminar.value, D.waypoint.value, D.upickle.value),
     libraryDependencies += D.scalajsDom.value,
     libraryDependencies += D.scalusCardanoLedger.value,
   )
