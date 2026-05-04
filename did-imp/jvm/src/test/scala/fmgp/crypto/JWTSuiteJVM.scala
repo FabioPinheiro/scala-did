@@ -126,4 +126,26 @@ class JWTSuiteJVM extends FunSuite {
     assert(jwt.verifyWith(ecKey.toPublicKey), "verify failed")
   }
 
+  // RFC 7515 §4.1.11: a verifier MUST reject a JWS whose protected header has a `crit`
+  // parameter listing names the verifier is not configured to process. This regression test
+  // pins the fix that makes the verifier consume the *original* protected header (which
+  // carries the `crit` claim) instead of a reconstructed one (which silently dropped it).
+  test("OKP EdDSA (Ed25519 key) verify rejects JWT with unrecognized `crit` (RFC 7515 §4.1.11)") {
+    val protectedHeaderJson = """{"alg":"EdDSA","crit":["myExt"],"myExt":"required"}"""
+    val protectedHeaderB64 = Base64.encode(protectedHeaderJson).urlBase64WithoutPadding
+    val payloadB64 = Base64.encode(rawPayload).urlBase64WithoutPadding
+    val jwtUnsigned = JWTUnsigned.fromBase64(protectedHeaderB64, payloadB64).getOrElse(fail("build failed"))
+    val jwt = jwtUnsigned.signWith(okpKey).getOrElse(fail("sign failed"))
+    assert(!jwt.verifyWith(okpKey.toPublicKey), "verify must reject unrecognized critical header")
+  }
+
+  test("EC ES256 (P-256 key) verify rejects JWT with unrecognized `crit` (RFC 7515 §4.1.11)") {
+    val protectedHeaderJson = """{"alg":"ES256","crit":["myExt"],"myExt":"required"}"""
+    val protectedHeaderB64 = Base64.encode(protectedHeaderJson).urlBase64WithoutPadding
+    val payloadB64 = Base64.encode(rawPayload).urlBase64WithoutPadding
+    val jwtUnsigned = JWTUnsigned.fromBase64(protectedHeaderB64, payloadB64).getOrElse(fail("build failed"))
+    val jwt = jwtUnsigned.signWith(ecKey).getOrElse(fail("sign failed"))
+    assert(!jwt.verifyWith(ecKey.toPublicKey), "verify must reject unrecognized critical header")
+  }
+
 }

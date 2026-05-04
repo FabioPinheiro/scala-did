@@ -138,25 +138,17 @@ object UtilsJVM {
 
   def ecKeyVerifyJWT(ecKey: JWKECKey, jwt: JWT): Boolean = {
     for {
-      headerJson <- jwt.protectedHeader.content.fromJson[ast.Json.Obj]
-      alg <- headerJson.get("alg").map(_.asString) match
-        case None              => Left("The field 'alg' must exist")
-        case Some(None)        => Left("The field 'alg' must be of the type String")
-        case Some(Some(value)) => Right(value)
-      algorithmTmp <- safeValueOf(JWAAlgorithm.valueOf(alg))
-      algorithm <- algorithmTmp match
+      header <-
+        try Right(JWSHeader.parse(jwt.protectedHeader.content))
+        catch case ex: java.text.ParseException => Left(s"Fail to parse JWS header: ${ex.getMessage()}")
+      algorithmTmp <- safeValueOf(JWAAlgorithm.valueOf(header.getAlgorithm.getName))
+      _ <- algorithmTmp match
         case JWAAlgorithm.ES256K => Right(algorithmTmp)
         case JWAAlgorithm.ES256  => Right(algorithmTmp)
         case JWAAlgorithm.ES384  => Right(algorithmTmp)
         case JWAAlgorithm.ES512  => Right(algorithmTmp)
         case JWAAlgorithm.EdDSA  => Left(s"This method do not support algorithm '$algorithmTmp'")
         case JWAAlgorithm.HS256  => Left(s"This method '$algorithmTmp' can only be call with symmetric keys")
-
-      header = {
-        val h = new JWSHeader.Builder(algorithm.asNimbusds)
-        Option(ecKey.getKeyID()).foreach(h.keyID(_))
-        h.build()
-      }
       verifier = {
         val v = new ECDSAVerifier(ecKey.toPublicJWK.toPublicJWK)
         v.getJCAContext().setProvider(CryptoProvider.provider)
@@ -271,24 +263,17 @@ object UtilsJVM {
     ) // TODO make it safe
 
     for {
-      headerJson <- jwt.protectedHeader.content.fromJson[ast.Json.Obj]
-      alg <- headerJson.get("alg").map(_.asString) match
-        case None              => Left("The field 'alg' must exist")
-        case Some(None)        => Left("The field 'alg' must be of the type String")
-        case Some(Some(value)) => Right(value)
-      algorithmTmp <- safeValueOf(JWAAlgorithm.valueOf(alg))
-      algorithm <- algorithmTmp match
+      header <-
+        try Right(JWSHeader.parse(jwt.protectedHeader.content))
+        catch case ex: java.text.ParseException => Left(s"Fail to parse JWS header: ${ex.getMessage()}")
+      algorithmTmp <- safeValueOf(JWAAlgorithm.valueOf(header.getAlgorithm.getName))
+      _ <- algorithmTmp match
         case JWAAlgorithm.ES256K => Left(s"This method can only be call with JWAAlgorithm.EdDSA (got '$algorithmTmp')")
         case JWAAlgorithm.ES256  => Left(s"This method can only be call with JWAAlgorithm.EdDSA (got '$algorithmTmp')")
         case JWAAlgorithm.ES384  => Left(s"This method can only be call with JWAAlgorithm.EdDSA (got '$algorithmTmp')")
         case JWAAlgorithm.ES512  => Left(s"This method can only be call with JWAAlgorithm.EdDSA (got '$algorithmTmp')")
         case JWAAlgorithm.EdDSA  => Right(JWAAlgorithm.EdDSA)
         case JWAAlgorithm.HS256  => Left(s"This method '$algorithmTmp' can only be call with symmetric keys")
-      header = {
-        val h = new JWSHeader.Builder(algorithm.asNimbusds)
-        Option(okpKey.getKeyID()).foreach(h.keyID(_))
-        h.build()
-      }
       ret = new Ed25519Verifier(okpKey.toPublicJWK.toPublicJWK).verify(
         header,
         jwt.base64JWTFormatWithNoSignature.getBytes(StandardCharset.UTF_8),
