@@ -108,6 +108,11 @@ object CMD {
       keyLabel: String,
   ) extends KeyCMD
 
+  final case class KeyExport(
+      override val setup: Setup,
+      keyLabel: String,
+  ) extends KeyCMD
+
 // TODO REMOVE CLEANUP
 //   final case class Mnemonic2Key(
 //       setup: Setup,

@@ -124,6 +124,24 @@ object KeyCommand {
                 keyLabel = keyLabel,
               )
           },
+        Command(
+          "export",
+          Options.none,
+          Args.text("label").??("Label of the key in the config to export"),
+        )
+          .withHelp(
+            "Export an Ed25519 key as a PRIVATE_KEY env line in hex. " +
+              "Random Ed25519 keys export as 32 bytes (64 hex chars); " +
+              "BIP32-Ed25519 mnemonic-derived keys export as the 64-byte extended secret kL||kR (128 hex chars), " +
+              "the form expected by Identus SDK's apollo.createPrivateKey({curve: 'Ed25519', raw: ...})."
+          )
+          .map { keyLabel =>
+            (setup: Setup) =>
+              CMD.KeyExport(
+                setup = setup,
+                keyLabel = keyLabel,
+              )
+          },
         // TODO REMOVE CLEANUP
         // Command(
         //   "derivation-path",
@@ -228,6 +246,24 @@ object KeyCommand {
         _ <- ZIO.log(text)
         _ <- Console.printLine(text)
       } yield ()).provideLayer(cmd.setup.layer).orDie
+
+    case KeyExport(setup, keyLabel) =>
+      val result = for {
+        state <- ZIO.fromEither(setup.staging)
+        entry <- ZIO
+          .fromOption(state.ssiPrivateKeys.get(keyLabel))
+          .orElseFail(s"Key '$keyLabel' not found in config.")
+        hex <- entry match {
+          case okp: OKPPrivateKey if okp.crv == Curve.Ed25519 =>
+            ZIO.succeed(bytes2Hex(fmgp.util.Base64.fromBase64url(okp.d).decode))
+          case k: KeyEd25519 =>
+            ZIO.succeed(bytes2Hex(k.key.extendedKey.extendedSecretKey))
+          case _ =>
+            ZIO.fail(s"Key '$keyLabel' is not an Ed25519 key. Only Ed25519 keys can be exported as PRIVATE_KEY.")
+        }
+        _ <- Console.printLine(s"PRIVATE_KEY=$hex")
+      } yield ()
+      result.catchAll(msg => Console.printLineError(msg).orDie)
 
     // TODO REMOVE CLEANUP
     // case CMD.Mnemonic2Key(setup, mWallet, derivationPath, keyLabel) =>
