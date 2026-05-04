@@ -2,13 +2,17 @@ package fmgp.did.method.prism.cip30
 
 import scala.scalajs.js
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 import com.raquo.laminar.api.L.*
 import org.scalajs.dom
 
-import _root_.proto.prism.{PrismEvent, SignedPrismEvent}
-import fmgp.did.method.prism.DIDPrism
+import zio.*
+import zio.json.*
+
+import _root_.proto.prism.{PrismBlock, PrismEvent, PrismObject, SignedPrismEvent}
+import fmgp.did.method.prism.{DIDPrism, PrismStateInMemory, SSI}
+import fmgp.did.method.prism.proto.{MaybeEvent, OP}
 
 object Cip30App:
 
@@ -77,6 +81,7 @@ object Cip30App:
         "Connect a Cardano wallet (Lace / Eternl / Nami / Yoroi) and press Submit.",
       ),
       didsBlock(events),
+      simulatedStateBlock(events),
       eventsBlock(events),
       walletBlock(state, events),
     )
@@ -91,6 +96,59 @@ object Cip30App:
         h2(s"DID${if dids.size == 1 then "" else "s"} that will be created"),
         ul(dids.map(d => li(code(d.string)))),
       )
+
+  private def simulatedStateBlock(events: Seq[SignedPrismEvent]): HtmlElement =
+    simulate(events) match
+      case Left(reason) =>
+        div(
+          cls := "section",
+          h2("Simulated state"),
+          p(cls := "error", s"Simulation failed: $reason"),
+        )
+      case Right(ssis) if ssis.isEmpty =>
+        div(
+          cls := "section",
+          h2("Simulated state"),
+          p(em("No DID state to simulate (no CreateDid events).")),
+        )
+      case Right(ssis) =>
+        div(
+          cls := "section",
+          h2(s"Simulated state (${ssis.size} DID${if ssis.size == 1 then "" else "s"})"),
+          ul(
+            ssis.map { ssi =>
+              li(
+                strong(code(ssi.did.string)),
+                detailsTag(
+                  summaryTag("show SSI"),
+                  pre(cls := "json", ssi.toJsonPretty),
+                ),
+                detailsTag(
+                  summaryTag("show DID Document"),
+                  pre(cls := "json", didDocumentJson(ssi)),
+                ),
+              )
+            }
+          ),
+        )
+
+  private def simulate(events: Seq[SignedPrismEvent]): Either[String, Seq[SSI]] =
+    val prismObject = PrismObject(blockContent = Some(PrismBlock(events = events)))
+    val maybeEvents = MaybeEvent.fromProto(prismObject, "sim-tx", 0)
+    val program =
+      for
+        state <- PrismStateInMemory.empty
+        _     <- ZIO.foreach(maybeEvents)(state.addMaybeEvent(_))
+        ssis  <- state.makeSSI
+      yield ssis
+    Try(Unsafe.unsafe { implicit u => Runtime.default.unsafe.run(program).getOrThrow() }).toEither.left
+      .map(t => Option(t.getMessage).getOrElse(t.getClass.getSimpleName))
+
+  private def didDocumentJson(ssi: SSI): String =
+    Try(ssi.didDocument.map(_.toJsonPretty).getOrElse("(no DID Document)")) match
+      case Success(s) => s
+      case Failure(t) =>
+        s"(DID Document not available in browser: ${Option(t.getMessage).getOrElse(t.getClass.getSimpleName)})"
 
   private def eventsBlock(events: Seq[SignedPrismEvent]): HtmlElement =
     div(
