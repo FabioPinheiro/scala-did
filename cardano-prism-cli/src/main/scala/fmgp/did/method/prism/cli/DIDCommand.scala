@@ -146,13 +146,15 @@ object DIDCommand {
         _ <- Console.printLine(bytes2Hex(signedPrismEvent.toByteArray))
       } yield ()).provideLayer(setup.layer)
     case CMD.DIDCreateDeterministic(setup, keysLabels, didCommServiceEndpoints) => {
+      val labelToUsage: Map[String, PrismKeyUsage] = keysLabels.toMap
       for {
         _ <- ZIO.unit
         _ <- ZIO.log(cmd.toString())
-        allSelectedKeys = setup.mState.get.ssiPrivateKeys.view.filterKeys(label => keysLabels.contains(label)).toMap
+        allSelectedKeys = setup.mState.get.ssiPrivateKeys.view
+          .filterKeys(label => labelToUsage.contains(label))
+          .toMap
         (masterKeyLabel, masterKey) <- allSelectedKeys.find {
-          case (label, key: DerivedKey) => key.path.keyUsage == PrismKeyUsage.MasterKeyUsage
-          case _                        => false
+          case (label, _) => labelToUsage.get(label).contains(PrismKeyUsage.MasterKeyUsage)
         } match
           case None                                   => ZIO.fail("Master key is missing") // Master key is missing
           case Some((label, masterKey: KeySecp256k1)) => ZIO.succeed(label, masterKey.secp256k1PrivateKey)
@@ -161,30 +163,29 @@ object DIDCommand {
         addKey <- ZIO
           .foreach(allOtherKeys.toSeq) {
             case (id, key: DerivedKey) =>
+              val usage = labelToUsage(id)
               ZIO.succeed(
                 key match
                   case KeySecp256k1(derivationPath, secp256k1PrivateKey) =>
-                    secp256k1PrivateKey.compressedKey(id = id, keyUsage = key.path.keyUsage)
+                    secp256k1PrivateKey.compressedKey(id = id, keyUsage = usage)
                   case KeyEd25519(derivationPath, hdKeyPair) =>
-                    hdKeyPair.compressedKey(id = id, keyUsage = key.path.keyUsage)
+                    hdKeyPair.compressedKey(id = id, keyUsage = usage)
                   case KeyX25519(derivationPath, opkKey) =>
                     PrismPublicKey.CompressedECKey(
                       id = id,
-                      usage = key.path.keyUsage,
+                      usage = usage,
                       curve = "X25519",
                       data = opkKey.toPublicKey.xBase64Url.decode
                     )
               )
             case (label, key: PrivateKey) =>
+              val usage = labelToUsage(label)
               key match
                 case okp: OKPPrivateKey =>
                   ZIO.succeed(
                     CompressedECKey(
                       id = label,
-                      usage = okp.crv match
-                        case Curve.X25519  => PrismKeyUsage.KeyAgreementKeyUsage
-                        case Curve.Ed25519 => PrismKeyUsage.AuthenticationKeyUsage
-                      ,
+                      usage = usage,
                       curve = okp.crv.name,
                       data = okp.toPublicKey.xBase64Url.decode
                     )

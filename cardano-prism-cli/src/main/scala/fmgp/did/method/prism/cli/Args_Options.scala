@@ -5,6 +5,7 @@ import fmgp.did.method.prism.DIDPrism
 import fmgp.did.method.prism.BlockfrostConfig
 import fmgp.did.method.prism.cardano.PublicCardanoNetwork
 import fmgp.did.method.prism.cardano.CardanoWalletConfig
+import fmgp.did.method.prism.proto.PrismKeyUsage
 import fmgp.did.DID
 import fmgp.did.DIDSubject
 
@@ -101,7 +102,48 @@ val indexerDBConnectionAgr =
       "Indexer MongoDB connection to be used as a state storage. Ex: 'mongodb+srv://user:password@cluster0.bgnyyy1.mongodb.net/indexer'"
     )
 
-val keysLabels = Args.text("keyID").atLeast(1).??("Label/name of keys to be used")
+private val keyUsageByName: Map[String, PrismKeyUsage] = Map(
+  "Master" -> PrismKeyUsage.MasterKeyUsage,
+  "Issuing" -> PrismKeyUsage.IssuingKeyUsage,
+  "Keyagreement" -> PrismKeyUsage.KeyAgreementKeyUsage,
+  "Authentication" -> PrismKeyUsage.AuthenticationKeyUsage,
+  "Revocation" -> PrismKeyUsage.RevocationKeyUsage,
+  "Capabilityinvocation" -> PrismKeyUsage.CapabilityinvocationKeyUsage,
+  "Capabilitydelegation" -> PrismKeyUsage.CapabilitydelegationKeyUsage,
+  "Vdr" -> PrismKeyUsage.VdrKeyUsage,
+)
+
+val keysLabels =
+  Args
+    .text("keyID:Usage")
+    .atLeast(1)
+    .mapOrFail { entries =>
+      val parsed = entries.map { entry =>
+        entry.split(":", 2) match
+          case Array(label, usageStr) =>
+            keyUsageByName.get(usageStr) match
+              case Some(u) => Right((label, u))
+              case None    =>
+                Left(
+                  s"Unknown PrismKeyUsage '$usageStr' in '$entry'. " +
+                    s"Valid: ${keyUsageByName.keys.toSeq.sorted.mkString(", ")}."
+                )
+          case _ =>
+            Left(
+              s"Key reference '$entry' is missing a usage. " +
+                s"Format: 'label:Usage' (e.g. 'master:Master' 'iss:Issuing' 'auth:Authentication' 'comm:Keyagreement')."
+            )
+      }
+      parsed.collectFirst { case Left(err) => err } match
+        case Some(err) => Left(HelpDoc.p(err))
+        case None      => Right(parsed.collect { case Right(v) => v })
+    }
+    .??(
+      "Keys to use, one per arg, formatted 'label:Usage' " +
+        "(e.g. 'master:Master' 'iss:Issuing' 'auth:Authentication' 'comm:Keyagreement'). " +
+        s"Valid usage values: ${keyUsageByName.keys.toSeq.sorted.mkString(", ")}. " +
+        "Exactly one key must declare the 'Master' usage and resolve to a secp256k1 key."
+    )
 // val TEST = Options.keyValueMap(Options.Single("aa", Vector.empty, PrimType.Text))
 val didCommServiceEndpoints =
   Options

@@ -138,7 +138,7 @@ object CMD {
   ) extends DIDCMD
   final case class DIDCreateDeterministic(
       setup: Setup,
-      keysLabels: Seq[String],
+      keysLabels: Seq[(String, PrismKeyUsage)],
       didCommServiceEndpoints: Map[String, String],
   ) extends DIDCMD
   final case class DIDUpdate(did: DIDPrism) extends DIDCMD
