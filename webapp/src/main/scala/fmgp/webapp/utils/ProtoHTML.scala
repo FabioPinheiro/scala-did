@@ -70,7 +70,7 @@ object ProtoHTML {
         .combineSeq(
           (fb_that_is_not_oneofs ++ oneOfs).map {
             case fb: FieldBuilder        => fb.signalFDPValue
-            case oneOfB: OneOfBuilder[A] => oneOfB.signalFieldBuilder.flatMap(_.signalFDPValue)
+            case oneOfB: OneOfBuilder[A] => oneOfB.signalFieldBuilder.flatMapSwitch(_.signalFDPValue)
           }
         )
         .map { seq => PMessage(seq.toMap) }

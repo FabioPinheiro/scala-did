@@ -1,7 +1,7 @@
 package fmgp.webapp
 
 import org.scalajs.dom
-import com.raquo.laminar.api.L.*
+import com.raquo.laminar.api.L.{Status as _, *}
 import scala.scalajs.js
 import scala.scalajs.js.timers.*
 import scala.scalajs.js.JSConverters.*
@@ -288,7 +288,7 @@ object AgentManagement {
             ),
           )
 
-        case _ => ""
+        case _ => div()
       }
     ),
     div(
