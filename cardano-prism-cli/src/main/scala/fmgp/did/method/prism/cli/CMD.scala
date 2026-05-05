@@ -52,9 +52,8 @@ object CMD {
 
   sealed trait WebsiteCMD extends CMD
 
-  /** Submit PRISM events through a CIP-30 browser wallet. The CLI starts a
-    * one-shot ZIO-http server, opens a page that connects to the wallet, and
-    * exits after the wallet reports the tx hash. Unrelated to Blockfrost.
+  /** Submit PRISM events through a CIP-30 browser wallet. The CLI starts a one-shot ZIO-http server, opens a page that
+    * connects to the wallet, and exits after the wallet reports the tx hash. Unrelated to Blockfrost.
     */
   final case class SubmitEventsCip30(
       events: Seq[SignedPrismEvent],

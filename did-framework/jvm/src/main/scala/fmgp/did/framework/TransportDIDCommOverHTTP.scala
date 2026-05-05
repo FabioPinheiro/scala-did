@@ -26,8 +26,8 @@ import fmgp.did.comm.*
   *     DIDComm message (SignedMessage or EncryptedMessage), it is published to the inbound Hub. If the body is empty,
   *     not valid JSON, or not a DIDComm message, it is logged and ignored.
   *   - R5 — TransportID: Uses `TransportID.http`.
-  *   - R6 — Error handling: HTTP errors (non-2xx status) are logged but not delivered to `inbound`.
-  *     Network/connection failures are logged and the effect dies (orDie).
+  *   - R6 — Error handling: HTTP errors (non-2xx status) are logged but not delivered to `inbound`. Network/connection
+  *     failures are logged and the effect dies (orDie).
   *   - R7 — SingleTransmission semantics: TransmissionType is SingleTransmission, unlike WebSocket's
   *     MultiTransmissions.
   *   - R8 — Environment: Requires `Client & Scope` from zio-http. The companion object provides `makeWithEnvironment`

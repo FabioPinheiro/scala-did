@@ -18,13 +18,16 @@ object SimulateView:
 
   def apply(): HtmlElement =
     val rawInput = Var[String]("")
-    val result   = Var[Option[Either[String, Seq[SignedPrismEvent]]]](None)
+    val result = Var[Option[Either[String, Seq[SignedPrismEvent]]]](None)
 
     div(
       cls := "view simulate",
       h1("Simulate PRISM events"),
       p(
-        "Paste hex below — one ", code("SignedPrismEvent"), ", ", code("PrismObject"),
+        "Paste hex below — one ",
+        code("SignedPrismEvent"),
+        ", ",
+        code("PrismObject"),
         ", or Cardano metadata-map (label 21325) per line. Mixing is allowed.",
       ),
       textArea(
@@ -57,7 +60,8 @@ object SimulateView:
     )
 
   /** Per-line auto-detect, tried in order:
-    *   1. Cardano metadata-map CBOR (label 21325) — strict; fails fast when the bytes are not a PRISM-labelled metadata map.
+    *   1. Cardano metadata-map CBOR (label 21325) — strict; fails fast when the bytes are not a PRISM-labelled metadata
+    *      map.
     *   2. SignedPrismEvent protobuf hex.
     *   3. PrismObject protobuf hex (its inner block events are extracted).
     *
@@ -74,7 +78,8 @@ object SimulateView:
             tryMetadataCbor(bs)
               .orElse(Try(SignedPrismEvent.parseFrom(bs)).map(Seq(_)))
               .orElse(Try(PrismObject.parseFrom(bs)).map(po => po.blockContent.toSeq.flatMap(_.events)))
-              .toEither.left
+              .toEither
+              .left
               .map(t =>
                 s"Line ${i + 1}: not a SignedPrismEvent, PrismObject, or Cardano metadata-map " +
                   s"(${Option(t.getMessage).getOrElse(t.getClass.getSimpleName)})"
@@ -89,8 +94,8 @@ object SimulateView:
     Try(Cbor.decode(bs).to[CardanoTransactionMetadataPrismCBOR].value)
       .map(meta => meta.toPrismObject.blockContent.toSeq.flatMap(_.events))
 
-  /** Renders the result of running PrismStateInMemory over the given events. Used both by the
-    * Simulate page and by the Submit page (as an inline preview).
+  /** Renders the result of running PrismStateInMemory over the given events. Used both by the Simulate page and by the
+    * Submit page (as an inline preview).
     */
   def simulatedStateBlock(events: Seq[SignedPrismEvent]): HtmlElement =
     simulate(events) match
@@ -133,8 +138,8 @@ object SimulateView:
     val program =
       for
         state <- PrismStateInMemory.empty
-        _     <- ZIO.foreach(maybeEvents)(state.addMaybeEvent(_))
-        ssis  <- state.makeSSI
+        _ <- ZIO.foreach(maybeEvents)(state.addMaybeEvent(_))
+        ssis <- state.makeSSI
       yield ssis
     Try(Unsafe.unsafe { implicit u => Runtime.default.unsafe.run(program).getOrThrow() }).toEither.left
       .map(t => Option(t.getMessage).getOrElse(t.getClass.getSimpleName))

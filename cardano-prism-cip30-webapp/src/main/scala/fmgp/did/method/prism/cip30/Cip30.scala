@@ -4,9 +4,8 @@ import scala.scalajs.js
 import scala.concurrent.Future
 import scala.scalajs.js.Thenable.Implicits.thenable2future
 
-/** Thin js.Dynamic facade over `window.cardano` for CIP-30 wallet extensions
-  * (Nami, Eternl, Lace, ...). Each entry exposes `enable()` returning the
-  * per-session API handle.
+/** Thin js.Dynamic facade over `window.cardano` for CIP-30 wallet extensions (Nami, Eternl, Lace, ...). Each entry
+  * exposes `enable()` returning the per-session API handle.
   */
 object Cip30:
 
@@ -18,8 +17,8 @@ object Cip30:
       supportedExtensions: List[Int],
   )
 
-  /** CIP-30 `DataSignature`: a CBOR-encoded `COSE_Sign1` plus the public key in
-    * `COSE_Key` form, both hex-encoded. See CIP-8 for the COSE structure.
+  /** CIP-30 `DataSignature`: a CBOR-encoded `COSE_Sign1` plus the public key in `COSE_Key` form, both hex-encoded. See
+    * CIP-8 for the COSE structure.
     */
   final case class DataSignature(signature: String, key: String)
 
@@ -113,8 +112,7 @@ object Cip30:
     val f: Future[js.Any] = p
     traced("getChangeAddress", f.map(_.toString))
 
-  /** Network ID the wallet is configured for. `0 = testnet (preprod/preview)`,
-    * `1 = mainnet`. CIP-30 §3.
+  /** Network ID the wallet is configured for. `0 = testnet (preprod/preview)`, `1 = mainnet`. CIP-30 §3.
     */
   def getNetworkId(api: js.Dynamic): Future[Int] =
     import scala.concurrent.ExecutionContext.Implicits.global
@@ -127,9 +125,8 @@ object Cip30:
     val f: Future[js.Any] = asPromise
     traced("getNetworkId", f.map(_.asInstanceOf[Double].toInt))
 
-  /** All UTxOs available to the wallet, as hex-CBOR `[input, output]` pairs.
-    * The wallet may return `null` (treated here as an empty list) or an empty
-    * array if it has no funds. CIP-30 §3.
+  /** All UTxOs available to the wallet, as hex-CBOR `[input, output]` pairs. The wallet may return `null` (treated here
+    * as an empty list) or an empty array if it has no funds. CIP-30 §3.
     */
   def getUtxos(api: js.Dynamic): Future[List[String]] =
     import scala.concurrent.ExecutionContext.Implicits.global
@@ -146,10 +143,8 @@ object Cip30:
       },
     )
 
-  /** Ask the wallet to sign a transaction. Returns the hex-CBOR
-    * `TransactionWitnessSet` (the wallet does not return a full signed tx --
-    * caller must merge witnesses with the body). `partialSign = false` is the
-    * conventional default.
+  /** Ask the wallet to sign a transaction. Returns the hex-CBOR `TransactionWitnessSet` (the wallet does not return a
+    * full signed tx -- caller must merge witnesses with the body). `partialSign = false` is the conventional default.
     */
   def signTx(api: js.Dynamic, txCborHex: String, partialSign: Boolean = false): Future[String] =
     import scala.concurrent.ExecutionContext.Implicits.global
@@ -160,9 +155,8 @@ object Cip30:
         .map(_.toString),
     )
 
-  /** Submit a fully-witnessed tx through the wallet's backend. Returns the tx
-    * hash (hex). The wallet may show a final confirmation popup, hence the
-    * `withDappName` wrap.
+  /** Submit a fully-witnessed tx through the wallet's backend. Returns the tx hash (hex). The wallet may show a final
+    * confirmation popup, hence the `withDappName` wrap.
     */
   def submitTx(api: js.Dynamic, signedTxCborHex: String): Future[String] =
     import scala.concurrent.ExecutionContext.Implicits.global

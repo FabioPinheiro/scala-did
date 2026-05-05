@@ -106,23 +106,21 @@ object KeyCommand {
           "random-Ed25519",
           Options.text("label").??("Key label/name. key will be save staging with that name."),
         )
-          .map { keyLabel =>
-            (setup: Setup) =>
-              CMD.KeyEd25519Random(
-                setup = setup,
-                keyLabel = keyLabel,
-              )
+          .map { keyLabel => (setup: Setup) =>
+            CMD.KeyEd25519Random(
+              setup = setup,
+              keyLabel = keyLabel,
+            )
           },
         Command(
           "random-X25519",
           Options.text("label").??("Key label/name. key will be save staging with that name."),
         )
-          .map { keyLabel =>
-            (setup: Setup) =>
-              CMD.KeyX25519Random(
-                setup = setup,
-                keyLabel = keyLabel,
-              )
+          .map { keyLabel => (setup: Setup) =>
+            CMD.KeyX25519Random(
+              setup = setup,
+              keyLabel = keyLabel,
+            )
           },
         Command(
           "export",
@@ -135,12 +133,11 @@ object KeyCommand {
               "BIP32-Ed25519 mnemonic-derived keys export as the 64-byte extended secret kL||kR (128 hex chars), " +
               "the form expected by Identus SDK's apollo.createPrivateKey({curve: 'Ed25519', raw: ...})."
           )
-          .map { keyLabel =>
-            (setup: Setup) =>
-              CMD.KeyExport(
-                setup = setup,
-                keyLabel = keyLabel,
-              )
+          .map { keyLabel => (setup: Setup) =>
+            CMD.KeyExport(
+              setup = setup,
+              keyLabel = keyLabel,
+            )
           },
         // TODO REMOVE CLEANUP
         // Command(
@@ -224,9 +221,7 @@ object KeyCommand {
         key <- KeyGenerator.makeEd25519.orDieWith(e => RuntimeException(e.toString))
         _ <- forceStateUpdateAtEnd
         _ <- updateState { stagingState =>
-          stagingState.copy(ssiPrivateKeys =
-            stagingState.ssiPrivateKeys.+(keyLabel -> key)
-          )
+          stagingState.copy(ssiPrivateKeys = stagingState.ssiPrivateKeys.+(keyLabel -> key))
         }
         text = s"Random Ed25519 key generated and saved as '$keyLabel'"
         _ <- ZIO.log(text)
@@ -238,9 +233,7 @@ object KeyCommand {
         key <- KeyGenerator.makeX25519.orDieWith(e => RuntimeException(e.toString))
         _ <- forceStateUpdateAtEnd
         _ <- updateState { stagingState =>
-          stagingState.copy(ssiPrivateKeys =
-            stagingState.ssiPrivateKeys.+(keyLabel -> key)
-          )
+          stagingState.copy(ssiPrivateKeys = stagingState.ssiPrivateKeys.+(keyLabel -> key))
         }
         text = s"Random X25519 key generated and saved as '$keyLabel'"
         _ <- ZIO.log(text)

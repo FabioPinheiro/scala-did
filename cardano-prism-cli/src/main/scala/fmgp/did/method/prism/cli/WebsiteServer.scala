@@ -12,15 +12,14 @@ import proto.prism.SignedPrismEvent
 
 /** ZIO-http server that serves the cardano-prism CIP-30 webapp.
   *
-  * The webapp bundle is built by sbt (`sbt cardanoPrismCip30Webapp/cip30Bundle`) and embedded in
-  * this jar as `cip30/bundle.js`. Set `CIP30_WEBAPP_BUNDLE` to a filesystem path to override the
-  * embedded copy during development.
+  * The webapp bundle is built by sbt (`sbt cardanoPrismCip30Webapp/cip30Bundle`) and embedded in this jar as
+  * `cip30/bundle.js`. Set `CIP30_WEBAPP_BUNDLE` to a filesystem path to override the embedded copy during development.
   *
   * Two modes:
-  *   - [[runUntilDone]]: one-shot. Injects events as `window.PRISM_CIP30_EVENTS`, registers a
-  *     `/done` handler, and completes when the page POSTs the tx hash. Used by `submit-cip30`.
-  *   - [[runForever]]: long-running. No events injected, no `/done` handler. Used by `open` and
-  *     `simulate`. Runs until interrupted (Ctrl-C).
+  *   - [[runUntilDone]]: one-shot. Injects events as `window.PRISM_CIP30_EVENTS`, registers a `/done` handler, and
+  *     completes when the page POSTs the tx hash. Used by `submit-cip30`.
+  *   - [[runForever]]: long-running. No events injected, no `/done` handler. Used by `open` and `simulate`. Runs until
+  *     interrupted (Ctrl-C).
   */
 object WebsiteServer:
 
@@ -32,7 +31,7 @@ object WebsiteServer:
     given codec: JsonCodec[TxResult] = DeriveJsonCodec.gen[TxResult]
 
   private val BundleResource = "cip30/bundle.js"
-  private val MapResource    = "cip30/bundle.js.map"
+  private val MapResource = "cip30/bundle.js.map"
 
   // ---- public entry points ----------------------------------------------
 
@@ -40,12 +39,12 @@ object WebsiteServer:
   def runUntilDone(events: Seq[SignedPrismEvent], port: Int): ZIO[Any, Throwable, TxResult] =
     for
       bundleBytes <- loadBundle
-      mapBytes    <- loadMap
-      _           <- ZIO.log(s"CIP-30 webapp bundle loaded (${bundleBytes.length} bytes)")
-      done        <- Promise.make[Throwable, TxResult]
+      mapBytes <- loadMap
+      _ <- ZIO.log(s"CIP-30 webapp bundle loaded (${bundleBytes.length} bytes)")
+      done <- Promise.make[Throwable, TxResult]
       indexHtml = renderIndexHtml(events, Landing.Submit)
-      routes    = buildRoutes(bundleBytes, mapBytes, indexHtml, Some(done))
-      url       = s"http://localhost:$port"
+      routes = buildRoutes(bundleBytes, mapBytes, indexHtml, Some(done))
+      url = s"http://localhost:$port"
       _ <- ZIO.log(s"Open $url in your browser to submit.")
       _ <- printDIDsToConsole(events)
       _ <- BrowserOpener.openUrl(url).forkDaemon
@@ -61,13 +60,13 @@ object WebsiteServer:
   def runForever(landing: Landing, port: Int): ZIO[Any, Throwable, Nothing] =
     for
       bundleBytes <- loadBundle
-      mapBytes    <- loadMap
-      _           <- ZIO.log(s"webapp bundle loaded (${bundleBytes.length} bytes)")
+      mapBytes <- loadMap
+      _ <- ZIO.log(s"webapp bundle loaded (${bundleBytes.length} bytes)")
       indexHtml = renderIndexHtml(Seq.empty, landing)
-      routes    = buildRoutes(bundleBytes, mapBytes, indexHtml, None)
-      url       = s"http://localhost:$port${landingFragment(landing)}"
-      _      <- ZIO.log(s"Serving $url — Ctrl-C to stop.")
-      _      <- BrowserOpener.openUrl(url).forkDaemon
+      routes = buildRoutes(bundleBytes, mapBytes, indexHtml, None)
+      url = s"http://localhost:$port${landingFragment(landing)}"
+      _ <- ZIO.log(s"Serving $url — Ctrl-C to stop.")
+      _ <- BrowserOpener.openUrl(url).forkDaemon
       result <- Server.serve(routes).provide(Server.defaultWithPort(port))
     yield result
 
@@ -99,23 +98,27 @@ object WebsiteServer:
             .map(Some(_))
             .tap(_ => ZIO.log(s"loaded bundle from filesystem: $path"))
         case None =>
-          ZIO.attemptBlocking {
-            Option(getClass.getClassLoader.getResourceAsStream(resourcePath))
-              .map { in =>
-                try in.readAllBytes()
-                finally in.close()
-              }
-          }.flatMap {
-            case Some(b) => ZIO.some(b)
-            case None if required =>
-              ZIO.fail(new RuntimeException(
-                s"""CIP-30 webapp bundle not found on classpath ($resourcePath).
+          ZIO
+            .attemptBlocking {
+              Option(getClass.getClassLoader.getResourceAsStream(resourcePath))
+                .map { in =>
+                  try in.readAllBytes()
+                  finally in.close()
+                }
+            }
+            .flatMap {
+              case Some(b)          => ZIO.some(b)
+              case None if required =>
+                ZIO.fail(
+                  new RuntimeException(
+                    s"""CIP-30 webapp bundle not found on classpath ($resourcePath).
                    |Rebuild it with:
                    |  sbt cardanoPrismCip30Webapp/cip30Bundle
                    |Or set CIP30_WEBAPP_BUNDLE to a filesystem path.""".stripMargin
-              ))
-            case None => ZIO.none
-          }
+                  )
+                )
+              case None => ZIO.none
+            }
     yield bytes
 
   // ---- HTTP routing -----------------------------------------------------
@@ -136,18 +139,20 @@ object WebsiteServer:
       headers = Headers(Header.ContentType(MediaType.text.javascript)),
       body = Body.fromArray(bundleBytes),
     )
-    val mapResponse = mapBytes.map { bytes =>
-      Response(
-        status = Status.Ok,
-        headers = Headers(Header.ContentType(MediaType.application.json)),
-        body = Body.fromArray(bytes),
-      )
-    }.getOrElse(Response.status(Status.NotFound))
+    val mapResponse = mapBytes
+      .map { bytes =>
+        Response(
+          status = Status.Ok,
+          headers = Headers(Header.ContentType(MediaType.application.json)),
+          body = Body.fromArray(bytes),
+        )
+      }
+      .getOrElse(Response.status(Status.NotFound))
 
     val staticRoutes = Routes(
-      Method.GET / Root            -> handler(indexResponse),
-      Method.GET / "index.html"    -> handler(indexResponse),
-      Method.GET / "bundle.js"     -> handler(bundleResponse),
+      Method.GET / Root -> handler(indexResponse),
+      Method.GET / "index.html" -> handler(indexResponse),
+      Method.GET / "bundle.js" -> handler(bundleResponse),
       Method.GET / "bundle.js.map" -> handler(mapResponse),
     )
 

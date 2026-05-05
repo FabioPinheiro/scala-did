@@ -2,8 +2,8 @@ package fmgp.did.method.prism.cli
 
 import zio.*
 
-/** Best-effort cross-platform browser launcher. Failures are logged and swallowed — the URL is
-  * always also printed to the console so the user can fall back to a manual click.
+/** Best-effort cross-platform browser launcher. Failures are logged and swallowed — the URL is always also printed to
+  * the console so the user can fall back to a manual click.
   */
 object BrowserOpener:
 

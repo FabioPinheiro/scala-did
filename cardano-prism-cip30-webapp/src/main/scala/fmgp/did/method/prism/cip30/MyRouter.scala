@@ -8,20 +8,20 @@ import upickle.default.*
 object MyRouter:
 
   sealed trait Page
-  case object HomePage     extends Page
-  case object SubmitPage   extends Page
+  case object HomePage extends Page
+  case object SubmitPage extends Page
   case object SimulatePage extends Page
 
-  given homeRW:     ReadWriter[HomePage.type]     = macroRW
-  given submitRW:   ReadWriter[SubmitPage.type]   = macroRW
+  given homeRW: ReadWriter[HomePage.type] = macroRW
+  given submitRW: ReadWriter[SubmitPage.type] = macroRW
   given simulateRW: ReadWriter[SimulatePage.type] = macroRW
-  given pageRW:     ReadWriter[Page]              = macroRW
+  given pageRW: ReadWriter[Page] = macroRW
 
   private val routes = List(
-    Route.static(HomePage,     root / "home"     / endOfSegments, Router.localFragmentBasePath),
-    Route.static(SubmitPage,   root / "submit"   / endOfSegments, Router.localFragmentBasePath),
+    Route.static(HomePage, root / "home" / endOfSegments, Router.localFragmentBasePath),
+    Route.static(SubmitPage, root / "submit" / endOfSegments, Router.localFragmentBasePath),
     Route.static(SimulatePage, root / "simulate" / endOfSegments, Router.localFragmentBasePath),
-    Route.static(HomePage,     root /              endOfSegments, Router.localFragmentBasePath),
+    Route.static(HomePage, root / endOfSegments, Router.localFragmentBasePath),
   )
 
   val router: Router[Page] = new Router[Page](
@@ -31,11 +31,11 @@ object MyRouter:
       case SubmitPage   => "cardano-prism: submit"
       case SimulatePage => "cardano-prism: simulate"
     },
-    serializePage   = page => write(page),
-    deserializePage = str  => read[Page](str),
-    routeFallback   = _ => HomePage,
-    popStateEvents  = windowEvents(_.onPopState),
-    owner           = unsafeWindowOwner,
+    serializePage = page => write(page),
+    deserializePage = str => read[Page](str),
+    routeFallback = _ => HomePage,
+    popStateEvents = windowEvents(_.onPopState),
+    owner = unsafeWindowOwner,
   )
 
   def navigateTo(page: Page): Binder[HtmlElement] = Binder { el =>

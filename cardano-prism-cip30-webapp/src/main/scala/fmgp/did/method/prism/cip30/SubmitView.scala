@@ -65,8 +65,7 @@ object SubmitView:
 
   private def didsBlock(events: Seq[SignedPrismEvent]): HtmlElement =
     val dids = extractCreatedDIDs(events)
-    if dids.isEmpty then
-      div(cls := "section", h2("DIDs"), p(em("No `CreateDid` events in this submission.")))
+    if dids.isEmpty then div(cls := "section", h2("DIDs"), p(em("No `CreateDid` events in this submission.")))
     else
       div(
         cls := "section",
@@ -98,8 +97,7 @@ object SubmitView:
     div(
       cls := "section wallet",
       h2("Wallet"),
-      if available.isEmpty then
-        p(em("No CIP-30 compatible wallet detected. Install Lace / Eternl / Nami / Yoroi."))
+      if available.isEmpty then p(em("No CIP-30 compatible wallet detected. Install Lace / Eternl / Nami / Yoroi."))
       else walletPicker(available, state, events),
       child <-- state.signal.map(stateView),
     )
@@ -134,8 +132,8 @@ object SubmitView:
     )
 
   private def stateView(s: TxState): HtmlElement = s match
-    case TxState.Idle             => div()
-    case TxState.Connecting(id)   =>
+    case TxState.Idle           => div()
+    case TxState.Connecting(id) =>
       p(cls := "status", s"Connecting to $id...")
     case TxState.Connected(id, _, networkId, _) =>
       p(cls := "status", s"Connected ($id) on ${networkLabel(networkId)}.")
@@ -168,29 +166,28 @@ object SubmitView:
     import scala.concurrent.ExecutionContext.Implicits.global
     val flow =
       for
-        api           <- stage("enable",           Cip30.enable(walletId))
-        networkId     <- stage("getNetworkId",     Cip30.getNetworkId(api))
+        api <- stage("enable", Cip30.enable(walletId))
+        networkId <- stage("getNetworkId", Cip30.getNetworkId(api))
         changeAddrHex <- stage("getChangeAddress", Cip30.getChangeAddress(api))
-        utxosHex      <- stage("getUtxos",         Cip30.getUtxos(api))
+        utxosHex <- stage("getUtxos", Cip30.getUtxos(api))
         _ = state.set(TxState.Connected(walletId, api, networkId, changeAddrHex))
         snap = MetadataTx.WalletSnapshot(
-          networkId          = networkId,
-          utxosCbor          = utxosHex.map(Cip30.hexToBytes),
+          networkId = networkId,
+          utxosCbor = utxosHex.map(Cip30.hexToBytes),
           changeAddressBytes = Cip30.hexToBytes(changeAddrHex),
         )
-        unsignedTx <- stageSync("buildPrismTx",
+        unsignedTx <- stageSync(
+          "buildPrismTx",
           MetadataTx.buildPrismTx(snap, events) match
             case Left(reason) => throw new RuntimeException(reason)
             case Right(tx)    => tx,
         )
         unsignedHex <- stageSync("encode unsignedTx", Cip30.bytesToHex(unsignedTx.toCbor))
-        _           = state.set(TxState.Submitting(walletId, api))
-        witnessHex  <- stage("signTx", Cip30.signTx(api, unsignedHex, partialSign = false))
-        signed      <- stageSync("attachWitnesses",
-          MetadataTx.attachWitnesses(unsignedTx, Cip30.hexToBytes(witnessHex)),
-        )
-        signedHex   <- stageSync("encode signedTx", Cip30.bytesToHex(signed.toCbor))
-        txHash      <- stage("submitTx", Cip30.submitTx(api, signedHex))
+        _ = state.set(TxState.Submitting(walletId, api))
+        witnessHex <- stage("signTx", Cip30.signTx(api, unsignedHex, partialSign = false))
+        signed <- stageSync("attachWitnesses", MetadataTx.attachWitnesses(unsignedTx, Cip30.hexToBytes(witnessHex)))
+        signedHex <- stageSync("encode signedTx", Cip30.bytesToHex(signed.toCbor))
+        txHash <- stage("submitTx", Cip30.submitTx(api, signedHex))
       yield (txHash, networkId)
 
     flow.onComplete {
