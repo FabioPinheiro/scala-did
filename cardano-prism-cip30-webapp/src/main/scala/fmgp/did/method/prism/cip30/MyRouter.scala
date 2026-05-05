@@ -34,9 +34,8 @@ object MyRouter:
     serializePage   = page => write(page),
     deserializePage = str  => read[Page](str),
     routeFallback   = _ => HomePage,
-  )(
-    popStateEvents = windowEvents(_.onPopState),
-    owner = unsafeWindowOwner,
+    popStateEvents  = windowEvents(_.onPopState),
+    owner           = unsafeWindowOwner,
   )
 
   def navigateTo(page: Page): Binder[HtmlElement] = Binder { el =>
