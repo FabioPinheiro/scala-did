@@ -102,6 +102,16 @@ val indexerDBConnectionAgr =
       "Indexer MongoDB connection to be used as a state storage. Ex: 'mongodb+srv://user:password@cluster0.bgnyyy1.mongodb.net/indexer'"
     )
 
+val exportFolderArg =
+  Args
+    .directory("output-folder", exists = Exists.Either)
+    .??("Folder to write one file per ref. Created if missing. Files are named '<ref-hex>'.")
+
+val fromScratchFlag =
+  Options
+    .boolean("from-scratch")
+    .??("Ignore any existing '.cursor' file and rebuild the folder from scratch (full overwrite).")
+
 private val keyUsageByName: Map[String, PrismKeyUsage] = Map(
   "Master" -> PrismKeyUsage.MasterKeyUsage,
   "Issuing" -> PrismKeyUsage.IssuingKeyUsage,

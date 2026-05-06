@@ -348,6 +348,29 @@ cardano-prism indexer mongodb \
   'mongodb+srv://user:password@cluster0.example.mongodb.net/indexer'
 ```
 
+### Export from MongoDB to per-`ref` files
+
+Dumps the events stored in a MongoDB-backed indexer into one file per `ref` on disk. The on-disk layout matches what the file system indexer produces (`<output-folder>/<ref-hex>`, one JSON-encoded event per line, sorted by `(b, o)`), so any tool already consuming `events/<ref>` files works unchanged.
+
+A `.cursor` file (JSON `{"b":N,"o":M}`) is written into the output folder after each successful run, recording the latest `(b, o)` exported. Subsequent runs read this cursor and only fetch events with `(b, o) > cursor`, appending them to the existing files. Use `--from-scratch` to ignore the cursor and rebuild every file.
+
+```bash
+# cardano-prism indexer export [--from-scratch] <mongodb-connection> <output-folder>
+
+# First run (or any run with no .cursor) — full rebuild
+# Subsequent runs — incremental, appends only new events since the last .cursor
+cardano-prism indexer export \
+  'mongodb+srv://readonly:readonly@cluster0.example.mongodb.net/indexer' \
+  ./prism-vdr/preprod/events
+
+# Force a full rebuild
+cardano-prism indexer export --from-scratch \
+  'mongodb+srv://readonly:readonly@cluster0.example.mongodb.net/indexer' \
+  ./prism-vdr/preprod/events
+```
+
+A read-only MongoDB connection string is sufficient.
+
 ---
 
 ## VDR — Verifiable Data Registry (`vdr`)

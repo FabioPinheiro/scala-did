@@ -6,6 +6,7 @@ import fmgp.did.DIDSubject
 import fmgp.did.method.prism.*
 import fmgp.did.method.prism.RefVDR
 import fmgp.did.method.prism.proto.*
+import fmgp.did.method.prism.cardano.EventCursor
 
 case class PrismStateFS() extends PrismStateRead {
 
@@ -26,5 +27,7 @@ case class PrismStateFS() extends PrismStateRead {
   ]] = ???
 
   override def getEventByHash(refHash: EventHash): ZIO[Any, Nothing, Option[MySignedPrismEvent[OP]]] = ???
+
+  override def getEventsAfter(from: EventCursor): ZIO[Any, Throwable, Seq[EventWithRootRef]] = ???
 
 }

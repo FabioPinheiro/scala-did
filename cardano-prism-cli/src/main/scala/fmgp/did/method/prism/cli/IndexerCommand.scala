@@ -16,6 +16,7 @@ object IndexerCommand {
       .subcommands(
         indexerInMemory,
         indexerMongoDB,
+        indexerExportMongoDB,
       )
 
   def indexerInMemory =
@@ -25,6 +26,11 @@ object IndexerCommand {
     Command("mongodb", blockfrostConfig, indexerDBConnectionAgr)
       .map { case (blockfrostConfig, mongoDBConnection) =>
         CMD.IndexerMongoDB(mongoDBConnection, blockfrostConfig)
+      }
+  def indexerExportMongoDB =
+    Command("export", fromScratchFlag, indexerDBConnectionAgr ++ exportFolderArg)
+      .map { case (fromScratch, (mongoDBConnection, exportDir)) =>
+        CMD.IndexerExportMongoDB(mongoDBConnection, exportDir, fromScratch)
       }
 
   def program(cmd: CMD.Indexer): ZIO[Any, Throwable, Unit] = cmd match {
@@ -47,6 +53,15 @@ object IndexerCommand {
         blockfrostConfigLayer = ZLayer.succeed(blockfrostConfig)
         eventCounter <- vdr.Indexer.indexerJobDB.provideLayer(prismStateZLayer ++ blockfrostConfigLayer)
         // _ <- ZIO.log(s"IndexerJobDB Update with $eventCounter")
+      } yield ()
+    case cmd @ CMD.IndexerExportMongoDB(mongoDBConnection, exportDir, fromScratch) =>
+      for {
+        _ <- ZIO.log(s"Export start: $mongoDBConnection -> $exportDir (fromScratch=$fromScratch)")
+        prismStateZLayer = AsyncDriverResource.layer >>> PrismStateMongoDB.makeReadOnlyLayer(mongoDBConnection)
+        count <- vdr.IndexerExport
+          .exportEventsToFiles(exportDir, fromScratch = fromScratch)
+          .provideLayer(prismStateZLayer)
+        _ <- ZIO.log(s"Export finished: $count events written")
       } yield ()
   }
 

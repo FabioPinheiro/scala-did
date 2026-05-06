@@ -139,6 +139,19 @@ trait PrismStateRead {
   /** Gets a specific event by its [[EventHash]]. */
   def getEventByHash(refHash: EventHash): ZIO[Any, Exception, Option[MySignedPrismEvent[OP]]]
 
+  /** Returns every event whose `(b, o)` is strictly greater than `from`, each carrying its `rootRef`, sorted ascending
+    * by `(b, o)`.
+    *
+    * Used for incremental tooling (e.g. exporters that resume from a `.cursor` file).
+    *
+    * The default implementation walks all SSI/VDR refs and fetches each matching event individually — backends with a
+    * native query (e.g. MongoDB) should override for efficiency.
+    *
+    * @param from
+    *   Lower-exclusive bound. Pass [[EventCursor.init]] to fetch everything.
+    */
+  def getEventsAfter(from: EventCursor): ZIO[Any, Throwable, Seq[EventWithRootRef]]
+
   /** Gets the current SSI state. */
   def getSSI(ssi: DIDSubject): ZIO[Any, Throwable, SSI] =
     getSSIHistory(ssi).map(_.latestVersion) // getEventsForSSI(ssi).map { events => SSI.make(ssi, events) }

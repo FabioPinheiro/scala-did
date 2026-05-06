@@ -9,6 +9,7 @@ import fmgp.did.DIDSubject
 import fmgp.did.method.prism.SSI
 import fmgp.did.method.prism.RefVDR
 import fmgp.did.method.prism.proto.*
+import fmgp.did.method.prism.cardano.EventCursor
 
 object PrismStateInMemoryData {
   def empty = PrismStateInMemoryData(Map.empty, Map.empty, Map.empty, Map.empty)
@@ -140,6 +141,28 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
       case None              => None
       case Some(signedEvent) => Some(signedEvent)
   }
+
+  override def getEventsAfter(from: EventCursor): ZIO[Any, Throwable, Seq[EventWithRootRef]] =
+    for {
+      ssiMap <- ssi2eventsRef
+      vdrMap <- vdr2eventsRef
+      ssiPairs = ssiMap.toSeq.flatMap { case (did, refs) =>
+        val rootRef = EventHash.fromPRISM(DIDPrism(did.specificId))
+        refs.map(ref => (rootRef, ref))
+      }
+      vdrPairs = vdrMap.toSeq.flatMap { case (refVDR, refs) =>
+        refs.map(ref => (refVDR.eventHash, ref))
+      }
+      candidates = (ssiPairs ++ vdrPairs)
+        .filter { case (_, ref) => ref.b > from.b || (ref.b == from.b && ref.o > from.o) }
+        .sortBy { case (_, ref) => (ref.b, ref.o) }
+      events <- ZIO.foreach(candidates) { case (rootRef, ref) =>
+        getEventByHash(ref.eventHash).flatMap {
+          case None        => ZIO.fail(new RuntimeException(s"impossible state: missing Event hash '${ref.eventHash}'"))
+          case Some(event) => ZIO.succeed(EventWithRootRef(rootRef, event))
+        }
+      }
+    } yield events
 
   /** We add/index events with out validating them.
     *

@@ -16,6 +16,11 @@ object CMD {
   sealed trait Indexer extends CMD
   final case class IndexerInMemory(workdir: Path, mBlockfrostConfig: Option[BlockfrostConfig]) extends CMD.Indexer
   final case class IndexerMongoDB(utlMongoConnection: String, blockfrostConfig: BlockfrostConfig) extends CMD.Indexer
+  final case class IndexerExportMongoDB(
+      utlMongoConnection: String,
+      exportDir: Path,
+      fromScratch: Boolean,
+  ) extends CMD.Indexer
 
   final case class Version() extends CMD
   final case class PWD() extends CMD

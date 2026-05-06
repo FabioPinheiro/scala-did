@@ -2,6 +2,7 @@ package fmgp.did.method.prism.mongo
 
 import fmgp.did.DIDSubject
 import fmgp.did.method.prism.EventHash
+import fmgp.did.method.prism.EventWithRootRef
 import fmgp.did.method.prism.cardano.EventCursor
 import fmgp.did.method.prism.proto.MySignedPrismEvent
 import fmgp.did.method.prism.proto.OP

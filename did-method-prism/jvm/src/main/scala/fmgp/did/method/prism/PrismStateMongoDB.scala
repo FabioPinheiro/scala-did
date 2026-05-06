@@ -168,6 +168,25 @@ private[prism] trait PrismStateReadMongoDBTrait extends PrismStateRead {
       ret <- findEventByHash(refHash)
     } yield ret.map(_.event)
 
+  override def getEventsAfter(from: cardano.EventCursor): ZIO[Any, Throwable, Seq[EventWithRootRef]] =
+    for {
+      coll <- collection.mapError(ex => StorageException(ex))
+      // (b > cb) OR (b == cb AND o > co)
+      selector = BSONDocument(
+        "$or" -> BSONArray(
+          BSONDocument("b" -> BSONDocument("$gt" -> from.b)),
+          BSONDocument("b" -> from.b, "o" -> BSONDocument("$gt" -> from.o)),
+        )
+      )
+      cursor = coll
+        .find(selector = selector)
+        .sort(BSONDocument("b" -> 1, "o" -> 1))
+        .cursor[EventWithRootRef]()
+      allEvents <- ZIO
+        .fromFuture(implicit ec => cursor.collect(maxDocs = -1))
+        .mapError(ex => StorageException(StorageThrowable(ex)))
+    } yield allEvents.toSeq
+
   // ## DB methods ##
 
   /** Finds event by hash in main collection. */
