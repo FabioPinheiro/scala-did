@@ -147,6 +147,7 @@
     <li class="level1 nav-node"><a href="#indexer-indexer">Indexer (<code>indexer</code>)</a></li>
     <li class="level2 nav-leaf"><a href="#file-system-mode-in-memory-indexer">File system mode (in-memory indexer)</a></li>
     <li class="level2 nav-leaf"><a href="#mongodb-mode-database-mode">MongoDB mode (database mode)</a></li>
+    <li class="level2 nav-leaf"><a href="#export-from-mongodb-to-per-ref-files">Export from MongoDB to per-<code>ref</code> files</a></li>
     <li class="level1 nav-node"><a href="#vdr-verifiable-data-registry-vdr">VDR — Verifiable Data Registry (<code>vdr</code>)</a></li>
     <li class="level2 nav-leaf"><a href="#create-a-bytes-entry">Create a bytes entry</a></li>
     <li class="level2 nav-leaf"><a href="#create-an-ipfs-entry">Create an IPFS entry</a></li>
@@ -427,6 +428,23 @@ cardano-prism website open --port </span><span class="number-literal">9090</span
 </span><span>cardano-prism indexer mongodb \
   --token preprod&lt;YOUR_API_TOKEN&gt; \
   </span><span class="string-literal">&#39;mongodb+srv://user:password@cluster0.example.mongodb.net/indexer&#39;</span></code></pre>
+        
+        <h3 id="export-from-mongodb-to-per-ref-files" class="section"><a class="anchor-link left" href="#export-from-mongodb-to-per-ref-files"><i class="icofont-laika link">&#xef71;</i></a>Export from MongoDB to per-<code>ref</code> files</h3>
+        <p>Dumps the events stored in a MongoDB-backed indexer into one file per <code>ref</code> on disk. The on-disk layout matches what the file system indexer produces (<code>&lt;output-folder&gt;/&lt;ref-hex&gt;</code>, one JSON-encoded event per line, sorted by <code>(b, o)</code>), so any tool already consuming <code>events/&lt;ref&gt;</code> files works unchanged.</p>
+        <p>A <code>.cursor</code> file (JSON <code>{&quot;b&quot;:N,&quot;o&quot;:M}</code>) is written into the output folder after each successful run, recording the latest <code>(b, o)</code> exported. Subsequent runs read this cursor and only fetch events with <code>(b, o) &gt; cursor</code>, appending them to the existing files. Use <code>--from-scratch</code> to ignore the cursor and rebuild every file.</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment"># cardano-prism indexer export [--from-scratch] &lt;mongodb-connection&gt; &lt;output-folder&gt;
+</span><span>
+</span><span class="comment"># First run (or any run with no .cursor) — full rebuild
+# Subsequent runs — incremental, appends only new events since the last .cursor
+</span><span>cardano-prism indexer </span><span class="identifier">export</span><span> \
+  </span><span class="string-literal">&#39;mongodb+srv://readonly:readonly@cluster0.example.mongodb.net/indexer&#39;</span><span> \
+  ./prism-vdr/preprod/events
+
+</span><span class="comment"># Force a full rebuild
+</span><span>cardano-prism indexer </span><span class="identifier">export</span><span> --from-scratch \
+  </span><span class="string-literal">&#39;mongodb+srv://readonly:readonly@cluster0.example.mongodb.net/indexer&#39;</span><span> \
+  ./prism-vdr/preprod/events</span></code></pre>
+        <p>A read-only MongoDB connection string is sufficient.</p>
         <hr>
         
         <h2 id="vdr-verifiable-data-registry-vdr" class="section"><a class="anchor-link left" href="#vdr-verifiable-data-registry-vdr"><i class="icofont-laika link">&#xef71;</i></a>VDR — Verifiable Data Registry (<code>vdr</code>)</h2>
