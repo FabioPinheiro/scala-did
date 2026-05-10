@@ -102,21 +102,23 @@ class TransportDIDCommOverHTTPSuite extends ZSuite {
       }
     )
 
-    ZIO.scoped {
-      for {
-        server <- Server.serve(echoRoutes).fork
-        port <- ZIO.serviceWithZIO[Server](_.port)
-        client <- ZIO.service[Client]
-        scope <- ZIO.service[Scope]
-        destination = s"http://localhost:$port"
-        transport <- TransportDIDCommOverHTTP
-          .makeWithEnvironment(destination, env = ZEnvironment(client, scope))
+    ZIO
+      .scoped {
+        for {
+          server <- Server.serve(echoRoutes).fork
+          port <- ZIO.serviceWithZIO[Server](_.port)
+          client <- ZIO.service[Client]
+          scope <- ZIO.service[Scope]
+          destination = s"http://localhost:$port"
+          transport <- TransportDIDCommOverHTTP
+            .makeWithEnvironment(destination, env = ZEnvironment(client, scope))
 
-        // Send should not fail — the server accepts the POST
-        _ <- transport.send(signedMessage)
-        _ <- server.interrupt
-      } yield ()
-    }.provide(Server.defaultWithPort(0), Client.default)
+          // Send should not fail — the server accepts the POST
+          _ <- transport.send(signedMessage)
+          _ <- server.interrupt
+        } yield ()
+      }
+      .provide(Server.defaultWithPort(0), Client.default)
   }
 
   // Issue #596: HTTP response containing a DIDComm message should be published to inbound
@@ -132,31 +134,33 @@ class TransportDIDCommOverHTTPSuite extends ZSuite {
       }
     )
 
-    ZIO.scoped {
-      for {
-        server <- Server.serve(echoRoutes).fork
-        port <- ZIO.serviceWithZIO[Server](_.port)
-        client <- ZIO.service[Client]
-        scope <- ZIO.service[Scope]
-        destination = s"http://localhost:$port"
-        transport <- TransportDIDCommOverHTTP
-          .makeWithEnvironment(destination, env = ZEnvironment(client, scope))
+    ZIO
+      .scoped {
+        for {
+          server <- Server.serve(echoRoutes).fork
+          port <- ZIO.serviceWithZIO[Server](_.port)
+          client <- ZIO.service[Client]
+          scope <- ZIO.service[Scope]
+          destination = s"http://localhost:$port"
+          transport <- TransportDIDCommOverHTTP
+            .makeWithEnvironment(destination, env = ZEnvironment(client, scope))
 
-        // Subscribe BEFORE sending (Hub requires subscriber before publish)
-        inboundFiber <- transport.inbound.take(1).runHead.timeout(5.seconds).fork
-        _ <- ZIO.sleep(50.millis)
+          // Subscribe BEFORE sending (Hub requires subscriber before publish)
+          inboundFiber <- transport.inbound.take(1).runHead.timeout(5.seconds).fork
+          _ <- ZIO.sleep(50.millis)
 
-        // Send — the server responds with a SignedMessage JSON body
-        _ <- transport.send(signedMessage)
+          // Send — the server responds with a SignedMessage JSON body
+          _ <- transport.send(signedMessage)
 
-        // The response should be parsed and published to inbound
-        result <- inboundFiber.join
-        _ <- server.interrupt
-      } yield assert(
-        result.flatten.isDefined,
-        "HTTP response containing a DIDComm message should be published to inbound"
-      )
-    }.provide(Server.defaultWithPort(0), Client.default)
+          // The response should be parsed and published to inbound
+          result <- inboundFiber.join
+          _ <- server.interrupt
+        } yield assert(
+          result.flatten.isDefined,
+          "HTTP response containing a DIDComm message should be published to inbound"
+        )
+      }
+      .provide(Server.defaultWithPort(0), Client.default)
   }
 
 }
