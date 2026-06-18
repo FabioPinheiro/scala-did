@@ -174,7 +174,7 @@ lazy val V = new {
   val waypoint = "9.0.0"
   val upickle = "4.4.3"
 
-  val identusApollo = "1.8.1-kt2.1.20" // "1.7.1"
+  val identusApollo = "1.8.8" // "1.7.1"
   val scalus = "0.16.0"
 }
 
@@ -705,7 +705,7 @@ lazy val didPrismNode = project
       rootPaths.value.apply("BASE").toFile() / "did-method-prism-node" / "src/main/protobuf"
     ),
     libraryDependencies ++= Seq(
-      "io.grpc" % "grpc-netty" % "1.81.0", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
+      "io.grpc" % "grpc-netty" % "1.82.0", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
       "io.netty" % "netty-handler" % "4.2.15.Final", // This is to forces a update in from "io.grpc" % "grpc-netty" % "1.73.0" -> https://mvnrepository.com/artifact/io.netty/netty-handler/4.1.110.Final
       // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion,
       // REMOVE // The following needed only if you include scalapb/scalapb.proto:
