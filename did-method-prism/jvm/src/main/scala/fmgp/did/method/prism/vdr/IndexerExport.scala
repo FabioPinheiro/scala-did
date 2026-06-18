@@ -25,8 +25,8 @@ object IndexerExport {
     *
     * Behavior:
     *   - If `fromScratch=true` OR `<exportDir>/.cursor` is missing: rebuild every file with `TRUNCATE_EXISTING`.
-    *   - Otherwise: read the cursor and only fetch events with `(b, o) > cursor` (via [[PrismStateRead.getEventsAfter]]),
-    *     appending each new event to its `<rootRef-hex>` file (sorted by `(b, o)`).
+    *   - Otherwise: read the cursor and only fetch events with `(b, o) > cursor` (via
+    *     [[PrismStateRead.getEventsAfter]]), appending each new event to its `<rootRef-hex>` file (sorted by `(b, o)`).
     *
     * The latest `(b, o)` seen is written back to `<exportDir>/.cursor` after a successful run.
     *

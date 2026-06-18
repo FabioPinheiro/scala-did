@@ -21,17 +21,19 @@ object CursorFile {
 
   /** Reads the cursor file. Returns `None` if it does not exist. Fails if it exists but is unreadable or malformed. */
   def read(dir: Path): ZIO[Any, Throwable, Option[EventCursor]] =
-    ZIO.attemptBlockingIO {
-      val p = path(dir)
-      if (Files.exists(p)) Some(Files.readString(p)) else None
-    }.flatMap {
-      case None => ZIO.none
-      case Some(content) =>
-        content.trim.fromJson[EventCursor] match
-          case Right(c)    => ZIO.some(c)
-          case Left(error) =>
-            ZIO.fail(new RuntimeException(s"Failed to parse '${path(dir)}': $error (content='$content')"))
-    }
+    ZIO
+      .attemptBlockingIO {
+        val p = path(dir)
+        if (Files.exists(p)) Some(Files.readString(p)) else None
+      }
+      .flatMap {
+        case None          => ZIO.none
+        case Some(content) =>
+          content.trim.fromJson[EventCursor] match
+            case Right(c)    => ZIO.some(c)
+            case Left(error) =>
+              ZIO.fail(new RuntimeException(s"Failed to parse '${path(dir)}': $error (content='$content')"))
+      }
 
   /** Writes the cursor file (full overwrite). Creates the parent directory if missing. */
   def write(dir: Path, cursor: EventCursor): ZIO[Any, Throwable, Unit] =
