@@ -19,6 +19,7 @@ This repository is a highly modular, polyglot project focused on Decentralized I
 | `sbt testJVM` | Runs all JVM unit/integration tests. | Includes `didCommProtocolsJVM/test`, etc. |
 | `sbt testJS` | Runs all JavaScript/Scala.js tests. | |
 | `sbt testAll` | Runs all tests across both JVM and JS platforms. | |
+| `sbt testAllNoDB` | Runs all no DB related tests across both JVM and JS platforms. | |
 | `sbt docAll` | Generates API documentation using Mdoc. | |
 | `sbt siteAll` | Generates the documentation website using Laika. | |
 | `sbt assemblyAll` | Builds documentation AND the frontend website. | A composite command. |

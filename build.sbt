@@ -360,20 +360,43 @@ lazy val buildInfoConfigure: Project => Project = _.enablePlugins(BuildInfoPlugi
     ),
   )
 
-addCommandAlias(
-  "testJVM",
-  ";didJVM/test; didCommProtocolsJVM/test; didFrameworkJVM/test; didImpJVM/test; " +
-    "didResolverPeerJVM/test; didResolverPrismJVM/test; didResolverWebJVM/test; didUniresolverJVM/test; " +
-    "multiformatsJVM/test; " +
-    "didPrismNode/test; cardanoPrismCli/test; "
+lazy val testJVMProjects = Seq(
+  "didJVM",
+  "didCommProtocolsJVM",
+  "didFrameworkJVM",
+  "didImpJVM",
+  "didResolverPeerJVM",
+  "didResolverPrismJVM",
+  "didResolverWebJVM",
+  "didUniresolverJVM",
+  "multiformatsJVM",
+  "didPrismNode",
+  "cardanoPrismCli",
 )
-addCommandAlias(
-  "testJS",
-  ";didJS/test;  didCommProtocolsJS/test;  didFrameworkJS/test;  didImpJS/test;  " +
-    "didResolverPeerJS/test;  didResolverPrismJS/test;  didResolverWebJS/test;  didUniresolverJS/test;  " +
-    "multiformatsJS/test; "
+
+lazy val testJSProjects = Seq(
+  "didJS",
+  "didCommProtocolsJS",
+  "didFrameworkJS",
+  "didImpJS",
+  "didResolverPeerJS",
+  "didResolverPrismJS",
+  "didResolverWebJS",
+  "didUniresolverJS",
+  "multiformatsJS",
 )
+
+def testAlias(projects: Seq[String], task: String, args: String = ""): String =
+  projects.map(project => s"$project/$task$args").mkString(";", "; ", "; ")
+
+val noDBTestArgs = " * -- --exclude-tags=DBTest"
+
+addCommandAlias("testJVM", testAlias(testJVMProjects, "test"))
+addCommandAlias("testJS", testAlias(testJSProjects, "test"))
 addCommandAlias("testAll", ";testJVM;testJS")
+addCommandAlias("testJVMNoDB", testAlias(testJVMProjects, "testOnly", noDBTestArgs))
+addCommandAlias("testJSNoDB", testAlias(testJSProjects, "testOnly", noDBTestArgs))
+addCommandAlias("testAllNoDB", ";testJVMNoDB;testJSNoDB")
 addCommandAlias("docAll", "doc;docs/unidoc")
 addCommandAlias("siteAll", "docs/mdoc;docs/laikaSite")
 addCommandAlias("assemblyAll", "docAll;siteAll;installFrontend;fullPackAll;buildFrontend;demoJVM/assembly")
