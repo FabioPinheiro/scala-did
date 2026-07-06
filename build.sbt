@@ -855,6 +855,11 @@ lazy val cardanoPrismCip30Webapp = project
     libraryDependencies += D.scalusCardanoLedger.value,
   )
   .settings(
+    // This browser-only bundle project has no test sources. Avoid starting the
+    // Scala.js test bridge under Node.js during aggregated CI test runs.
+    Test / test := {},
+  )
+  .settings(
     cip30Bundle := {
       val log = streams.value.log
       // Use fullLinkJS (production-optimized) so the published bundle is small.
