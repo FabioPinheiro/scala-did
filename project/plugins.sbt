@@ -50,7 +50,7 @@ libraryDependencies ++= {
   if (baseDirectory.value / "../.git" isDirectory) {
     // addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.11.2")
     // See https://stackoverflow.com/questions/35699543/how-to-load-dynamically-a-sbt-plugin
-    val dependency = "com.github.sbt" % "sbt-ci-release" % "1.11.2"
+    val dependency = "com.github.sbt" % "sbt-ci-release" % "1.12.0"
     val sbtV = (update / sbtBinaryVersion).value // (pluginCrossBuild / sbtBinaryVersion).value
     val scalaV = (update / scalaBinaryVersion).value
     Seq(Defaults.sbtPluginExtra(dependency, sbtV, scalaV))
