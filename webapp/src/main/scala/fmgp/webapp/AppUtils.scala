@@ -14,17 +14,21 @@ object AppUtils { // TODO RENAME TO UIUtils
 
   def onEnterPress = onKeyPress.filter(_.keyCode == dom.KeyCode.Enter)
 
-  val menuClickObserver = Observer[dom.MouseEvent](onNext = ev => {
-    import typings.materialDrawer.mod.MDCDrawer
-    val tmp = MDCDrawer.attachTo(dom.window.document.querySelector(".mdc-drawer"))
-    tmp.open_=(!tmp.open)
-  })
+  val menuClickObserver = Observer[dom.MouseEvent](onNext =
+    ev => {
+      import typings.materialDrawer.mod.MDCDrawer
+      val tmp = MDCDrawer.attachTo(dom.window.document.querySelector(".mdc-drawer"))
+      tmp.open_=(!tmp.open)
+    }
+  )
 
-  val optionsClickObserver = Observer[dom.MouseEvent](onNext = ev => {
-    import typings.materialMenu.mod.MDCMenu
-    val tmp = MDCMenu.attachTo(dom.window.document.querySelector(".mdc-menu"))
-    tmp.open_=(!tmp.open)
-  })
+  val optionsClickObserver = Observer[dom.MouseEvent](onNext =
+    ev => {
+      import typings.materialMenu.mod.MDCMenu
+      val tmp = MDCMenu.attachTo(dom.window.document.querySelector(".mdc-menu"))
+      tmp.open_=(!tmp.open)
+    }
+  )
 
   def topBarHeader(title: Signal[String]) = { // (title: String) = {
     val menuButton = button(
