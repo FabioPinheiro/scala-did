@@ -26,12 +26,12 @@ produces a jar that contains `cip30/bundle.js` ready to serve.
 ```sh
 sbt cardanoPrismCip30Webapp/fullLinkJS
 npm install
-CIP30_SCALAJS_DIR=target/scala-3.3.7/cardano-prism-cip30-webapp-opt npm run build
+CIP30_SCALAJS_DIR=target/scala-3.3.8/cardano-prism-cip30-webapp-opt npm run build
 ```
 
 Output: `dist/bundle.js` (+ `dist/bundle.js.map`).
 
-If `CIP30_SCALAJS_DIR` is unset, `build.js` falls back to `target/scala-3.3.7/cardano-prism-cip30-webapp-opt/` — adjust if the Scala version in `build.sbt` changes.
+If `CIP30_SCALAJS_DIR` is unset, `build.js` falls back to `target/scala-3.3.8/cardano-prism-cip30-webapp-opt/` — adjust if the Scala version in `build.sbt` changes.
 
 ## Inspect the jar
 
@@ -42,18 +42,18 @@ Two ways to package the CLI:
 # Library jar — only this project's classes/resources, needs deps on the
 # classpath at runtime. Useful for publishing to a Maven repo.
 sbt cardanoPrismCli/Compile/packageBin
-# -> cardano-prism-cli/target/scala-3.3.7/cardano-prism-cli_3-0.1.0-SNAPSHOT.jar
+# -> cardano-prism-cli/target/scala-3.3.8/cardano-prism-cli_3-0.1.0-SNAPSHOT.jar
 
 # Fat jar — all dependencies merged into one runnable jar. Optional; only needed if you want a single-file distribution.
 sbt cardanoPrismCli/assembly
-# Run: java -jar cardano-prism-cli/target/scala-3.3.7/cardano-prism.jar cardano submit-cip30 0a066d617374657212473045022100b32b3dfc1fb47dc102038c1cbc1571b955f0ee7bab27e8b9626f8da62c50a4d6022050dfa98afdfe7503dbe58ed9ae20addb6d52a182521cd67e9d4bb6b79629b0f41a400a3e0a3c123a0a066d617374657210014a2e0a09736563703235366b31122103ebe0934672da51ca01da94d278376a204e0e73a8d235c290bc2d5f1a629f8aec
+# Run: java -jar cardano-prism-cli/target/scala-3.3.8/cardano-prism.jar cardano submit-cip30 0a066d617374657212473045022100b32b3dfc1fb47dc102038c1cbc1571b955f0ee7bab27e8b9626f8da62c50a4d6022050dfa98afdfe7503dbe58ed9ae20addb6d52a182521cd67e9d4bb6b79629b0f41a400a3e0a3c123a0a066d617374657210014a2e0a09736563703235366b31122103ebe0934672da51ca01da94d278376a204e0e73a8d235c290bc2d5f1a629f8aec
 ```
 
 To list the contents of either jar (sanity-check that `cip30/bundle.js` is
 actually packaged):
 
 ```sh
-jar tf cardano-prism-cli/target/scala-3.3.7/cardano-prism-cli_3-0.1.0-SNAPSHOT.jar | grep cip30
+jar tf cardano-prism-cli/target/scala-3.3.8/cardano-prism-cli_3-0.1.0-SNAPSHOT.jar | grep cip30
 # cip30/bundle.js
 # cip30/bundle.js.map
 ```

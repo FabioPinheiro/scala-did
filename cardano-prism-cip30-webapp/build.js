@@ -10,7 +10,7 @@ const here = dirname(fileURLToPath(import.meta.url))
 // outside sbt, fall back to the conventional path for the current Scala
 // version pinned in build.sbt — adjust if you bump the Scala version.
 const scalajsDir = process.env.CIP30_SCALAJS_DIR
-  ?? resolve(here, 'target/scala-3.3.7/cardano-prism-cip30-webapp-opt')
+  ?? resolve(here, 'target/scala-3.3.8/cardano-prism-cip30-webapp-opt')
 
 // Generate a tiny entry that imports from the env-supplied path; esbuild
 // inlines it during the bundle pass. This keeps the path resolution purely

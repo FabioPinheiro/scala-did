@@ -26,7 +26,7 @@ object ConfigCommand {
         case Some(path) => path.toFile()
       if (sourcePath.exists()) {
         val source = scala.io.Source.fromFile(sourcePath)
-        val data = source.getLines.reduceLeft(_ + _)
+        val data = source.getLines().reduceLeft(_ + _)
         data.fromJson[StagingState]
       } else Left(s"Staging file '${sourcePath.toString}' does not exist")
     }
