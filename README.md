@@ -118,8 +118,6 @@ flowchart BT
     did-imp --> did
   end
 
-  prism-node:::JVM -----> did-method-prism
-
   did-example ----> did
   did-example --> did-imp
   demo --> did-imp

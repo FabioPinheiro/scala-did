@@ -127,7 +127,6 @@ lazy val docs = project
         didResolverPeer.jvm,
         didResolverPrism.jvm,
         cardanoPrismCli,
-        didPrismNode,
         didResolverWeb.jvm,
         didUniresolver.jvm,
       ), // or inAnyProject -- inProjects(...)
@@ -370,7 +369,6 @@ lazy val testJVMProjects = Seq(
   "didResolverWebJVM",
   "didUniresolverJVM",
   "multiformatsJVM",
-  "didPrismNode",
   "cardanoPrismCli",
 )
 
@@ -436,7 +434,6 @@ lazy val root = project
   .aggregate(didResolverPrism.js, didResolverPrism.jvm) // publish
   .aggregate(cardanoPrismCli) // NOT publish (yet)
   .aggregate(cardanoPrismCip30Webapp) // NOT publish
-  .aggregate(didPrismNode) // NOT publish
   .aggregate(didResolverWeb.js, didResolverWeb.jvm) // publish
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
   .aggregate(docs) // just to aggregate the command clean
@@ -710,36 +707,6 @@ lazy val cardanoPrismCli = project
     }.taskValue,
   )
   .dependsOn(did.jvm, didResolverPrism.jvm, didResolverPeer.jvm, didUniresolver.jvm)
-
-lazy val didPrismNode = project
-  .in(file("did-method-prism-node"))
-  .settings(publish / skip := true)
-  .settings((setupTestConfig): _*)
-  .settings(
-    name := "prism-node",
-    libraryDependencies += "dev.zio" %% "zio-logging-slf4j2-bridge" % "2.5.3",
-  )
-  .settings(
-    Compile / PB.targets := Seq(
-      scalapb.gen(grpc = true) -> (Compile / sourceManaged).value / "scalapb",
-      scalapb.zio_grpc.ZioCodeGenerator -> (Compile / sourceManaged).value / "scalapb",
-    ),
-    Compile / PB.protoSources := Seq(
-      rootPaths.value.apply("BASE").toFile() / "did-method-prism-node" / "src/main/protobuf"
-    ),
-    libraryDependencies ++= Seq(
-      "io.grpc" % "grpc-netty" % "1.82.2", // https://mvnrepository.com/artifact/io.grpc/grpc-netty
-      "io.netty" % "netty-handler" % "4.2.16.Final", // This is to forces a update in from "io.grpc" % "grpc-netty" % "1.73.0" -> https://mvnrepository.com/artifact/io.netty/netty-handler/4.1.110.Final
-      // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion,
-      // REMOVE // The following needed only if you include scalapb/scalapb.proto:
-      // REMOVE // "com.thesamet.scalapb" %%% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
-      "com.thesamet.scalapb" %%% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
-    ),
-    assembly / mainClass := Some("fmgp.prism.Node"), // TODO Move to a new repo
-    assembly / assemblyJarName := "prism-node.jar", // TODO Move to a new repo
-    run / fork := false
-  )
-  .dependsOn(didResolverPrism.jvm)
 
 //https://w3c-ccg.github.io/did-method-web/
 lazy val didResolverWeb = crossProject(JSPlatform, JVMPlatform)
