@@ -175,7 +175,7 @@ lazy val V = new {
   val upickle = "4.4.3"
 
   val identusApollo = "1.8.8" // "1.7.1"
-  val scalus = "0.16.0"
+  val scalus = "1.1.0"
 }
 
 /** NPM Dependencies */
@@ -619,7 +619,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.scalusTest.value,
   )
   .jvmSettings( // scalus
-    libraryDependencies += compilerPlugin(D.scalusPlugin.value),
+    libraryDependencies += compilerPlugin(D.scalusPlugin.value cross CrossVersion.full),
     libraryDependencies += D.scalusBloxbean.value,
   )
   .jvmSettings(libraryDependencies += D.zioHttp.value)
