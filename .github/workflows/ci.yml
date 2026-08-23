@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # https://github.com/japgolly/setup-everything-scala
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # Needed for the release tag // `git fetch --tags` will also work
       - name: Setup Java and Scala
@@ -35,9 +35,9 @@ jobs:
         with:
           java-version: openjdk@1.17.0 # adopt@1.11 # zulu@1.17.0-0 # openjdk@1.17.0
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
-          node-version: "22" # or whatever
+          node-version: "24" # or whatever
       - name: Setup Scala.JS
         uses: japgolly/setup-scalajs@v1
       - name: Cache sbt
@@ -72,7 +72,7 @@ jobs:
     if: (inputs.force_deploy_ghpages == true) || (github.ref == 'refs/heads/master') || startsWith(github.ref, 'refs/tags/v')
     steps:
       # https://github.com/japgolly/setup-everything-scala
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # Needed for the release tag // `git fetch --tags` will also work
       - name: Setup Java and Scala
@@ -80,9 +80,9 @@ jobs:
         with:
           java-version: openjdk@1.17.0
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
-          node-version: "22" # or whatever
+          node-version: "24" # or whatever
       - name: Setup Scala.JS
         uses: japgolly/setup-scalajs@v1
       - name: Cache sbt
@@ -113,7 +113,7 @@ jobs:
     if: ((inputs.make_snapshot_release == true) && (github.ref_name == 'master') || startsWith(github.ref, 'refs/tags/v'))
     steps:
       # https://github.com/japgolly/setup-everything-scala
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # Needed for the release tag // `git fetch --tags` will also work
       - name: Setup Java and Scala
@@ -121,9 +121,9 @@ jobs:
         with:
           java-version: openjdk@1.17.0
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
-          node-version: "22" # or whatever
+          node-version: "24" # or whatever
       - name: Setup Scala.JS
         uses: japgolly/setup-scalajs@v1
       - name: Cache sbt
