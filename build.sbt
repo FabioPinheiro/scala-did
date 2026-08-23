@@ -157,7 +157,7 @@ lazy val V = new {
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time
   val scalaJavaTime = "2.5.0"
 
-  val bullet = "1.16.2"
+  val bullet = "1.17.0"
 
   val reactivemongo = "1.1.0-RC19"
 
@@ -524,7 +524,7 @@ lazy val didImp = crossProject(JSPlatform, JVMPlatform)
     // BUT have vulnerabilities in the dependencies: CVE-2023-2976
     libraryDependencies += "com.google.crypto.tink" % "tink" % "1.23.0", // https://mvnrepository.com/artifact/com.google.crypto.tink/tink/1.10.0
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
-    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.35.1",
+    libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.36.0",
   )
   .jsConfigure(scalaJSLibConfigure)
   .jsSettings(
@@ -590,7 +590,7 @@ lazy val didResolverPeer = crossProject(JSPlatform, JVMPlatform)
     resolvers += "jitpack" at "https://jitpack.io", // For java-multibase
     libraryDependencies += "com.github.multiformats" % "java-multibase" % "1.3.0" % Test, // FIX CVE-2020-15250 in peerdid
     libraryDependencies += "org.bouncycastle" % "bcprov-jdk18on" % "1.85.2" % Test,
-    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.84" % Test,
+    libraryDependencies += "org.bouncycastle" % "bcpkix-jdk18on" % "1.85" % Test,
     libraryDependencies += D.nimbusJoseJwt.value % Test,
     // libraryDependencies += "com.nimbusds" % "nimbus-jose-jwt" % "9.16-preview.1" % Test,
   )
@@ -629,8 +629,8 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     // To fix vulnerabilitie https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-2976
     libraryDependencies += "com.google.protobuf" % "protobuf-java" % "4.29.6",
     // https://oss.sonatype.org/#nexus-search;quick~com.bloxbean.cardano
-    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.8.0-pre4",
-    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.8.0-pre4",
+    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-lib" % "0.8.0-pre5",
+    libraryDependencies += "com.bloxbean.cardano" % "cardano-client-backend-blockfrost" % "0.8.0-pre5",
     libraryDependencies += D.reactivemongoProvided.value,
   )
   .settings(

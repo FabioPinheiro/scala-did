@@ -50,7 +50,7 @@ libraryDependencies ++= {
   if (baseDirectory.value / "../.git" isDirectory) {
     // addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.11.2")
     // See https://stackoverflow.com/questions/35699543/how-to-load-dynamically-a-sbt-plugin
-    val dependency = "com.github.sbt" % "sbt-ci-release" % "1.12.0"
+    val dependency = "com.github.sbt" % "sbt-ci-release" % "1.12.1"
     val sbtV = (update / sbtBinaryVersion).value // (pluginCrossBuild / sbtBinaryVersion).value
     val scalaV = (update / scalaBinaryVersion).value
     Seq(Defaults.sbtPluginExtra(dependency, sbtV, scalaV))
@@ -78,7 +78,7 @@ addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.6.1") // https://github.com/sb
 // addSbtPlugin("org.typelevel" % "sbt-typelevel-site" % "0.6.2") // https://typelevel.org/sbt-typelevel/site.html
 
 // Deploy demo - https://github.com/sbt/sbt-assembly/tags
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.3.1")
+addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.4.2")
 addSbtPlugin("com.github.sbt" % "sbt-gzip" % "2.0.0")
 
 // To debug what the job sends to https://github.com/FabioPinheiro/scala-did/security/dependabot
