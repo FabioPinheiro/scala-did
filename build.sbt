@@ -147,12 +147,12 @@ lazy val V = new {
 
   // https://mvnrepository.com/artifact/dev.zio/zio
   val zio = "2.1.26"
-  val zioJson = "0.9.2"
+  val zioJson = "0.10.0"
   // val zioSchema = "1.8.2"
   val zioMunitTest = "0.4.0"
-  val zioHttp = "3.11.3" // With fix CORS https://github.com/zio/zio-http/pull/2490
+  val zioHttp = "3.11.4" // With fix CORS https://github.com/zio/zio-http/pull/2490
   val zioPrelude = "1.0.0-RC21"
-  val zioCLI = "0.8.1"
+  val zioCLI = "0.8.2"
 
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time
   val scalaJavaTime = "2.5.0"
