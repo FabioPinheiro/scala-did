@@ -12,7 +12,7 @@ import fmgp.crypto.error.*
 import fmgp.did.*
 import fmgp.did.comm.*
 import fmgp.did.agent.MessageStorage
-import fmgp.did.method.web.DIDWebResolver
+//FIXME import fmgp.did.method.web.DIDWebResolver
 import fmgp.did.method.peer.DidPeerResolver
 import fmgp.did.method.prism.{HttpUtils, DIDPrismResolver}
 import fmgp.did.method.hardcode.HardcodeResolver
@@ -44,7 +44,7 @@ object Global {
       HardcodeResolver.default,
       DidPeerResolver.default,
       didPrismResolver,
-      DIDWebResolver.default,
+      // The published baseline does not provide did-method-web; Uniresolver handles did:web resolution.
       uniresolver,
     )
   } yield multiResolver

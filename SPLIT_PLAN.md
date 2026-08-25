@@ -51,10 +51,10 @@ Move:
 - `did-example`
 - `serviceworker`
 - `webapp`
-- `demo`
+- `backend`
 - `vite`
 - `vite.config.js`
-- `demo/Dockerfile` and `demo/fly.toml`
+- `backend/Dockerfile` and `backend/fly.toml`
 - Sandbox CI, Docker, and deployment configuration
 
 `did-experiments` is optional. It has no current main-application consumers;
@@ -94,7 +94,7 @@ Before creating `M`:
 - prove Scala.js linking with explicit npm runtime dependencies. npm
   dependencies are application-build settings, not Maven-transitive metadata.
 
-The Sandbox consumes the released modules used by `did-example` and `demo`:
+The Sandbox consumes the released modules used by `did-example` and `backend`:
 `did`, `did-imp`, `did-framework`, `did-method-peer`, `did-method-prism`,
 `did-method-web`, and `did-uniresolver`.
 
@@ -170,7 +170,7 @@ applications.
 
    ```text
    webapp      -> did-example JS + serviceworker
-   demo JVM    -> did-example JVM
+   backend     -> did-example JVM
    did-example -> published Scala-DID artifacts
    ```
 
@@ -183,7 +183,7 @@ applications.
    `project/ManualSettings.scala`, dynamically loaded `sbt-ci-release`, and
    Maven publication settings from this build.
 7. Remove `docs/target` resource directories and the unused Laika dependency
-   from `demo`; its assembly packages only `vite/dist` and Sandbox-owned
+   from `backend`; its assembly packages only `vite/dist` and Sandbox-owned
    resources.
 8. Replace `DocsApp` generated-file serving with compatibility redirects:
 
@@ -207,7 +207,7 @@ only released Scala-DID artifacts and never needs `docs/target`.
 
 1. After `split/sandbox` passes, create `split/lib_and_prism` from `M`.
 2. Remove the Sandbox-owned paths: `did-example`, `did-experiments` if still
-   present, `serviceworker`, `webapp`, `demo`, `vite`, and `vite.config.js`.
+   present, `serviceworker`, `webapp`, `backend`, `vite`, and `vite.config.js`.
    Retain `cardano-prism-cli` and `cardano-prism-cip30-webapp` for this stage.
 3. Reduce the root npm manifest/lockfile only after a clean Scala.js library
    build. Retain npm dependencies needed by published Scala.js libraries and

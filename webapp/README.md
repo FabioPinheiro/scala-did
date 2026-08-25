@@ -2,7 +2,7 @@
 
 ## build and run
 
-[See info about who to buind and run in demo](./../demo/README.md)
+[See information about how to build and run the backend](./../backend/README.md)
 
 **Run Frontend:**
 

@@ -2,6 +2,7 @@
 .metals/
 .bsp/
 .vscode/
+.playwright-mcp/
 project/metals.sbt
 project/project/
 target/
@@ -10,13 +11,10 @@ dist/
 
 **/yarn.lock
 
-## igone the demo (generated code)
-docs-build/**
-
 ## Do not lock the RUST examples dependencies
 **/Cargo.lock
 
-## igone(generated files)
+## Generated files
 .*.swn
 .*.swo
 .*.swp
@@ -28,11 +26,8 @@ docs-build/**
 *.tmp
 ~*
 
-#vite 
+# Vite
 vite/dev-dist/
-
-#lixo
-lixo
 
 # Secrets
 .secret

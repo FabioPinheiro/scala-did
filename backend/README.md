@@ -1,0 +1,98 @@
+# DEMO
+
+## run
+
+**Run Server:**
+
+```shell
+# Build Frontend
+sbt 'serviceworker/fullLinkJS';
+npm run build
+```
+
+```shell
+sbt '~backend/reStart'
+```
+
+Open [chrome://inspect/#devices](chrome://inspect/#devices)
+
+**Run Frontend:**
+
+```shell
+# Live reload
+sbt '~serviceworker/fastLinkJS';
+sbt '~webapp/fastLinkJS' # run on another console
+npm run dev
+```
+
+## docker
+
+```shell
+sbt backend/assembly
+# java -jar backend/target/scala-3.3.8/scala-did-demo-server.jar
+docker build --tag scala_did_demo ./backend/
+#docker buildx build --platform linux/amd64,linux/arm64 --tag scala_did_demo ./backend/
+docker run --rm -p 8080:8080 --memory="100m" --cpus="1.0" scala_did_demo
+```
+
+```
+jar tf /home/fabio/workspace/ScalaDID/backend/target/scala-3.3.8/scala-did-demo-server.jar | less
+jar tvf /home/fabio/workspace/ScalaDID/backend/target/scala-3.3.8/scala-did-demo-server.jar | sort -rnk 1 | less
+java -jar /home/fabio/workspace/ScalaDID/backend/target/scala-3.3.8/scala-did-demo-server.jar
+```
+
+## FLY.IO
+
+- `fly auth login`
+- `fly open /demo`
+- `fly status -a scala-did-demo`
+- `fly image show -a scala-did-demo`
+- `fly logs -c backend/fly.toml`
+
+**deploy with fly**
+
+```shell
+sbt backend/assembly
+fly deploy ./backend/
+```
+
+**deploy by pushing docker image**
+
+```shell
+sbt backend/assembly
+#docker build --tag scala_did_demo ./backend/
+docker buildx build --platform linux/amd64,linux/arm64 --tag scala_did_demo ./backend/
+docker tag scala_did_demo registry.fly.io/scala-did-demo
+# fly auth docker
+docker push registry.fly.io/scala-did-demo
+fly image update -a scala-did-demo
+fly deploy -a scala-did-demo --image registry.fly.io/scala-did-demo:latest --ha=false
+```
+
+## History of deployments
+
+Size of the last docker layer:
+- 2025/05/12 +- 147.1MB
+- 2025/05/02 +- 144.5MB (webapp main js file is 7513.78kb / gzip: 1036.58kb)
+- 2025/05/01 +- 423.2MB ...?
+- 2024/10/05 +- 118.1MB (big multicodec table)
+- 2024/10/05 +- 117.0MB (arm64 & Java 21)
+- 2024/02/19 +- 121.9MB (arm64 & Java 21)
+- 2024/02/18 +- 121.2MB
+- 2024/02/13 +- 120.8MB
+- 2024/02/05 +- 119.3MB
+- 2023/11/15 +- 124.1MB
+- 2023/10/28 +- 118.1MB
+- 2023/10/20 +- 117.3MB
+- 2023/09/24 +- 115.1MB
+
+## Others
+
+Sort by file size
+`jar tvf backend/target/scala-3.3.8/scala-did-demo-server.jar | sort -k1nr | less`
+
+Show assets
+`jar tvf backend/target/scala-3.3.8/scala-did-demo-server.jar | sort -k1nr | grep "assets/"`
+
+Show jar size
+`du -h backend/target/scala-3.3.8/scala-did-demo-server.jar`

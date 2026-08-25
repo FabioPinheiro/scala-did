@@ -1,10 +1,9 @@
 {
-  "name": "did-scala",
+  "name": "scala-did-sandbox",
   "private": true,
   "license": "Apache-2.0",
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "yarn@1.22.22",
   "scripts": {
     "dev": "vite",
     "clean": "rm -rf node_modules",
