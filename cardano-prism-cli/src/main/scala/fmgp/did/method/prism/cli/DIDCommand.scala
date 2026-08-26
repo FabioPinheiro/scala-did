@@ -153,12 +153,14 @@ object DIDCommand {
         allSelectedKeys = setup.mState.get.ssiPrivateKeys.view
           .filterKeys(label => labelToUsage.contains(label))
           .toMap
-        (masterKeyLabel, masterKey) <- allSelectedKeys.find { case (label, _) =>
+        masterKeyAndLabel <- allSelectedKeys.find { case (label, _) =>
           labelToUsage.get(label).contains(PrismKeyUsage.MasterKeyUsage)
         } match
           case None                                   => ZIO.fail("Master key is missing") // Master key is missing
           case Some((label, masterKey: KeySecp256k1)) => ZIO.succeed(label, masterKey.secp256k1PrivateKey)
           case Some((label, masterKey))               => ZIO.fail("Master key need to be of the type secp256k1")
+        masterKeyLabel = masterKeyAndLabel._1
+        masterKey = masterKeyAndLabel._2
         allOtherKeys = allSelectedKeys.view.filterKeys(_ != masterKeyLabel).toMap
         addKey <- ZIO
           .foreach(allOtherKeys.toSeq) {

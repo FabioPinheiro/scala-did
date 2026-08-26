@@ -13,7 +13,7 @@ The pipeline is wired into `cardanoPrismCip30Webapp/cip30Bundle`:
 sbt cardanoPrismCip30Webapp/cip30Bundle
 ```
 
-That runs `fullLinkJS` (production-optimized Scala.js), `npm install`, and `node build.js`. The same task is chained into `cardano-prism-cli`'s resource generators, so:
+That runs `fullLinkJS` (production-optimized Scala.js), `npm ci`, and `node build.js`. The same task is chained into `cardano-prism-cli`'s resource generators, so:
 
 ```sh
 sbt cardanoPrismCli/Compile/packageBin
@@ -25,7 +25,7 @@ produces a jar that contains `cip30/bundle.js` ready to serve.
 
 ```sh
 sbt cardanoPrismCip30Webapp/fullLinkJS
-npm install
+npm ci
 CIP30_SCALAJS_DIR=target/scala-3.3.8/cardano-prism-cip30-webapp-opt npm run build
 ```
 
@@ -42,7 +42,7 @@ Two ways to package the CLI:
 # Library jar — only this project's classes/resources, needs deps on the
 # classpath at runtime. Useful for publishing to a Maven repo.
 sbt cardanoPrismCli/Compile/packageBin
-# -> cardano-prism-cli/target/scala-3.3.8/cardano-prism-cli_3-0.1.0-SNAPSHOT.jar
+# -> cardano-prism-cli/target/scala-3.3.8/cardano-prism-cli_3-1.0.jar
 
 # Fat jar — all dependencies merged into one runnable jar. Optional; only needed if you want a single-file distribution.
 sbt cardanoPrismCli/assembly

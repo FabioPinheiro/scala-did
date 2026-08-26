@@ -3,72 +3,17 @@ run-name: CI on ${{ github.ref_name }}
 
 on:
   workflow_dispatch:
-    inputs:
-      make_snapshot_release:
-        description: "Publish libraries's SNAPSHOT"
-        default: false
-        type: boolean
-        required: false
-      force_deploy_ghpages:
-        description: "Force deploy gb-pages"
-        default: false
-        type: boolean
-        required: false
   pull_request:
-    branches-ignore:
-      - "gh-pages"
   push:
     branches: [master]
     tags: ["v*"]
 
 jobs:
   build-test:
-    name: Build and Test
+    name: Build, bundle, and test
     runs-on: ubuntu-latest
     steps:
-      # https://github.com/japgolly/setup-everything-scala
       - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0 # Needed for the release tag // `git fetch --tags` will also work
-      - name: Setup Java and Scala
-        uses: olafurpg/setup-scala@v14
-        with:
-          java-version: openjdk@1.17.0 # adopt@1.11 # zulu@1.17.0-0 # openjdk@1.17.0
-      - name: Setup Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: "24" # or whatever
-      - name: Setup Scala.JS
-        uses: japgolly/setup-scalajs@v1
-      - name: Cache sbt
-        uses: coursier/cache-action@v7
-      ### Compile & Test ###
-      # - name: Compile and Test
-      #   run: sbt -v -mem 2048 -J-Xmx5120m "ciJobLib"
-      #   env:
-      #     NODE_OPTIONS: "--openssl-legacy-provider" # This is need after node-version "16"
-      - name: Install Scala.js runtime dependencies
-        run: npm ci
-      - name: Scalafmt
-        continue-on-error: true
-        run: sbt -v scalafmtCheckAll
-      - name: Compile
-        run: sbt -v compile
-      - name: Test
-        run: SKIP_INTEGRATION_TEST=true sbt -v test
-      - name: Generate documentation
-        run: sbt -v "docAll;siteAll;"
-
-  ghpages:
-    name: Deploy gh-pages
-    needs: build-test
-    runs-on: ubuntu-latest
-    if: (inputs.force_deploy_ghpages == true) || (github.ref == 'refs/heads/master') || startsWith(github.ref, 'refs/tags/v')
-    steps:
-      # https://github.com/japgolly/setup-everything-scala
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0 # Needed for the release tag // `git fetch --tags` will also work
       - name: Setup Java and Scala
         uses: olafurpg/setup-scala@v14
         with:
@@ -76,40 +21,35 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: "24" # or whatever
-      - name: Setup Scala.JS
+          node-version: "24"
+      - name: Setup Scala.js
         uses: japgolly/setup-scalajs@v1
       - name: Cache sbt
         uses: coursier/cache-action@v7
-
-      ### create build deploy gh-pages ###
-      - name: sbt "docAll; siteAll"
-        run: sbt -v "docAll; siteAll"
-
-      - name: Build
+      - name: Install CIP-30 dependencies
+        run: npm --prefix cardano-prism-cip30-webapp ci
+      - name: Scalafmt
+        run: sbt -v scalafmtCheckAll
+      - name: Compile and test
+        run: sbt -v "compile;test"
+      - name: Link, bundle, and assemble
+        run: sbt -v cardanoPrismCli/assembly
+      - name: Verify embedded CIP-30 bundle and CLI
         run: |
-          mkdir ./public
-          cp -r docs/target/site/did-doc/. ./public
-          cp -r docs/target/scaladoc/unidoc ./public/api
-
-      - name: Deploy
-        # https://github.com/marketplace/actions/github-pages-action
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
-          cname: doc.did.fmgp.app
+          unzip -Z1 cardano-prism-cli/target/scala-3.3.8/cardano-prism.jar | grep -Fx cip30/bundle.js
+          unzip -Z1 cardano-prism-cli/target/scala-3.3.8/cardano-prism.jar | grep -Fx cip30/bundle.js.map
+          java -jar cardano-prism-cli/target/scala-3.3.8/cardano-prism.jar --help
+          java -jar cardano-prism-cli/target/scala-3.3.8/cardano-prism.jar version
 
   publish:
-    name: Publish Artifacts
+    name: Publish CLI artifact
     needs: build-test
     runs-on: ubuntu-latest
-    if: ((inputs.make_snapshot_release == true) && (github.ref_name == 'master') || startsWith(github.ref, 'refs/tags/v'))
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
-      # https://github.com/japgolly/setup-everything-scala
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0 # Needed for the release tag // `git fetch --tags` will also work
+          fetch-depth: 0
       - name: Setup Java and Scala
         uses: olafurpg/setup-scala@v14
         with:
@@ -117,19 +57,15 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: "24" # or whatever
-      - name: Setup Scala.JS
+          node-version: "24"
+      - name: Setup Scala.js
         uses: japgolly/setup-scalajs@v1
       - name: Cache sbt
         uses: coursier/cache-action@v7
-
-      ### Publish Artifacts ###
-      - name: publish
-        run: sbt ci-release
+      - name: Publish
+        run: sbt -v ci-release
         env:
-          NODE_OPTIONS: "--openssl-legacy-provider" # This is need after node-version "16"
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          PACKAGES_GITHUB_TOKEN: ${{ secrets.PACKAGES_GITHUB_TOKEN }}

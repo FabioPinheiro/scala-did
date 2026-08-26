@@ -2,5 +2,4 @@ node_modules/
 dist/
 .entry.generated.js
 .empty-stub.js
-package-lock.json
 yarn.lock

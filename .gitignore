@@ -8,13 +8,9 @@ target/
 node_modules/
 dist/
 
-**/yarn.lock
-
-## igone the demo (generated code)
-docs-build/**
-
-## Do not lock the RUST examples dependencies
-**/Cargo.lock
+## Generated CIP-30 bundle inputs
+cardano-prism-cip30-webapp/.entry.generated.js
+cardano-prism-cip30-webapp/.empty-stub.js
 
 ## Generated files
 .*.swn
@@ -27,9 +23,6 @@ docs-build/**
 *.semanticdb
 *.tmp
 ~*
-
-#lixo
-lixo
 
 # Secrets
 .secret
