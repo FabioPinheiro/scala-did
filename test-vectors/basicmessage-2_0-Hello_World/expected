@@ -1,0 +1,11 @@
+{
+  "id" : "bf4a022c-f6f0-48b1-8e98-cdf2c37b027a",
+  "type" : "https://didcomm.org/basicmessage/2.0/message",
+  "to" : [
+    "did:example:bob"
+  ],
+  "from" : "did:example:alice",
+  "body" : {
+    "content" : "Hello, World!"
+  }
+}
