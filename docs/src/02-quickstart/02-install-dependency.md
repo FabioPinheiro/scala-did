@@ -37,5 +37,4 @@ Let got module by module
   You can use the publicly available uniresolver or a custom one.
 
 
-- `did-example` is just a list DID knowd identities, Like mediator and other agents. Also, contends some utilities.
 - `multiformats` is our implementation of [Multiformats](https://multiformats.io/) used by `did-peer`

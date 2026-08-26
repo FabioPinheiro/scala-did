@@ -42,9 +42,6 @@ For the latest version, check: ![Maven Central](https://img.shields.io/maven-cen
 - [Documentation Source](./docs/src/01-about/01-scala-did.md) - Raw documentation files
 - [LICENSE](LICENSE) - Apache License, Version 2.0
 - [did implementations](did-imp/README.md) - Notes and TODO list
-- [example](did-example/README.md) - Set of DIDs for experiments
-- [demo](demo/README.md) - How to build, test and deploy the Demo
-- [webapp module](webapp/README.md) - How to build, develop and run locally
 - [multiformats module](multiformats/README.md) - Implementation notes and considerations
 
 ## Adopters
@@ -101,7 +98,7 @@ flowchart BT
   did --> zio-json
   did-method-web ----> zhttp:::JVM
 
-  subgraph fmgp libraries
+  subgraph DID_libraries
     did-method-peer --> multiformats
     subgraph platform specific
       did-imp
@@ -111,39 +108,25 @@ flowchart BT
     end
     did-method-web --> did
     did-method-peer --> did
-    did-method-prism ---> did
     did-comm-protocols --> did
     did-framework --> did
+    did-method-prism ---> did
     did-framework --> did-comm-protocols
     did-imp --> did
-  end
 
-  did-example ----> did
-  did-example --> did-imp
-  demo --> did-imp
+  end
 
   did-imp_jvm:::JVM ----> nimbus-jose-jwt:::JVM --> google-tink:::JVM
   did-imp_jvm:::JVM ---> google-tink
 
   did-imp_js ----> jose:::JS
 
-  %% subgraph demo/docs
-    webapp:::JS --> did-framework
-    demo --> did-framework
-    demo --> did-method-web
-    demo --> did-method-peer
-    webapp:::JS --> did-imp_js
-    webapp:::JS  --> did-method-web
-    webapp:::JS  --> did-method-peer
-    webapp:::JS  --> did-example
-    demo  --> did-example
-    demo -.->|uses\serves| webapp
+  subgraph Cardano_PRISM
+    %%cardano-prism-cip30 --> did-method-prism
+    cardano-prism-cli --> cardano-prism-cip30
+  end
 
-    demo_jvm(demo_jvm\nA server):::JVM ==>|compiles together| demo
-
-    did-example  --> did-method-peer
-    did-example  --> did-method-web
-  %% end
+  Cardano_PRISM ---> DID_libraries
 
   classDef JVM fill:#141,stroke:#444,stroke-width:2px;
   classDef JS fill:#05a,stroke:#444,stroke-width:2px;

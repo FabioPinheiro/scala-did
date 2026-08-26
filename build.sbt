@@ -167,8 +167,6 @@ lazy val V = new {
   val bouncycastle = "1.80"
   val nimbusJoseJwt = "10.9.1"
 
-  val laika = "1.3.2"
-
   val laminar = "17.2.1"
   val waypoint = "9.0.0"
   val upickle = "4.4.3"
@@ -256,8 +254,6 @@ lazy val D = new {
   // For munit https://scalameta.org/munit/docs/getting-started.html#scalajs-setup
   val munit = Def.setting("org.scalameta" %%% "munit" % V.munit % Test)
 
-  val laika = Def.setting("org.typelevel" %%% "laika-core" % V.laika) // JVM & JS
-
   // For WEBAPP
   val laminar = Def.setting("com.raquo" %%% "laminar" % V.laminar)
   val waypoint = Def.setting("com.raquo" %%% "waypoint" % V.waypoint)
@@ -323,29 +319,6 @@ lazy val scalaJSLibConfigure: Project => Project =
       useYarn := true,
     )
 
-lazy val scalaJSViteConfigure: Project => Project =
-  _.enablePlugins(ScalaJSPlugin)
-    .enablePlugins(ScalablyTypedConverterExternalNpmPlugin)
-    .settings(
-      /* Configure Scala.js to emit modules in the optimal way to
-       * connect to Vite's incremental reload.
-       * - emit ECMAScript modules
-       * - emit as many small modules as possible for classes in the "livechart" package
-       * - emit as few (large) modules as possible for all other classes
-       *   (in particular, for the standard library)
-       */
-      scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withJSHeader(jsHeader) },
-      // .withSourceMap(false) // disabled because it somehow triggers warnings and errors
-
-      // Tell ScalablyTyped that we manage `npm install` ourselves
-      externalNpm := rootPaths.value.apply("BASE").toFile(),
-      // ShortModuleNames
-      stShortModuleNames := true,
-      // stOutputPackage := "fmgp.typings",
-      // TODO REMOVE webpackBundlingMode := BundlingMode.LibraryAndApplication(), // BundlingMode.Application,
-      // TODO useYarn := true
-    )
-
 lazy val buildInfoConfigure: Project => Project = _.enablePlugins(BuildInfoPlugin)
   .settings(
     buildInfoPackage := "fmgp",
@@ -397,30 +370,7 @@ addCommandAlias("testJSNoDB", testAlias(testJSProjects, "testOnly", noDBTestArgs
 addCommandAlias("testAllNoDB", ";testJVMNoDB;testJSNoDB")
 addCommandAlias("docAll", "doc;docs/unidoc")
 addCommandAlias("siteAll", "docs/mdoc;docs/laikaSite")
-addCommandAlias("assemblyAll", "docAll;siteAll;installFrontend;fullPackAll;buildFrontend;demoJVM/assembly")
-addCommandAlias("live", "fastPackAll;~demoJVM/reStart") // Missing the buildFrontend
 addCommandAlias("ciJobLib", "compile;testAll")
-addCommandAlias("ciJobFrontend", "installFrontend;fullPackAll;buildFrontend")
-
-// Note fastPackAll and fullPackAll needs installFrontend (scala-did/node_modules/typescript/lib must exist)
-addCommandAlias("fastPackAll", "serviceworker/fastLinkJS;webapp/fastLinkJS")
-addCommandAlias("fullPackAll", "serviceworker/fullLinkJS;webapp/fullLinkJS")
-lazy val installFrontend = taskKey[Unit]("Install all NPM package")
-installFrontend := {
-  val npmInstall = Process("npm" :: "install" :: Nil)
-  val log = streams.value.log
-  if ((npmInstall !) == 0) { log.success("NPM package install successful!") }
-  else { throw new IllegalStateException("NPM package install failed!") }
-}
-
-lazy val buildFrontend = taskKey[Unit]("Execute frontend scripts")
-buildFrontend := {
-  // val npmInstall = Process("npm" :: "install" :: Nil)
-  val npmBuild = Process("npm" :: "run" :: "build" :: Nil)
-  val log = streams.value.log
-  if (( /*npmInstall #&&*/ npmBuild !) == 0) { log.success("frontend build successful!") }
-  else { throw new IllegalStateException("frontend build failed!") }
-}
 
 lazy val root = project
   .in(file("."))
@@ -437,17 +387,6 @@ lazy val root = project
   .aggregate(didResolverWeb.js, didResolverWeb.jvm) // publish
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
   .aggregate(docs) // just to aggregate the command clean
-  .aggregate(demo.jvm) // NOT publish
-
-// Move to a new repository
-lazy val all = project
-  .in(file("allProjects"))
-  .aggregate(root)
-  .aggregate(didExperiments.js, didExperiments.jvm) // NOT publish
-  .aggregate(didExample.js, didExample.jvm)
-  .aggregate(serviceworker)
-  .aggregate(webapp)
-  .aggregate(demo.jvm, demo.js)
 
 lazy val did = crossProject(JSPlatform, JVMPlatform)
   .in(file("did"))
@@ -481,19 +420,6 @@ lazy val didCommProtocols = crossProject(JSPlatform, JVMPlatform)
   .settings(name := "did-comm-protocols")
   .jsConfigure(scalaJSLibConfigure) // Because of didJS now uses NPM libs
   .dependsOn(did % "compile;test->test")
-  .configure(docConfigure)
-
-lazy val didExperiments = crossProject(JSPlatform, JVMPlatform)
-  .in(file("did-experiments"))
-  .settings(publish / skip := true)
-  .settings(Test / scalacOptions -= "-Ysafe-init") // TODO REMOVE Cannot prove the method argument is hot.
-  .settings(
-    name := "did-experiments",
-    libraryDependencies += D.zioPrelude.value, // just for the hash (is this over power?)
-    libraryDependencies += D.zioMunitTest.value,
-  )
-  .dependsOn(did % "compile;test->test")
-  .jsConfigure(scalaJSLibConfigure) // Because of didJS now uses NPM libs
   .configure(docConfigure)
 
 lazy val didFramework = crossProject(JSPlatform, JVMPlatform)
@@ -740,62 +666,9 @@ lazy val didUniresolver = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     libraryDependencies += D.zioHttp.value,
   )
-  // .enablePlugins(ScalaJSBundlerPlugin).jsSettings(Test / npmDependencies += "node-fetch" -> "3.3.0")
-  .jsSettings( // TODO https://scalacenter.github.io/scalajs-bundler/reference.html#jsdom
-    libraryDependencies += D.scalajsDom.value,
-    // jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
-    // Test / requireJsDomEnv := true,
-  )
+  .jsSettings(libraryDependencies += D.scalajsDom.value)
   .dependsOn(did)
   .configure(docConfigure)
-
-lazy val serviceworker = project
-  .in(file("serviceworker"))
-  .settings(publish / skip := true)
-  .settings(name := "fmgp-serviceworker")
-  .enablePlugins(ScalaJSPlugin) // Enable the Scala.js plugin in this project
-  .settings(
-    scalaJSLinkerConfig ~= {
-      _.withModuleKind(ModuleKind.ESModule)
-        .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("fmgp.serviceworker")))
-        .withJSHeader(jsHeader)
-    },
-    scalaJSModuleInitializers := Seq( // scalaJSUseMainModuleInitializer := true,
-      ModuleInitializer.mainMethod("fmgp.serviceworker.SW", "main").withModuleID("sw")
-    ),
-    libraryDependencies += D.scalajsDom.value,
-    libraryDependencies ++= Seq(D.zio.value, D.zioJson.value),
-  )
-
-lazy val webapp = project
-  .in(file("webapp"))
-  .settings(publish / skip := true)
-  .settings(name := "fmgp-webapp")
-  .configure(scalaJSViteConfigure)
-  .settings(
-    scalaJSLinkerConfig ~= {
-      _.withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("fmgp.webapp")))
-    },
-    Compile / scalaJSModuleInitializers += {
-      ModuleInitializer.mainMethod("fmgp.webapp.App", "main").withModuleID("webapp")
-    },
-  )
-  .configure(buildInfoConfigure)
-  .settings(
-    libraryDependencies ++= Seq(D.laminar.value, D.waypoint.value, D.upickle.value),
-    libraryDependencies ++= Seq(D.zio.value, D.zioJson.value),
-  )
-  // .settings( // for doc
-  //   libraryDependencies += D.laika.value,
-  //   Compile / sourceGenerators += {
-  //     val needThis: Task[Unit] = (docs / mdoc).toTask("").taskValue
-  //     val generateCode: Task[Seq[File]] = makeDocSources.taskValue
-  //     needThis.flatMap(unit => generateCode)
-  //     // I have no clue what I did here but types match and its working =)
-  //   },
-  // )
-  .dependsOn(didExample.js)
-  .dependsOn(serviceworker)
 
 lazy val cip30Bundle =
   taskKey[File]("Build the esbuild bundle of the cardano-prism CIP-30 webapp")
@@ -856,34 +729,6 @@ lazy val cardanoPrismCip30Webapp = project
     ),
   )
   .dependsOn(didResolverPrism.js)
-
-lazy val didExample = crossProject(JSPlatform, JVMPlatform)
-  .in(file("did-example"))
-  .settings(publish / skip := true)
-  .dependsOn(did, didImp, didFramework, didResolverPeer, didResolverPrism, didResolverWeb, didUniresolver)
-
-lazy val demo = crossProject(JSPlatform, JVMPlatform)
-  .in(file("demo"))
-  .settings(publish / skip := true)
-  .settings(
-    name := "did-demo",
-    libraryDependencies += D.zioStreams.value,
-    libraryDependencies += D.munit.value,
-    libraryDependencies += D.zioMunitTest.value,
-    libraryDependencies += D.laika.value,
-  )
-  .jvmSettings(
-    reStart / mainClass := Some("fmgp.did.demo.AppServer"),
-    assembly / mainClass := Some("fmgp.did.demo.AppServer"),
-    assembly / assemblyJarName := "scala-did-demo-server.jar",
-    libraryDependencies += D.zioHttp.value,
-    Compile / unmanagedResourceDirectories += baseDirectory.value / "src" / "main" / "extra-resources",
-    Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "scaladoc",
-    // Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "mdoc"
-    Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "site",
-    Compile / unmanagedResourceDirectories += rootPaths.value.apply("BASE").toFile() / "vite" / "dist",
-  )
-  .dependsOn(did, didImp, didFramework, didResolverPeer, didResolverWeb, didUniresolver, didExample)
 
 val webjarsPattern = "(META-INF/resources/webjars/.*)".r
 val bouncycastlePattern1 = "(org/bouncycastle/.*)".r

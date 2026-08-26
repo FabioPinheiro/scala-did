@@ -16,7 +16,7 @@ docs-build/**
 ## Do not lock the RUST examples dependencies
 **/Cargo.lock
 
-## igone(generated files)
+## Generated files
 .*.swn
 .*.swo
 .*.swp
@@ -27,9 +27,6 @@ docs-build/**
 *.semanticdb
 *.tmp
 ~*
-
-#vite 
-vite/dev-dist/
 
 #lixo
 lixo

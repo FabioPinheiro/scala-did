@@ -6,31 +6,14 @@
   "type": "module",
   "packageManager": "yarn@1.22.22",
   "scripts": {
-    "dev": "vite",
-    "clean": "rm -rf node_modules",
-    "build_for_sourcemap": "NODE_OPTIONS='--max-old-space-size=4096' vite build",
-    "build": "vite build",
-    "preview": "vite preview"
+    "clean": "rm -rf node_modules"
   },
   "devDependencies": {
-    "@scala-js/vite-plugin-scalajs": "^1.0.0",
-    "@types/object-hash": "^3.0.4",
-    "jsdom": "^22.1.0",
-    "terser": "^5.19.4",
-    "typescript": "^5.3.3",
-    "vite": "^4.1.0",
-    "vite-plugin-compression": "^0.5.1",
-    "vite-plugin-pwa": "^0.19.0"
+    "typescript": "^5.3.3"
   },
   "dependencies": {
     "@noble/curves": "^1.9.7",
-    "@types/qrcode": "^1.5.6",
     "jose": "^5.10.0",
-    "js-sha256": "^0.11.1",
-    "material-components-web": "^12.0.0",
-    "mermaid": "^11.12.2",
-    "multiformats": "^9.6.4",
-    "qr-scanner": "^1.4.2",
-    "qrcode": "^1.5.4"
+    "js-sha256": "^0.11.1"
   }
 }

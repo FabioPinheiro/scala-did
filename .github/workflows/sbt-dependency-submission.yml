@@ -27,24 +27,15 @@ jobs:
         uses: japgolly/setup-scalajs@v1
       - name: Cache sbt
         uses: coursier/cache-action@v7
-      - name: npm install
-        run: npm install
+      - name: Install Scala.js runtime dependencies
+        run: npm ci
 
       - uses: scalacenter/sbt-dependency-submission@v2
         with:
           working-directory: ./
           modules-ignore:
             root_3
-            all_3
-            did-experiments_3
-            did-experiments_sjs1_3
             scala-did-docs_3
-            did-demo_sjs1_3
-          # did-demo_3
-          # fmgp-webapp_sjs1_3
-          # didexample_3
-          # didexample_sjs1_3
-          # fmgp-serviceworker_sjs1_3
           configs-ignore: test scala-tool scala-doc-tool
 
-# githubGenerateSnapshot {"ignoredModules":["root_3", "all_3", "did-experiments_3", "did-experiments_sjs1_3", "scala-did-docs_3", "did-demo_sjs1_3"], "ignoredConfigs":["test", "scala-tool", "scala-doc-tool"]}
+# githubGenerateSnapshot {"ignoredModules":["root_3", "scala-did-docs_3"], "ignoredConfigs":["test", "scala-tool", "scala-doc-tool"]}
