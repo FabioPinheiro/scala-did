@@ -15,9 +15,6 @@ resolvers += MavenRepository("sonatype-s01-snapshots", "https://s01.oss.sonatype
 libraryDependencySchemes += "org.scala-lang.modules" %% "scala-parser-combinators" % VersionScheme.Always
 addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta45")
 
-// Utils Buildinfo - https://github.com/sbt/sbt-buildinfo
-addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.13.1")
-
 // CI - https://github.com/rtimush/sbt-updates/tags
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.7.0") // sbt> dependencyUpdates
 
@@ -42,9 +39,6 @@ libraryDependencies ++= {
 addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.9.1") // https://github.com/scalameta/mdoc/tags
 addSbtPlugin("org.typelevel" % "laika-sbt" % "1.3.2") // https://typelevel.org/Laika/
 addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.6.1") // https://github.com/sbt/sbt-unidoc
-
-// CLI assembly
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.4.2")
 
 // ScalaPB for did:prism
 addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.8")

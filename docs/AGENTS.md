@@ -6,8 +6,8 @@ This document provides non-obvious context, conventions, and commands necessary 
 
 This repository is a highly modular, polyglot project focused on Decentralized Identifiers (DIDs) and DID Communications (DIDComm).
 
-*   **Core Structure**: The project is divided into numerous sub-modules (e.g., `did`, `did-comm-protocols`, `did-method-prism`, `did-method-web`, `cardano-prism-cli`).
-*   **Polyglot Nature**: It supports JVM (Scala/Java), Scala.js, and CLI tooling.
+*   **Core Structure**: The project is divided into library modules (e.g., `did`, `did-comm-protocols`, `did-method-prism`, and `did-method-web`).
+*   **Cross-platform Nature**: The libraries support JVM (Scala/Java) and Scala.js.
 *   **Interoperability**: Modules are interconnected using `crossProject` in `build.sbt`, linking JVM and JS components.
 *   **Architectural Flow**: The system primarily revolves around DID resolution, DID document management, and secured DIDComm message exchange.
 *   **Key Dependencies**: ZIO is the primary asynchronous programming framework. Crypto operations rely on a mix of BouncyCastle and NimbusJoseJwt.
@@ -30,14 +30,12 @@ This repository is a highly modular, polyglot project focused on Decentralized I
 *   **Asynchronicity**: Core logic heavily leverages ZIO's effect system. When modifying data flow, be mindful of effect handling patterns like `.mapOrFail`, `ZIO.succeed`, and error propagation.
 *   **Serialization**: Serialization is managed via ZIO JSON (`JsonDecoderExtension.scala`). Ensure any new data structures correctly implement or integrate with the existing decoder/encoder patterns.
 *   **Dependency Management**: Dependencies are managed via a centralized `D` object in `build.sbt`, which also tracks external NPM dependencies (`NPM` object).
-*   **CLI Entry Points**: CLI commands are organized by module (e.g., `cardano-prism-cli/src/main/scala/fmgp/did/method/prism/cli/`). Follow this structure for adding new commands.
 
 ## ⚠️ Critical Gotchas & Non-Obvious Knowledge
 
-1.  **Assembly Conflicts**: The `assemblyMergeStrategy` in `build.sbt` is heavily customized. This is due to dependency conflicts (e.g., BouncyCastle versions, Protobuf versions) between different modules. Any change to core dependencies *must* be checked against this merge strategy.
-2.  **Vulnerability Remediation**: Modules like `did-imp` contain explicit comments noting CVEs (e.g., CVE-2023-2976). Fixing these requires careful dependency updates as documented in the build file.
-3.  **Progressive Disclosure**: When implementing a new DID method or protocol, the specific regex and parsing logic are the most critical pieces of knowledge, as generic DID logic will fail.
-4.  **TODOs**: Be aware of existing `TODO`s in files like `DIDPrism.scala` related to long-form DID support and event processing; these represent known incomplete features.
+1.  **Vulnerability Remediation**: Modules like `did-imp` contain explicit comments noting CVEs (e.g., CVE-2023-2976). Fixing these requires careful dependency updates as documented in the build file.
+2.  **Progressive Disclosure**: When implementing a new DID method or protocol, the specific regex and parsing logic are the most critical pieces of knowledge, as generic DID logic will fail.
+3.  **TODOs**: Be aware of existing `TODO`s in files like `DIDPrism.scala` related to long-form DID support and event processing; these represent known incomplete features.
 
 ## 🧪 Testing Approach
 
