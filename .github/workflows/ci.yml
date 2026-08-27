@@ -47,6 +47,8 @@ jobs:
       #   run: sbt -v -mem 2048 -J-Xmx5120m "ciJobLib"
       #   env:
       #     NODE_OPTIONS: "--openssl-legacy-provider" # This is need after node-version "16"
+      - name: Install Scala.js runtime dependencies
+        run: npm ci
       - name: Scalafmt
         continue-on-error: true
         run: sbt -v scalafmtCheckAll
@@ -56,14 +58,6 @@ jobs:
         run: SKIP_INTEGRATION_TEST=true sbt -v test
       - name: Generate documentation
         run: sbt -v "docAll;siteAll;"
-      - name: npm install
-        run: npm install
-      - name: Build serviceworker and webapp
-        run: sbt -v fullPackAll # need npm install
-      - name: Build Frontend - Vite
-        run: npm run build
-      - name: Demo assembly
-        run: sbt -v demoJVM/assembly
 
   ghpages:
     name: Deploy gh-pages

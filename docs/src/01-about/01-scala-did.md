@@ -10,7 +10,7 @@ This library allows you to easily integrate DID and DIDComm messaging into your 
 
 The one of the main goals of this library is to make DID and DIDComm v2 **type safety** and **easy to use**.
 
-The [repository](https://github.com/FabioPinheiro/scala-did) also contes the [**LIVE DEMO (DIDComm's Sandbox)**](https://did.fmgp.app/)
+A [**live DIDComm Sandbox**](https://did.fmgp.app/) is available separately from this library repository.
 The **PoC Mediator** was move to the [Identus Mediator](https://github.com/hyperledger/identus-mediator) where a production ready mediator is being developed and maintain.
 
 ## Badges

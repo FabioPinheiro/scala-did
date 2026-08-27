@@ -13,7 +13,7 @@ object ManualSettings {
     val github = "https://github.com/FabioPinheiro/scala-did"
     val scaladoc = "https://doc.did.fmgp.app/api/"
     val javadoc = "https://javadoc.io/doc/app.fmgp"
-    val demo = "https://did.fmgp.app"
+    val sandbox = "https://did.fmgp.app"
     val discord = "https://discord.gg/atala"
   }
 
@@ -37,7 +37,7 @@ object ManualSettings {
       navLinks = Seq(
         IconLink.external(links.github, HeliumIcon.github),
         IconLink.external(links.javadoc, HeliumIcon.api),
-        IconLink.external(links.demo, HeliumIcon.demo),
+        IconLink.external(links.sandbox, HeliumIcon.demo),
         IconLink.external(links.discord, HeliumIcon.chat)
       ),
     )
@@ -83,7 +83,7 @@ object ManualSettings {
       ),
       projectLinks = Seq(
         TextLink.external(links.github, "Source on GitHub"),
-        TextLink.external(links.demo, "Live Demo"),
+        TextLink.external(links.sandbox, "Live DIDComm Sandbox"),
       ),
       teasers = Seq(
         Teaser(
