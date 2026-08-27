@@ -1,6 +1,3 @@
-import org.scalajs.linker.interface.{ModuleInitializer, ModuleSplitStyle}
-import scala.sys.process._
-
 inThisBuild(
   Seq(
     scalaVersion := "3.3.8", // Also update docs/publishWebsite.sh and any ref to scala-3.3.8
@@ -31,10 +28,6 @@ inThisBuild(
     versionScheme := Some("early-semver"), // https://www.scala-sbt.org/1.x/docs/Publishing.html#Version+scheme
   )
 )
-lazy val notYetPublishedConfigure: Project => Project = _.settings(
-  publish / skip := true
-)
-
 // ### publish Github ###
 lazy val publishConfigure: Project => Project = _.settings(
   // For publish to Github
@@ -126,7 +119,6 @@ lazy val docs = project
         multiformats.jvm,
         didResolverPeer.jvm,
         didResolverPrism.jvm,
-        cardanoPrismCli,
         didResolverWeb.jvm,
         didUniresolver.jvm,
       ), // or inAnyProject -- inProjects(...)
@@ -152,8 +144,6 @@ lazy val V = new {
   val zioMunitTest = "0.4.0"
   val zioHttp = "3.11.4" // With fix CORS https://github.com/zio/zio-http/pull/2490
   val zioPrelude = "1.0.0-RC21"
-  val zioCLI = "0.8.2"
-
   // https://mvnrepository.com/artifact/io.github.cquiroz/scala-java-time
   val scalaJavaTime = "2.5.0"
 
@@ -166,10 +156,6 @@ lazy val V = new {
 
   val bouncycastle = "1.80"
   val nimbusJoseJwt = "10.9.1"
-
-  val laminar = "17.2.1"
-  val waypoint = "9.0.0"
-  val upickle = "4.4.3"
 
   val identusApollo = "1.8.8" // "1.7.1"
   val scalus = "1.1.0"
@@ -209,7 +195,6 @@ lazy val D = new {
   // val zioSchema = Def.setting("dev.zio" %% "zio-schema-json" % V.zioSchema)
   val zioHttp = sbt.Def.setting("dev.zio" %% "zio-http" % V.zioHttp)
   val zioPrelude = Def.setting("dev.zio" %%% "zio-prelude" % V.zioPrelude)
-  val zioCLI = Def.setting("dev.zio" %% "zio-cli" % V.zioCLI)
   // val zioTest = Def.setting("dev.zio" %%% "zio-test" % V.zio % Test)
   // val zioTestSBT = Def.setting("dev.zio" %%% "zio-test-sbt" % V.zio % Test)
   // val zioTestMagnolia = Def.setting("dev.zio" %%% "zio-test-magnolia" % V.zio % Test)
@@ -223,7 +208,6 @@ lazy val D = new {
 
   // mongoexport --uri=$MONGODB_CONNECTION  --db=sample_mflix --sort='{_id:1}' --type=json --collection=users --out=users.json
   val reactivemongoProvided = Def.setting("org.reactivemongo" %% "reactivemongo" % V.reactivemongo % Provided)
-  val reactivemongo = Def.setting("org.reactivemongo" %% "reactivemongo" % V.reactivemongo)
 
   // https://mvnrepository.com/artifact/org.scalus/scalus
   val scalus = Def.setting("org.scalus" %%% "scalus" % V.scalus)
@@ -254,10 +238,6 @@ lazy val D = new {
   // For munit https://scalameta.org/munit/docs/getting-started.html#scalajs-setup
   val munit = Def.setting("org.scalameta" %%% "munit" % V.munit % Test)
 
-  // For WEBAPP
-  val laminar = Def.setting("com.raquo" %%% "laminar" % V.laminar)
-  val waypoint = Def.setting("com.raquo" %%% "waypoint" % V.waypoint)
-  val upickle = Def.setting("com.lihaoyi" %%% "upickle" % V.upickle)
 }
 
 inThisBuild(
@@ -304,12 +284,6 @@ inThisBuild(
 lazy val setupTestConfig: Seq[sbt.Def.SettingsDefinition] = Seq(
   libraryDependencies ++= Seq(D.munit.value, D.zioMunitTest.value),
 )
-lazy val jsHeader =
-  """/* FMGP scala-did examples and tool
-    | * https://github.com/FabioPinheiro/scala-did
-    | * Copyright: Fabio Pinheiro - fabiomgpinheiro@gmail.com
-    | */""".stripMargin.trim() + "\n"
-
 lazy val scalaJSLibConfigure: Project => Project =
   _.enablePlugins(ScalaJSPlugin)
     .enablePlugins(ScalablyTypedConverterGenSourcePlugin)
@@ -318,19 +292,6 @@ lazy val scalaJSLibConfigure: Project => Project =
       stOutputPackage := "fmgp.typings", // shade into another package
       useYarn := true,
     )
-
-lazy val buildInfoConfigure: Project => Project = _.enablePlugins(BuildInfoPlugin)
-  .settings(
-    buildInfoPackage := "fmgp",
-    // buildInfoObject := "BuildInfo",
-    buildInfoKeys := Seq[BuildInfoKey](
-      name,
-      version,
-      scalaVersion,
-      sbtVersion,
-      // BuildInfoKey.action("buildTime") { System.currentTimeMillis }, // re-computed each time at compile
-    ),
-  )
 
 lazy val testJVMProjects = Seq(
   "didJVM",
@@ -342,7 +303,6 @@ lazy val testJVMProjects = Seq(
   "didResolverWebJVM",
   "didUniresolverJVM",
   "multiformatsJVM",
-  "cardanoPrismCli",
 )
 
 lazy val testJSProjects = Seq(
@@ -382,8 +342,6 @@ lazy val root = project
   .aggregate(multiformats.js, multiformats.jvm) // publish
   .aggregate(didResolverPeer.js, didResolverPeer.jvm) // publish
   .aggregate(didResolverPrism.js, didResolverPrism.jvm) // publish
-  .aggregate(cardanoPrismCli) // NOT publish (yet)
-  .aggregate(cardanoPrismCip30Webapp) // NOT publish
   .aggregate(didResolverWeb.js, didResolverWeb.jvm) // publish
   .aggregate(didUniresolver.js, didUniresolver.jvm) // NOT publish
   .aggregate(docs) // just to aggregate the command clean
@@ -602,42 +560,10 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
   .jvmConfigure(_.dependsOn(didImp.jvm % Test)) // For fmgp.did.method.prism.CardanoWalletConfigSuite (import UtilsJVM)
   .configure(docConfigure)
 
-lazy val cardanoPrismCli = project
-  .in(file("cardano-prism-cli"))
-  .configure(publishConfigure)
-  .configure(buildInfoConfigure)
-  .settings(
-    buildInfoPackage := "fmgp.did.method.prism.cli",
-    name := "cardano-prism-cli",
-    libraryDependencies += D.zioMunitTest.value,
-  )
-  .settings( // PoC for a prism-cli tooling // TODO Move to a new repo
-    libraryDependencies += D.zioCLI.value,
-    libraryDependencies += D.reactivemongo.value,
-    assembly / mainClass := Some("fmgp.did.method.prism.cli.PrismCli"),
-    assembly / assemblyJarName := "cardano-prism.jar",
-  )
-  .settings(
-    // Bundle the CIP-30 webapp (Scala.js + esbuild) and embed it as a classpath resource at `cip30/bundle.js` so `cardano-prism.jar` is self-contained.
-    Compile / resourceGenerators += Def.task {
-      val bundleJs = (cardanoPrismCip30Webapp / cip30Bundle).value
-      val bundleMap = file(bundleJs.getPath + ".map")
-      val resourceDir = (Compile / resourceManaged).value / "cip30"
-      IO.createDirectory(resourceDir)
-      val outJs = resourceDir / "bundle.js"
-      IO.copyFile(bundleJs, outJs)
-      val outMap = resourceDir / "bundle.js.map"
-      val maps = if (bundleMap.isFile) { IO.copyFile(bundleMap, outMap); Seq(outMap) }
-      else Seq.empty
-      Seq(outJs) ++ maps
-    }.taskValue,
-  )
-  .dependsOn(did.jvm, didResolverPrism.jvm, didResolverPeer.jvm, didUniresolver.jvm)
-
 //https://w3c-ccg.github.io/did-method-web/
 lazy val didResolverWeb = crossProject(JSPlatform, JVMPlatform)
   .in(file("did-method-web"))
-  .configure(notYetPublishedConfigure)
+  .configure(publishConfigure)
   .settings(
     name := "did-method-web",
     libraryDependencies += D.munit.value,
@@ -669,154 +595,3 @@ lazy val didUniresolver = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(libraryDependencies += D.scalajsDom.value)
   .dependsOn(did)
   .configure(docConfigure)
-
-lazy val cip30Bundle =
-  taskKey[File]("Build the esbuild bundle of the cardano-prism CIP-30 webapp")
-
-lazy val cardanoPrismCip30Webapp = project
-  .in(file("cardano-prism-cip30-webapp"))
-  .settings(publish / skip := true)
-  .settings(name := "cardano-prism-cip30-webapp")
-  .enablePlugins(ScalaJSPlugin)
-  .settings(
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withJSHeader(jsHeader) },
-    scalaJSLinkerConfig ~= {
-      _.withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("fmgp.did.method.prism.cip30")))
-    },
-    Compile / scalaJSModuleInitializers += {
-      ModuleInitializer
-        .mainMethod("fmgp.did.method.prism.cip30.Cip30App", "main")
-        .withModuleID("cip30webapp")
-    },
-  )
-  .settings(
-    libraryDependencies ++= Seq(D.laminar.value, D.waypoint.value, D.upickle.value),
-    libraryDependencies += D.scalajsDom.value,
-    libraryDependencies += D.scalusCardanoLedger.value,
-  )
-  .settings(
-    // This browser-only bundle project has no test sources. Avoid starting the
-    // Scala.js test bridge under Node.js during aggregated CI test runs.
-    Test / test := {},
-  )
-  .settings(
-    cip30Bundle := {
-      val log = streams.value.log
-      // Use fullLinkJS (production-optimized) so the published bundle is small.
-      // fastLinkJS would produce a much larger, dev-only bundle.
-      val _ = (Compile / fullLinkJS).value
-      val scalaJsDir = (Compile / fullLinkJS / scalaJSLinkerOutputDirectory).value
-      val bundleDir = baseDirectory.value
-      val bundleJs = bundleDir / "dist" / "bundle.js"
-      val env = Seq("CIP30_SCALAJS_DIR" -> scalaJsDir.getAbsolutePath)
-      log.info(s"cip30Bundle: npm install in $bundleDir")
-      val install = Process(Seq("npm", "install"), bundleDir, env *)
-      if ((install !) != 0) sys.error(s"cip30Bundle: npm install failed in $bundleDir")
-      log.info(s"cip30Bundle: node build.js in $bundleDir (scalajs=$scalaJsDir)")
-      val build = Process(Seq("node", "build.js"), bundleDir, env *)
-      if ((build !) != 0) sys.error(s"cip30Bundle: esbuild bundle failed in $bundleDir")
-      if (!bundleJs.isFile) sys.error(s"cip30Bundle: expected $bundleJs to exist after build")
-      log.success(s"cip30Bundle: ${bundleJs}")
-      bundleJs
-    },
-    // Make `sbt clean` wipe the esbuild outputs and the small generated entry/stub files build.js writes into the project base dir.
-    cleanFiles ++= Seq(
-      baseDirectory.value / "dist",
-      baseDirectory.value / ".entry.generated.js",
-      baseDirectory.value / ".empty-stub.js",
-      baseDirectory.value / "package-lock.json",
-      baseDirectory.value / "node_modules",
-    ),
-  )
-  .dependsOn(didResolverPrism.js)
-
-val webjarsPattern = "(META-INF/resources/webjars/.*)".r
-val bouncycastlePattern1 = "(org/bouncycastle/.*)".r
-val bouncycastlePattern2 = "(META-INF/versions/9/org/bouncycastle/.*)".r
-val bouncycastlePattern3 = "(META-INF/versions/11/org/bouncycastle/.*)".r
-val bouncycastlePattern4 = "(META-INF/versions/15/org/bouncycastle/.*)".r
-val protobufPattern1 = "(google/protobuf/.*)".r
-val protobufPattern2 = "(com/google/protobuf/.*)".r
-
-ThisBuild / assemblyMergeStrategy := {
-  case "META-INF/versions/9/module-info.class"    => MergeStrategy.first
-  case "META-INF/versions/11/module-info.class"   => MergeStrategy.first
-  case "META-INF/io.netty.versions.properties"    => MergeStrategy.first
-  case "META-INF/versions/9/OSGI-INF/MANIFEST.MF" => MergeStrategy.first
-  case "META-INF/okio.kotlin_module"              => MergeStrategy.first
-  case webjarsPattern(file)                       => MergeStrategy.discard
-  case "module-info.class"        => MergeStrategy.first // jackson-annotations-2.16.0.jar & checker-qual-3.43.0.jar
-  case bouncycastlePattern1(file) => MergeStrategy.preferProject // because of a Apollo is using very old version
-  case bouncycastlePattern2(file) => MergeStrategy.preferProject // because of a Apollo is using very old version
-  case bouncycastlePattern3(file) => MergeStrategy.preferProject // because of a Apollo is using very old version
-  case bouncycastlePattern4(file) => MergeStrategy.preferProject // because of a Apollo is using very old version
-  case protobufPattern1(file)     => MergeStrategy.preferProject // because of a Apollo is using very old version
-  case protobufPattern2(file)     => MergeStrategy.preferProject // because of a Apollo is using very old version
-  // GraalVM native-image hints (reflect-config.json etc) — read only by `native-image`,
-  // not at runtime on the JVM. netty-transport ships them and reactivemongo-shaded
-  // bundles its own (different) copy of the same files. Pick first.
-  case PathList("META-INF", "native-image", _*) => MergeStrategy.first
-//   case PathList("javax", "servlet", xs @ _*)         => MergeStrategy.first
-//   case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
-//   case "application.conf"                            => MergeStrategy.concat
-//   case "unwanted.txt"                                => MergeStrategy.discard
-  case x =>
-    val oldStrategy = (ThisBuild / assemblyMergeStrategy).value
-    oldStrategy(x)
-}
-
-/** Copy the Documentation and Generate an Scala object to Store */
-def makeDocSources = Def
-  .task {
-    val resourceFolder = rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "mdoc"
-    val log = streams.value.log
-    def processFiles(files: Seq[String]): Seq[(String, String)] = files.flatMap { fileName =>
-      val resourceFile = rootPaths.value.apply("BASE").toFile() / "docs" / "target" / "mdoc" / fileName
-      val originalFile = rootPaths.value.apply("BASE").toFile() / "docs" / "src" / fileName // "readme.md"
-
-      if (resourceFile.isDirectory()) {
-        processFiles(resourceFile.list().map(fileName + "/" + _).toSeq)
-      } else {
-
-        // TODO do the if
-        // if (!sourceFile.exists() || sourceFile.lastModified() < resourceFile.lastModified()) {
-        val file =
-          if (resourceFile.exists()) resourceFile
-          else {
-            log.warn("makeDocSources: the resourceFile does not exists. Using the originalFile")
-            originalFile
-          }
-        val contentREAMDE = IO
-          .read(file)
-          .replaceAllLiterally("$", "$$")
-          .replaceAllLiterally("\"\"\"", "\"\"$\"")
-        // }
-        val valName = "_" + fileName.toLowerCase.replace(".", "_").replace("-", "_").replace("/", "_")
-
-        Seq(
-          (
-            s"""    "${fileName.toLowerCase}" -> $valName""",
-            s"""  final val $valName = raw\"\"\"$contentREAMDE\"\"\""""
-          )
-        )
-      }
-    }
-
-    val aux = processFiles(resourceFolder.list().toSeq)
-
-    val sourceDir = (Compile / sourceManaged).value
-    val sourceFile = sourceDir / "DocSource.scala"
-    val scalaCode = s"""
-        |package fmgp.did
-        |object DocSource {
-        |
-        |${aux.map(_._2).mkString("\n\n")}
-        |
-        |  final val all = Map(
-        |${aux.map(_._1).mkString(",\n")}
-        |  )
-        |
-        |}""".stripMargin
-    IO.write(sourceFile, scalaCode)
-    Seq(sourceFile)
-  }

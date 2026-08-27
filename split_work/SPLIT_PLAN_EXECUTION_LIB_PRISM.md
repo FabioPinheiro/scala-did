@@ -8,9 +8,12 @@ library/docs/CLI candidate: it removes the Sandbox while deliberately retaining
 ## State
 
 - Branch: `split/lib_and_prism`
-- Recorded from: `907f5deb3` (`build: add SPLIT_PLAN.md`)
-- The extraction changes recorded here are currently working-tree changes; they
-  have not been committed by this work.
+- Started from: `907f5deb3` (`build: add SPLIT_PLAN.md`)
+- Completed in: `f8f4b435d` (`build: split plan - lib & prism`)
+
+The Stage 2 extraction changes below were committed in `f8f4b435d`. This
+record is retained as the Stage 2 hand-off to the subsequent PRISM and library
+extractions.
 
 ## Actions taken
 
