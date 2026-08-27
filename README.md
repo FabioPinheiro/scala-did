@@ -121,12 +121,34 @@ flowchart BT
 
   did-imp_js ----> jose:::JS
 
-  subgraph Cardano_PRISM
-    %%cardano-prism-cip30 --> did-method-prism
-    cardano-prism-cli --> cardano-prism-cip30
-  end
-
-  Cardano_PRISM ---> DID_libraries
+%%  subgraph Sandbox
+%%    webapp:::JS
+%%    demo
+%%    %% webapp:::JS --> did-framework
+%%    %% demo --> did-framework
+%%    %% demo --> did-method-web
+%%    %% demo --> did-method-peer
+%%    %% webapp:::JS --> did-imp_js
+%%    %% webapp:::JS  --> did-method-web
+%%    %% webapp:::JS  --> did-method-peer
+%%    %% webapp:::JS  --> did-example
+%%    %% demo  --> did-example
+%%    %% demo -.->|uses\serves| webapp
+%%
+%%    demo_jvm(demo_jvm\nA server):::JVM ==>|compiles together| demo
+%%    demo_jvm  --> did-example
+%%
+%%    %% did-example  --> did-method-peer
+%%    %% did-example  --> did-method-web
+%%  end
+%%
+%%  subgraph Cardano_PRISM
+%%    %%cardano-prism-cip30 --> did-method-prism
+%%    cardano-prism-cli --> cardano-prism-cip30
+%%  end
+%%
+%%  Cardano_PRISM ---> DID_libraries
+%%  Sandbox ---> DID_libraries
 
   classDef JVM fill:#141,stroke:#444,stroke-width:2px;
   classDef JS fill:#05a,stroke:#444,stroke-width:2px;
@@ -142,4 +164,73 @@ NOTES:
 - Other boxes are not platform specific.
 - The `did-imp-hw` is a idea how to extend for other implementation. Like a hardware/platform specific or with hardware wallet support.
 - `did-method-web` & `did-method-peer` & `did-method-prism` are implementations of the respective did methods.
+
+## Ecosystem and Integrations
+
+`scala-did` is the core library in a slowly growing ecosystem of DID, DIDComm, and Cardano PRISM tooling.
+
+### Related projects
+
+  - [cardano-prism-cli](https://github.com/FabioPinheiro/cardano-prism-cli) — A command-line tool for working with Cardano PRISM. This project was split from this repository.
+  - [scala-did-sandbox](https://github.com/FabioPinheiro/scala-did-sandbox) — An independent sandbox containing DIDComm demonstrations.
+  - [prism-mainnet](https://github.com/FabioPinheiro/prism-mainnet) — A trustless, read-only mirror of PRISM DID data on the Cardano mainnet.
+
+### Downstream integrations
+
+  - [Hyperledger Identus Mediator](https://github.com/hyperledger-identus/mediator) — now part of the [LF Decentralized Trust](https://www.lfdecentralizedtrust.org/) Identus project; it uses `scala-did` for DIDComm functionality.
+  - [Universal Resolver driver for `did:prism`](https://github.com/FabioPinheiro/uni-resolver-driver-did-prism) — A `did:prism` driver used by the [Decentralized Identity Foundation
+ Universal Resolver](https://github.com/decentralized-identity/universal-resolver).
+  - [PRISM VDR Driver](https://github.com/hyperledger-identus/prism-vdr-driver) an implementation of [Generic VDR specification](https://github.com/hyperledger-identus/vdr).
+  - [Blockfrost DID PRISM (Cardano data)](https://github.com/FabioPinheiro/prism-vdr) — Indexed `did:prism` data, including DID Documents and related data for PRISM DIDs stored on the Cardano blockchain.
+
+```mermaid
+flowchart BT
+
+  subgraph Ecosystem["scala-did ecosystem"]
+
+    scalaDid["scala-did<br/>DID & DIDComm library"]
+    prismMainnet["prism-mainnet<br/>Trustless read-only PRISM mirror"]
+
+    subgraph prismCli["Cardano PRISM CLI"]
+      %%cardano-prism-cip30 --> did-method-prism
+      cardano-prism-cli:::JVM -. serves .-> cardano-prism-cip30:::JS
+    end
+
+
+    subgraph sandbox["scala-did-sandbox<br/>DIDComm demos"]
+      webapp:::JS
+      demo_jvm(DID/DIDComm Sandbox Demo):::JVM
+      demo_jvm --> did-example
+      demo_jvm -. serves .-> webapp:::JS
+    end
+
+    prismCli -- "split from" --> scalaDid
+    sandbox -- "split from" --> scalaDid
+    prismMainnet --> prismCli
+  end
+
+
+  
+  subgraph Integrations["Downstream integrations"]
+    resolver["DIF Universal Resolver"]
+    mediator["Hyperledger Identus Mediator"]
+    blockfrost_prism["Blockfrost DID PRISM"]
+    driver["did:prism Universal Resolver driver"]
+    vdr_driver["PRISM VDR driver"]
+    
+    mediator --> scalaDid
+    vdr_driver --> scalaDid
+    blockfrost_prism --> scalaDid
+    driver --> resolver
+    vdr_driver -. "uses" .-> blockfrost_prism
+    driver -. "V2 uses" .-> blockfrost_prism
+    driver -. "V3 will use" .-> prismMainnet
+  end
+
+  Integrations ~~~~ Ecosystem
+
+  classDef JVM fill:#141,stroke:#444,stroke-width:2px;
+  classDef JS fill:#05a,stroke:#444,stroke-width:2px;
+```
+
 
