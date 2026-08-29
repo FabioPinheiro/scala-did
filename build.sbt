@@ -158,7 +158,7 @@ lazy val V = new {
   val nimbusJoseJwt = "10.9.1"
 
   val identusApollo = "1.8.8" // "1.7.1"
-  val scalus = "1.1.0"
+  val scalus = "1.1.1"
 }
 
 /** NPM Dependencies */
