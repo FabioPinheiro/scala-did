@@ -22,7 +22,7 @@ consumes Scala-DID through Maven; it does not retain library source projects.
 - Replaced documentation resources embedded in the demo jar with redirects to
   `https://doc.did.fmgp.app`. `/doc` and `/api` preserve suffixes and query
   strings; `/apis` intentionally returns `410 Gone`.
-- Corrected the Docker assembly input path for Scala 3.3.8.
+- Corrected the Docker assembly input path for Scala 3.9.0.
 - Reworked CI as an application workflow: npm install, formatting, compile and
   test, Scala.js linking, Vite production build, backend assembly, Docker image
   build, and container health-check smoke test.
@@ -93,7 +93,7 @@ or build modules.
 | `.gitignore` | Remove documentation-specific ignore rules and retain Sandbox build/editor/generated-file ignores. |
 | `.github/workflows/ci.yml` | Replace library publication/docs deployment CI with Sandbox build, package, Docker, and smoke-test checks. |
 | `.github/workflows/sbt-dependency-submission.yml` | Restrict dependency-submission ignores to Sandbox projects and use `npm ci`. |
-| `backend/Dockerfile` | Copy the actual Scala 3.3.8 assembly output. The Docker build context is `backend/`. |
+| `backend/Dockerfile` | Copy the actual Scala 3.9.0 assembly output. The Docker build context is `backend/`. |
 | `backend/src/main/scala/fmgp/did/demo/AppServer.scala` | Register redirect routes rather than resource-backed generated documentation routes. |
 | `backend/src/main/scala/fmgp/did/demo/DocsApp.scala` | Implement documentation redirects and retire the obsolete `/apis` endpoint. |
 | `backend/src/test/scala/fmgp/did/demo/DocsAppSuite.scala` | Test `/doc`, `/doc/x`, `/api`, `/api/x`, query-string preservation, and `/apis` retirement. |

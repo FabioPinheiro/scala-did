@@ -1,7 +1,6 @@
 inThisBuild(
   Seq(
-    scalaVersion := "3.3.8", // Also update docs/publishWebsite.sh and any ref to scala-3.3.8
-    // scalaVersion := "3.4.2", // Also update docs/publishWebsite.sh and any ref to scala-3.4.2
+    scalaVersion := "3.9.0", // Also update docs/publishWebsite.sh and any ref to scala-3.9.0
   )
 )
 // publish config
@@ -248,8 +247,7 @@ inThisBuild(
       Seq("-encoding", "UTF-8") ++ // source files are in UTF-8
         // Seq("-explain") ++ // Compile error Explanation
         Seq( // run all/Test/compile before each commit
-          "-source",
-          "future", // TODO user '3.9' // Note 3.10 will start to remove scala 2 logic like implicits
+          "-source:future", // TODO user '3.9' // Note 3.10 will start to remove scala 2 logic like implicits
           "-Wconf:msg=pattern selector should be an instance of Matchable:s" // FIXME REMOVE
         ) ++ // preparation for scala 3.9
         Seq(
@@ -269,7 +267,7 @@ inThisBuild(
           // https://docs.scala-lang.org/scala3/guides/migration/tooling-syntax-rewriting.html
           // scalac -help
           if (true) Seq("-Xfatal-warnings")
-          else Seq("-rewrite", "-source", "future-migration") // preparation for scala 3.9 and 3.10
+          else Seq("-rewrite", "-source:future-migration") // preparation for scala 3.9 and 3.10
         } ++
         // Because DeriveJson(Decoder/Encoder).gen[DidFail] exceeded maximal number of successive inlines (default is 32)
         Seq("-Xmax-inlines", "43")
@@ -500,7 +498,8 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.scalusTest.value,
   )
   .jvmSettings( // scalus
-    libraryDependencies += compilerPlugin(D.scalusPlugin.value cross CrossVersion.full),
+    // libraryDependencies += compilerPlugin(D.scalusPlugin.value cross CrossVersion.full),
+    libraryDependencies += compilerPlugin("org.scalus" % "scalus-plugin_3.8.4" % V.scalus), // FIXME
     libraryDependencies += D.scalusBloxbean.value,
   )
   .jvmSettings(libraryDependencies += D.zioHttp.value)
