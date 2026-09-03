@@ -39,13 +39,13 @@ object Multibase {
 
     def decode: Array[Byte] = {
       val baseOpt = Base.Codes.get(x.charAt(0))
-      if (baseOpt.isEmpty) { // TODO REMOVE ERROR
+      if baseOpt.isEmpty then { // TODO REMOVE ERROR
         throw new IllegalArgumentException("Cannot get Multibase type from input data: " + x)
       }
 
       val base = baseOpt.get
       val rest = x.substring(1)
-      if (rest.isEmpty) Array[Byte]()
+      if rest.isEmpty then Array[Byte]()
       else
         base match {
           case Base.Base1             => throw new UnsupportedOperationException("Base1 is not supported yet!")

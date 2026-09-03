@@ -45,7 +45,7 @@ object AskIntroduction {
   // }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, AskIntroduction] =
-    if (msg.`type` != piuri) Left(s"No able to create AskIntroduction from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create AskIntroduction from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
@@ -120,7 +120,7 @@ object IntroductionStatus {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, IntroductionStatus] =
-    if (msg.`type` != piuri) Left(s"No able to create IntroductionStatus from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create IntroductionStatus from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
@@ -200,7 +200,7 @@ object ForwardRequest {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, ForwardRequest] =
-    if (msg.`type` != piuri) Left(s"No able to create ForwardRequest from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create ForwardRequest from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
@@ -288,9 +288,9 @@ object Request {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, Request] =
-    if (msg.`type` != piuri) Left(s"No able to create Request from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create Request from a Message of type '${msg.`type`}'")
     else
-      for {
+      for
         maybeTo <- msg.to.toSeq.flatten match { // Note: toSeq is from the match
           case Seq()            => Right(None)
           case firstTo +: Seq() => Right(Some(firstTo))
@@ -306,7 +306,7 @@ object Request {
         // msg.thid match
         //   case None => Left(s"'$piuri' MUST have field 'thid'")
         //   case Some(thid) =>
-      } yield Request(
+      yield Request(
         id = msg.id,
         from = from,
         to = maybeTo,
@@ -364,7 +364,7 @@ object Answer {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, Answer] =
-    if (msg.`type` != piuri) Left(s"No able to create Answer from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create Answer from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
@@ -414,7 +414,7 @@ object Handshake {
   def piuri = PIURI("https://decentriqube.com/discovery/1/handshake")
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, Handshake] =
-    if (msg.`type` != piuri) Left(s"No able to create Handshake from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create Handshake from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")

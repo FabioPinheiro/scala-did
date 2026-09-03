@@ -44,10 +44,10 @@ object IndexerUtils {
       case InvalidPrismObject(tx, b, reason)         => ZIO.succeed(maybeEvent)
       case InvalidSignedPrismEvent(tx, b, o, reason) => ZIO.succeed(maybeEvent)
       case op: MySignedPrismEvent[OP]                =>
-        for {
+        for
           state <- ZIO.service[PrismState]
           _ <- state.addEvent(op).orDie // TODO die
-        } yield (maybeEvent)
+        yield (maybeEvent)
   }
 
   case class EventCounter(
@@ -55,7 +55,7 @@ object IndexerUtils {
       invalidSignedPrismEvent: Int = 0,
       signedPrismEvent: Int = 0
   )
-  def countEvents(implicit trace: Trace): ZSink[Any, Nothing, MaybeEvent[OP], Nothing, EventCounter] =
+  def countEvents(using trace: Trace): ZSink[Any, Nothing, MaybeEvent[OP], Nothing, EventCounter] =
     ZSink.foldLeft(EventCounter())((ec, event) => {
       event match
         case InvalidPrismObject(tx, b, reason) =>
@@ -67,7 +67,7 @@ object IndexerUtils {
           ec.copy(signedPrismEvent = ec.signedPrismEvent + 1)
     })
 
-  def loadPrismStateFromChunkFiles: ZIO[IndexerConfig & PrismState, Throwable, PrismState] = for {
+  def loadPrismStateFromChunkFiles: ZIO[IndexerConfig & PrismState, Throwable, PrismState] = for
     indexerConfig <- ZIO.service[IndexerConfig]
     chunkFilesAfter <- fmgp.did.method.prism.vdr.Indexer
       .findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath)
@@ -91,6 +91,6 @@ object IndexerUtils {
     ssiCount <- state.ssiCount
     vdrCount <- state.vdrCount
     _ <- ZIO.log(s"PrismState was $ssiCount SSI and $vdrCount VDR")
-  } yield state
+  yield state
 
 }

@@ -24,7 +24,7 @@ case class Uniresolver(uniresolverServer: String) extends Resolver {
     // if (!methods.contains(did.toDID.namespace)) ZIO.fail(DidMethodNotSupported(did.toDID.namespace))
     // else
     val url = uniresolverServer + did
-    for {
+    for
       data <- ZIO
         .fromPromiseJS(fetch(url, new RequestInit { method = HttpMethod.GET }))
         .flatMap(e => ZIO.fromPromiseJS(e.text()))
@@ -32,7 +32,7 @@ case class Uniresolver(uniresolverServer: String) extends Resolver {
       didResolutionResult <- data.fromJson[DIDResolutionResult] match
         case Left(error)  => ZIO.fail(DIDresolutionFail.fromParseError("DIDResolutionResult", error))
         case Right(value) => ZIO.succeed(value.didDocument)
-    } yield (didResolutionResult)
+    yield (didResolutionResult)
   }
 
 }

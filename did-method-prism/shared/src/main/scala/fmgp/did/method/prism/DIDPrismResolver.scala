@@ -20,20 +20,20 @@ class DIDPrismResolver(baseUrl: String, httpUtils: HttpUtils) extends Resolver {
   }
 }
 object DIDPrismResolver {
-  def make(baseUrl: String): ZIO[HttpUtils, Nothing, DIDPrismResolver] = for {
+  def make(baseUrl: String): ZIO[HttpUtils, Nothing, DIDPrismResolver] = for
     httpUtils <- ZIO.service[HttpUtils]
-  } yield DIDPrismResolver(baseUrl, httpUtils)
+  yield DIDPrismResolver(baseUrl, httpUtils)
 
   def layer(baseUrl: String): URLayer[HttpUtils, Resolver] = layerDIDPrismResolver(baseUrl)
   def layerDIDPrismResolver(baseUrl: String): URLayer[HttpUtils, DIDPrismResolver] = ZLayer.fromZIO(make(baseUrl))
 
   def didDocument(baseUrl: String, did: DIDPrism): ZIO[HttpUtils, ResolverError, DIDDocument] = did match {
     case prism: DIDPrism =>
-      for {
+      for
         httpUtils <- ZIO.service[HttpUtils]
         didDoc <- httpUtils
           .getT[DIDDocument](s"$baseUrl/${did.string}")
           .mapError(ex => DIDresolutionFail.fromThrowable(ex))
-      } yield didDoc
+      yield didDoc
   }
 }

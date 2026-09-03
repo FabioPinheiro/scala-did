@@ -19,7 +19,7 @@ case class DIDWeb(specificId: String) extends DID {
   def paths: Array[String] = specificId.split(":").drop(1)
 
   def url = "https://" + domainName.replace("%3A", ":") + "/" + {
-    if (paths.isEmpty) ".well-known" else paths.mkString("/")
+    if paths.isEmpty then ".well-known" else paths.mkString("/")
   } + "/did.json"
 
 }

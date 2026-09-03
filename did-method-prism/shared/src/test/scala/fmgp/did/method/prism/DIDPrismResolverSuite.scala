@@ -55,7 +55,7 @@ class DIDPrismResolverSuite extends ZSuite {
     "Resolver 'did:prism:00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae'".tag(fmgp.IntregrationTest)
   ) {
     {
-      for {
+      for
         resolver <- ZIO.service[Resolver]
         subject = DIDSubject("did:prism:00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae")
         doc <- resolver.didDocument(subject.asFROMTO)
@@ -79,7 +79,7 @@ class DIDPrismResolverSuite extends ZSuite {
             |  ]
             |}""".stripMargin
         )
-      } yield assertEquals(doc.id, subject)
+      yield assertEquals(doc.id, subject)
     }
       .provide(
         HttpUtilsSuiteAUX.layer >>> DIDPrismResolver.layer(
@@ -92,7 +92,7 @@ class DIDPrismResolverSuite extends ZSuite {
     "Resolver 'did:prism:0108edf719cb2e42aed1fd2b70435da12a77291eb25c294d6095cdfe874607b8'".tag(fmgp.IntregrationTest)
   ) {
     {
-      for {
+      for
         resolver <- ZIO.service[Resolver]
         subject = DIDSubject("did:prism:0108edf719cb2e42aed1fd2b70435da12a77291eb25c294d6095cdfe874607b8")
         doc <- resolver.didDocument(subject.asFROMTO)
@@ -102,7 +102,7 @@ class DIDPrismResolverSuite extends ZSuite {
             |  "id" : "did:prism:0108edf719cb2e42aed1fd2b70435da12a77291eb25c294d6095cdfe874607b8"
             |}""".stripMargin
         )
-      } yield assertEquals(doc.id, subject)
+      yield assertEquals(doc.id, subject)
     }
       .provide(
         HttpUtilsSuiteAUX.layer >>> DIDPrismResolver.layer(

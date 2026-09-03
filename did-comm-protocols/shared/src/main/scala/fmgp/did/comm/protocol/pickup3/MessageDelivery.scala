@@ -53,7 +53,7 @@ object MessageDelivery {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, MessageDelivery] =
-    if (msg.`type` != piuri) Left(s"No able to create MessageDelivery from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create MessageDelivery from a Message of type '${msg.`type`}'")
     else {
       def auxAttachments = msg.attachments.toSeq.flatten
         .map { attachment =>
@@ -71,7 +71,7 @@ object MessageDelivery {
         }
         .map(_.flatMap(kv => kv._2.decodeToString.fromJson[Message].map(m => (kv._1, m))))
         .foldRight(Right(Seq.empty): Either[String, Seq[(String, Message)]]) { case (elem, acc) =>
-          for { xs <- acc; x <- elem } yield x +: xs
+          for  xs <- acc; x <- elem  yield x +: xs
         }
 
       msg.to.toSeq.flatten match // Note: toSeq is from the match

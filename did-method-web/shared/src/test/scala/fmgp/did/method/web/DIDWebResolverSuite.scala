@@ -13,21 +13,21 @@ class DIDWebResolverSuite extends ZSuite {
 
   testZ("Resolver (.well-known) 'did:web:did.fmgp.app'".tag(fmgp.IntregrationTest)) {
     {
-      for {
+      for
         resolver <- ZIO.service[Resolver]
         subject = DIDSubject("did:web:did.fmgp.app")
         doc <- resolver.didDocument(subject.asFROMTO)
-      } yield assertEquals(doc.id, subject)
+      yield assertEquals(doc.id, subject)
     }.provideLayer(DIDWebResolverSuiteUtils.resolverLayer)
   }
 
   testZ("Resolver (with path) 'did:web:did.fmgp.app:fabio'".tag(fmgp.IntregrationTest)) {
     {
-      for {
+      for
         resolver <- ZIO.service[Resolver]
         subject = DIDSubject("did:web:did.fmgp.app:fabio")
         doc <- resolver.didDocument(subject.asFROMTO)
-      } yield assertEquals(doc.id, subject)
+      yield assertEquals(doc.id, subject)
     }.provideLayer(DIDWebResolverSuiteUtils.resolverLayer)
   }
 }

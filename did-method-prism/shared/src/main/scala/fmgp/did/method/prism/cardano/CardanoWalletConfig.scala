@@ -70,7 +70,7 @@ object CardanoWalletConfig {
           w24
         ) =>
       // Check words https://github.com/cardano-foundation/cardano-wallet/blob/master/specifications/mnemonic/english.txt
-      if (words.exists(w => MnemonicEnglish.words.contains(w)))
+      if words.exists(w => MnemonicEnglish.words.contains(w)) then
         // TODO check Checksums https://cips.cardano.org/cip/CIP-4
         Right(CardanoWalletConfig(words.toSeq, passphrase))
       else

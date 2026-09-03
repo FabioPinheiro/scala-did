@@ -33,9 +33,9 @@ class TransportDIDCommOverHTTPSuite extends ZSuite {
 
   // R5: TransportID must use "http"
   testZ("R5 - TransportID should start with transport:http") {
-    for {
+    for
       transport <- TransportDIDCommOverHTTP.make("http://localhost:0")
-    } yield assert(
+    yield assert(
       transport.id.startsWith("transport:http:"),
       s"Expected transport:http: prefix but got: ${transport.id}"
     )
@@ -43,9 +43,9 @@ class TransportDIDCommOverHTTPSuite extends ZSuite {
 
   // R4: SingleTransmission semantics
   testZ("R4 - transmissionType should be SingleTransmission") {
-    for {
+    for
       transport <- TransportDIDCommOverHTTP.make("http://localhost:0")
-    } yield {
+    yield {
       assertEquals(transport.transmissionFlow, Transport.TransmissionFlow.BothWays)
       assertEquals(transport.transmissionType, Transport.TransmissionType.SingleTransmission)
     }
@@ -54,7 +54,7 @@ class TransportDIDCommOverHTTPSuite extends ZSuite {
   // R2: Hub-based inbound supports multiple subscribers (broadcast)
   testZ("R2 - inbound Hub delivers messages to multiple subscribers") {
     ZIO.scoped {
-      for {
+      for
         hub <- Hub.bounded[SignedMessage | EncryptedMessage](3)
 
         // Two subscribers BEFORE publishing (using Hub directly, no HTTP needed)
@@ -66,7 +66,7 @@ class TransportDIDCommOverHTTPSuite extends ZSuite {
 
         result1 <- sub1.take
         result2 <- sub2.take
-      } yield {
+      yield {
         assert(result1 == signedMessage, "Subscriber 1 should receive the message")
         assert(result2 == signedMessage, "Subscriber 2 should receive the message")
       }
@@ -77,7 +77,7 @@ class TransportDIDCommOverHTTPSuite extends ZSuite {
   // This is a very slow
   testZ("R3 - late subscribers do not receive messages published before subscription") {
     ZIO.scoped {
-      for {
+      for
         hub <- Hub.bounded[SignedMessage | EncryptedMessage](3)
 
         // Publish BEFORE any subscriber exists
@@ -86,7 +86,7 @@ class TransportDIDCommOverHTTPSuite extends ZSuite {
         // Subscribe AFTER publish
         sub <- hub.subscribe
         result <- sub.poll
-      } yield assert(
+      yield assert(
         result.isEmpty,
         "Late subscriber should NOT receive messages published before subscription (Hub semantics)"
       )
@@ -104,7 +104,7 @@ class TransportDIDCommOverHTTPSuite extends ZSuite {
 
     ZIO
       .scoped {
-        for {
+        for
           server <- Server.serve(echoRoutes).fork
           port <- ZIO.serviceWithZIO[Server](_.port)
           client <- ZIO.service[Client]
@@ -116,7 +116,7 @@ class TransportDIDCommOverHTTPSuite extends ZSuite {
           // Send should not fail — the server accepts the POST
           _ <- transport.send(signedMessage)
           _ <- server.interrupt
-        } yield ()
+        yield ()
       }
       .provide(Server.defaultWithPort(0), Client.default)
   }
@@ -136,7 +136,7 @@ class TransportDIDCommOverHTTPSuite extends ZSuite {
 
     ZIO
       .scoped {
-        for {
+        for
           server <- Server.serve(echoRoutes).fork
           port <- ZIO.serviceWithZIO[Server](_.port)
           client <- ZIO.service[Client]
@@ -155,7 +155,7 @@ class TransportDIDCommOverHTTPSuite extends ZSuite {
           // The response should be parsed and published to inbound
           result <- inboundFiber.join
           _ <- server.interrupt
-        } yield assert(
+        yield assert(
           result.flatten.isDefined,
           "HTTP response containing a DIDComm message should be published to inbound"
         )

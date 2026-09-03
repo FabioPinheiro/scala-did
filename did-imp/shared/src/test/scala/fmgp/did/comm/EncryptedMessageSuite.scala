@@ -113,10 +113,10 @@ class EncryptedMessageSuite extends ZSuite {
           (vmr, key)
         }
 
-        for {
+        for
           data <- authDecryptMessage(senderKey, recipientKidsKeys, message) // .orDie
           // obj <- ZIO.fromEither(data.fromJson[PlaintextMessageClass]) // .orDieWith(str => RuntimeException(str))
-        } yield assertEquals(data, expeted)
+        yield assertEquals(data, expeted)
       case data => ZIO.dieMessage(data.toString)
     }
   }
@@ -169,7 +169,7 @@ class EncryptedMessageSuite extends ZSuite {
     ) match {
       case (Right(ks), Right(message)) =>
         assertEquals(ks.keys.size, 9)
-        for {
+        for
           _ <- ZIO.unit
           // {"epk":{"kty":"EC","crv":"P-521",
           //        "x":"AblhyUD5LX4OsX8FE5Z84A_OBa8b8waUHWHQ1m0gs8nHUDD7rH9IEdYo2TK1PaNakNZJNxkQAX-ZRLVkPh6uxy2M",
@@ -209,7 +209,7 @@ class EncryptedMessageSuite extends ZSuite {
             assert(data3.isInstanceOf[SignedMessage])
             data3.asInstanceOf[SignedMessage]
           }
-        } yield assertEquals(message3, SignedMessageExamples.exampleSignatureEdDSA_obj)
+        yield assertEquals(message3, SignedMessageExamples.exampleSignatureEdDSA_obj)
       case data => ZIO.dieMessage(data.toString)
     }
 
@@ -239,9 +239,9 @@ class EncryptedMessageSuite extends ZSuite {
           (vmr, key)
         }
 
-        for {
+        for
           data <- authDecryptMessage(senderKey, recipientKidsKeys, message)
-        } yield assert(data.isInstanceOf[PlaintextMessage])
+        yield assert(data.isInstanceOf[PlaintextMessage])
       // val effect = authDecrypt(senderKey, recipientKidsKeys, message)
       // effect.flip.map(e => assert(e.isInstanceOf[MACCheckFailed.type]))
 
@@ -290,7 +290,7 @@ class EncryptedMessageSuite extends ZSuite {
           (VerificationMethodReferenced(kid), key.toPublicKey)
         }
 
-        for {
+        for
           message <- encrypt(kidKeys, data)
           _ = assert(message.`protected`.obj.isInstanceOf[AnonProtectedHeader])
           _ = assert(message.recipients.size == 3)
@@ -302,7 +302,7 @@ class EncryptedMessageSuite extends ZSuite {
           }.flatten
           data <- anonDecryptMessage(recipientKidsKeys, message)
           // obj <- ZIO.fromEither(data.fromJson[PlaintextMessageClass])
-        } yield assertEquals(data, example2encrypt)
+        yield assertEquals(data, example2encrypt)
       case data => fail(data.toString)
     }
   }
@@ -321,7 +321,7 @@ class EncryptedMessageSuite extends ZSuite {
           (VerificationMethodReferenced(kid), key.toPublicKey)
         }
 
-        for {
+        for
           message <- encrypt(kidKeys, data)
           _ = assert(message.`protected`.obj.isInstanceOf[AnonProtectedHeader])
           _ = assert(message.recipients.size == 2)
@@ -333,7 +333,7 @@ class EncryptedMessageSuite extends ZSuite {
           }.flatten
           data <- anonDecryptMessage(recipientKidsKeys, message)
           // obj <- ZIO.fromEither(data.fromJson[PlaintextMessageClass])
-        } yield assertEquals(data, example2encrypt)
+        yield assertEquals(data, example2encrypt)
 
       case data => fail(data.toString)
     }
@@ -353,7 +353,7 @@ class EncryptedMessageSuite extends ZSuite {
           (VerificationMethodReferenced(kid), key.toPublicKey)
         }
 
-        for {
+        for
           message <- encrypt(kidKeys, data)
           _ = assert(message.`protected`.obj.isInstanceOf[AnonProtectedHeader])
           _ = assert(message.recipients.size == 2)
@@ -365,7 +365,7 @@ class EncryptedMessageSuite extends ZSuite {
           }.flatten
           data <- anonDecryptMessage(recipientKidsKeys, message)
           // obj <- ZIO.fromEither(data.fromJson[PlaintextMessageClass])
-        } yield assertEquals(data, example2encrypt)
+        yield assertEquals(data, example2encrypt)
 
       case data => fail(data.toString)
     }
@@ -391,7 +391,7 @@ class EncryptedMessageSuite extends ZSuite {
           (VerificationMethodReferenced(kid), key.toPublicKey)
         }
 
-        for {
+        for
           message <- authEncrypt(senderKidKey, kidKeys, data)
           _ = assert(message.`protected`.obj.isInstanceOf[AuthProtectedHeader])
           _ = assert(message.recipients.size == 3)
@@ -403,7 +403,7 @@ class EncryptedMessageSuite extends ZSuite {
           }.flatten
           data <- authDecryptMessage(senderKey.toPublicKey, recipientKidsKeys, message)
           // obj <- ZIO.fromEither(data.fromJson[PlaintextMessageClass])
-        } yield assertEquals(data, example2encrypt)
+        yield assertEquals(data, example2encrypt)
 
       case data => fail(data.toString)
     }
@@ -428,7 +428,7 @@ class EncryptedMessageSuite extends ZSuite {
           (VerificationMethodReferenced(kid), key.toPublicKey)
         }
 
-        for {
+        for
           message <- authEncrypt(senderKidKey, kidKeys, data)
           _ = assert(message.`protected`.obj.isInstanceOf[AuthProtectedHeader])
           _ = assert(message.recipients.size == 2)
@@ -440,7 +440,7 @@ class EncryptedMessageSuite extends ZSuite {
           }.flatten
           data <- authDecryptMessage(senderKey.toPublicKey, recipientKidsKeys, message)
           // obj <- ZIO.fromEither(data.fromJson[PlaintextMessageClass])
-        } yield assertEquals(data, example2encrypt)
+        yield assertEquals(data, example2encrypt)
 
       case data => fail(data.toString)
     }

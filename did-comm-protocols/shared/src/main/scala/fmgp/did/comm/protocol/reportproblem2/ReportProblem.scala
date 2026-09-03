@@ -112,7 +112,7 @@ object ProblemReport {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, ProblemReport] = {
-    if (msg.`type` != piuri) Left(s"No able to create ProblemReport from a Message of the type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create ProblemReport from a Message of the type '${msg.`type`}'")
     else
       msg.from match
         case None       => Left(s"'$piuri' MUST have field 'from'")

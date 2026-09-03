@@ -48,7 +48,7 @@ class TransportDIDCommOverHTTP(
       val contentTypeHeader = msg match
         case _: SignedMessage    => MediaTypes.SIGNED.pipe(e => Header.ContentType(MediaType(e.mainType, e.subType)))
         case _: EncryptedMessage => MediaTypes.ENCRYPTED.pipe(e => Header.ContentType(MediaType(e.mainType, e.subType)))
-      for {
+      for
         res <- Client
           .batched( // Shound we use .batched() or .streaming()testAll
             Request
@@ -67,11 +67,11 @@ class TransportDIDCommOverHTTP(
           case Some(msg) => publishInbound(msg)
           case None      => ZIO.unit
         }
-      } yield ()
+      yield ()
     }
 
   private def parseResponse(data: String): UIO[Option[SignedMessage | EncryptedMessage]] =
-    if (data.isBlank) ZIO.succeed(None)
+    if data.isBlank then ZIO.succeed(None)
     else
       data.fromJson[SignedOrEncryptedMessage](using SignedOrEncryptedMessage.decoder) match
         case Left(error) =>
@@ -87,15 +87,15 @@ object TransportDIDCommOverHTTP {
   def make(
       destination: String,
       boundSize: Int = 3,
-  ): ZIO[Any, Nothing, TransportDIDComm[Client & Scope]] = for {
+  ): ZIO[Any, Nothing, TransportDIDComm[Client & Scope]] = for
     inbound <- Hub.bounded[SignedMessage | EncryptedMessage](boundSize)
-  } yield TransportDIDCommOverHTTP(destination, inbound)
+  yield TransportDIDCommOverHTTP(destination, inbound)
 
   def makeWithEnvironment(
       destination: String,
       boundSize: Int = 3,
       env: ZEnvironment[Client & Scope]
-  ): ZIO[Any, Nothing, TransportDIDComm[Any]] = for {
+  ): ZIO[Any, Nothing, TransportDIDComm[Any]] = for
     inbound <- Hub.bounded[SignedMessage | EncryptedMessage](boundSize)
-  } yield TransportDIDCommOverHTTP(destination, inbound).provide(env)
+  yield TransportDIDCommOverHTTP(destination, inbound).provide(env)
 }

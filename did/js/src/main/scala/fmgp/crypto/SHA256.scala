@@ -26,35 +26,33 @@ object SHA256ZIO {
   def digest(str: String): UIO[Array[Byte]] = {
     val encoder = TextEncoder()
     val data = encoder.encode(str)
-    for {
-      hashBuffer <- ZIO
-        .fromPromiseJS(
-          // BufferSource
-          crypto.subtle
-            .digest(
-              HashAlgorithm.`SHA-256`,
-              data
-            )
-            .asInstanceOf[js.Promise[ArrayBuffer]]
-        )
-      // .catchAll(ex => ZIO.fail(SomeThrowable(ex))) // TODO ERROR Type
-    } yield arrayBuffer2ByteArray(hashBuffer)
+    for hashBuffer <- ZIO
+      .fromPromiseJS(
+        // BufferSource
+        crypto.subtle
+          .digest(
+            HashAlgorithm.`SHA-256`,
+            data
+          )
+          .asInstanceOf[js.Promise[ArrayBuffer]]
+      )
+    // .catchAll(ex => ZIO.fail(SomeThrowable(ex))) // TODO ERROR Type
+    yield arrayBuffer2ByteArray(hashBuffer)
   }.orDie
 
   def digest(data: Array[Byte]): UIO[Array[Byte]] = {
     import scala.scalajs.js.JSConverters.*
-    for {
-      hashBuffer <- ZIO
-        .fromPromiseJS(
-          // BufferSource
-          crypto.subtle
-            .digest(
-              HashAlgorithm.`SHA-256`,
-              byteArray2Uint8Array(data)
-            )
-            .asInstanceOf[js.Promise[ArrayBuffer]]
-        )
-      // .catchAll(ex => ZIO.fail(SomeThrowable(ex))) // TODO ERROR Type
-    } yield arrayBuffer2ByteArray(hashBuffer)
+    for hashBuffer <- ZIO
+      .fromPromiseJS(
+        // BufferSource
+        crypto.subtle
+          .digest(
+            HashAlgorithm.`SHA-256`,
+            byteArray2Uint8Array(data)
+          )
+          .asInstanceOf[js.Promise[ArrayBuffer]]
+      )
+    // .catchAll(ex => ZIO.fail(SomeThrowable(ex))) // TODO ERROR Type
+    yield arrayBuffer2ByteArray(hashBuffer)
   }.orDie
 }

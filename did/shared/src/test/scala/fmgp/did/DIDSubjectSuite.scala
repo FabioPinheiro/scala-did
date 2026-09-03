@@ -206,7 +206,7 @@ class DIDSubjectSuite extends FunSuite {
     didSubjects.foreach(did =>
       didSubjectQs.foreach { didQ =>
         test(
-          s"Compare DIDSubject(Q) - commutative property: '$did' ${if (did.sameSubjectQ(didQ)) "==" else "!="} '$didQ'"
+          s"Compare DIDSubject(Q) - commutative property: '$did' ${if did.sameSubjectQ(didQ) then "==" else "!="} '$didQ'"
         ) {
           assertEquals(did.sameSubjectQ(didQ), didQ.sameSubject(did))
         }

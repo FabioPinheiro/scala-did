@@ -57,7 +57,7 @@ private[prism] trait PrismStateReadMongoDBTrait extends PrismStateRead {
   override def cursor: ZIO[Any, Nothing, cardano.EventCursor]
 
   override def ssi2eventsRef: ZIO[Any, Nothing, Map[DIDSubject, Seq[EventRef]]] = {
-    (for {
+    (for
       coll <- collection.mapError(ex => StorageException(ex))
       cursor = coll
         .find(selector = BSONDocument.empty)
@@ -77,10 +77,10 @@ private[prism] trait PrismStateReadMongoDBTrait extends PrismStateRead {
             .toSeq
           (didSubject, eventRefs)
         }
-    } yield didEvents).orDie // Convert all errors to defects since return type is Nothing
+    yield didEvents).orDie // Convert all errors to defects since return type is Nothing
   }
   override def vdr2eventsRef: ZIO[Any, Nothing, Map[RefVDR, Seq[EventRef]]] = {
-    (for {
+    (for
       coll <- collection.mapError(ex => StorageException(ex))
       cursor = coll
         .find(selector = BSONDocument.empty)
@@ -100,11 +100,11 @@ private[prism] trait PrismStateReadMongoDBTrait extends PrismStateRead {
             .toSeq
           (vdrRef, eventRefs)
         }
-    } yield vdrEvents).orDie // Convert all errors to defects since return type is Nothing
+    yield vdrEvents).orDie // Convert all errors to defects since return type is Nothing
   }
 
   override def getEventsIdBySSI(ssi: DIDSubject): ZIO[Any, Nothing, Seq[EventRef]] = {
-    (for {
+    (for
       prism <- ZIO
         .fromEither(DIDPrism.fromDID(ssi))
         .map(did => EventHash.fromPRISM(did))
@@ -113,22 +113,22 @@ private[prism] trait PrismStateReadMongoDBTrait extends PrismStateRead {
       eventRefs = events
         .map(e => EventRef(e.event.b, e.event.o, e.event.eventHash))
         .sortBy(ref => (ref.b, ref.o))
-    } yield eventRefs).orDie // FIXME Convert all errors to defects since return type is Nothing
+    yield eventRefs).orDie // FIXME Convert all errors to defects since return type is Nothing
   }
   override def getEventsIdByVDR(id: RefVDR): ZIO[Any, Nothing, Seq[EventRef]] = {
-    (for {
+    (for
       rootHash <- ZIO.succeed(EventHash.fromHex(id.hex))
       events <- findALlRelatedEvents(rootHash)
       eventRefs = events
         .map(e => EventRef(e.event.b, e.event.o, e.event.eventHash))
         .sortBy(ref => (ref.b, ref.o))
-    } yield eventRefs).orDie // FIXME Convert all errors to defects since return type is Nothing
+    yield eventRefs).orDie // FIXME Convert all errors to defects since return type is Nothing
   }
 
   override def getEventsForSSI(ssi: DIDSubject): ZIO[Any, Throwable, Seq[
     MySignedPrismEvent[CreateDidOP | UpdateDidOP | DeactivateDidOP]
   ]] = {
-    for {
+    for
       prism <- ZIO
         .fromEither(DIDPrism.fromDID(ssi))
         .map(did => EventHash.fromPRISM(did))
@@ -142,13 +142,13 @@ private[prism] trait PrismStateReadMongoDBTrait extends PrismStateRead {
         case Left(errorStr)          => ZIO.dieMessage(errorStr) // FIXME
         case Right(signedPrismEvent) => ZIO.succeed(signedPrismEvent)
       }
-    } yield (seqSignedPrismEvent)
+    yield (seqSignedPrismEvent)
   }
 
   override def getEventsForVDR(refVDR: RefVDR): ZIO[Any, Throwable, Seq[
     MySignedPrismEvent[CreateStorageEntryOP | UpdateStorageEntryOP | DeactivateStorageEntryOP]
   ]] = {
-    for {
+    for
       rootHash <- ZIO.succeed(EventHash.fromHex(refVDR.hex))
       seq <- findALlRelatedEvents(rootHash)
       tmp = seq
@@ -159,17 +159,17 @@ private[prism] trait PrismStateReadMongoDBTrait extends PrismStateRead {
         case Left(errorStr)          => ZIO.dieMessage(errorStr) // FIXME
         case Right(signedPrismEvent) => ZIO.succeed(signedPrismEvent)
       }
-    } yield (seqSignedPrismEvent)
+    yield (seqSignedPrismEvent)
   }
 
   override def getEventByHash(refHash: EventHash): ZIO[Any, Exception, Option[MySignedPrismEvent[OP]]] =
-    for {
+    for
       _ <- ZIO.logInfo(s"getEventByHash $refHash")
       ret <- findEventByHash(refHash)
-    } yield ret.map(_.event)
+    yield ret.map(_.event)
 
   override def getEventsAfter(from: cardano.EventCursor): ZIO[Any, Throwable, Seq[EventWithRootRef]] =
-    for {
+    for
       coll <- collection.mapError(ex => StorageException(ex))
       // (b > cb) OR (b == cb AND o > co)
       selector = BSONDocument(
@@ -185,13 +185,13 @@ private[prism] trait PrismStateReadMongoDBTrait extends PrismStateRead {
       allEvents <- ZIO
         .fromFuture(implicit ec => cursor.collect(maxDocs = -1))
         .mapError(ex => StorageException(StorageThrowable(ex)))
-    } yield allEvents.toSeq
+    yield allEvents.toSeq
 
   // ## DB methods ##
 
   /** Finds event by hash in main collection. */
   private[prism] def findEventByHash(refHash: EventHash): ZIO[Any, Exception, Option[EventWithRootRef]] =
-    for {
+    for
       coll <- collection.mapError(ex => StorageException(ex))
       cursor = coll.find(selector = BSONDocument("_id" -> refHash)).cursor[EventWithRootRef]()
       maybeEventWithRootRef <-
@@ -199,11 +199,11 @@ private[prism] trait PrismStateReadMongoDBTrait extends PrismStateRead {
           .fromFuture(implicit ec => cursor.collect(maxDocs = 1))
           .mapError(ex => StorageException(StorageThrowable(ex)))
           .map(_.headOption)
-    } yield maybeEventWithRootRef
+    yield maybeEventWithRootRef
 
   /** Finds all events in a chain by rootRef. */
   private[prism] def findALlRelatedEvents(rootHash: EventHash): ZIO[Any, Exception, Seq[EventWithRootRef]] =
-    for {
+    for
       coll <- collection
         .mapError(ex => StorageException(ex))
       cursor = coll
@@ -213,11 +213,11 @@ private[prism] trait PrismStateReadMongoDBTrait extends PrismStateRead {
         ZIO
           .fromFuture(implicit ec => cursor.collect(maxDocs = -1))
           .mapError(ex => StorageException(StorageThrowable(ex)))
-    } yield allRelatedEvents.toSeq
+    yield allRelatedEvents.toSeq
 
   /** Inserts event with rootRef into main collection. */
   private[prism] def insertEvent(eventWithRootRef: EventWithRootRef): ZIO[Any, StorageException, Unit] =
-    for {
+    for
       coll <- collection.mapError(ex => StorageException(ex))
       insertResult <- ZIO
         .fromFuture(implicit ec => coll.insert.one(eventWithRootRef))
@@ -229,7 +229,7 @@ private[prism] trait PrismStateReadMongoDBTrait extends PrismStateRead {
         }
         .tapError(err => ZIO.logError(s"Fail to insert event: ${err.getMessage}"))
         .mapError(ex => StorageException(StorageThrowable(ex)))
-    } yield ()
+    yield ()
 
 }
 
@@ -237,7 +237,7 @@ private[prism] trait PrismStateReadMongoDBTrait extends PrismStateRead {
 case class PrismStateReadMongoDB(reactiveMongoApi: ReactiveMongoApi) extends PrismStateReadMongoDBTrait {
 
   override def cursor: ZIO[Any, Nothing, cardano.EventCursor] = {
-    (for {
+    (for
       coll <- collection.mapError(ex => StorageException(ex))
       mEventCursor <- ZIO
         .fromFuture(implicit ec =>
@@ -248,7 +248,7 @@ case class PrismStateReadMongoDB(reactiveMongoApi: ReactiveMongoApi) extends Pri
         )
 
       latestCursor = (Seq(cardano.EventCursor.init) ++ mEventCursor).sorted.last
-    } yield latestCursor).orDie // Convert all errors to defects since return type is Nothing
+    yield latestCursor).orDie // Convert all errors to defects since return type is Nothing
   }
 
 }
@@ -307,7 +307,7 @@ case class PrismStateMongoDB(reactiveMongoApi: ReactiveMongoApi) extends PrismSt
     .mapError(ex => StorageCollection(ex))
 
   override def cursor: ZIO[Any, Nothing, cardano.EventCursor] = {
-    (for {
+    (for
       coll <- collection.mapError(ex => StorageException(ex))
       mEventCursor <- ZIO
         .fromFuture(implicit ec =>
@@ -325,7 +325,7 @@ case class PrismStateMongoDB(reactiveMongoApi: ReactiveMongoApi) extends PrismSt
             .one[EventCursor]
         )
       latestCursor = (Seq(cardano.EventCursor.init) ++ mEventCursor ++ mLostEventCursor).sorted.last
-    } yield latestCursor).orDie // Convert all errors to defects since return type is Nothing
+    yield latestCursor).orDie // Convert all errors to defects since return type is Nothing
   }
 
   /** Adds event to MongoDB with automatic rootRef tracking.
@@ -340,7 +340,7 @@ case class PrismStateMongoDB(reactiveMongoApi: ReactiveMongoApi) extends PrismSt
     *   VoidOP operations are not supported and will fail with RuntimeException
     */
   override protected def addEventImpl(event: MySignedPrismEvent[OP]): ZIO[Any, Exception, Unit] = {
-    for {
+    for
       _ <- ZIO.logInfo(s"inserting event '${event.eventHash.hex}'")
       coll <- collection
         .mapError(ex => StorageException(ex))
@@ -367,7 +367,7 @@ case class PrismStateMongoDB(reactiveMongoApi: ReactiveMongoApi) extends PrismSt
                 s"Event '${event.eventHash}' has previousEvent '${previousEventHash}' but is not in DB."
               ) *> insertLostEvent(event)
           }
-    } yield ()
+    yield ()
   }
 
   /** Inserts orphaned event into lost collection.
@@ -375,7 +375,7 @@ case class PrismStateMongoDB(reactiveMongoApi: ReactiveMongoApi) extends PrismSt
     * Used when an event's parent is not found in the main collection.
     */
   private[prism] def insertLostEvent(event: MySignedPrismEvent[OP]): ZIO[Any, StorageException, Unit] =
-    for {
+    for
       coll <- lostCollection.mapError(ex => StorageException(ex))
       insertResult <- ZIO
         .fromFuture(implicit ec => coll.insert.one(event))
@@ -387,11 +387,11 @@ case class PrismStateMongoDB(reactiveMongoApi: ReactiveMongoApi) extends PrismSt
         }
         .tapError(err => ZIO.logError(s"fail to insert in lost colletion: ${err.getMessage}"))
         .mapError(ex => StorageException(StorageThrowable(ex)))
-    } yield ()
+    yield ()
 
   /** Finds event by hash in lost collection. */
   private[prism] def findLostEventByHash(refHash: EventHash): ZIO[Any, Exception, Option[MySignedPrismEvent[OP]]] =
-    for {
+    for
       coll <- lostCollection.mapError(ex => StorageException(ex))
       cursor = coll.find(selector = BSONDocument("_id" -> refHash)).cursor[MySignedPrismEvent[OP]]()
       maybeEventWithRootRef <-
@@ -399,5 +399,5 @@ case class PrismStateMongoDB(reactiveMongoApi: ReactiveMongoApi) extends PrismSt
           .fromFuture(implicit ec => cursor.collect(maxDocs = 1))
           .mapError(ex => StorageException(StorageThrowable(ex)))
           .map(_.headOption)
-    } yield maybeEventWithRootRef
+    yield maybeEventWithRootRef
 }

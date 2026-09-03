@@ -28,10 +28,10 @@ class AgentProgramImp(
       msg: SignedMessage | EncryptedMessage,
       transport: TransportDIDComm[Any]
   ): URIO[Operations & Resolver, Unit] = {
-    for {
+    for
       job <- acceptTransport(transport)
       ret <- jobExecuterProtocol(msg, transport) // Run a single time (for the message already read)
-    } yield ()
+    yield ()
   }
 
   private def jobExecuterProtocol(
@@ -49,7 +49,7 @@ class AgentProgramImp(
     DidFail,
     Unit
   ] = ZIO.logAnnotate("msg_sha256", msg.sha256) {
-    for {
+    for
       _ <- ZIO.logDebug(s"Receive message with sha256: '${msg.sha256}'")
       agent <- ZIO.service[Agent]
       recipientsSubject <- msg match
@@ -60,22 +60,22 @@ class AgentProgramImp(
         ZIO.foreach(recipientsSubject)(subject => m.publish(subject.asTO, msg))
       }
       _ <-
-        if (!recipientsSubject.contains(agent.id.asDIDSubject)) {
+        if !recipientsSubject.contains(agent.id.asDIDSubject) then {
           ZIO.logError(s"This agent '${agent.id.asDIDSubject}' is not a recipient") // TODO send a FAIL!!!!!!
         } else {
-          for {
+          for
 
             pMsg <- AgentProgramImp.decrypt(msg)
             _ <- pMsg.from match
               case None       => ZIO.unit
               case Some(from) => transportManager.update { _.link(from.asFROMTO, transport) }
             _ <- processMessage(pMsg, transport)
-          } yield ()
+          yield ()
         }
-    } yield ()
+    yield ()
   }
 
-  private def processMessage(plaintextMessage: PlaintextMessage, transport: TransportDIDComm[Any]) = for {
+  private def processMessage(plaintextMessage: PlaintextMessage, transport: TransportDIDComm[Any]) = for
     action <- protocolHandler
       .program(plaintextMessage)
       .tapError(ex => ZIO.logError(s"Error when execute Protocol: $ex"))
@@ -83,7 +83,7 @@ class AgentProgramImp(
       case NoReply         => ZIO.unit // TODO Maybe infor transport of immediately reply
       case reply: AnyReply =>
         import fmgp.did.comm.Operations.*
-        for {
+        for
           message <- reply.msg.to.toSeq.flatten match {
             case Seq() =>
               reply.msg.from match
@@ -96,7 +96,7 @@ class AgentProgramImp(
           }
           _ <- plaintextMessage.return_route match
             case Some(ReturnRoute.none) | None =>
-              for {
+              for
                 transportDispatcher: TransportDispatcher <- transportManager.get
                 _ <- reply.msg.to.toSeq.flatten match {
                   case Seq() => ZIO.logWarning("This reply message will be sented to nobody: " + reply.msg.toJson)
@@ -105,10 +105,10 @@ class AgentProgramImp(
                       transportDispatcher.send(to = to, msg = message, thid = reply.msg.thid, pthid = reply.msg.pthid)
                     }
                 }
-              } yield ()
+              yield ()
             case Some(ReturnRoute.all) | Some(ReturnRoute.thread) => transport.send(message)
-        } yield ()
-  } yield ()
+        yield ()
+  yield ()
 }
 
 object AgentProgramImp {
@@ -119,10 +119,10 @@ object AgentProgramImp {
       agent: Agent,
       protocolHandler: ProtocolExecuter[Resolver & Agent & Operations, DidFail]
   ): ZIO[TransportFactory, Nothing, AgentProgram] =
-    for {
+    for
       transportManager <- TransportManager.make
       agentProgram = new AgentProgramImp(agent, transportManager, protocolHandler)
-    } yield agentProgram
+    yield agentProgram
 
   // TODO move into the class
   val basicProtocolHandlerLayer: ULayer[ProtocolExecuter[Services, DidFail]] =
@@ -135,7 +135,7 @@ object AgentProgramImp {
 
   // TODO move to another place & move validations and build a contex
   def decrypt(msg: Message): ZIO[Agent & Resolver & Operations, DidFail, PlaintextMessage] =
-    for {
+    for
       ops <- ZIO.service[Operations]
       plaintextMessage <- msg match
         case pm: PlaintextMessage => ZIO.succeed(pm)
@@ -153,6 +153,6 @@ object AgentProgramImp {
                 case Left(error) => ZIO.fail(FailToParse(error))
                 case Right(msg2) => decrypt(msg2)
           }
-    } yield (plaintextMessage)
+    yield (plaintextMessage)
 
 }

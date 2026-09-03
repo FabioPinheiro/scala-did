@@ -44,7 +44,7 @@ trait Operations {
     authDecryptRaw(msg).flatMap(Operations.parseMessage(_))
 
   def verify2PlaintextMessage(msg: SignedMessage): ZIO[Resolver, CryptoFailed, PlaintextMessage] =
-    for {
+    for
       payload <- verify(msg).flatMap {
         case false => ZIO.fail(SignatureVerificationFailed)
         case true  => ZIO.succeed(msg.payload)
@@ -52,7 +52,7 @@ trait Operations {
       plaintextMessage <- payload.content.fromJson[PlaintextMessage] match
         case Left(error)  => ZIO.fail(CryptoFailToParse(error))
         case Right(value) => ZIO.succeed(value)
-    } yield plaintextMessage
+    yield plaintextMessage
 
 }
 

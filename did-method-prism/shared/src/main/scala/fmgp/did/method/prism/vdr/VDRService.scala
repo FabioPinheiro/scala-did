@@ -27,28 +27,28 @@ trait VDRService extends VDRPassiveService {
       vdrKey: Secp256k1PrivateKey,
       data: Array[Byte]
   ): ZIO[Any, Throwable, (RefVDR, SignedPrismEvent, TxHash)] =
-    for {
+    for
       tmp <- dryCreateBytes(didPrism, vdrKey, data)
       (refVDR, signedPrismEvent) = tmp
       txHash <- submit(signedPrismEvent)
-    } yield (refVDR, signedPrismEvent, txHash)
+    yield (refVDR, signedPrismEvent, txHash)
   def updateBytes(
       eventRef: RefVDR,
       vdrKey: Secp256k1PrivateKey,
       data: Array[Byte]
   ): ZIO[Any, Throwable, (EventHash, SignedPrismEvent, TxHash)] =
-    for {
+    for
       tmp <- dryUpdateBytes(eventRef, vdrKey, data)
       (refVDR, signedPrismEvent) = tmp
       txHash <- submit(signedPrismEvent)
-    } yield (refVDR, signedPrismEvent, txHash)
+    yield (refVDR, signedPrismEvent, txHash)
   def deactivate(
       eventRef: RefVDR,
       vdrKey: Secp256k1PrivateKey
   ): ZIO[Any, Throwable, (EventHash, SignedPrismEvent, TxHash)] =
-    for {
+    for
       tmp <- dryDeactivate(eventRef, vdrKey)
       (refVDR, signedPrismEvent) = tmp
       txHash <- submit(signedPrismEvent)
-    } yield (refVDR, signedPrismEvent, txHash)
+    yield (refVDR, signedPrismEvent, txHash)
 }

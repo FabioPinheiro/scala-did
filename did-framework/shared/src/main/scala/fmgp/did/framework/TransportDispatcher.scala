@@ -24,7 +24,7 @@ trait TransportDispatcher extends TransportFactory {
       to: TO,
       msg: SignedMessage | EncryptedMessage
   ): ZIO[Resolver & Agent & Operations, DidFail, Either[String, TransportDIDComm[Any]]] =
-    for {
+    for
       resolver <- ZIO.service[Resolver]
       doc <- resolver.didDocument(to).mapError(ResolverErrorWarp(_))
       services = {
@@ -36,15 +36,15 @@ trait TransportDispatcher extends TransportFactory {
         case None => ZIO.logWarning(s"No url to send message") *> ZIO.succeed(Left("No url to send message"))
         case Some(did) if did.startsWith("did:") => // make it more type safe
           val mediator = DIDSubject(did).asTO
-          for {
+          for
             forwardMessage <- makeForwardMessage(to = mediator, next = to.toDIDSubject, msg)
             ret <- sendViaDIDCommMessagingService(mediator, forwardMessage)
-          } yield ret
+          yield ret
         case Some(uri) =>
-          for {
+          for
             _ <- ZIO.log(s"Send to uri: $uri")
             transport <- openTransport(uri)
             _ <- transport.send(msg)
-          } yield Right(transport)
-    } yield transportOrError
+          yield Right(transport)
+    yield transportOrError
 }

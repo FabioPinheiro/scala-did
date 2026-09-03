@@ -19,10 +19,10 @@ object DIDResolverProxy {
 
   // /** see https://identity.foundation/peer-did-method-spec/#generation-method */
   def didDocument(baseUrl: String, did: DID): ZIO[HttpUtils, ResolverError, DIDDocument] =
-    for {
+    for
       httpUtils <- ZIO.service[HttpUtils]
       didDoc <- httpUtils
         .getT[DIDDocument](s"$baseUrl/${did.string}")
         .mapError(ex => DIDresolutionFail.fromThrowable(ex))
-    } yield didDoc
+    yield didDoc
 }

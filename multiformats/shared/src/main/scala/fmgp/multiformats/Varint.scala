@@ -36,7 +36,7 @@ object Varint {
   def encodeInt(num: Int): Varint = {
     @tailrec
     def rec(value: Int, acc: Array[Byte]): Array[Byte] =
-      if ((value & INT_REST_BITES) == 0) acc :+ (value & LOW_7_BITS).toByte
+      if (value & INT_REST_BITES) == 0 then acc :+ (value & LOW_7_BITS).toByte
       else rec(value >>> 7, acc :+ ((value & LOW_7_BITS) | MSB).toByte)
 
     Varint(rec(num, Array()))
@@ -45,7 +45,7 @@ object Varint {
   def encodeLong(num: Long): Varint = {
     @tailrec
     def rec(value: Long, acc: Array[Byte]): Array[Byte] =
-      if ((value & LONG_REST_BITES) == 0) acc :+ (value & LOW_7_BITS).toByte
+      if (value & LONG_REST_BITES) == 0 then acc :+ (value & LOW_7_BITS).toByte
       else rec(value >>> 7, acc :+ ((value & LOW_7_BITS) | MSB).toByte)
 
     Varint(rec(num, Array()))
@@ -55,8 +55,8 @@ object Varint {
   def decodeToInt(bytes: Varint, offset: Int): Either[String, (Int, Int)] = {
     @tailrec
     def rec(index: Int, shift: Int, acc: Int): Either[String, (Int, Int)] =
-      if (index >= bytes.length) Left("Cannot find the ending Byte")
-      else if ((bytes(index) & MSB) == 0) Right(acc | (bytes(index) << shift), index + 1 - offset)
+      if index >= bytes.length then Left("Cannot find the ending Byte")
+      else if (bytes(index) & MSB) == 0 then Right(acc | (bytes(index) << shift), index + 1 - offset)
       else rec(index + 1, shift + 7, acc | ((bytes(index) & LOW_7_BITS) << shift))
     rec(offset, 0, 0)
   }
@@ -65,8 +65,8 @@ object Varint {
   def decodeToLong(bytes: Varint, offset: Int): Either[String, (Long, Int)] = {
     @tailrec
     def rec(index: Int, shift: Long, acc: Long): Either[String, (Long, Int)] =
-      if (index >= bytes.length) Left("Cannot find the ending Byte")
-      else if ((bytes(index) & MSB) == 0) Right(acc | (bytes(index).toLong << shift), index + 1 - offset)
+      if index >= bytes.length then Left("Cannot find the ending Byte")
+      else if (bytes(index) & MSB) == 0 then Right(acc | (bytes(index).toLong << shift), index + 1 - offset)
       else rec(index + 1, shift + 7, acc | ((bytes(index).toLong & LOW_7_BITS) << shift))
 
     rec(offset, 0L, 0L)
@@ -75,8 +75,8 @@ object Varint {
   def extractLength(bytes: Array[Byte], offset: Int): Int = {
     @tailrec
     def rec(index: Int): Int =
-      if (index >= bytes.length) 0
-      else if ((bytes(index) & MSB) == 0) index + 1 - offset
+      if index >= bytes.length then 0
+      else if (bytes(index) & MSB) == 0 then index + 1 - offset
       else rec(index + 1)
 
     rec(offset)

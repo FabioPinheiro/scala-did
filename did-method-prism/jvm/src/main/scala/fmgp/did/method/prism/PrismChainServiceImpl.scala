@@ -13,7 +13,7 @@ case class PrismChainServiceImpl(
       prismEvents: Seq[SignedPrismEvent],
       msg: Option[String],
   ): ZIO[Any, Throwable, TxHash] = {
-    for {
+    for
       // tx <- ZIO.succeed(CardanoService.makeTrasation(bfConfig, wallet, prismEvents, msg))
       // txHash <- CardanoService
       //   .submitTransaction(tx)
@@ -22,6 +22,6 @@ case class PrismChainServiceImpl(
         .makeTrasation(prismEvents, msg)
       txHash <- ScalusService
         .submitTransaction(tx)
-    } yield (txHash)
+    yield (txHash)
   }.provideEnvironment(ZEnvironment(bfConfig) ++ ZEnvironment(wallet))
 }

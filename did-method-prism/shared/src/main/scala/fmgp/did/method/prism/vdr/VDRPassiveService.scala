@@ -40,11 +40,11 @@ trait VDRPassiveService {
 
 object VDRPassiveService {
   def fetch(vdrRef: RefVDR): ZIO[PrismStateRead, Throwable, VDR] =
-    for {
+    for
       _ <- ZIO.log(s"fecth VDR entry '${vdrRef.hex}'")
       state <- ZIO.service[PrismStateRead]
       vdr <- state.getVDR(vdrRef)
-    } yield vdr
+    yield vdr
 
   /** return a PrismBlock with all event (in order) relative to the vdr */
   def prove(eventRef: RefVDR): ZIO[PrismStateRead, Throwable, PrismBlock] = ??? // FIXME
@@ -57,7 +57,7 @@ object VDRPassiveService {
       vdrKey: Secp256k1PrivateKey,
       data: Array[Byte]
   ): ZIO[PrismStateRead, Throwable, (RefVDR, SignedPrismEvent)] =
-    for {
+    for
       state <- ZIO.service[PrismStateRead]
       ssi <- state.getSSI(didPrism)
       nonce <- Random.nextBytes(16)
@@ -73,14 +73,14 @@ object VDRPassiveService {
         data = data,
         nonce = nonce.toArray,
       )
-    } yield ret
+    yield ret
 
   def dryUpdateBytes(
       eventRef: RefVDR,
       vdrKey: Secp256k1PrivateKey,
       data: Array[Byte]
   ): ZIO[PrismStateRead, Throwable, (EventHash, SignedPrismEvent)] =
-    for {
+    for
       state <- ZIO.service[PrismStateRead]
       oldVDR <- state.getVDR(eventRef)
       didPrism <- oldVDR.did match
@@ -102,13 +102,13 @@ object VDRPassiveService {
         keyName = keyLable,
         data = data,
       )
-    } yield ret
+    yield ret
 
   def dryDeactivate(
       eventRef: RefVDR,
       vdrKey: Secp256k1PrivateKey
   ): ZIO[PrismStateRead, Throwable, (EventHash, SignedPrismEvent)] =
-    for {
+    for
       state <- ZIO.service[PrismStateRead]
       oldVDR <- state.getVDR(eventRef)
       didPrism <- oldVDR.did match
@@ -129,6 +129,6 @@ object VDRPassiveService {
         vdrKey = vdrKey,
         keyName = keyLable,
       )
-    } yield ret
+    yield ret
 
 }

@@ -57,14 +57,14 @@ object DataModels {
 
   given BSONDocumentReader[MySignedPrismEvent[OP]] with { // = Macros.reader[MySignedPrismEvent[OP]]
     override def readDocument(doc: BSONDocument): Try[MySignedPrismEvent[OP]] = {
-      for {
+      for
         tx <- doc.getAsTry[String]("tx")
         o <- doc.getAsTry[Int]("o")
         b <- doc.getAsTry[Int]("b")
         signedWith <- doc.getAsTry[String]("signedWith")
         signature <- doc.getAsTry[String]("signature").map(hex2bytes)
         protobuf <- doc.getAsTry[PrismEvent]("protobuf")
-      } yield MySignedPrismEvent[OP](tx, o, b, signedWith, signature, protobuf)
+      yield MySignedPrismEvent[OP](tx, o, b, signedWith, signature, protobuf)
     }
   }
 
@@ -88,7 +88,7 @@ object DataModels {
 
   given BSONDocumentReader[EventWithRootRef] with { // = Macros.reader[MySignedPrismEvent[OP]]
     override def readDocument(doc: BSONDocument): Try[EventWithRootRef] = {
-      for {
+      for
         ref <- doc.getAsTry[EventHash]("ref")
         tx <- doc.getAsTry[String]("tx")
         o <- doc.getAsTry[Int]("o")
@@ -96,7 +96,7 @@ object DataModels {
         signedWith <- doc.getAsTry[String]("signedWith")
         signature <- doc.getAsTry[String]("signature").map(hex2bytes)
         protobuf <- doc.getAsTry[PrismEvent]("protobuf")
-      } yield EventWithRootRef(ref, MySignedPrismEvent[OP](tx, o, b, signedWith, signature, protobuf))
+      yield EventWithRootRef(ref, MySignedPrismEvent[OP](tx, o, b, signedWith, signature, protobuf))
     }
   }
 

@@ -16,7 +16,7 @@ object HttpUtils {
 
 case class HttpUtils() {
   def getT[T](url: String)(using decoder: JsonDecoder[T], classTag: reflect.ClassTag[T]): Task[T] =
-    for {
+    for
       response <- ZIO.fromPromiseJS(fetch(url, new RequestInit { method = HttpMethod.GET }))
       data <- ZIO.fromPromiseJS(response.text())
       ret <- data.fromJson[T] match
@@ -24,16 +24,16 @@ case class HttpUtils() {
           val aux = s"Fail to parse: $fail"
           ZIO.logWarning(aux) *> ZIO.fail(new RuntimeException(aux))
         case Right(doc) => ZIO.succeed(doc)
-    } yield (ret)
+    yield (ret)
 
   def getSeqT[T](url: String)(using decoder: JsonDecoder[T], classTag: reflect.ClassTag[T]): Task[Seq[T]] =
-    for {
+    for
       response <- ZIO.fromPromiseJS(fetch(url, new RequestInit { method = HttpMethod.GET }))
       ret <- response.status match
         case 404 =>
           ZIO.log(s"Events Not Found for DID in $url") *> ZIO.succeed(Seq.empty)
         case c if c >= 200 & c < 300 =>
-          for {
+          for
             rawData <- ZIO.fromPromiseJS(response.text())
             rawDataSplitByLines = rawData.split("\n").toSeq.map(_.fromJson[T])
             seqOfTOrError =
@@ -52,9 +52,9 @@ case class HttpUtils() {
               case Right(seqEvents) =>
                 ZIO.succeed(seqEvents)
 
-          } yield seqOfT
+          yield seqOfT
         case anotherCode =>
           val aux = s"Fail on HTTP request with code $anotherCode"
           ZIO.logError(aux) *> ZIO.fail(new RuntimeException(aux))
-    } yield ret
+    yield ret
 }

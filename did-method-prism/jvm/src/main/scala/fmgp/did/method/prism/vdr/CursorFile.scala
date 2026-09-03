@@ -24,7 +24,7 @@ object CursorFile {
     ZIO
       .attemptBlockingIO {
         val p = path(dir)
-        if (Files.exists(p)) Some(Files.readString(p)) else None
+        if Files.exists(p) then Some(Files.readString(p)) else None
       }
       .flatMap {
         case None          => ZIO.none

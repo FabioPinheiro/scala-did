@@ -11,20 +11,20 @@ import zio.json.*
 class KeyGeneratorSuite extends ZSuite {
 
   testZ("makeX25519") {
-    for {
+    for
       _ <- ZIO.unit
       key <- KeyGenerator.makeX25519
       _ = assertEquals(key.kty, KTY.OKP)
       _ = assertEquals(key.crv, Curve.X25519)
-    } yield ()
+    yield ()
   }
 
   testZ("makeEd25519") {
-    for {
+    for
       _ <- ZIO.unit
       key <- KeyGenerator.makeEd25519
       _ = assertEquals(key.kty, KTY.OKP)
       _ = assertEquals(key.crv, Curve.Ed25519)
-    } yield ()
+    yield ()
   }
 }

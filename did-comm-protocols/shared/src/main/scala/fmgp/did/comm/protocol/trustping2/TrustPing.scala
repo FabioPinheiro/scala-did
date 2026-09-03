@@ -45,7 +45,7 @@ object TrustPing {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, TrustPing] =
-    if (msg.`type` != piuri) Left(s"No able to create TrustPing from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create TrustPing from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()           => Left(s"'$piuri' MUST have field 'to' with one element")
@@ -129,7 +129,7 @@ object TrustPingResponse {
   def piuri = PIURI("https://didcomm.org/trust-ping/2.0/ping-response")
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, TrustPingResponse] =
-    if (msg.`type` != piuri)
+    if msg.`type` != piuri then
       Left(s"No able to create TrustPingResponse from a Message of the type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match

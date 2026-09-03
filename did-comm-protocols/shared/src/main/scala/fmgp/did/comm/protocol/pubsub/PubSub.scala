@@ -54,7 +54,7 @@ object RequestToSubscribe {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, RequestToSubscribe] = {
-    if (msg.`type` != piuri)
+    if msg.`type` != piuri then
       Left(s"No able to create RequestToSubscribe from a Message of the type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
@@ -120,7 +120,7 @@ object SetupToSubscribe {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, SetupToSubscribe] = {
-    if (msg.`type` != piuri)
+    if msg.`type` != piuri then
       Left(s"No able to create SetupToSubscribe from a Message of the type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
@@ -188,7 +188,7 @@ object Subscribe {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, Subscribe] = {
-    if (msg.`type` != piuri)
+    if msg.`type` != piuri then
       Left(s"No able to create Subscribe from a Message of the type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
@@ -255,7 +255,7 @@ object Subscription {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, Subscription] = {
-    if (msg.`type` != piuri)
+    if msg.`type` != piuri then
       Left(s"No able to create Subscription from a Message of the type '${msg.`type`}'")
     else
       msg.thid match

@@ -43,7 +43,7 @@ class VarintTest extends FunSuite {
 
   test("encode an Int to Varint and decode it back") {
     val rand = new scala.util.Random
-    for (i <- 1 to 100) {
+    for i <- 1 to 100 do {
       val num = rand.nextInt()
       val encoded = Varint.encodeInt(num)
       val ret = Varint.decodeToInt(encoded).getOrElse(???)
@@ -54,7 +54,7 @@ class VarintTest extends FunSuite {
 
   test("encode an Long to Varint and decode it back") {
     val rand = new scala.util.Random
-    for (i <- 1 to 100) {
+    for i <- 1 to 100 do {
       val num = rand.nextLong()
       val encoded = Varint.encodeLong(num)
       val ret = Varint.decodeToLong(encoded).getOrElse(???)
