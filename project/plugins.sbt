@@ -36,7 +36,7 @@ libraryDependencies ++= {
 }
 
 // Documentation
-addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.9.1") // https://github.com/scalameta/mdoc/tags
+addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.9.2") // https://github.com/scalameta/mdoc/tags
 addSbtPlugin("org.typelevel" % "laika-sbt" % "1.3.2") // https://typelevel.org/Laika/
 addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.6.1") // https://github.com/sbt/sbt-unidoc
 
