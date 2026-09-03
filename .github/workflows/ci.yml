@@ -31,9 +31,9 @@ jobs:
         with:
           fetch-depth: 0 # Needed for the release tag // `git fetch --tags` will also work
       - name: Setup Java and Scala
-        uses: olafurpg/setup-scala@v14
-        with:
-          java-version: openjdk@1.17.0 # adopt@1.11 # zulu@1.17.0-0 # openjdk@1.17.0
+        uses: coursier/setup-action@v3
+      - name: Setup SBT
+        uses: sbt/setup-sbt@v1
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
@@ -41,7 +41,7 @@ jobs:
       - name: Setup Scala.JS
         uses: japgolly/setup-scalajs@v1
       - name: Cache sbt
-        uses: coursier/cache-action@v7
+        uses: coursier/cache-action@v8
       ### Compile & Test ###
       # - name: Compile and Test
       #   run: sbt -v -mem 2048 -J-Xmx5120m "ciJobLib"
@@ -70,9 +70,9 @@ jobs:
         with:
           fetch-depth: 0 # Needed for the release tag // `git fetch --tags` will also work
       - name: Setup Java and Scala
-        uses: olafurpg/setup-scala@v14
-        with:
-          java-version: openjdk@1.17.0
+        uses: coursier/setup-action@v3
+      - name: Setup SBT
+        uses: sbt/setup-sbt@v1
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
@@ -80,7 +80,7 @@ jobs:
       - name: Setup Scala.JS
         uses: japgolly/setup-scalajs@v1
       - name: Cache sbt
-        uses: coursier/cache-action@v7
+        uses: coursier/cache-action@v8
 
       ### create build deploy gh-pages ###
       - name: sbt "docAll; siteAll"
@@ -111,9 +111,9 @@ jobs:
         with:
           fetch-depth: 0 # Needed for the release tag // `git fetch --tags` will also work
       - name: Setup Java and Scala
-        uses: olafurpg/setup-scala@v14
-        with:
-          java-version: openjdk@1.17.0
+        uses: coursier/setup-action@v3
+      - name: Setup SBT
+        uses: sbt/setup-sbt@v1
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
@@ -121,7 +121,7 @@ jobs:
       - name: Setup Scala.JS
         uses: japgolly/setup-scalajs@v1
       - name: Cache sbt
-        uses: coursier/cache-action@v7
+        uses: coursier/cache-action@v8
 
       ### Publish Artifacts ###
       - name: publish
