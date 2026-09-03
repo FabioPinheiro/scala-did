@@ -8,7 +8,7 @@ import fmgp.crypto.error.*
 //TODO move out of the JVM into the
 final case class DynamicResolver(resolver: Resolver) extends Resolver {
   override protected def didDocumentOf(did: FROMTO): IO[ResolverError, DIDDocument] =
-    for {
+    for
       docFromResolver <- resolver.didDocument(did)
       // sm <- transportManager.get
       doc = DIDDocumentClass(
@@ -21,5 +21,5 @@ final case class DynamicResolver(resolver: Resolver) extends Resolver {
         capabilityDelegation = docFromResolver.capabilityDelegation,
         service = docFromResolver.service, // TODO data from sm
       )
-    } yield (doc)
+    yield (doc)
 }

@@ -57,7 +57,7 @@ object DIDPrism {
     case regexPrismLongForm(hash, data)   => Right(DIDPrism(s"$hash:$data"))
     case any if regexPrism.matches(any)   => Left(s"Not a did:prism '$any' - (But regexPrism for did PRISM ?)")
     case DID.regex(namespace, specificId) =>
-      if (namespace == DIDPrism.namespace) Left(s"Invalid specificId for a did:prism '$specificId'")
+      if namespace == DIDPrism.namespace then Left(s"Invalid specificId for a did:prism '$specificId'")
       else Left(s"Expected the did method 'prism' instead of '$namespace'")
     case any => Left(s"Not a did '$any'")
     // TODO REGEX for a DID but not a DID PRISM

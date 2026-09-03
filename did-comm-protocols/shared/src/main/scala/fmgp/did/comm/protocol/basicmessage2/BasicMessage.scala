@@ -65,7 +65,7 @@ object BasicMessage {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, BasicMessage] = {
-    if (msg.`type` != piuri)
+    if msg.`type` != piuri then
       Left(s"No able to create BasicMessage from a Message of the type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match

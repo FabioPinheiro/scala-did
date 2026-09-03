@@ -15,7 +15,7 @@ extension (jwtUnsigned: JWTUnsigned) {
 
   def signWith(key: OKP_EC_Key): Either[String, JWT] = {
     val hack: ProtectedHeaderJWT = jwtUnsigned.protectedHeader
-    for {
+    for
       header: JWSHeader <-
         try Right(JWSHeader.parse(jwtUnsigned.protectedHeader.content))
         catch {
@@ -37,7 +37,7 @@ extension (jwtUnsigned: JWTUnsigned) {
       signingInput: Array[Byte] = jwtUnsigned.base64JWTFormatWithNoSignature.getBytes(StandardCharset.UTF_8)
       signatureStr = signer.sign(header, signingInput).toString
       signature <- SignatureJWT.fromBase64url(signatureStr)
-    } yield jwtUnsigned.toJWT(signature)
+    yield jwtUnsigned.toJWT(signature)
   }
 }
 

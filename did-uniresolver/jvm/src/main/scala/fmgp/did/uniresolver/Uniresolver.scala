@@ -12,10 +12,10 @@ import io.netty.bootstrap.ChannelFactory
 object Uniresolver {
   val defaultEndpoint = "https://dev.uniresolver.io/1.0/identifiers/"
   def make(url: String = defaultEndpoint): ZIO[Client & Scope, Nothing, Uniresolver] =
-    for {
+    for
       client <- ZIO.service[Client]
       scope <- ZIO.service[Scope]
-    } yield Uniresolver(url, client, scope)
+    yield Uniresolver(url, client, scope)
   def layer(url: String = defaultEndpoint): ZLayer[Client & Scope, Nothing, Resolver] =
     ZLayer.fromZIO(make(url))
 }
@@ -25,7 +25,7 @@ case class Uniresolver(uniresolverServer: String, client: Client, scope: Scope) 
   override protected def didDocumentOf(did: FROMTO): IO[ResolverError, DIDDocument] = {
     // if (!methods.contains(did.toDID.namespace)) ZIO.fail(DidMethodNotSupported(did.toDID.namespace))
     // else
-    for {
+    for
       _ <- ZIO.unit
       path = uniresolverServer + did
       res <- Client
@@ -38,7 +38,7 @@ case class Uniresolver(uniresolverServer: String, client: Client, scope: Scope) 
         case Left(error) =>
           ZIO.fail(DIDresolutionFail.fromParseError("DIDResolutionResult", error + s" from '${path}'"))
         case Right(value) => ZIO.succeed(value.didDocument)
-    } yield (didResolutionResult)
+    yield (didResolutionResult)
   }
 
   // val methods = Seq(

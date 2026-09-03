@@ -18,7 +18,7 @@ class MultibaseTest extends FunSuite {
   test("convert given string to correct encodings.") {
     val str = "Multibase is awesome! \\o/"
 
-    for (base <- Base.Codes.values if base != Base.Base1) {
+    for base <- Base.Codes.values if base != Base.Base1 do {
       assertEquals(Multibase.encodeString(base, str).decodeToString, str)
     }
 
@@ -37,10 +37,10 @@ class MultibaseTest extends FunSuite {
     val strs =
       Seq("zQmPZ9gcCEpqKTo6aq61g2nXGUhM4iCL3ewB6LDXZCtioEB", "zQmatmE9msSfkKxoffpHwNLNKgwZG8eT9Bud6YoPab52vpy", "z11")
 
-    for (
+    for
       s <- strs;
       base <- Base.Codes.values if base != Base.Base1
-    ) assertEquals(Multibase.decodeToString(Multibase.encodeString(base, s)), s)
+    do assertEquals(Multibase.decodeToString(Multibase.encodeString(base, s)), s)
 
   }
 
@@ -144,7 +144,7 @@ class MultibaseTest extends FunSuite {
   )
 
   test("convert given string to correct encodings for all TestCases") {
-    for (TestCase(name, str, expEncoded) <- testCases) {
+    for TestCase(name, str, expEncoded) <- testCases do {
       val base = Base.Names(name)
       val encoded = Multibase.encodeString(base, str)
       assertEquals(encoded.value, expEncoded)

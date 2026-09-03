@@ -69,7 +69,7 @@ object FeatureQuery {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, FeatureQuery] = {
-    if (msg.`type` != piuri)
+    if msg.`type` != piuri then
       Left(s"No able to create FeatureQuery from a Message of the type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
@@ -157,7 +157,7 @@ object FeatureDisclose {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, FeatureDisclose] = {
-    if (msg.`type` != piuri)
+    if msg.`type` != piuri then
       Left(s"No able to create FeatureDisclose from a Message of the type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match

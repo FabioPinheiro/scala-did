@@ -201,7 +201,7 @@ object Menu {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, Menu] = {
-    if (msg.`type` != piuri)
+    if msg.`type` != piuri then
       Left(s"No able to create Menu from a Message of the type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
@@ -292,7 +292,7 @@ object Perform {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, Perform] = {
-    if (msg.`type` != piuri)
+    if msg.`type` != piuri then
       Left(s"No able to create Perform from a Message of the type '${msg.`type`}'")
     else
       msg.thid match

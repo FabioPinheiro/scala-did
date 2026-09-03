@@ -24,7 +24,7 @@ package object util {
 
   inline def hex2bytes(hex: String): Array[Byte] = {
     val tmp = hex.replaceAll("[^0-9A-Fa-f]", "")
-    (if (tmp.size % 2 == 0) tmp else "0" + tmp)
+    (if tmp.size % 2 == 0 then tmp else "0" + tmp)
       .sliding(2, 2)
       .toArray
       .map(Integer.parseInt(_, 16).toByte)

@@ -29,9 +29,9 @@ object Cip0000 {
         val b: Int = bStr.toInt // Safe due to regex
         val c: Int = cStr.toInt // Safe due to regex
 
-        if (a < 0) Left("didIndex MUST be a no negative number")
-        else if (0 < b && b < 8) Left("keyUsage MUST be between 1 to 8")
-        else if (c < 0) Left("didIndex MUST be a no negative number")
+        if a < 0 then Left("didIndex MUST be a no negative number")
+        else if 0 < b && b < 8 then Left("keyUsage MUST be between 1 to 8")
+        else if c < 0 then Left("didIndex MUST be a no negative number")
         PrismKeyUsage.fromProtoEnum(b) match
           case Left(error)     => Left("keyUsage MUST be between 1 to 8?")
           case Right(keyUsage) => Right(Cip0000(didIndex = a, keyUsage = keyUsage, keyIndex = c))

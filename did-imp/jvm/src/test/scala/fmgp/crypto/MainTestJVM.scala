@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets
 object MainTestJVM {
 
   def compressPubKey(pubKey: BigInteger): String = {
-    val pubKeyYPrefix: String = if (pubKey.testBit(0)) "03" else "02"
+    val pubKeyYPrefix: String = if pubKey.testBit(0) then "03" else "02"
     val pubKeyHex: String = pubKey.toString(16);
     val pubKeyX: String = pubKeyHex.substring(0, 64);
     pubKeyYPrefix + pubKeyX;

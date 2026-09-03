@@ -35,7 +35,7 @@ object Indexer extends ZIOAppDefault {
 
   def metadataFromJsonAPI(blockfrostConfig: BlockfrostConfig, pageJump: Int = 0) = ZStream
     .paginateChunkZIO(pageJump) { pageNumber =>
-      for {
+      for
         _ <- ZIO.log(s"pageNumber=$pageNumber; (entries ${pageNumber * PAGE_SIZE}-${(pageNumber + 1) * PAGE_SIZE})")
         urlRequest = API.metadataContentJson(
           network = blockfrostConfig.network,
@@ -49,7 +49,7 @@ object Indexer extends ZIOAppDefault {
         )
         responseStr <- response.body.asString
         page <- responseStr.fromJson[Either[BlockfrostErrorResponse, Seq[MetadataContentJson]]](
-          MetadataContentJson.decoderSeqOrError
+          using MetadataContentJson.decoderSeqOrError
         ) match
           case Left(error) => ZIO.logError(responseStr) *> ZIO.fail(new RuntimeException("fail to parse"))
           case Right(Left(value: BlockfrostErrorResponse)) =>
@@ -65,13 +65,13 @@ object Indexer extends ZIOAppDefault {
                 )
               )
             )
-      } yield (Chunk.fromIterable(page), if (page.size == PAGE_SIZE) Some(pageNumber + 1) else None)
+      yield (Chunk.fromIterable(page), if page.size == PAGE_SIZE then Some(pageNumber + 1) else None)
     }
     .provideSomeLayer(Client.default ++ Scope.default)
 
   def metadataFromCBORAPI(blockfrostConfig: BlockfrostConfig, pageJump: Int = 0) = ZStream
     .paginateChunkZIO(pageJump) { pageNumber =>
-      for {
+      for
         _ <- ZIO.log(s"pageNumber=$pageNumber; (entries ${pageNumber * PAGE_SIZE}-${(pageNumber + 1) * PAGE_SIZE})")
         urlRequest = API.metadataContentCBOR(
           network = blockfrostConfig.network,
@@ -86,7 +86,7 @@ object Indexer extends ZIOAppDefault {
         responseStr <- response.body.asString
 
         page <- responseStr.fromJson[Either[BlockfrostErrorResponse, Seq[MetadataContentCBOR]]](
-          MetadataContentCBOR.decoderSeqOrError
+          using MetadataContentCBOR.decoderSeqOrError
         ) match
           case Left(error) => ZIO.logError(responseStr) *> ZIO.fail(new RuntimeException(s"fail to parse: $error"))
           case Right(Left(value: BlockfrostErrorResponse)) =>
@@ -98,7 +98,7 @@ object Indexer extends ZIOAppDefault {
                 CardanoMetadataCBOR(pageNumber * PAGE_SIZE + index, metadataContent.tx_hash, metadataContent.metadata)
               )
             )
-      } yield (Chunk.fromIterable(page), if (page.size == PAGE_SIZE) Some(pageNumber + 1) else None)
+      yield (Chunk.fromIterable(page), if page.size == PAGE_SIZE then Some(pageNumber + 1) else None)
     }
     .provideSomeLayer(Client.default ++ Scope.default)
 
@@ -175,7 +175,7 @@ object Indexer extends ZIOAppDefault {
     }
     .map(ZLayer.succeed)
 
-  def indexerJobFS = for {
+  def indexerJobFS = for
     indexerConfig <- ZIO.service[IndexerConfig]
     _ <- ZIO.log(s"Check the LastTransactionIndexStored")
     chunkFilesBeforeStart <- findChunkFiles(rawMetadataPath = indexerConfig.rawMetadataPath)
@@ -222,7 +222,7 @@ object Indexer extends ZIOAppDefault {
     _ <- ZStream
       .fromIterable(ssiEvetns)
       .mapZIO { case (did, opidSeq) =>
-        for {
+        for
           _ <- ZIO.logDebug(s"DID: $did")
           events <- state.getEventsForSSI(did)
           _ <- ZStream.fromIterableZIO(state.getEventsForSSI(did)).run {
@@ -234,7 +234,7 @@ object Indexer extends ZIOAppDefault {
               .contramapChunks[MySignedPrismEvent[OP]](_.flatMap { spo => s"${spo.toJson}\n".getBytes })
           }
           ssi = fmgp.did.method.prism.SSI.make(did, events)
-          _ <- ZIO.when(ssi.latestHash.isDefined)(for {
+          _ <- ZIO.when(ssi.latestHash.isDefined)(for
             _ <- ZStream.from(ssi).run {
               ZSink
                 .fromFileName(name = indexerConfig.ssiPath(did), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
@@ -248,8 +248,8 @@ object Indexer extends ZIOAppDefault {
                     .flatMap { case doc => s"${doc.toJsonPretty}\n".getBytes }
                 )
             }
-          } yield ())
-        } yield ()
+          yield ())
+        yield ()
       }
       .run(ZSink.count)
 
@@ -257,7 +257,7 @@ object Indexer extends ZIOAppDefault {
     _ <- ZStream
       .fromIterable(vdrEvents)
       .mapZIO { case (ref, events) =>
-        for {
+        for
           _ <- ZIO.logDebug(s"VDR: $ref")
           _ <- ZStream.fromIterableZIO(state.getEventsForVDR(ref)).run {
             ZSink
@@ -273,12 +273,12 @@ object Indexer extends ZIOAppDefault {
               .fromFileName(name = indexerConfig.vdrPath(ref), options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
               .contramapChunks[VDR](_.flatMap { case vdr => s"${vdr.toJsonPretty}\n".getBytes })
           }
-        } yield ()
+        yield ()
       }
       .run(ZSink.count)
-  } yield ()
+  yield ()
 
-  def indexerJobDB: ZIO[BlockfrostConfig & PrismState, Throwable, EventCounter] = for {
+  def indexerJobDB: ZIO[BlockfrostConfig & PrismState, Throwable, EventCounter] = for
     state <- ZIO.service[PrismState]
     blockfrostConfig <- ZIO.service[BlockfrostConfig]
     cursor <- state.cursor
@@ -297,15 +297,15 @@ object Indexer extends ZIOAppDefault {
         .run(IndexerUtils.countEvents)
 
     eventCounter <- streamJob.debug
-  } yield eventCounter
+  yield eventCounter
 
   override val run = {
-    for {
+    for
       _ <- indexerLogo
       indexerConfigZLayer <- makeIndexerConfigZLayerFromArgs
       prismStateZLayer = ZLayer(PrismStateInMemory.empty)
       _ <- indexerJobFS.provideLayer(indexerConfigZLayer ++ prismStateZLayer)
-    } yield ()
+    yield ()
   }
 
 }

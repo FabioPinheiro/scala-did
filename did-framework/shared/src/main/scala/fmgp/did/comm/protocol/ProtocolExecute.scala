@@ -130,11 +130,11 @@ object NullProtocolExecute extends ProtocolExecuter[Any, MissingProtocol] {
 object BasicMessageExecuter extends ProtocolExecuter[Any, FailToParse] {
 
   override def supportedPIURI: Seq[PIURI] = Seq(BasicMessage.piuri)
-  override def program(plaintextMessage: PlaintextMessage) = for {
+  override def program(plaintextMessage: PlaintextMessage) = for
     job <- BasicMessage.fromPlaintextMessage(plaintextMessage) match
       case Left(error) => ZIO.fail(FailToParse(error))
       case Right(bm)   => ZIO.log(s"BasicMessage: ${bm.toString}")
-  } yield NoReply
+  yield NoReply
 }
 
 class TrustPingExecuter extends ProtocolExecuterWithServices[ProtocolExecuter.Services, FailToParse] {
@@ -152,16 +152,16 @@ class TrustPingExecuter extends ProtocolExecuterWithServices[ProtocolExecuter.Se
           case Left(error)                                    => ZIO.fail(FailToParse(error))
           case Right(ping: TrustPingWithOutRequestedResponse) => ZIO.logInfo(ping.toString()) *> ZIO.succeed(NoReply)
           case Right(ping: TrustPingWithRequestedResponse)    =>
-            for {
+            for
               _ <- ZIO.logInfo(ping.toString())
               ret = ping.makeRespond
-            } yield Reply(ret.toPlaintextMessage)
+            yield Reply(ret.toPlaintextMessage)
       case `piuriTrustPingResponse` =>
-        for {
+        for
           job <- TrustPingResponse.fromPlaintextMessage(plaintextMessage) match
             case Left(error) => ZIO.fail(FailToParse(error))
             case Right(ping) => ZIO.logInfo(ping.toString())
-        } yield NoReply
+        yield NoReply
   }
 
 }

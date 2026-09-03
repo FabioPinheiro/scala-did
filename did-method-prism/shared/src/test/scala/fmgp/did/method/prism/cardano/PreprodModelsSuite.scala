@@ -68,7 +68,7 @@ class PreprodModelsSuite extends ZSuite {
     // println(s"UpdateDidOP ${op1.opHash} -- ${op1.event.previousEventHash}")
     // println(s"CreateDidOP ${op2.opHash} -- ${op2.event.previousEventHash}")
 
-    for {
+    for
       state <- PrismStateInMemory.empty
       // println("State 0")
       _ <- state.addEvent(op0)
@@ -78,6 +78,6 @@ class PreprodModelsSuite extends ZSuite {
       _ <- state.addEvent(op2)
       // println("State 3")
       // println(s3.toJsonPretty)
-    } yield ()
+    yield ()
   }
 }

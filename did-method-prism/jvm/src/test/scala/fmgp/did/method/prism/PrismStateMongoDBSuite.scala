@@ -35,7 +35,7 @@ class PrismStateMongoDBSuite extends ZSuite {
 
   val prismStateFixture: FunFixture[ULayer[PrismState]] =
     ZTestLocalFixture { _ =>
-      for {
+      for
         prismStateLayer <- ZIO.succeed(
           (
             AsyncDriverResource.layer >>>
@@ -51,18 +51,18 @@ class PrismStateMongoDBSuite extends ZSuite {
             }
           }
           .provideLayer(prismStateLayer)
-      } yield prismStateLayer
+      yield prismStateLayer
     } { _ => ZIO.unit }
 
   /** Clear all events from the collection (for testing) */
   def clearCollection(c: IO[StorageCollection, BSONCollection]): ZIO[Any, StorageException, Unit] =
-    for {
+    for
       coll <- c.mapError(ex => StorageException(ex))
       _ <- ZIO
         .fromFuture(implicit ec => coll.delete().one(BSONDocument.empty))
         .mapError(ex => StorageException(StorageThrowable(ex)))
       _ <- ZIO.log(s"Collection '${coll.name}' deleted")
-    } yield ()
+    yield ()
 
   val aux = Seq(createSSI, createVDR, updateVDR, updateVDR_withTheNewKey, updateSSI_addKey).zipWithIndex
     .map { (hex, index) => VDRUtilsTestExtra.makeSignedPrismEvent(hex, opIndex = index) }
@@ -81,11 +81,11 @@ class PrismStateMongoDBSuite extends ZSuite {
       .tag(fmgp.IntregrationTest)
       .tag(fmgp.DBTest)
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       cursor <- state.cursor
       _ = assertEquals(cursor, cardano.EventCursor.init)
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered(
@@ -93,14 +93,14 @@ class PrismStateMongoDBSuite extends ZSuite {
       .tag(fmgp.IntregrationTest)
       .tag(fmgp.DBTest)
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       createDidEvent = aux(0) // CreateDidOP with b=0, o=0
       _ <- state.addEvent(createDidEvent)
       cursor <- state.cursor
       _ = assertEquals(cursor.b, 0)
       _ = assertEquals(cursor.o, 0)
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered(
@@ -108,7 +108,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       .tag(fmgp.IntregrationTest)
       .tag(fmgp.DBTest)
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       // aux events have indices: 0, 1, 2, 3, 4
       _ <- state.addEvent(aux(0)) // b=0, o=0
@@ -116,7 +116,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       _ <- state.addEvent(aux(2)) // b=0, o=2
       cursor <- state.cursor
       _ = assertEquals(cursor, EventCursor(b = 0, o = 2))
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered(
@@ -124,7 +124,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       .tag(fmgp.IntregrationTest)
       .tag(fmgp.DBTest)
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       createDidEvent = aux(0)
       updateDidEvent = aux(4) // Has previousEventHash, will go to lost collection if create not present first
@@ -140,7 +140,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       cursor2 <- state.cursor
       _ = assertEquals(cursor2.b, 0)
       _ = assertEquals(cursor2.o, 4) // Still 4, the maximum
-    } yield ()
+    yield ()
   }
 
   // ### addEvent ###
@@ -150,11 +150,11 @@ class PrismStateMongoDBSuite extends ZSuite {
       .tag(fmgp.IntregrationTest)
       .tag(fmgp.DBTest)
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       createDidEvent = aux(0) // CreateDidOP
       _ <- state.addEvent(createDidEvent) // no exceptions thrown
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered(
@@ -162,7 +162,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       .tag(fmgp.IntregrationTest)
       .tag(fmgp.DBTest)
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       createSSIEvent = VDRUtilsTestExtra.makeSignedPrismEvent(createSSI, opIndex = 0)
       // updateSSIEvent = VDRUtilsTestExtra.makeSignedPrismEvent(updateSSI_addKey, opIndex = 1)
@@ -188,7 +188,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       _ = assertEquals(eventRefs2.size, 1)
       _ = assertEquals(ssi.did, didSubject)
       _ = assertEquals(ssi.keys.size, 2)
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered(
@@ -196,7 +196,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       .tag(fmgp.IntregrationTest)
       .tag(fmgp.DBTest)
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       createSSIEvent = VDRUtilsTestExtra.makeSignedPrismEvent(createSSI, opIndex = 0)
       updateSSIEvent = VDRUtilsTestExtra.makeSignedPrismEvent(updateSSI_addKey, opIndex = 1)
@@ -222,7 +222,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       _ = assertEquals(eventRefs2.size, 2)
       _ = assertEquals(ssi.did, didSubject)
       _ = assertEquals(ssi.keys.size, 3)
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered(
@@ -230,7 +230,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       .tag(fmgp.IntregrationTest)
       .tag(fmgp.DBTest)
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       // Query for a non-existent SSI
       fakeDID = DIDPrism("0000000000000000000000000000000000000000000000000000000000000000").asDIDSubject
@@ -238,7 +238,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       eventRefs2 <- state.getEventsForSSI(fakeDID) // Test getEventsForSSI
       _ = assertEquals(eventRefs1.size, 0) // Should return empty sequence
       _ = assertEquals(eventRefs2.size, 0) // Should return empty sequence
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered(
@@ -246,7 +246,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       .tag(fmgp.IntregrationTest)
       .tag(fmgp.DBTest)
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       // Query for a non-existent VDR
       fakeVDR = RefVDR("0000000000000000000000000000000000000000000000000000000000000000")
@@ -254,7 +254,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       eventRefs2 <- state.getEventsForVDR(fakeVDR) // Test getEventsForVDR
       _ = assertEquals(eventRefs1.size, 0) // Should return empty sequence
       _ = assertEquals(eventRefs2.size, 0) // Should return empty sequence
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered(
@@ -262,7 +262,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       .tag(fmgp.IntregrationTest)
       .tag(fmgp.DBTest)
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       createVDREvent = aux(1)
       eventHash = createVDREvent.eventHash
@@ -279,7 +279,7 @@ class PrismStateMongoDBSuite extends ZSuite {
             expected = eventHash.hex,
             clue = s"VDR event hash mismatch: ${retrieved.get.eventHash.hex} != ${eventHash.hex}"
           )
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered(
@@ -287,7 +287,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       .tag(fmgp.IntregrationTest)
       .tag(fmgp.DBTest)
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       createDidEvent = aux(0)
       updateDidEvent = aux(4)
@@ -318,7 +318,7 @@ class PrismStateMongoDBSuite extends ZSuite {
             expected = createDidEvent.eventHash.hex,
             clue = "The rootRef of the in updateDidEvent the MongoDB must be the same as the one is createDidEvent"
           )
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered(
@@ -326,7 +326,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       .tag(fmgp.IntregrationTest)
       .tag(fmgp.DBTest)
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       createDidEvent = aux(0)
       updateDidEvent = aux(4)
@@ -351,7 +351,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       _ = updateRetrievedWithRootRef match
         case None => fail(s"Event updateDidEvent ${updateDidEvent.eventHash.hex} not found in the lostCollection")
         case Some(lostEvent) => // ok
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered(
@@ -359,7 +359,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       .tag(fmgp.IntregrationTest)
       .tag(fmgp.DBTest)
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       // createDID = aux(0)
       createVDR = aux(1)
@@ -390,7 +390,7 @@ class PrismStateMongoDBSuite extends ZSuite {
         case VDR.DataEmpty()              => // ok
         case VDR.DataByteArray(byteArray) => fail("The data is not valid since the DID doesn't exist")
         case _                            => fail("Wrong Data type")
-    } yield {}
+    yield {}
   }
 
   prismStateFixture.testZLayered(
@@ -398,7 +398,7 @@ class PrismStateMongoDBSuite extends ZSuite {
       .tag(fmgp.IntregrationTest)
       .tag(fmgp.DBTest)
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       createDID = aux(0) // createSSI
       createVDR = aux(1) // createVDR
@@ -434,7 +434,7 @@ class PrismStateMongoDBSuite extends ZSuite {
           ) // the last event should not take effect
           assertEquals(bytes2Hex(byteArray), bytes2Hex(VDRUtilsTestExtra.data2))
         case _ => fail("Wrong Data type")
-    } yield {}
+    yield {}
   }
 
   // TODO add test for duplicated key

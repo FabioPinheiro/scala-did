@@ -11,7 +11,7 @@ object Base64Impl {
     * Base64RFC4648.
     */
   def encode(data: Array[Byte], base64: Base64RFC4648): String =
-    if (data.isEmpty) ""
+    if data.isEmpty then ""
     else
       data
         .grouped(NumGroupsBeforeEncodeInLeastCommonLength)
@@ -52,7 +52,7 @@ object Base64Impl {
   def decode(data: String, base64: Base64RFC4648): Array[Byte] = {
     val chars = data.toCharArray
     val length = chars.length
-    val pads = if (base64.pad.isEmpty) 0 else numPads(chars, 0, length - 1, base64.pad.get)
+    val pads = if base64.pad.isEmpty then 0 else numPads(chars, 0, length - 1, base64.pad.get)
     val pos = base64.alphabetPos
     chars
       .slice(0, length - pads)
@@ -63,7 +63,7 @@ object Base64Impl {
 
   @tailrec
   private def numPads(chars: Array[Char], pads: Int, last: Int, pad: Char): Int =
-    if (last < 0 || pads >= NumGroupsBeforeEncodeInLeastCommonLength || chars(last) != pad) pads
+    if last < 0 || pads >= NumGroupsBeforeEncodeInLeastCommonLength || chars(last) != pad then pads
     else numPads(chars, pads + 1, last - 1, pad)
 
   private def decodeBytes(group: Array[Char], pos: Map[Char, Int]): Array[Byte] =

@@ -18,7 +18,7 @@ object OperationsImp {
 class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
 
   def sign(msg: PlaintextMessage): ZIO[Agent & Resolver, CryptoFailed, SignedMessage] =
-    for {
+    for
       agent <- ZIO.service[Agent]
       fromDID <- msg.from match
         case Some(did) if (did == agent.id.asFROM) => ZIO.succeed(did)
@@ -42,14 +42,14 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
           case None      => ZIO.fail(NoSupportedKey)
         }
       ret <- cryptoOperations.sign(signingKey, msg)
-    } yield ret
+    yield ret
 
   def verify(msg: SignedMessage): ZIO[Resolver, CryptoFailed, Boolean] = {
-    for {
+    for
       resolver <- ZIO.service[Resolver]
       mSignerKids = msg.signatures.map(_.signerKid).map(e => DIDURL.parseString(e))
       ret <- ZIO.forall(mSignerKids) { mSignerKid =>
-        for {
+        for
           didURL <- mSignerKid match {
             case Left(fail)    => ZIO.fail(FailToExtractKid(fail))
             case Right(didURL) => ZIO.succeed(didURL)
@@ -62,26 +62,26 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
             case Some(key) => ZIO.succeed(key)
             case None      => ZIO.fail(FailToExtractKid("Fail to extract kid: " + didURL.string))
           result <- cryptoOperations.verify(key, msg)
-        } yield result
+        yield result
       }
-    } yield ret
+    yield ret
   }
 
   override def anonEncrypt(msg: PlaintextMessage): ZIO[Resolver, DidFail, EncryptedMessage] = {
     // TODO return EncryptionFailed.type on docs
-    for {
+    for
       resolver <- ZIO.service[Resolver]
       docs <- ZIO.foreach(msg.to.toSeq.flatten)(
         resolver.didDocument(_).mapError(ResolverErrorWarp(_))
       )
       recipientKidsKeys = docs.flatMap(_.allKeysTypeKeyAgreement).map(_.pair)
       ret <- cryptoOperations.anonEncrypt(recipientKidsKeys, msg.toJson.getBytes)
-    } yield ret
+    yield ret
   }
 
   override def authEncrypt(msg: PlaintextMessage): ZIO[Agent & Resolver, DidFail, EncryptedMessage] = {
     // TODO return EncryptionFailed.type on docs
-    for {
+    for
       agent <- ZIO.service[Agent]
       resolver <- ZIO.service[Resolver]
       fromDID <- msg.from match
@@ -132,12 +132,12 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
         case eMsg +: others => // TODO Don't discard other messages
           ZIO.logWarning(s"We are discount other encrypted messages (${others.size})") *>
             ZIO.succeed(eMsg)
-    } yield headFixme
+    yield headFixme
   }
 
   /** decrypt */
   def anonDecryptRaw(msg: EncryptedMessage): ZIO[Agent, DidFail, Array[Byte]] = {
-    for {
+    for
       agent <- ZIO.service[Agent]
       did = agent.id
       kidsNeeded = msg.recipients.map(_.header.kid)
@@ -145,14 +145,14 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
       keys = agent.keyStore.keys.toSeq
         .flatMap { k =>
           val vmr = (VerificationMethodReferenced(k.kid))
-          if (kidsNeeded.contains(vmr)) Some(vmr, k) else None
+          if kidsNeeded.contains(vmr) then Some(vmr, k) else None
         }
       data <- cryptoOperations.anonDecrypt(keys, msg)
-    } yield data
+    yield data
   }
 
   def authDecryptRaw(msg: EncryptedMessage): ZIO[Agent & Resolver, DidFail, Array[Byte]] =
-    for {
+    for
       agent <- ZIO.service[Agent]
       did = agent.id
       kidsNeeded = msg.recipients.map(_.header.kid)
@@ -160,7 +160,7 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
       keys = agent.keyStore.keys.toSeq
         .flatMap { k =>
           val vmr = (VerificationMethodReferenced(k.kid))
-          if (kidsNeeded.contains(vmr)) Some(vmr, k) else None
+          if kidsNeeded.contains(vmr) then Some(vmr, k) else None
         }
       resolver <- ZIO.service[Resolver]
       skid = msg.`protected`.obj match
@@ -171,6 +171,6 @@ class OperationsImp(cryptoOperations: CryptoOperations) extends Operations {
         .mapError(ResolverErrorWarp(_))
       senderKey = doc.allKeysTypeKeyAgreement.find { e => e.vmr == skid }.get // FIXME get
       data <- cryptoOperations.authDecrypt(senderKey.key, keys, msg)
-    } yield data
+    yield data
 
 }

@@ -33,7 +33,7 @@ trait ECDH_UtilsOKP {
   ): Either[CurveError, Curve] = {
     okpRecipientsKeys.collect(_._2.getCurve).toSet match {
       case theCurve if theCurve.size == 1 =>
-        if (Curve.okpCurveSet.contains(theCurve.head)) Right(theCurve.head)
+        if Curve.okpCurveSet.contains(theCurve.head) then Right(theCurve.head)
         else Left(WrongCurve(theCurve.head, Curve.okpCurveSet))
       case multiCurves if multiCurves.size > 1 =>
         Left(MultiCurvesTypes(multiCurves, Curve.okpCurveSet))
@@ -49,7 +49,7 @@ object ECDH_AnonOKP extends ECDH_UtilsOKP {
       okpRecipientsKeys: Seq[(VerificationMethodReferenced, OKPKey)],
       header: AnonHeaderBuilder,
       clearText: Array[Byte],
-  ): Either[CryptoFailed, EncryptedMessageGeneric] = for {
+  ): Either[CryptoFailed, EncryptedMessageGeneric] = for
     curve <- getCurve(okpRecipientsKeys).map(_.toJWKCurve)
 
     // Generate ephemeral X25519 key pair
@@ -82,7 +82,7 @@ object ECDH_AnonOKP extends ECDH_UtilsOKP {
     }
     myProvider = new ECDH_AnonCryptoProvider(curve, cek)
     ret = myProvider.encryptAUX(updatedHeader, sharedSecrets, clearText, updatedAAD)
-  } yield (ret)
+  yield (ret)
 
   def decrypt(
       okpRecipientsKeys: Seq[(VerificationMethodReferenced, OKPKey)],
@@ -91,7 +91,7 @@ object ECDH_AnonOKP extends ECDH_UtilsOKP {
       iv: IV,
       cipherText: CipherText,
       authTag: TAG
-  ): Either[CryptoFailed, Array[Byte]] = for {
+  ): Either[CryptoFailed, Array[Byte]] = for
     curve <- getCurve(okpRecipientsKeys).map(_.toJWKCurve)
     critPolicy: CriticalHeaderParamsDeferral = {
       val aux = new CriticalHeaderParamsDeferral()
@@ -109,7 +109,7 @@ object ECDH_AnonOKP extends ECDH_UtilsOKP {
         // TODO check point on curve
         val key = recipient._2.toJWK
 
-        if (!key.getCurve().equals(ephemeralPublicKey.getCurve()))
+        if !key.getCurve().equals(ephemeralPublicKey.getCurve()) then
           Left(PointNotOnCurve("Curve of ephemeral public key does not match curve of private key"))
         else
           Try(
@@ -135,7 +135,7 @@ object ECDH_AnonOKP extends ECDH_UtilsOKP {
         authTag,
         aad = AAD.compute(Base64URL(header.base64url)),
       )
-  } yield (ret)
+  yield (ret)
 }
 
 object ECDH_AuthOKP extends ECDH_UtilsOKP {
@@ -145,7 +145,7 @@ object ECDH_AuthOKP extends ECDH_UtilsOKP {
       okpRecipientsKeys: Seq[(VerificationMethodReferenced, OKPKey)], // TODO no empty seq
       header: AuthHeaderBuilder,
       clearText: Array[Byte],
-  ): Either[CryptoFailed, EncryptedMessageGeneric] = for {
+  ): Either[CryptoFailed, EncryptedMessageGeneric] = for
     curve <- getCurve(okpRecipientsKeys).map(_.toJWKCurve)
 
     // Generate ephemeral X25519 key pair
@@ -186,7 +186,7 @@ object ECDH_AuthOKP extends ECDH_UtilsOKP {
     myProvider = new ECDH_AuthCryptoProvider(curve, cek)
 
     ret = myProvider.encryptAUX(updatedHeader, sharedSecrets, clearText, updatedAAD)
-  } yield (ret)
+  yield (ret)
 
   def decrypt(
       sender: OKPKey,
@@ -196,7 +196,7 @@ object ECDH_AuthOKP extends ECDH_UtilsOKP {
       iv: IV,
       cipherText: CipherText,
       authTag: TAG
-  ): Either[CryptoFailed, Array[Byte]] = for {
+  ): Either[CryptoFailed, Array[Byte]] = for
     curve <- getCurve(okpRecipientsKeys).map(_.toJWKCurve)
     critPolicy: CriticalHeaderParamsDeferral = {
       val aux = new CriticalHeaderParamsDeferral()
@@ -238,5 +238,5 @@ object ECDH_AuthOKP extends ECDH_UtilsOKP {
         aad = AAD.compute(Base64URL(header.base64url))
       )
 
-  } yield (ret)
+  yield (ret)
 }

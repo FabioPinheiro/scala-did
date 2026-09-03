@@ -139,7 +139,7 @@ object ScalusService {
 
     AuxiliaryData.Metadata(Map(Word64.fromUnsignedInt(999) -> Metadatum.Int(123)))
 
-    for {
+    for
       bfConfig <- ZIO.service[BlockfrostConfig]
       wallet <- ZIO.service[CardanoWalletConfig]
       cardanoNetwork = bfConfig.network
@@ -152,7 +152,7 @@ object ScalusService {
           .complete(reader = nodeProvider, sponsor = wallet.address(0, cardanoNetwork))
       )
       ret = tx.sign(wallet.signer(0)).transaction
-    } yield ret
+    yield ret
   }
 
   // private def makeBFNetworks(n: CardanoNetwork) = n match
@@ -170,7 +170,7 @@ object ScalusService {
   def submitTransaction(
       tx: Transaction
   ): ZIO[BlockfrostConfig, Throwable, TxHash] =
-    for {
+    for
       _ <- ZIO.log("submitTransaction")
       bfConfig <- ZIO.service[BlockfrostConfig]
       nodeProvider: BlockfrostProvider <- bfConfig.nodeProvider
@@ -187,17 +187,17 @@ object ScalusService {
       _ <- ZIO.log(s"submitTransaction result = ${hash.toHex}")
       _ <- {
         val base =
-          if (bfConfig.network == PublicCardanoNetwork.Mainnet) "https://cardanoscan.io"
+          if bfConfig.network == PublicCardanoNetwork.Mainnet then "https://cardanoscan.io"
           else s"https://${bfConfig.network.name}.cardanoscan.io"
         ZIO.log(s"See $base/transaction/${hash.toHex}?tab=metadata")
       }
-    } yield TxHash.fromHex(hash.toHex)
+    yield TxHash.fromHex(hash.toHex)
 
   def addressesTotalAda(address: String): ZIO[BlockfrostConfig, Throwable, BigDecimal] =
     addressesTotalAda(Address.fromString(address))
 
   def addressesTotalAda(address: Address): ZIO[BlockfrostConfig, Throwable, BigDecimal] =
-    for {
+    for
       addressStr <- ZIO.fromTry(address.encode)
       bfConfig <- ZIO.service[BlockfrostConfig]
       nodeProvider: BlockfrostProvider <- bfConfig.nodeProvider
@@ -217,5 +217,5 @@ object ScalusService {
         case Some(coin) =>
           ZIO.debug(s"Found ${coin.value.toString} Lovelaces ($total Ada) in ${bfConfig.network} for '$addressStr'")
         case None => ZIO.debug(s"Wallet '$addressStr' was no UTXOs in '$addressStr")
-    } yield total
+    yield total
 }

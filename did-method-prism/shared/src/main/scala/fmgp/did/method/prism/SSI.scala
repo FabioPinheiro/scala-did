@@ -33,7 +33,7 @@ final case class SSI(
     case k: PrismPublicKey.CompressedECKey   => addKey(k)
 
   private def addKey(k: PrismPublicKey.UncompressedECKey | PrismPublicKey.CompressedECKey): SSI =
-    if (keys.exists(_.id == k.id)) self //  ID must be unique
+    if keys.exists(_.id == k.id) then self //  ID must be unique
     else self.copy(keys = this.keys :+ k)
 
   def findVDRKey(pk: Secp256k1PrivateKey) = {
@@ -52,7 +52,7 @@ final case class SSI(
   }
 
   def append(spo: MySignedPrismEvent[CreateDidOP | UpdateDidOP | DeactivateDidOP]): SSI = {
-    if (Ordering[EventCursor].lteq(spo.eventCursor, this.cursor)) self // Ignore if the event its already process
+    if Ordering[EventCursor].lteq(spo.eventCursor, this.cursor) then self // Ignore if the event its already process
     else
       {
         spo match
@@ -71,7 +71,7 @@ final case class SSI(
                           case true  => newSSI
                       )
               case UpdateDidOP(previousEventHash, id, actions) =>
-                if (!latestHash.contains(previousEventHash) & self.checkMasterSignature(spo)) self
+                if !latestHash.contains(previousEventHash) & self.checkMasterSignature(spo) then self
                 else
                   actions
                     .foldLeft(self) { (tmpSSI, action) =>
@@ -90,14 +90,14 @@ final case class SSI(
                           copy(services = tmpSSI.services.map {
                             case s @ MyService(id, type_, serviceEndpoint) if id != sId => s
                             case MyService(id, type_, serviceEndpoint)                  =>
-                              if (newType.isEmpty) MyService(id = id, `type` = type_, newServiceEndpoints)
+                              if newType.isEmpty then MyService(id = id, `type` = type_, newServiceEndpoints)
                               else MyService(id = id, `type` = type_, newServiceEndpoints)
                           })
                         case UpdateDidOP.PatchContext(context) => copy(context = context) // replace
                     }
                     .copy(latestHash = Some(spo.opHash))
               case DeactivateDidOP(previousEventHash, id) =>
-                if (!latestHash.contains(previousEventHash) & self.checkMasterSignature(spo)) self
+                if !latestHash.contains(previousEventHash) & self.checkMasterSignature(spo) then self
                 else self.copy(latestHash = Some(spo.opHash), disabled = true)
       }.copy(cursor = spo.eventCursor)
   }
