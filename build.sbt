@@ -1,6 +1,6 @@
 inThisBuild(
   Seq(
-    scalaVersion := "3.3.8", // Also update docs/publishWebsite.sh and any ref to scala-3.3.8
+    scalaVersion := "3.9.0", // Also update docs/publishWebsite.sh and any ref to scala-3.3.8
     // scalaVersion := "3.4.2", // Also update docs/publishWebsite.sh and any ref to scala-3.4.2
   )
 )
