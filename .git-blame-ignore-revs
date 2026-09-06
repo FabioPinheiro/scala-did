@@ -37,3 +37,6 @@ cdfe91db6c14dc50dbbf4d37ea01ad57e0b56248
 
 # Scala Steward: Reformat with scalafmt 3.11.1
 b0bb9cf187b20fb2930b19be91dda15c2b716cf1
+
+# Run compiler with flag -rewrite -source:future - scala migration auto rewrite 
+34741374e3d972dc33a7159147f7ae1b0c5dc84a
