@@ -87,7 +87,7 @@ case class Base64Obj[T](obj: T, original: Option[Base64] = None) {
 }
 object Base64Obj {
 
-  given decoder[T](using jsonDecoder: JsonDecoder[T]): JsonDecoder[Base64Obj[T]] =
+  given decoder: [T] => (jsonDecoder: JsonDecoder[T]) => JsonDecoder[Base64Obj[T]] =
     Base64.decoder.mapOrFail { original =>
       original.decodeToString
         .fromJson[T]
@@ -96,7 +96,7 @@ object Base64Obj {
         )
     }
 
-  given encoder[T](using jsonEncoder: JsonEncoder[T]): JsonEncoder[Base64Obj[T]] =
+  given encoder: [T] => (jsonEncoder: JsonEncoder[T]) => JsonEncoder[Base64Obj[T]] =
     Base64.encoder.contramap[Base64Obj[T]] {
       case Base64Obj(_, Some(original)) => original
       case Base64Obj(obj, None)         => Base64.encode(obj.toJson)

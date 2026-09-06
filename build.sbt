@@ -247,7 +247,10 @@ inThisBuild(
       Seq("-encoding", "UTF-8") ++ // source files are in UTF-8
         // Seq("-explain") ++ // Compile error Explanation
         Seq( // run all/Test/compile before each commit
-          "-source:future", // TODO user '3.9' // Note 3.10 will start to remove scala 2 logic like implicits
+          "-Wconf:src=.*main/scalablytyped/fmgp.typings/:s", // WAITING https://github.com/ScalablyTyped/Converter/issues/763
+          "-Wconf:src=.*src_managed/main/scalapb/proto/prism/:s", // WAITING https://github.com/scalapb/ScalaPB/issues/2212
+          // FIXME `implicit` lambdas are no longer supported, use a lambda with `?=>` instead
+          // "-source:future", // TODO user '3.9' // Note 3.10 will start to remove scala 2 logic like implicits
           "-Wconf:msg=pattern selector should be an instance of Matchable:s" // FIXME REMOVE
         ) ++ // preparation for scala 3.9
         Seq(
@@ -266,7 +269,7 @@ inThisBuild(
         ) ++ {
           // https://docs.scala-lang.org/scala3/guides/migration/tooling-syntax-rewriting.html
           // scalac -help
-          if (true) Seq("-Xfatal-warnings")
+          if (true) Seq("-Werror") // "-Xfatal-warnings"
           else Seq("-rewrite", "-source:future-migration") // preparation for scala 3.9 and 3.10
         } ++
         // Because DeriveJson(Decoder/Encoder).gen[DidFail] exceeded maximal number of successive inlines (default is 32)

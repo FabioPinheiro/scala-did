@@ -7,7 +7,7 @@ import fmgp.util.*
 import fmgp.crypto.UtilsJVM.*
 import fmgp.did.comm.*
 
-given Conversion[Base64Obj[ProtectedHeader], JWEHeader] with
+given Conversion[Base64Obj[ProtectedHeader], JWEHeader] {
   def apply(x: Base64Obj[ProtectedHeader]) = {
     val encryptionMethod = x.obj.enc match
       case ENCAlgorithm.XC20P           => EncryptionMethod.XC20P
@@ -38,9 +38,10 @@ given Conversion[Base64Obj[ProtectedHeader], JWEHeader] with
             typ.map(e => aux.`type`(JOSEObjectType(e.typ)))
             aux.build()
   }
+}
 
-given Conversion[Base64, com.nimbusds.jose.util.Base64URL] with
+given Conversion[Base64, com.nimbusds.jose.util.Base64URL]:
   def apply(x: Base64) = new com.nimbusds.jose.util.Base64URL(x.urlBase64)
 
-given Conversion[JWAAlgorithm, JWSAlgorithm] with
+given Conversion[JWAAlgorithm, JWSAlgorithm]:
   def apply(alg: JWAAlgorithm) = alg.asNimbusds

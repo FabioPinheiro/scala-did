@@ -41,7 +41,7 @@ object UtilsJVM {
 
   object unsafe {
 
-    given Conversion[ENCAlgorithm, EncryptionMethod] with
+    given Conversion[ENCAlgorithm, EncryptionMethod]:
       def apply(x: ENCAlgorithm) = {
         x match
           case ENCAlgorithm.XC20P           => EncryptionMethod.XC20P
@@ -50,7 +50,7 @@ object UtilsJVM {
       }
 
     /** Don't import this by default */
-    given Conversion[ProtectedHeader, JWEHeader] with
+    given Conversion[ProtectedHeader, JWEHeader]:
       def apply(x: ProtectedHeader) = {
         val encryptionMethod = x.enc match
           case ENCAlgorithm.XC20P           => EncryptionMethod.XC20P

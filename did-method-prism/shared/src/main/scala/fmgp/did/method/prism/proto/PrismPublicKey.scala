@@ -150,24 +150,26 @@ object PrismPublicKey {
             VoidKey(id = id, "PublicKey x or y is missing in ECKeyData")
           case ECKeyData(curve, x, y, unknownFields) =>
             if x.size == 0 || y.size == 0 then VoidKey(id = id, "PublicKey curve is missing in ECKeyData")
-            UncompressedECKey(
-              id = id,
-              usage = PrismKeyUsage.fromProto(usage),
-              curve = curve,
-              x = x.toByteArray(),
-              y = y.toByteArray()
-            )
+            else
+              UncompressedECKey(
+                id = id,
+                usage = PrismKeyUsage.fromProto(usage),
+                curve = curve,
+                x = x.toByteArray(),
+                y = y.toByteArray()
+              )
       case PublicKey(id, usage: PrismKeyUsage.ProtoKeyUsage, KeyData.CompressedEcKeyData(value), unknownFields) =>
         value match
           case CompressedECKeyData("", data, unknownFields) =>
             VoidKey(id = id, "PublicKey curve is missing in CompressedECKeyData")
           case CompressedECKeyData(curve, data, unknownFields) =>
             if data.size == 0 then VoidKey(id = id, "PublicKey data is missing in CompressedECKeyData")
-            CompressedECKey(
-              id = id,
-              usage = PrismKeyUsage.fromProto(usage),
-              curve = curve,
-              data = data.toByteArray()
-            )
+            else
+              CompressedECKey(
+                id = id,
+                usage = PrismKeyUsage.fromProto(usage),
+                curve = curve,
+                data = data.toByteArray()
+              )
   }
 }

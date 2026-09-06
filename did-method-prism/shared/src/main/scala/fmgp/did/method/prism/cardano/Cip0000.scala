@@ -32,9 +32,10 @@ object Cip0000 {
         if a < 0 then Left("didIndex MUST be a no negative number")
         else if 0 < b && b < 8 then Left("keyUsage MUST be between 1 to 8")
         else if c < 0 then Left("didIndex MUST be a no negative number")
-        PrismKeyUsage.fromProtoEnum(b) match
-          case Left(error)     => Left("keyUsage MUST be between 1 to 8?")
-          case Right(keyUsage) => Right(Cip0000(didIndex = a, keyUsage = keyUsage, keyIndex = c))
+        else
+          PrismKeyUsage.fromProtoEnum(b) match
+            case Left(error)     => Left("keyUsage MUST be between 1 to 8?")
+            case Right(keyUsage) => Right(Cip0000(didIndex = a, keyUsage = keyUsage, keyIndex = c))
       case _ =>
         Left(s"Fail to parse regex in `$derivationPath`")
     }
