@@ -29,18 +29,18 @@ case class ReactiveMongoLive(
 object ReactiveMongoApi {
 
   private def acquire(connectionString: String) = (
-    for {
+    for
       asyncDriver <- ZIO.service[AsyncDriver]
       mongoParsedUri <- ZIO.fromFuture(implicit ec => MongoConnection.fromStringWithDB(connectionString))
       connection <- ZIO.fromFuture(_ =>
         asyncDriver.connect(mongoParsedUri, Some(mongoParsedUri.db), strictMode = false)
       )
       reactiveMongo = ReactiveMongoLive(asyncDriver, mongoParsedUri, connection)
-    } yield reactiveMongo
+    yield reactiveMongo
   ).uninterruptible
 
   private def release(api: ReactiveMongoApi) = ZIO
-    .fromFuture(_ => api.connection.close()(10.seconds))
+    .fromFuture(_ => api.connection.close()(using 10.seconds))
     .orDie
     .unit
 

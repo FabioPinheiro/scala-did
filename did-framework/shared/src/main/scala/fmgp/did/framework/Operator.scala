@@ -25,13 +25,13 @@ case class Operator(
             .flatMap { pMsg =>
               val recipients = pMsg.to.toSet.flatten.map(_.toDIDSubject)
               val toBeInfor = getAgentProgram(recipients)
-              if (toBeInfor.isEmpty) ZIO.logWarning("No Agent to inform") *> ZIO.succeed(false)
+              if toBeInfor.isEmpty then ZIO.logWarning("No Agent to inform") *> ZIO.succeed(false)
               else ZIO.foreachParDiscard(toBeInfor)(_.receiveMsg(sMsg, transport)) *> ZIO.succeed(true)
             }
         case eMsg: EncryptedMessage =>
           val recipients = eMsg.recipientsSubject
           val toBeInfor = getAgentProgram(recipients)
-          if (toBeInfor.isEmpty) ZIO.logWarning("No Agent to inform") *> ZIO.succeed(false)
+          if toBeInfor.isEmpty then ZIO.logWarning("No Agent to inform") *> ZIO.succeed(false)
           else ZIO.foreachParDiscard(toBeInfor)(_.receiveMsg(eMsg, transport)) *> ZIO.succeed(true)
       }
       .takeUntil(i => i)

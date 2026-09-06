@@ -99,7 +99,7 @@ case class ECDH_AnonCryptoProvider(val curve: JWKCurve, val cek: SecretKey) exte
     }.flatten
 
     CryptoErrorCollection.unfold(tmp).flatMap { result =>
-      if (result.tail.forall(_.sameElements(result.head)))
+      if result.tail.forall(_.sameElements(result.head)) then
         result.headOption match
           case Some(value) => Right(value)
           case None        => Left(ZeroResults)
@@ -178,7 +178,7 @@ case class ECDH_AuthCryptoProvider(val curve: JWKCurve, val cek: SecretKey) exte
     }.flatten
 
     CryptoErrorCollection.unfold(tmp).flatMap { result =>
-      if (result.tail.forall(_.sameElements(result.head)))
+      if result.tail.forall(_.sameElements(result.head)) then
         result.headOption match
           case Some(value) => Right(value)
           case None        => Left(ZeroResults)

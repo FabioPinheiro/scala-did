@@ -38,7 +38,7 @@ object AuthRequest {
   def piuri = PIURI("https://fmgp.app/auth/0.1/request")
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, AuthRequest] = {
-    if (msg.`type` != piuri)
+    if msg.`type` != piuri then
       Left(s"No able to create AuthRequest from a Message of the type '${msg.`type`}'")
     else
       msg.from match
@@ -107,7 +107,7 @@ object AuthMsg {
     )
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, AuthMsg] = {
-    if (msg.`type` != piuri)
+    if msg.`type` != piuri then
       Left(s"No able to create AuthMsg from a Message of the type '${msg.`type`}'")
     else
       msg.thid match

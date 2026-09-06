@@ -172,7 +172,7 @@ object CardanoService {
   // Return the hash/id of the transaction
   @deprecated("use ScalusService object instead")
   def submitTransaction(tx: Transaction): ZIO[BlockfrostConfig, Throwable, TxHash] =
-    for {
+    for
       _ <- ZIO.log("submitTransaction")
       bfConfig <- ZIO.service[BlockfrostConfig]
       backendService: BackendService = makeBFBackendService(bfConfig)
@@ -182,16 +182,16 @@ object CardanoService {
       _ <- ZIO.log(s"submitTransaction result = ${result.toString}")
       _ <- {
         val base =
-          if (bfConfig.network == PublicCardanoNetwork.Mainnet) "https://cardanoscan.io"
+          if bfConfig.network == PublicCardanoNetwork.Mainnet then "https://cardanoscan.io"
           else s"https://${bfConfig.network.name}.cardanoscan.io"
         ZIO.log(s"See $base/transaction/${result.getValue}?tab=metadata")
       }
       // TODO If result.code(),  <= 200 < 300 return error
-    } yield TxHash.fromHex(result.getValue)
+    yield TxHash.fromHex(result.getValue)
 
   @deprecated("use ScalusService object instead")
   def addressesTotalAda(address: String): ZIO[BlockfrostConfig, Throwable, BigDecimal] =
-    for {
+    for
       bfConfig <- ZIO.service[BlockfrostConfig]
       result <- ZIO.attempt(makeBFBackendService(bfConfig).getAddressService().getAddressDetails(address))
       receivedSum = result.getValue
@@ -207,5 +207,5 @@ object CardanoService {
       lovelaces = receivedSum - sentSum
       total = BigDecimal(lovelaces) / BigDecimal(1000000)
       _ <- ZIO.debug(s"Found $lovelaces Lovelaces ($total Ada) in ${bfConfig.network} for '$address'")
-    } yield total
+    yield total
 }

@@ -143,7 +143,7 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
   }
 
   override def getEventsAfter(from: EventCursor): ZIO[Any, Throwable, Seq[EventWithRootRef]] =
-    for {
+    for
       ssiMap <- ssi2eventsRef
       vdrMap <- vdr2eventsRef
       ssiPairs = ssiMap.toSeq.flatMap { case (did, refs) =>
@@ -162,7 +162,7 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
           case Some(event) => ZIO.succeed(EventWithRootRef(rootRef, event))
         }
       }
-    } yield events
+    yield events
 
   /** We add/index events with out validating them.
     *
@@ -179,7 +179,7 @@ case class PrismStateInMemory(ref: Ref[PrismStateInMemoryData]) extends PrismSta
 
       def newOpHash2op(data: PrismStateInMemoryData) = data.opHash2op.updatedWith(opId.eventHash.hex) {
         case Some(value) =>
-          if (value.opHash == opId.eventHash.hex) Some(op)
+          if value.opHash == opId.eventHash.hex then Some(op)
           else throw new RuntimeException("impossible state: duplicated event but with different hash?")
         case None => Some(op)
       }

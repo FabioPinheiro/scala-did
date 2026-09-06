@@ -22,7 +22,7 @@ case class TransportManager(
     transportFactory.openTransport(uri) // FIXME TODO register Transport
 
   def link(vmr: VerificationMethodReferenced, transportID: TransportID): TransportManager =
-    if (!transports.map(_.id).contains(transportID)) this // if transport is close
+    if !transports.map(_.id).contains(transportID) then this // if transport is close
     else
       kids.get(vmr) match
         case Some(seq) if seq.contains(transportID) => this
@@ -31,7 +31,7 @@ case class TransportManager(
 
   def link(from: FROMTO, transport: TransportDIDComm[Any]): TransportManager = link(from, transport.id)
   def link(from: FROMTO, transportID: TransportID): TransportManager =
-    if (!transports.map(_.id).contains(transportID)) this // if transport is close
+    if !transports.map(_.id).contains(transportID) then this // if transport is close
     else
       ids.get(from) match
         case Some(seq) if seq.contains(transportID) => this
@@ -72,23 +72,23 @@ case class TransportManager(
 object TransportManager {
 
   def make: URIO[TransportFactory, Ref[TransportManager]] =
-    for {
+    for
       transportFactory <- ZIO.service[TransportFactory]
       ref <- Ref.make(TransportManager(transportFactory = transportFactory))
-    } yield ref
+    yield ref
 
   def registerTransport(transport: TransportDIDComm[Any]) =
-    for {
+    for
       socketManager <- ZIO.service[Ref[TransportManager]]
       _ <- socketManager.update { _.registerTransport(transport) }
       _ <- ZIO.log(s"RegisterTransport concluded")
-    } yield ()
+    yield ()
 
   def unregisterTransport(transportId: String) =
-    for {
+    for
       socketManager <- ZIO.service[Ref[TransportManager]]
       _ <- socketManager.update { case sm: TransportManager => sm.unregisterTransport(transportId) }
       _ <- ZIO.log(s"Channel unregisterSocket")
-    } yield ()
+    yield ()
 
 }

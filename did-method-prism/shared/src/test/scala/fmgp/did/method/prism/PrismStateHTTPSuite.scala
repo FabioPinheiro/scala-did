@@ -21,7 +21,7 @@ class PrismStateHTTPSuite extends ZSuite {
     )
   ) {
     {
-      for {
+      for
         httpUtils <- ZIO.service[HttpUtils]
         state = PrismStateHTTP(httpUtils)
         events <- state.getEventsForSSI(DIDPrism("00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae"))
@@ -96,7 +96,7 @@ class PrismStateHTTPSuite extends ZSuite {
             |  "protobuf" : "12eb010a2000592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae1240303035393261313431613463326263623761366161363931373530353131653265396230343832333138323031323565313561623730623132613231306161651a400a3e0a3c0a0869737375696e673010024a2e0a09736563703235366b31122102a680f17d9b683a9043b45a89989d37fed7a2de8a025eb19790933f59412b64f31a430a410a3f0a0b7265766f636174696f6e3010054a2e0a09736563703235366b3112210384cdd12ac3cf34f241a75281e755e97b35984845b0b7b922df14790b2a9a2266"
             |}""".stripMargin
         )
-      } yield ()
+      yield ()
     }.provide(HttpUtilsSuiteAUX.layer)
   }
 }

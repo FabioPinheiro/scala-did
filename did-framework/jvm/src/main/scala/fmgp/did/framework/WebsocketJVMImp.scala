@@ -10,7 +10,7 @@ object WebsocketJVMImp {
       channel: Channel[ChannelEvent[WebSocketFrame], ChannelEvent[WebSocketFrame]],
       wsProgram: Websocket[Throwable],
   ) = {
-    for {
+    for
       job <- channel
         .receiveAll {
           case UserEventTriggered(UserEvent.HandshakeComplete) => wsProgram.onHandshakeComplete
@@ -30,7 +30,7 @@ object WebsocketJVMImp {
         .debug
       wait <- job.join.debug
       _ <- ZIO.logDebug("WS Function END")
-    } yield ()
+    yield ()
   }
 
 }

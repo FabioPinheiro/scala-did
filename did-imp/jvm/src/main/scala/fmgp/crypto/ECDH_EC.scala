@@ -36,7 +36,7 @@ trait ECDH_UtilsEC {
   ): Either[CurveError, Curve] =
     ecRecipientsKeys.collect(_._2.getCurve).toSet match {
       case theCurve if theCurve.size == 1 =>
-        if (Curve.ecCurveSet.contains(theCurve.head)) Right(theCurve.head)
+        if Curve.ecCurveSet.contains(theCurve.head) then Right(theCurve.head)
         else Left(WrongCurve(theCurve.head, Curve.okpCurveSet))
       case multiCurves if multiCurves.size > 1 =>
         Left(MultiCurvesTypes(multiCurves, Curve.okpCurveSet))
@@ -51,7 +51,7 @@ object ECDH_AnonEC extends ECDH_UtilsEC {
       ecRecipientsKeys: Seq[(VerificationMethodReferenced, ECKey)],
       header: AnonHeaderBuilder,
       clearText: Array[Byte],
-  ): Either[CryptoFailed, EncryptedMessageGeneric] = for {
+  ): Either[CryptoFailed, EncryptedMessageGeneric] = for
     curve <- getCurve(ecRecipientsKeys).map(_.toJWKCurve)
 
     // Generate ephemeral EC key pair
@@ -75,7 +75,7 @@ object ECDH_AnonEC extends ECDH_UtilsEC {
     myProvider = new ECDH_AnonCryptoProvider(curve, cek)
 
     ret = myProvider.encryptAUX(updatedHeader, sharedSecrets, clearText, updatedAAD)
-  } yield (ret)
+  yield (ret)
 
   def decrypt(
       ecRecipientsKeys: Seq[(VerificationMethodReferenced, ECKey)],
@@ -84,7 +84,7 @@ object ECDH_AnonEC extends ECDH_UtilsEC {
       iv: IV,
       cipherText: CipherText,
       authTag: TAG
-  ): Either[CryptoFailed, Array[Byte]] = for {
+  ): Either[CryptoFailed, Array[Byte]] = for
     curve <- getCurve(ecRecipientsKeys).map(_.toJWKCurve)
     critPolicy: CriticalHeaderParamsDeferral = {
       val aux = new CriticalHeaderParamsDeferral()
@@ -101,7 +101,7 @@ object ECDH_AnonEC extends ECDH_UtilsEC {
       ecRecipientsKeys.map { case recipient: (VerificationMethodReferenced, ECKey) =>
         val recipientKey = recipient._2.toJWK
 
-        if (!ECChecks.isPointOnCurve(ephemeralKey.toECPublicKey(), recipientKey.toECPrivateKey()))
+        if !ECChecks.isPointOnCurve(ephemeralKey.toECPublicKey(), recipientKey.toECPrivateKey()) then
           Left(PointNotOnCurve("Curve of ephemeral public key does not match curve of private key"))
         else
           Try(
@@ -126,7 +126,7 @@ object ECDH_AnonEC extends ECDH_UtilsEC {
         authTag,
         aad = AAD.compute(Base64URL(header.base64url))
       )
-  } yield (ret)
+  yield (ret)
 }
 
 object ECDH_AuthEC extends ECDH_UtilsEC {
@@ -136,7 +136,7 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
       ecRecipientsKeys: Seq[(VerificationMethodReferenced, ECKey)],
       header: AuthHeaderBuilder,
       clearText: Array[Byte],
-  ): Either[CryptoFailed, EncryptedMessageGeneric] = for {
+  ): Either[CryptoFailed, EncryptedMessageGeneric] = for
     curve <- getCurve(ecRecipientsKeys).map(_.toJWKCurve)
 
     // Generate ephemeral EC key pair on the same curve as the consumer's public key
@@ -168,7 +168,7 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
     }
 
     ret = myProvider.encryptAUX(updatedHeader, sharedSecrets, clearText, updatedAAD)
-  } yield (ret)
+  yield (ret)
 
   def decrypt(
       sender: ECKey,
@@ -178,7 +178,7 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
       iv: IV,
       cipherText: CipherText,
       authTag: TAG
-  ): Either[CryptoFailed, Array[Byte]] = for {
+  ): Either[CryptoFailed, Array[Byte]] = for
     curve <- getCurve(ecRecipientsKeys).map(_.toJWKCurve)
     critPolicy: CriticalHeaderParamsDeferral = {
       val aux = new CriticalHeaderParamsDeferral()
@@ -194,7 +194,7 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
       ecRecipientsKeys.map { case recipient: (VerificationMethodReferenced, ECKey) =>
         val recipientKey = recipient._2.toJWK
 
-        if (!ECChecks.isPointOnCurve(ephemeralKey.toECPublicKey(), recipientKey.toECPrivateKey()))
+        if !ECChecks.isPointOnCurve(ephemeralKey.toECPublicKey(), recipientKey.toECPrivateKey()) then
           Left(PointNotOnCurve("Curve of ephemeral public key does not match curve of private key"))
         else
           Try(
@@ -220,5 +220,5 @@ object ECDH_AuthEC extends ECDH_UtilsEC {
         authTag,
         aad = AAD.compute(Base64URL(header.base64url))
       )
-  } yield (ret)
+  yield (ret)
 }

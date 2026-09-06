@@ -58,12 +58,12 @@ object KTY {
   given encoder: JsonEncoder[KTY] = JsonEncoder.string.contramap((e: KTY) => e.toString)
 
   given decoderEC: JsonDecoder[KTY.EC.type] = JsonDecoder.string.mapOrFail(str =>
-    if (str == KTY.EC.toString) Right(KTY.EC) else Left(s"'$str' is not a type KTY.EC")
+    if str == KTY.EC.toString then Right(KTY.EC) else Left(s"'$str' is not a type KTY.EC")
   )
   given encoderEC: JsonEncoder[KTY.EC.type] = JsonEncoder.string.contramap((e: KTY.EC.type) => e.toString)
 
   given decoderOKP: JsonDecoder[KTY.OKP.type] = JsonDecoder.string.mapOrFail(str =>
-    if (str == KTY.OKP.toString) Right(KTY.OKP) else Left(s"'$str' is not a type KTY.OKP")
+    if str == KTY.OKP.toString then Right(KTY.OKP) else Left(s"'$str' is not a type KTY.OKP")
   )
   given encoderOKP: JsonEncoder[KTY.OKP.type] = JsonEncoder.string.contramap((e: KTY.OKP.type) => e.toString)
 
@@ -371,7 +371,7 @@ object OKP_EC_Key {
     }
   given decoder: JsonDecoder[OKP_EC_Key] = JsonDecoder[Json.Obj]
     .mapOrFail { obj =>
-      for {
+      for
         kty <- obj.get(ktyCursor).flatMap(_.as[KTY])
         maybeD <- obj.get("d") match
           case None       => Right(None)
@@ -382,7 +382,7 @@ object OKP_EC_Key {
         x <- obj.get(xCursor).map(_.value)
         key <- kty match
           case ktyEC: KTY.EC.type =>
-            for {
+            for
               y <- obj.get(yCursor).map(_.value)
               crv <- obj.get(crvCursor).flatMap(_.as[ECCurveOpaque])
               ret = (maybeD, maybeKid) match
@@ -391,9 +391,9 @@ object OKP_EC_Key {
                 case (Some(d), None)      => ECPrivateKeyWithoutKid(kty = ktyEC, crv = crv.curve, d = d, x = x, y = y)
                 case (Some(d), Some(kid)) =>
                   ECPrivateKeyWithKid(kty = ktyEC, crv = crv.curve, d = d, x = x, y = y, kid = kid)
-            } yield ret
+            yield ret
           case ktyOKP: KTY.OKP.type =>
-            for {
+            for
               crv <- obj.get(crvCursor).flatMap(_.as[OKPCurveOpaque])
               ret = (maybeD, maybeKid) match
                 case (None, None)         => OKPPublicKeyWithoutKid(kty = ktyOKP, crv = crv.curve, x = x)
@@ -401,8 +401,8 @@ object OKP_EC_Key {
                 case (Some(d), None)      => OKPPrivateKeyWithoutKid(kty = ktyOKP, crv = crv.curve, d = d, x = x)
                 case (Some(d), Some(kid)) =>
                   OKPPrivateKeyWithKid(kty = ktyOKP, crv = crv.curve, d = d, x = x, kid = kid)
-            } yield ret
-      } yield key
+            yield ret
+      yield key
     }
 }
 

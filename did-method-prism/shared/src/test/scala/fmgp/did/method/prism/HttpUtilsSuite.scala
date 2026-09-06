@@ -19,7 +19,7 @@ class HttpUtilsSuite extends ZSuite {
 
   testZ("Get DIDDocument for a DID".tag(fmgp.IntregrationTest)) {
     {
-      for {
+      for
         proxy <- ZIO.service[HttpUtils]
         tmp <- proxy
           .getT[DIDDocument](
@@ -46,7 +46,7 @@ class HttpUtilsSuite extends ZSuite {
           |  ]
           |}""".stripMargin
         )
-      } yield ()
+      yield ()
     }.provide(HttpUtilsSuiteAUX.layer)
     // https://raw.githubusercontent.com/FabioPinheiro/prism-vdr/refs/heads/main/mainnet/di:c/d:prism:00592a141a4c2bcb7a6aa691750511e2e9b048231820125e15ab70b12a210aae
   }

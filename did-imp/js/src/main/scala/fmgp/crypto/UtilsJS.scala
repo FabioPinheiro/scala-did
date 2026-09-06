@@ -128,7 +128,7 @@ object UtilsJS {
     }
 
     def verify(jwm: SignedMessage): IO[CryptoFailed, Boolean] =
-      for {
+      for
         jwmAux <- ZIO
           .from(js.JSON.parse(jwm.toJson).asInstanceOf[GeneralJWSInput])
           .mapError(_ match {
@@ -146,10 +146,10 @@ object UtilsJS {
             // case js.JavaScriptException(ex: JWSSignatureVerificationFailed) => ZIO.succeed(false)
             }
         )
-      } yield ret
+      yield ret
 
     def verifyJWT(jwt: JWT): IO[CryptoFailed, Boolean] =
-      for {
+      for
         ret <- key.toKeyLike.flatMap(thisKey =>
           ZIO
             .fromPromiseJS(
@@ -165,12 +165,12 @@ object UtilsJS {
               case js.JavaScriptException(ex: JWSSignatureVerificationFailed) => ZIO.succeed(false)
             }
         )
-      } yield ret
+      yield ret
   }
 
   extension (key: PrivateKey) {
     def sign(payload: Array[Byte]): IO[CryptoFailed, SignedMessage] =
-      for {
+      for
         // _ <- key match {
         //   case ECPublicKey(_, _, _, _, _) | ECPrivateKey(_, _, _, _, _, _) =>
         //     alg match
@@ -217,12 +217,12 @@ object UtilsJS {
               )
               .orElseFail(UnknownError)
           }
-      } yield ret
+      yield ret
 
     /** Based on https://github.com/panva/jose/blob/main/docs/classes/jwt_sign.SignJWT.md
       */
     def signJWT(payload: Array[Byte] /*, alg: JWAAlgorithm*/ ): IO[CryptoFailed, JWT] = {
-      for {
+      for
         jwtPayload <- ZIO
           .from(js.JSON.parse(String(payload)).asInstanceOf[JWTPayload])
           .mapError(_ match {
@@ -242,7 +242,7 @@ object UtilsJS {
               .map { jwtStr => JWT.unsafeFromEncodedJWT(jwtStr) }
               .orElseFail(UnknownError)
           }
-      } yield ret
+      yield ret
 
     }
   }

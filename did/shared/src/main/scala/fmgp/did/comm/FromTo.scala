@@ -66,7 +66,7 @@ object FROMTO {
   def apply(s: String): FROMTO = s.tap(e => FromTo.unsafe_parse(e))
   def either(s: String): Either[FailToParse, FROMTO] = FromTo.either_parse(s).flatMap(fromDIDURL(_))
   def fromDIDURL(s: DIDURL): Either[FailToParse, FROMTO] =
-    if (s.fragment.isEmpty) Right(unsafe_apply(s.string))
+    if s.fragment.isEmpty then Right(unsafe_apply(s.string))
     else Left(FailToParse(s"MUST be DID URL with no fragment '$s'"))
   def fromForcedDIDURL(s: DIDURL) = s.toFROMTO // REMOVE
   /** FIXME REMOVE method @throws java.lang.AssertionError if not a valid DIDSubject */
@@ -108,7 +108,7 @@ object FROM {
 
   def either(s: String): Either[FailToParse, FROM] = FromTo.either_parse(s).flatMap(fromDIDURL(_))
   def fromDIDURL(s: DIDURL): Either[FailToParse, FROM] =
-    if (s.fragment.isEmpty) Right(unsafe_apply(s.string))
+    if s.fragment.isEmpty then Right(unsafe_apply(s.string))
     else Left(FailToParse(s"MUST be DID URL with no fragment '$s'"))
   given decoder: JsonDecoder[FROM] = JsonDecoder.string.mapOrFail(s => FROM.either(s).left.map(_.error))
   given encoder: JsonEncoder[FROM] = JsonEncoder.string.contramap(e => e.value)
@@ -143,7 +143,7 @@ object TO {
   def apply(s: String): TO = s.tap(e => FromTo.unsafe_parse(e)) // 'tap' is to throws as soon as possible
   def either(s: String): Either[FailToParse, TO] = FromTo.either_parse(s).flatMap(fromDIDURL(_))
   def fromDIDURL(s: DIDURL): Either[FailToParse, TO] =
-    if (s.fragment.isEmpty) Right(unsafe_apply(s.string))
+    if s.fragment.isEmpty then Right(unsafe_apply(s.string))
     else Left(FailToParse(s"MUST be DID URL with no fragment '$s'"))
 
   given decoder: JsonDecoder[TO] = JsonDecoder.string.mapOrFail(s => TO.either(s).left.map(_.error))

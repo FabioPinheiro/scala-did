@@ -72,8 +72,7 @@ final case class DIDServiceDIDCommMessaging(
 
   /** serviceEndpoint MUST not fail! */
   def serviceEndpoint: Required[ServiceEndpointNoStr] =
-    if (restEndpoints.isEmpty)
-      firstEndpoint.toJsonAST.flatMap(_.as[Json.Obj]).getOrElse(Json.Obj())
+    if restEndpoints.isEmpty then firstEndpoint.toJsonAST.flatMap(_.as[Json.Obj]).getOrElse(Json.Obj())
     else endpoints.toJsonAST.flatMap(_.as[Json.Arr]).getOrElse(Json.Arr())
 
   // util used by webapp

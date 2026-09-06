@@ -36,30 +36,30 @@ object IndexerExport {
   def exportEventsToFiles(
       exportDir: Path,
       fromScratch: Boolean,
-  ): ZIO[PrismStateRead, Throwable, Long] = for {
+  ): ZIO[PrismStateRead, Throwable, Long] = for
     _ <- ZIO.attemptBlockingIO(Files.createDirectories(exportDir))
     existingCursor <- CursorFile.read(exportDir)
     written <-
-      if (fromScratch || existingCursor.isEmpty) fullRebuild(exportDir)
+      if fromScratch || existingCursor.isEmpty then fullRebuild(exportDir)
       else incrementalAppend(exportDir, existingCursor.get)
     state <- ZIO.service[PrismStateRead]
     finalCursor <- state.cursor
     _ <- CursorFile.write(exportDir, finalCursor)
     _ <- ZIO.log(s"Cursor written: $finalCursor")
-  } yield written
+  yield written
 
-  private def fullRebuild(exportDir: Path): ZIO[PrismStateRead, Throwable, Long] = for {
+  private def fullRebuild(exportDir: Path): ZIO[PrismStateRead, Throwable, Long] = for
     _ <- ZIO.log(s"Full rebuild into '$exportDir'")
     ssiCount <- exportSSIEventsFull(exportDir)
     vdrCount <- exportVDREventsFull(exportDir)
     total = ssiCount + vdrCount
     _ <- ZIO.log(s"Full rebuild complete: $total events ($ssiCount SSI + $vdrCount VDR)")
-  } yield total
+  yield total
 
   private def incrementalAppend(
       exportDir: Path,
       from: EventCursor,
-  ): ZIO[PrismStateRead, Throwable, Long] = for {
+  ): ZIO[PrismStateRead, Throwable, Long] = for
     state <- ZIO.service[PrismStateRead]
     _ <- ZIO.log(s"Incremental export from cursor=$from")
     newEvents <- state.getEventsAfter(from)
@@ -72,39 +72,39 @@ object IndexerExport {
       val target = exportDir.resolve(rootRef.hex)
       appendEventsFile(target, eventsForRef)
     }
-  } yield newEvents.size.toLong
+  yield newEvents.size.toLong
 
   // ---- Full-rebuild helpers (mirror indexerJobFS structure) ----
 
-  private def exportSSIEventsFull(exportDir: Path): ZIO[PrismStateRead, Throwable, Long] = for {
+  private def exportSSIEventsFull(exportDir: Path): ZIO[PrismStateRead, Throwable, Long] = for
     state <- ZIO.service[PrismStateRead]
     ssiRefs <- state.ssi2eventsRef
     written <- ZStream
       .fromIterable(ssiRefs.keys)
       .mapZIO { did =>
-        for {
+        for
           events <- state.getEventsForSSI(did)
           target = exportDir.resolve(did.specificId)
           _ <- writeEventsFile(target, events, options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
-        } yield events.size.toLong
+        yield events.size.toLong
       }
       .runFold(0L)(_ + _)
-  } yield written
+  yield written
 
-  private def exportVDREventsFull(exportDir: Path): ZIO[PrismStateRead, Throwable, Long] = for {
+  private def exportVDREventsFull(exportDir: Path): ZIO[PrismStateRead, Throwable, Long] = for
     state <- ZIO.service[PrismStateRead]
     vdrRefs <- state.vdr2eventsRef
     written <- ZStream
       .fromIterable(vdrRefs.keys)
       .mapZIO { ref =>
-        for {
+        for
           events <- state.getEventsForVDR(ref)
           target = exportDir.resolve(ref.hex)
           _ <- writeEventsFile(target, events, options = Set(WRITE, TRUNCATE_EXISTING, CREATE))
-        } yield events.size.toLong
+        yield events.size.toLong
       }
       .runFold(0L)(_ + _)
-  } yield written
+  yield written
 
   // ---- Shared writers ----
 

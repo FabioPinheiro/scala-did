@@ -105,7 +105,7 @@ object ForwardMessage {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, ForwardMessage] = {
-    if (msg.`type` != piuri) Left(s"No able to create ForwardMessage from a Message of the type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create ForwardMessage from a Message of the type '${msg.`type`}'")
     else {
       msg.body match
         case None    => Left(s"'$piuri' MUST have field 'body'")
@@ -212,7 +212,7 @@ object ForwardMessage {
       case sMsg: SignedMessage =>
         sMsg.payloadAsPlaintextMessage.map(_.to.toSet.flatten.map(_.toDIDSubject)).getOrElse(Set.empty)
       case eMsg: EncryptedMessage => eMsg.recipientsSubject
-    if (!recipients.contains(next))
+    if !recipients.contains(next) then
       Left("'next' shound be one of the recipients")
     else
       Right(
@@ -235,9 +235,9 @@ object ForwardMessage {
     buildForwardMessage(next = next, msg = msg, to = Set(to)) match
       case Left(error1)          => ZIO.fail(FailToEncodeMessage(piuri, error1))
       case Right(forwardMessage) =>
-        for {
+        for
           ops <- ZIO.service[Operations]
           encryptedMessage <- ops.anonEncrypt(forwardMessage.toPlaintextMessage)
-        } yield encryptedMessage
+        yield encryptedMessage
 
 }

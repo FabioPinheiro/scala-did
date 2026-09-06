@@ -81,7 +81,7 @@ object DIDExtra {
     val didPrism: DIDPrism = createEvent.didPrism.getOrElse(???) // '???' is ok
 
     val signedPrismUpdateEventDID =
-      if (actions.isEmpty) None
+      if actions.isEmpty then None
       else
         Some {
           val updateEvent: PrismEvent =

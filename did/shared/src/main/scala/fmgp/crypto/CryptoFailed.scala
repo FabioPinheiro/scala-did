@@ -56,7 +56,7 @@ package error {
         case (l, r) if l.isEmpty => Right(r.map(_.value))
         case (l, _)              =>
           val tmp = l.map(_.value)
-          if (tmp.size == 1) Left(tmp.head)
+          if tmp.size == 1 then Left(tmp.head)
           else Left(CryptoErrorCollection(tmp))
       }
   }

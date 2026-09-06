@@ -22,13 +22,13 @@ type Authentication = Option[Set[VerificationMethod]]
 
 /** To use the decoder and encoder: import fmgp.did.SetU.given */
 object SetU {
-  given decoder[U](using jsonDecoder: JsonDecoder[U]): JsonDecoder[U | Seq[U]] =
+  given decoder: [U] => (jsonDecoder: JsonDecoder[U]) => JsonDecoder[U | Seq[U]] =
     jsonDecoder
       .map(e => e: U | Seq[U])
       .orElse(JsonDecoder.seq[U].map(e => e: U | Seq[U]))
 
   // opinionated will always and go to a sequence
-  // inline given encoder[U](using jsonEncoder: JsonEncoder[U]): JsonEncoder[U | Seq[U]] =
+  // inline given encoder: [U] => (jsonEncoder: JsonEncoder[U]) => JsonEncoder[U | Seq[U]] =
   //   JsonEncoder.seq[U].contramap { (uuu: (U | Seq[U])) =>
   //     uuu match {
   //       case one: U                 => Seq(one)
@@ -37,11 +37,10 @@ object SetU {
   //   }
 
   // TODO we must prove that [U] is not the sequence itself... this will not work in that case
-  given encoder[U](using jsonEncoder: JsonEncoder[U]): JsonEncoder[U | Seq[U]] =
+  given encoder: [U] => (jsonEncoder: JsonEncoder[U]) => JsonEncoder[U | Seq[U]] =
     new JsonEncoder[U | Seq[U]] {
       override def unsafeEncode(b: U | Seq[U], indent: Option[Int], out: zio.json.internal.Write): Unit =
-        if (b.isInstanceOf[Seq[?]])
-          JsonEncoder.seq[U].unsafeEncode(b.asInstanceOf[Seq[U]], indent, out)
+        if b.isInstanceOf[Seq[?]] then JsonEncoder.seq[U].unsafeEncode(b.asInstanceOf[Seq[U]], indent, out)
         else jsonEncoder.unsafeEncode(b.asInstanceOf[U], indent, out)
 
     }

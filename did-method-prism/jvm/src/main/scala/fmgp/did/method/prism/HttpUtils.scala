@@ -8,10 +8,10 @@ import fmgp.did.*
 object HttpUtils {
 
   def make: ZIO[Client & Scope, Nothing, HttpUtils] =
-    for {
+    for
       client <- ZIO.service[Client]
       scope <- ZIO.service[Scope]
-    } yield HttpUtils(client, scope)
+    yield HttpUtils(client, scope)
 
   def layer: ZLayer[Client & Scope, Nothing, HttpUtils] =
     ZLayer.fromZIO(make)
@@ -19,13 +19,13 @@ object HttpUtils {
 
 case class HttpUtils(client: Client, scope: Scope) {
   def getT[T](url: String)(using decoder: JsonDecoder[T], classTag: reflect.ClassTag[T]): Task[T] =
-    for {
+    for
       res <- Client
         .batched(Request.get(path = url))
         .provideEnvironment(ZEnvironment(client, scope))
       // .mapError(ex => DIDresolutionFail.fromThrowable(ex))
       data <-
-        if (!res.status.isError) res.body.asString
+        if !res.status.isError then res.body.asString
         else ZIO.fail(new RuntimeException(s"Fail to parse because got 404 from endpoint '$url'"))
       // .mapError(ex => DIDresolutionFail.fromThrowable(ex))
       didDoc <- data.fromJson[T] match
@@ -36,10 +36,10 @@ case class HttpUtils(client: Client, scope: Scope) {
             ZIO.logWarning(aux) *>
             ZIO.fail(new RuntimeException(aux))
         case Right(doc) => ZIO.succeed(doc)
-    } yield (didDoc)
+    yield (didDoc)
 
   def getSeqT[T](url: String)(using decoder: JsonDecoder[T], classTag: reflect.ClassTag[T]): Task[Seq[T]] =
-    for {
+    for
       res <- Client
         .batched(Request.get(path = url))
         .provideEnvironment(ZEnvironment(client, scope))
@@ -67,6 +67,6 @@ case class HttpUtils(client: Client, scope: Scope) {
             }
             .tapError(ex => ZIO.logWarning(s"Fail to read data from '$url': ${ex.toString}"))
       }
-    } yield ret
+    yield ret
 
 }

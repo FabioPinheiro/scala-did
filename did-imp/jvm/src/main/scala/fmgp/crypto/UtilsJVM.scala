@@ -41,7 +41,7 @@ object UtilsJVM {
 
   object unsafe {
 
-    given Conversion[ENCAlgorithm, EncryptionMethod] with
+    given Conversion[ENCAlgorithm, EncryptionMethod]:
       def apply(x: ENCAlgorithm) = {
         x match
           case ENCAlgorithm.XC20P           => EncryptionMethod.XC20P
@@ -50,7 +50,7 @@ object UtilsJVM {
       }
 
     /** Don't import this by default */
-    given Conversion[ProtectedHeader, JWEHeader] with
+    given Conversion[ProtectedHeader, JWEHeader]:
       def apply(x: ProtectedHeader) = {
         val encryptionMethod = x.enc match
           case ENCAlgorithm.XC20P           => EncryptionMethod.XC20P
@@ -137,7 +137,7 @@ object UtilsJVM {
     ecKeyVerifyJWT(ecKey.toJWK, jwt)
 
   def ecKeyVerifyJWT(ecKey: JWKECKey, jwt: JWT): Boolean = {
-    for {
+    for
       header <-
         try Right(JWSHeader.parse(jwt.protectedHeader.content))
         catch case ex: java.text.ParseException => Left(s"Fail to parse JWS header: ${ex.getMessage()}")
@@ -159,7 +159,7 @@ object UtilsJVM {
         jwt.base64JWTFormatWithNoSignature.getBytes(StandardCharset.UTF_8),
         jwt.signature.base64
       )
-    } yield ret
+    yield ret
   }.getOrElse(false)
 
   def ecKeySignJWM(ecKey: JWKECKey, payload: Array[Byte], alg: JWAAlgorithm): SignedMessage = {
@@ -262,7 +262,7 @@ object UtilsJVM {
       "This method can only be call with Curve.Ed25519"
     ) // TODO make it safe
 
-    for {
+    for
       header <-
         try Right(JWSHeader.parse(jwt.protectedHeader.content))
         catch case ex: java.text.ParseException => Left(s"Fail to parse JWS header: ${ex.getMessage()}")
@@ -279,7 +279,7 @@ object UtilsJVM {
         jwt.base64JWTFormatWithNoSignature.getBytes(StandardCharset.UTF_8),
         jwt.signature.base64
       )
-    } yield ret
+    yield ret
   }.getOrElse(false)
 
   def okpKeySignJWMWithEd25519(

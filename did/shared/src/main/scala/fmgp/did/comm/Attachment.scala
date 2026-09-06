@@ -132,7 +132,9 @@ object AttachmentData {
     AttachmentDataBase64.decoder.widen[AttachmentData] <>
       AttachmentDataJson.decoder.widen[AttachmentData] <>
       AttachmentDataJWS.decoder
-        .mapOrFail { e => if (e.jws == Json.Null) Left("jws can not be null") else Right(e) } // TODO JWS_WithOutPayload
+        .mapOrFail { e =>
+          if e.jws == Json.Null then Left("jws can not be null") else Right(e)
+        } // TODO JWS_WithOutPayload
         .widen[AttachmentData] <>
       AttachmentDataLinks.decoder.widen[AttachmentData] <> // Note Try to decode Links after try JWS to work properly
       // TODO The code will not get here if we matches any other first!

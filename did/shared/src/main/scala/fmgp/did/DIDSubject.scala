@@ -55,7 +55,7 @@ object DIDSubject {
     */
   def apply(s: String): DIDSubject = s.tap(e => unsafeParseString(e)) // 'tap' is to throws as soon as possible
   def either(s: String): Either[FailToParse, DIDSubject] =
-    if (DID.regex.matches(s)) Right(DIDSubject(s)) else Left(FailToParse(s"NOT a DID subject '$s'"))
+    if DID.regex.matches(s) then Right(DIDSubject(s)) else Left(FailToParse(s"NOT a DID subject '$s'"))
 
   given decoder: JsonDecoder[DIDSubject] = JsonDecoder.string.map(s => DIDSubject(s)) // TODO use either
   given encoder: JsonEncoder[DIDSubject] = JsonEncoder.string.contramap(e => e.value)
@@ -123,7 +123,7 @@ object DIDSubjectQ {
     def toDID: DID = new { // FIXME unsafe
       val namespace = unsafeParseString(id)._1
       val specificId = unsafeParseString(id).pipe { e =>
-        e._2 + (if (!e._3.isEmpty | value.endsWith("?")) "?" + e._3 else "")
+        e._2 + (if !e._3.isEmpty | value.endsWith("?") then "?" + e._3 else "")
       }
     }
 
@@ -146,7 +146,7 @@ object DIDSubjectQ {
     */
   def apply(s: String): DIDSubjectQ = s.tap(e => unsafeParseString(e)) // 'tap' is to throws as soon as possible
   def either(s: String): Either[FailToParse, DIDSubjectQ] =
-    if (pattern.matches(s)) Right(DIDSubjectQ(s)) else Left(FailToParse(s"NOT a DID subject with query '$s'"))
+    if pattern.matches(s) then Right(DIDSubjectQ(s)) else Left(FailToParse(s"NOT a DID subject with query '$s'"))
 
   given decoder: JsonDecoder[DIDSubjectQ] = JsonDecoder.string.map(s => DIDSubjectQ(s)) // TODO use either
   given encoder: JsonEncoder[DIDSubjectQ] = JsonEncoder.string.contramap(e => e.value)

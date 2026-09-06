@@ -25,19 +25,19 @@ class GenericVDRDriver(
     "DRIVER was not initially. You need to run the '.initState' ZIo program first"
   )
 
-  def initState: ZIO[Any, Throwable, Unit] = for {
+  def initState: ZIO[Any, Throwable, Unit] = for
     // stateRef <- ZIO.service[Ref[PrismState]]
     state <- PrismStateInMemory.empty
     _ <- IndexerUtils.loadPrismStateFromChunkFiles
       .provide(ZLayer.succeed(IndexerConfig(mBlockfrostConfig = None, workdir)) ++ ZLayer.succeed(state))
     _ <- ZIO.log(s"Init GenericVDRDriver Service with PrismState (with ${state.ssiCount} SSI)")
-  } yield (globalState = state)
+  yield {globalState = state}
 
   // HACK
   def updateState = ZIO.succeed(globalState) // FIXME
 
   def createBytesEntry(data: Array[Byte]): ZIO[Any, Throwable, (RefVDR, TxHash)] = {
-    for {
+    for
       // TODO check is in of the type bytes
       // TODO check key
       state <- updateState
@@ -54,11 +54,11 @@ class GenericVDRDriver(
       tx <- ScalusService.makeTrasation(prismEvents = Seq(signedPrismEvent), maybeMsgCIP20)
       _ <- ZIO.log(s"Transation: ${bytes2Hex(tx.toCbor)}")
       txHash <- ScalusService.submitTransaction(tx)
-    } yield (refVDR, txHash)
+    yield (refVDR, txHash)
   }.provideEnvironment(ZEnvironment(bfConfig) ++ ZEnvironment(wallet))
 
   def updateBytesEntry(eventRef: RefVDR, data: Array[Byte]): ZIO[Any, Throwable, (EventHash, TxHash)] = {
-    for {
+    for
       //   stateRef <- ZIO.service[Ref[PrismState]]
       //   state <- stateRef.get
       state <- updateState
@@ -77,18 +77,18 @@ class GenericVDRDriver(
       tx <- ScalusService.makeTrasation(prismEvents = Seq(signedPrismEvent), maybeMsgCIP20)
       _ <- ZIO.log(s"Transation: ${bytes2Hex(tx.toCbor)}")
       txHash <- ScalusService.submitTransaction(tx)
-    } yield (eventHash, txHash)
+    yield (eventHash, txHash)
   }.provideEnvironment(ZEnvironment(bfConfig) ++ ZEnvironment(wallet))
 
   def fetchEntry(eventRef: RefVDR): ZIO[Any, Throwable, VDR] =
-    for {
+    for
       _ <- ZIO.log(s"Fetch VDR entry $eventRef")
       state <- updateState
       vdrEntry <- state.getVDR(eventRef)
-    } yield vdrEntry
+    yield vdrEntry
 
   def deactivateEntry(eventRef: RefVDR): ZIO[Any, Throwable, (EventHash, TxHash)] = {
-    for {
+    for
       _ <- ZIO.log(s"Deactivate VDR entry $eventRef")
       state <- updateState
       vdrEntry <- state.getVDR(eventRef)
@@ -110,7 +110,7 @@ class GenericVDRDriver(
       txHash <- ScalusService
         .submitTransaction(tx)
         .provideEnvironment(ZEnvironment(bfConfig))
-    } yield (eventHash, txHash)
+    yield (eventHash, txHash)
   }.provideEnvironment(ZEnvironment(bfConfig) ++ ZEnvironment(wallet))
 
 }

@@ -39,7 +39,7 @@ trait KeyGeneratorWeb {
   def makeKeyEC(
       crv: Curve.`P-256`.type | Curve.`P-384`.type | Curve.`P-521`.type
   ): IO[FailToGenerateKey, ECPrivateKey] =
-    for {
+    for
       keyPair <-
         ZIO
           .fromPromiseJS(
@@ -62,7 +62,7 @@ trait KeyGeneratorWeb {
       ret <- str.fromJson[ECPrivateKey] match
         case Left(fail)   => ZIO.fail(FailToGenerateKey(CryptoFailToParse(fail)))
         case Right(value) => ZIO.succeed(value)
-    } yield (ret)
+    yield (ret)
 
   /** Notes:
     *
@@ -84,7 +84,7 @@ trait KeyGeneratorWeb {
         val keyAlgorithm = js.Dictionary("name" -> "X25519").asInstanceOf[KeyAlgorithm]
         generateKey(keyAlgorithm, true, js.Array(KeyUsage.deriveKey))
     }
-    for {
+    for
       keyPair <-
         ZIO
           .fromPromiseJS(aux)
@@ -100,7 +100,7 @@ trait KeyGeneratorWeb {
       ret <- str.fromJson[OKPPrivateKey] match
         case Left(fail)   => ZIO.fail(FailToGenerateKey(CryptoFailToParse(fail)))
         case Right(value) => ZIO.succeed(value)
-    } yield (ret)
+    yield (ret)
   }
 }
 
@@ -112,7 +112,7 @@ trait KeyGeneratorJose {
 
   // ES256 (P-256) //ES256K (secp256k1)
   def joseMakeKeyEC(alg: String): IO[FailToGenerateKey, ECPrivateKey] =
-    for {
+    for
       keyPair <-
         ZIO
           .fromPromiseJS(generateKeyPair(alg))
@@ -128,11 +128,11 @@ trait KeyGeneratorJose {
       ret <- str.fromJson[ECPrivateKey] match
         case Left(fail)   => ZIO.fail(FailToGenerateKey(CryptoFailToParse(fail)))
         case Right(value) => ZIO.succeed(value)
-    } yield (ret)
+    yield (ret)
 
   // EdDSA Ed25519 //ECDH-ES+A256KW X25519
   def joseMakeKeyOKP(alg: String, crv: String): IO[FailToGenerateKey, OKPPrivateKey] =
-    for {
+    for
       keyPair <-
         ZIO
           .fromPromiseJS(generateKeyPair(alg = alg, options = GenerateKeyPairOptions().setCrv(crv)))
@@ -148,5 +148,5 @@ trait KeyGeneratorJose {
       ret <- str.fromJson[OKPPrivateKey] match
         case Left(fail)   => ZIO.fail(FailToGenerateKey(CryptoFailToParse(fail)))
         case Right(value) => ZIO.succeed(value)
-    } yield (ret)
+    yield (ret)
 }

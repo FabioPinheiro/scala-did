@@ -31,7 +31,7 @@ object Enroll {
   def piuri = PIURI("https://decentriqube.com/registry/1/enroll")
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, Enroll] =
-    if (msg.`type` != piuri) Left(s"No able to create Enroll from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create Enroll from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
@@ -95,7 +95,7 @@ object Account {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, Account] =
-    if (msg.`type` != piuri) Left(s"No able to create Account from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create Account from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
@@ -161,7 +161,7 @@ object SetId {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, SetId] =
-    if (msg.`type` != piuri) Left(s"No able to create SetId from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create SetId from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")

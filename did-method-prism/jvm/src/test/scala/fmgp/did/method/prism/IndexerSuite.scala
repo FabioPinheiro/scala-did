@@ -24,7 +24,7 @@ class IndexerSuite extends ZSuite {
     ZTestLocalFixture { _ => PrismStateInMemory.empty.map(s => ZLayer.succeed(s)) }(_ => ZIO.unit)
 
   prismStateFixture.testZLayered("Index SSI and the VDR create event") {
-    for {
+    for
       _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR)
@@ -45,11 +45,11 @@ class IndexerSuite extends ZSuite {
         case VDR.DataByteArray(byteArray) => assertEquals(byteArray.toSeq, data1.toSeq)
         case VDR.DataIPFS(cid)            => fail("Wrong DATA type")
         case VDR.DataStatusList(status)   => fail("Wrong DATA type")
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered("Index SSI and a create and update VDR Events") {
-    for {
+    for
       _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR, updateVDR)
@@ -71,11 +71,11 @@ class IndexerSuite extends ZSuite {
         case VDR.DataByteArray(byteArray) => assertEquals(byteArray.toSeq, data2.toSeq)
         case VDR.DataIPFS(cid)            => fail("Wrong DATA type")
         case VDR.DataStatusList(status)   => fail("Wrong DATA type")
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered("Index SSI and a create and update (with UnknownField 49) VDR Events") {
-    for {
+    for
       _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR, updateVDR_withUnknownField49)
@@ -97,11 +97,11 @@ class IndexerSuite extends ZSuite {
         case VDR.DataByteArray(byteArray) => assertEquals(byteArray.toSeq, data2.toSeq)
         case VDR.DataIPFS(cid)            => fail("Wrong DATA type")
         case VDR.DataStatusList(status)   => fail("Wrong DATA type")
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered("Index SSI and a create and update (with UnknownField 99) VDR Events") {
-    for {
+    for
       _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR, updateVDR_withUnknownField99)
@@ -123,11 +123,11 @@ class IndexerSuite extends ZSuite {
         case VDR.DataByteArray(byteArray) => assertEquals(byteArray.toSeq, data2.toSeq)
         case VDR.DataIPFS(cid)            => fail("Wrong DATA type")
         case VDR.DataStatusList(status)   => fail("Wrong DATA type")
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered("Index SSI and two VDR Events out of order") {
-    for {
+    for
       _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, updateVDR, createVDR)
@@ -148,11 +148,11 @@ class IndexerSuite extends ZSuite {
         case VDR.DataByteArray(byteArray) => assertEquals(byteArray.toSeq, data1.toSeq)
         case VDR.DataIPFS(cid)            => fail("Wrong DATA type")
         case VDR.DataStatusList(status)   => fail("Wrong DATA type")
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered("Index SSI (with a create and update events)") {
-    for {
+    for
       _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, updateSSI_addKey)
@@ -171,11 +171,11 @@ class IndexerSuite extends ZSuite {
         assertEquals(didHistory.versions.size, 2)
       }
 
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered("Index SSI (create and add new key) and three VDR events (using the new key)") {
-    for {
+    for
       _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR, updateVDR, updateSSI_addKey, updateVDR_withTheNewKey)
@@ -199,13 +199,13 @@ class IndexerSuite extends ZSuite {
         case VDR.DataByteArray(byteArray) => assertEquals(byteArray.toSeq, data3.toSeq)
         case VDR.DataIPFS(cid)            => fail("Wrong DATA type")
         case VDR.DataStatusList(status)   => fail("Wrong DATA type")
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered(
     "Index SSI (create and add new key) and three VDR events (using the new key before adding the key)"
   ) {
-    for {
+    for
       _ <- ZIO.unit
       stream = ZStream.fromIterable(
         Seq(createSSI, createVDR, updateVDR, updateVDR_withTheNewKey, updateSSI_addKey)
@@ -233,7 +233,7 @@ class IndexerSuite extends ZSuite {
         case VDR.DataByteArray(byteArray) => assertEquals(byteArray.toSeq, data2.toSeq)
         case VDR.DataIPFS(cid)            => fail("Wrong DATA type")
         case VDR.DataStatusList(status)   => fail("Wrong DATA type")
-    } yield ()
+    yield ()
   }
 
   // TODO test update event with a different data type like IPFS

@@ -31,14 +31,14 @@ object TransportWSImp {
       annotationMap: Seq[LogAnnotation]
   ): WebSocketApp[Operator & Operations & Resolver] = {
     def processByOperator(transport: TransportWSImp[String]) =
-      for {
+      for
         op <- ZIO.service[Operator]
         transportWarp = TransportDIDCommWS(transport)
         _ <- op
           .receiveTransport(transportWarp)
           .tapErrorCause(ZIO.logErrorCause(_))
           .mapError(DidException(_))
-      } yield ()
+      yield ()
     createWebSocketApp(annotationMap, processByOperator)
   }
 
@@ -51,7 +51,7 @@ object TransportWSImp {
         .fromFunctionZIO((channel: Channel[ChannelEvent[WebSocketFrame], ChannelEvent[WebSocketFrame]]) =>
           val socketID = Websocket.nextSocketName
           ZIO.logAnnotate(Websocket.logAnnotation(socketID), annotationMap*) {
-            for {
+            for
               transport <- make(channel, identifier = socketID)
               ws <- fmgp.did.framework.WebsocketJVMImp
                 .bindings(channel, transport.ws)
@@ -59,7 +59,7 @@ object TransportWSImp {
                 .fork
               _ <- f(transport)
               _ <- ws.join *> ZIO.log("WebsocketJVM CLOSE")
-            } yield ws
+            yield ws
           }
         ),
       customConfig = None
@@ -96,7 +96,7 @@ object TransportWSImp {
       channel: Channel[ChannelEvent[WebSocketFrame], ChannelEvent[WebSocketFrame]],
       identifier: String,
       boundSize: Int = 10,
-  ): ZIO[Any, Nothing, TransportWSImp[String]] = for {
+  ): ZIO[Any, Nothing, TransportWSImp[String]] = for
     outbound <- Queue.bounded[String](boundSize)
     inbound <- Hub.bounded[String](boundSize)
     ws = new Websocket[Throwable] {
@@ -115,5 +115,5 @@ object TransportWSImp {
       .fromQueue(outbound)
       .runForeach(data => ws.send(data))
       .fork
-  } yield TransportWSImp[String](outbound, inbound, ws)
+  yield TransportWSImp[String](outbound, inbound, ws)
 }

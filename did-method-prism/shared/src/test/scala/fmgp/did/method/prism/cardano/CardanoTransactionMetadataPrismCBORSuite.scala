@@ -48,11 +48,11 @@ class CardanoTransactionMetadataPrismCBORSuite extends FunSuite {
     assert(events.nonEmpty, "Expected at least one event in the PrismObject")
 
     val maybeEvents = MaybeEvent.fromProto(prismObject, "sim-tx", 0)
-    val program = for {
+    val program = for
       state <- PrismStateInMemory.empty
       _ <- ZIO.foreach(maybeEvents)(state.addMaybeEvent(_))
       ssis <- state.makeSSI
-    } yield ssis
+    yield ssis
 
     val ran =
       try Right(Unsafe.unsafe { implicit u => Runtime.default.unsafe.run(program).getOrThrow() })

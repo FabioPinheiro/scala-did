@@ -5,7 +5,7 @@ import scala.annotation.tailrec
 object BaseNImpl {
 
   def encode(base: Base, data: Array[Byte]): String =
-    if (data.isEmpty) ""
+    if data.isEmpty then ""
     else {
       val alphabet: Array[Char] = base.alphabet.toCharArray
       val baseSize = base.alphabet.length
@@ -13,12 +13,12 @@ object BaseNImpl {
 
       @tailrec
       def buildBase(res: String, bi: BigInt): String =
-        if (bi <= 0) res
+        if bi <= 0 then res
         else buildBase(alphabet((bi % baseSize).toInt).toString + res, bi / baseSize)
 
       @tailrec
       def confirmZeroByte(res: String, bytes: Array[Byte], idx: Int): String =
-        if (bytes(idx) != 0 || idx >= bytes.length) res
+        if bytes(idx) != 0 || idx >= bytes.length then res
         else confirmZeroByte(ZERO.toString + res, bytes, idx + 1)
 
       confirmZeroByte(buildBase("", BigInt(1, data)), data, 0)
@@ -31,7 +31,7 @@ object BaseNImpl {
 
     @tailrec
     def restoreBigInt(chars: Array[Char], bi: BigInt, idx: Int): BigInt =
-      if (idx >= chars.length) bi
+      if idx >= chars.length then bi
       else {
         val i: Int = alphabet.zipWithIndex.find(t => t._1 == chars(idx)).map(_._2).get
         restoreBigInt(chars, bi * baseSize + i, idx + 1)

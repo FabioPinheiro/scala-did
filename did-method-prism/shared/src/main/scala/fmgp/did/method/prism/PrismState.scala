@@ -98,7 +98,7 @@ trait PrismStateRead {
     CreateDidOP | UpdateDidOP | DeactivateDidOP
   ]]] =
     getEventsIdBySSI(ssi).flatMap { seqEventRef =>
-      for {
+      for
         events <- ZIO.foreach(seqEventRef) { eventRef =>
           getEventByHash(eventRef.eventHash).flatMap {
             case None =>
@@ -107,7 +107,7 @@ trait PrismStateRead {
           }
         }
         didEvents <- PrismState.forceType2DidEvent(events)
-      } yield didEvents
+      yield didEvents
     }
 
   /** Fetches all events in the chain for the given VDR reference.
@@ -124,7 +124,7 @@ trait PrismStateRead {
     CreateStorageEntryOP | UpdateStorageEntryOP | DeactivateStorageEntryOP
   ]]] =
     getEventsIdByVDR(refVDR).flatMap { seqEventRef =>
-      for {
+      for
         events <- ZIO.foreach(seqEventRef) { eventRef =>
           getEventByHash(eventRef.eventHash).flatMap {
             case None =>
@@ -133,7 +133,7 @@ trait PrismStateRead {
           }
         }
         storageEvents <- PrismState.forceType2StorageEvent(events)
-      } yield storageEvents
+      yield storageEvents
     }
 
   /** Gets a specific event by its [[EventHash]]. */

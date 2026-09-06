@@ -49,7 +49,7 @@ object MessagesReceived {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, MessagesReceived] =
-    if (msg.`type` != piuri) Left(s"No able to create MessagesReceived from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create MessagesReceived from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")

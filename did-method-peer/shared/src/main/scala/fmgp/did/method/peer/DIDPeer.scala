@@ -140,14 +140,14 @@ object DIDPeer2 {
           DIDPeer2.ElementE(
             Multibase.encode(
               Base58BTC,
-              Array(-20.toByte, 1.toByte).map(_.toByte) ++ Base64(key.x).decode // TODO refactoring
+              Array((-20).toByte, 1.toByte).map(_.toByte) ++ Base64(key.x).decode // TODO refactoring
             )
           )
         case Curve.Ed25519 =>
           DIDPeer2.ElementV(
             Multibase.encode(
               Base58BTC,
-              Array(-19.toByte, 1.toByte).map(_.toByte) ++ Base64(key.x).decode // TODO refactoring
+              Array((-19).toByte, 1.toByte).map(_.toByte) ++ Base64(key.x).decode // TODO refactoring
             )
           )
     case _: ECPrivateKey => ??? // TODO

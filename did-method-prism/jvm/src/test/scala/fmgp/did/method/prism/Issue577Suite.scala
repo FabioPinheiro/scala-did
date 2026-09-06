@@ -24,7 +24,7 @@ class Issue577Suite extends ZSuite {
   prismStateFixture.testZLayered(
     "createDeterministicDID + fromProtoForce + addEvent: getSSI should return a non-empty SSI"
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       (didPrism, createEvent, _) = DIDExtra.createDeterministicDID(pkMaster, Seq.empty)
       signedEvent = MaybeEvent.fromProtoForce2DIDEvent(createEvent, cursor = EventCursor(0, 0))
@@ -32,18 +32,18 @@ class Issue577Suite extends ZSuite {
       ssi <- state.getSSI(didPrism)
       _ = assert(ssi.exists, "SSI should exist after addEvent — fromProtoForce silently dropped the event (issue #577)")
       _ = assert(ssi.keys.nonEmpty, "SSI should have at least the master key")
-    } yield ()
+    yield ()
   }
 
   prismStateFixture.testZLayered(
     "addEvent with fake cursor (EventCursor.fake default) should fail with an exception"
   ) {
-    for {
+    for
       state <- ZIO.service[PrismState]
       (_, createEvent, _) = DIDExtra.createDeterministicDID(pkMaster, Seq.empty)
       signedEvent = MaybeEvent.fromProtoForce2DIDEvent(createEvent) // uses EventCursor.fake default
       result <- state.addEvent(signedEvent).either
       _ = assert(result.isLeft, "addEvent with a fake cursor should fail")
-    } yield ()
+    yield ()
   }
 }

@@ -15,7 +15,7 @@ object JWTOperationsImp {
 class JWTOperationsImp(ops: CryptoJWTOperations) extends JWTOperations {
 
   def signJWT(payload: JWTPayload): ZIO[Agent & Resolver, CryptoFailed, JWT] =
-    for {
+    for
       agent <- ZIO.service[Agent]
       issDID <- payload.getISS match
         case Some(iss) if (iss == agent.id.did) => ZIO.succeed(agent.id)
@@ -41,7 +41,7 @@ class JWTOperationsImp(ops: CryptoJWTOperations) extends JWTOperations {
           case None      => ZIO.fail(NoSupportedKey)
         }
       ret <- ops.signJWT(signingKey, payload.toJson.getBytes())
-    } yield ret
+    yield ret
 
   def verifyJWT(jwt: JWT): ZIO[Resolver, CryptoFailed, Boolean] =
     ZIO.fail(CryptoNotImplementedError) // FIXME

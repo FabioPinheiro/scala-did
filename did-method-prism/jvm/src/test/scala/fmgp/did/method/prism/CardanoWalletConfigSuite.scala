@@ -119,10 +119,10 @@ class CardanoWalletConfigSuite extends ZSuite {
     val ecPublicKey = ecPrivateKey.toPublicKey
     val data = "interoperability test payload".getBytes
 
-    for {
+    for
       signed <- CryptoOperationsImp.sign(ecPrivateKey, data)
       verified <- CryptoOperationsImp.verify(ecPublicKey, signed)
-    } yield assert(verified, "CryptoOperationsImp.verify should succeed for Apollo-derived secp256k1 key")
+    yield assert(verified, "CryptoOperationsImp.verify should succeed for Apollo-derived secp256k1 key")
 
   }
 
@@ -131,10 +131,10 @@ class CardanoWalletConfigSuite extends ZSuite {
     val ecPrivateKey = secp256k1Key.privateJWK.withKid("wallet-key-secp256k1")
     val ecPublicKey = ecPrivateKey.toPublicKey
 
-    for {
+    for
       jwt <- CryptoOperationsImp.signJWT(ecPrivateKey, "hello world".getBytes)
       verified <- CryptoOperationsImp.verifyJWT(ecPublicKey, jwt)
-    } yield assert(verified, "CryptoOperationsImp.verifyJWT should succeed for Apollo-derived secp256k1 key")
+    yield assert(verified, "CryptoOperationsImp.verifyJWT should succeed for Apollo-derived secp256k1 key")
 
   }
 
@@ -217,7 +217,7 @@ class CardanoWalletConfigSuite extends ZSuite {
       alg = KWAlgorithm.`ECDH-ES+A256KW`,
     )
 
-    val result = for {
+    val result = for
       encrypted <- ECDH_AnonOKP.encrypt(Seq((kid, key.toPublicKey)), header, clearText)
       jweRecipients = encrypted.recipients.map(r => JWERecipient(r.header.kid, r.encrypted_key))
       decrypted <- ECDH_AnonOKP.decrypt(
@@ -228,7 +228,7 @@ class CardanoWalletConfigSuite extends ZSuite {
         encrypted.ciphertext,
         encrypted.tag
       )
-    } yield decrypted
+    yield decrypted
 
     result match
       case Left(err)    => fail(s"round-trip failed: $err")
@@ -250,7 +250,7 @@ class CardanoWalletConfigSuite extends ZSuite {
       alg = KWAlgorithm.`ECDH-1PU+A256KW`,
     )
 
-    val result = for {
+    val result = for
       encrypted <- ECDH_AuthOKP.encrypt(senderKey, Seq((recipientKid, recipientKey.toPublicKey)), header, clearText)
       jweRecipients = encrypted.recipients.map(r => JWERecipient(r.header.kid, r.encrypted_key))
       decrypted <- ECDH_AuthOKP.decrypt(
@@ -262,7 +262,7 @@ class CardanoWalletConfigSuite extends ZSuite {
         encrypted.ciphertext,
         encrypted.tag
       )
-    } yield decrypted
+    yield decrypted
 
     result match
       case Left(err)    => fail(s"authEncrypt/authDecrypt round-trip failed: $err")
@@ -281,7 +281,7 @@ class CardanoWalletConfigSuite extends ZSuite {
       alg = KWAlgorithm.`ECDH-ES+A256KW`,
     )
 
-    val result = for {
+    val result = for
       encrypted <- ECDH_AnonOKP.encrypt(Seq((kid, correctKey.toPublicKey)), header, clearText)
       jweRecipients = encrypted.recipients.map(r => JWERecipient(r.header.kid, r.encrypted_key))
       decrypted <- ECDH_AnonOKP.decrypt(
@@ -292,7 +292,7 @@ class CardanoWalletConfigSuite extends ZSuite {
         encrypted.ciphertext,
         encrypted.tag
       )
-    } yield decrypted
+    yield decrypted
 
     assert(result.isLeft, "decrypting with a wrong key should fail")
   }

@@ -59,7 +59,7 @@ class JWTSuite extends ZSuite {
   )
 
   testZ("EC ES256 (P_256 key) sign and verify JWT") {
-    for {
+    for
       jwt <- CryptoOperationsImp.signJWT(
         senderKeyP256_1,
         data.getBytes,
@@ -73,7 +73,7 @@ class JWTSuite extends ZSuite {
         senderKeyP256_1.toPublicKey,
         jwt
       )
-    } yield assertEquals(ret, true)
+    yield assertEquals(ret, true)
   }
 
   testZ("EC ES256 (P_256 key) verify JWT sign JVM") {
@@ -91,7 +91,7 @@ class JWTSuite extends ZSuite {
   }
 
   testZ("EC ES256 (P_256 key) sign and fail to verify if 'kid' of the key do not match") {
-    for {
+    for
       jwt <- CryptoOperationsImp.signJWT(
         senderKeyP256_1,
         data.getBytes,
@@ -106,11 +106,11 @@ class JWTSuite extends ZSuite {
         keyWithFailKid.toPublicKey,
         jwt
       )
-    } yield assertEquals(ret, true)
+    yield assertEquals(ret, true)
   }
 
   testZ("EC ES256 (P_256 key) sign and fail to verify JWT if key is different") {
-    for {
+    for
       jwt <- CryptoOperationsImp.signJWT(
         senderKeyP256_1,
         data.getBytes,
@@ -124,11 +124,11 @@ class JWTSuite extends ZSuite {
         senderKeyP256_otherKey.toPublicKey,
         jwt
       )
-    } yield assertEquals(ret, false)
+    yield assertEquals(ret, false)
   }
 
   testZ("OKP EdDSA (Ed25519 key) sign and verify JWT") {
-    for {
+    for
       jwt <- CryptoOperationsImp.signJWT(
         okp,
         data.getBytes,
@@ -142,7 +142,7 @@ class JWTSuite extends ZSuite {
         okp.toPublicKey,
         jwt
       )
-    } yield assertEquals(ret, true)
+    yield assertEquals(ret, true)
   }
 
   test("(JWTUtils) JWTHeader - encode and decode (JSON)") {

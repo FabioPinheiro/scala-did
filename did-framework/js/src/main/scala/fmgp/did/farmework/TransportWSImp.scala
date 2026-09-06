@@ -40,7 +40,7 @@ object TransportWSImp {
   def make(
       wsUrl: String = wsUrlFromWindowLocation, // "ws://localhost:8080/ws",
       boundSize: Int = 10,
-  ): ZIO[Any, Nothing, TransportWSImp[MSG]] = for {
+  ): ZIO[Any, Nothing, TransportWSImp[MSG]] = for
     outbound <- Queue.bounded[MSG](boundSize)
     inbound <- Hub.bounded[MSG](boundSize)
 
@@ -82,5 +82,5 @@ object TransportWSImp {
       }
       .runDrain
       .fork
-  } yield transportWS
+  yield transportWS
 }

@@ -80,7 +80,7 @@ class SHASuite extends ZSuite {
 
   testVectors.foreach { (input, _, sha256out) =>
     val n = 20
-    test(s"SHA-256 Basic digest '${if (input.size > 20) input.slice(0, n) ++ "..." else input}'") {
+    test(s"SHA-256 Basic digest '${if input.size > 20 then input.slice(0, n) ++ "..." else input}'") {
       assertEquals(SHA256.digestToHex(input), sha256out)
       assertEquals(SHA256.digestToHex(input.getBytes()), sha256out)
       assertEquals(SHA256.digest(input).toSeq, hex2bytes(sha256out).toSeq)
@@ -90,8 +90,8 @@ class SHASuite extends ZSuite {
 
   testVectors.foreach { (input, _, sha256out) =>
     val n = 20
-    testZ(s"SHA-256 ZIO digest '${if (input.size > 20) input.slice(0, n) ++ "..." else input}'".ignore) {
-      for {
+    testZ(s"SHA-256 ZIO digest '${if input.size > 20 then input.slice(0, n) ++ "..." else input}'".ignore) {
+      for
         a <- SHA256ZIO.digestToHex(input)
         _ = assertEquals(a, sha256out)
         b <- SHA256ZIO.digestToHex(input.getBytes())
@@ -100,14 +100,14 @@ class SHASuite extends ZSuite {
         _ = assertEquals(c.toSeq, hex2bytes(sha256out).toSeq)
         d <- SHA256ZIO.digest(input.getBytes())
         _ = assertEquals(d.toSeq, hex2bytes(sha256out).toSeq)
-      } yield ()
+      yield ()
     }
   }
 
   testVectorsFromBytes.foreach { (input, sha256out) =>
     val hex = bytes2Hex(input)
     val n = 20
-    test(s"SHA-256 Basic digest from bytes:'${if (hex.size > 20) hex.slice(0, n) ++ "..." else hex}'") {
+    test(s"SHA-256 Basic digest from bytes:'${if hex.size > 20 then hex.slice(0, n) ++ "..." else hex}'") {
       assertEquals(SHA256.digestToHex(input), sha256out)
       assertEquals(SHA256.digest(input).toSeq, hex2bytes(sha256out).toSeq)
     }

@@ -18,13 +18,13 @@ import scala.util.Try
 type HASH = String
 object DataModels {
 
-  given BSONWriter[PrismEvent] with {
+  given BSONWriter[PrismEvent] {
     override def writeTry(obj: PrismEvent): Try[BSONValue] =
       // Success(BSONBinary(obj.toByteArray, Subtype.GenericBinarySubtype))
       Success(BSONString(bytes2Hex(obj.toByteArray)))
   }
 
-  given BSONReader[PrismEvent] with {
+  given BSONReader[PrismEvent] {
     override def readTry(bson: BSONValue): Try[PrismEvent] = {
       bson match
         // case b: BSONBinary => Success(PrismEvent.parseFrom(b.byteArray))
@@ -38,7 +38,7 @@ object DataModels {
   given BSONWriter[EventHash] = BSONWriter.stringWriter.beforeWrite(eventHash => eventHash.hex)
   given BSONReader[EventHash] = BSONReader.stringReader.afterRead(str => EventHash.fromHex(str))
 
-  given BSONDocumentWriter[MySignedPrismEvent[OP]] with {
+  given BSONDocumentWriter[MySignedPrismEvent[OP]] {
     override def writeTry(obj: MySignedPrismEvent[OP]): Try[BSONDocument] =
       obj match
         case MySignedPrismEvent(tx, b, o, signedWith, signature, protobuf) =>
@@ -55,20 +55,20 @@ object DataModels {
           )
   }
 
-  given BSONDocumentReader[MySignedPrismEvent[OP]] with { // = Macros.reader[MySignedPrismEvent[OP]]
+  given BSONDocumentReader[MySignedPrismEvent[OP]] { // = Macros.reader[MySignedPrismEvent[OP]]
     override def readDocument(doc: BSONDocument): Try[MySignedPrismEvent[OP]] = {
-      for {
+      for
         tx <- doc.getAsTry[String]("tx")
         o <- doc.getAsTry[Int]("o")
         b <- doc.getAsTry[Int]("b")
         signedWith <- doc.getAsTry[String]("signedWith")
         signature <- doc.getAsTry[String]("signature").map(hex2bytes)
         protobuf <- doc.getAsTry[PrismEvent]("protobuf")
-      } yield MySignedPrismEvent[OP](tx, o, b, signedWith, signature, protobuf)
+      yield MySignedPrismEvent[OP](tx, o, b, signedWith, signature, protobuf)
     }
   }
 
-  given BSONDocumentWriter[EventWithRootRef] with {
+  given BSONDocumentWriter[EventWithRootRef] {
     override def writeTry(obj: EventWithRootRef): Try[BSONDocument] =
       obj.event match
         case MySignedPrismEvent(tx, b, o, signedWith, signature, protobuf) =>
@@ -86,9 +86,9 @@ object DataModels {
           )
   }
 
-  given BSONDocumentReader[EventWithRootRef] with { // = Macros.reader[MySignedPrismEvent[OP]]
+  given BSONDocumentReader[EventWithRootRef] { // = Macros.reader[MySignedPrismEvent[OP]]
     override def readDocument(doc: BSONDocument): Try[EventWithRootRef] = {
-      for {
+      for
         ref <- doc.getAsTry[EventHash]("ref")
         tx <- doc.getAsTry[String]("tx")
         o <- doc.getAsTry[Int]("o")
@@ -96,7 +96,7 @@ object DataModels {
         signedWith <- doc.getAsTry[String]("signedWith")
         signature <- doc.getAsTry[String]("signature").map(hex2bytes)
         protobuf <- doc.getAsTry[PrismEvent]("protobuf")
-      } yield EventWithRootRef(ref, MySignedPrismEvent[OP](tx, o, b, signedWith, signature, protobuf))
+      yield EventWithRootRef(ref, MySignedPrismEvent[OP](tx, o, b, signedWith, signature, protobuf))
     }
   }
 

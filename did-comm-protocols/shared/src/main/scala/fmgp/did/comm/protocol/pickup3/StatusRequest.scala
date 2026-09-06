@@ -40,7 +40,7 @@ object StatusRequest {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, StatusRequest] =
-    if (msg.`type` != piuri) Left(s"No able to create StatusRequest from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create StatusRequest from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")

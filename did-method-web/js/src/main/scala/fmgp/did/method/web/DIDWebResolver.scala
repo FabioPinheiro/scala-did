@@ -23,7 +23,7 @@ case class DIDWebResolver() extends Resolver {
   override protected def didDocumentOf(did: FROMTO): IO[ResolverError, DIDDocument] = did.toDID match {
     case did if (did.namespace == DIDWeb.namespace) =>
       val web = DIDWeb(did.specificId)
-      for {
+      for
         ret <- ZIO
           .fromPromiseJS(fetch(web.url, new RequestInit { method = HttpMethod.GET }))
           .mapError(ex => DIDresolutionFail.fromThrowable(ex))
@@ -33,7 +33,7 @@ case class DIDWebResolver() extends Resolver {
         didDoc <- data.fromJson[DIDDocument] match
           case Left(error) => ZIO.fail(DIDresolutionFail.fromParseError("DIDResolutionResult", error))
           case Right(doc)  => ZIO.succeed(doc)
-      } yield (didDoc)
+      yield (didDoc)
     case did => ZIO.fail(UnsupportedMethod(did.namespace))
   }
 }

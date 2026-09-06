@@ -20,10 +20,10 @@ class JWMSuiteJS extends ZSuite {
   import scala.scalajs.js
 
   testZ("Make Key ES256 (P-256)") {
-    for {
+    for
       key <- KeyGenerator.makeKeyEC(Curve.`P-256`)
       _ = assertEquals(key.crv, Curve.`P-256`)
-    } yield ()
+    yield ()
   }
 
   // TODO
@@ -35,42 +35,42 @@ class JWMSuiteJS extends ZSuite {
   // }
 
   testZ("Make Key EdDSA (Ed25519)") {
-    for {
+    for
       key <- KeyGenerator.makeKeyOKP(Curve.Ed25519)
       _ = assertEquals(key.crv, Curve.Ed25519)
-    } yield ()
+    yield ()
   }
   testZ("Make Key EdDSA (X25519)") {
-    for {
+    for
       key <- KeyGenerator.makeKeyOKP(Curve.X25519)
       _ = assertEquals(key.crv, Curve.X25519)
-    } yield ()
+    yield ()
   }
 
   testZ("[jose] Make Key ES256 (P-256)") {
-    for {
+    for
       key <- KeyGenerator.joseMakeKeyEC("ES256")
       _ = assertEquals(key.crv, Curve.`P-256`)
-    } yield ()
+    yield ()
   }
 
   testZ("[jose] Make Key ES256K (secp256k1)") {
-    for {
+    for
       key <- KeyGenerator.joseMakeKeyEC("ES256K")
       _ = assertEquals(key.crv, Curve.secp256k1)
-    } yield ()
+    yield ()
   }
   testZ("[jose] Make Key EdDSA (Ed25519)") {
-    for {
+    for
       key <- KeyGenerator.joseMakeKeyOKP("EdDSA", "Ed25519")
       _ = assertEquals(key.crv, Curve.Ed25519)
-    } yield ()
+    yield ()
   }
   testZ("[jose] Make Key EdDSA (X25519)") {
-    for {
+    for
       key <- KeyGenerator.joseMakeKeyOKP("ECDH-ES+A256KW", "X25519")
       _ = assertEquals(key.crv, Curve.X25519)
-    } yield ()
+    yield ()
   }
 
   testZ("sign and verify an example") {

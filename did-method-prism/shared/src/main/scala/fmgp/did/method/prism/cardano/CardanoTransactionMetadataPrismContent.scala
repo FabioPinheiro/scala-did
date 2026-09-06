@@ -30,22 +30,22 @@ case class CardanoTransactionMetadataPrismCBOR(version: Int, protoBytes: Array[B
 }
 object CardanoTransactionMetadataPrismCBOR {
   given Decoder[CardanoTransactionMetadataPrismCBOR] = Decoder { reader =>
-    if (reader.hasMapHeader) {
+    if reader.hasMapHeader then {
       reader.readMapHeader(1)
-      if (reader.hasInt & reader.readInt() == PRISM_LABEL_CIP_10) {
-        if (reader.hasMapHeader(2)) {
+      if reader.hasInt & reader.readInt() == PRISM_LABEL_CIP_10 then {
+        if reader.hasMapHeader(2) then {
           val readerPrismStr = reader.readMapHeader(2)
           reader.readString() match
             case "v" => {
               val version = reader.readInt() // PRISM version
-              if (reader.hasString & (reader.readString() == "c"))
+              if reader.hasString & (reader.readString() == "c") then
                 val protoBytes = reader.read[Array[Array[Byte]]]().flatten // read protobuf bytes!
                 CardanoTransactionMetadataPrismCBOR(version = version, protoBytes = protoBytes)
               else reader.unexpectedDataItem(expected = "the map key 'c'")
             }
             case "c" => {
               val protoBytes = reader.read[Array[Array[Byte]]]().flatten // read protobuf bytes!
-              if (reader.hasString & (reader.readString() == "v")) {
+              if reader.hasString & (reader.readString() == "v") then {
                 val version = reader.readInt() // PRISM version'
                 CardanoTransactionMetadataPrismCBOR(version = version, protoBytes = protoBytes)
               } else reader.unexpectedDataItem(expected = "the map key 'v'")

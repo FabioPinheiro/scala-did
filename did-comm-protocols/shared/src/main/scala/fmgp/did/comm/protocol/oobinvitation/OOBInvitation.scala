@@ -70,7 +70,7 @@ object OOBInvitation {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, OOBInvitation] = {
-    if (msg.`type` != piuri)
+    if msg.`type` != piuri then
       Left(s"No able to create OOB-Invitation from a Message of the type '${msg.`type`}'")
     else
       msg.from match

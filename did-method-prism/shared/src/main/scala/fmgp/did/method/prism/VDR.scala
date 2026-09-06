@@ -37,16 +37,16 @@ final case class VDR(
         assert(valueDIDPrism == ssiHistory.didPrism, s"$valueDIDPrism != ${ssiHistory.didPrism}") // FIXME
     val ssi = ssiHistory.latestVersionBefore(spo.eventCursor)
     assert(Ordering[EventCursor].gt(spo.eventCursor, ssi.cursor)) // SSI check
-    if (Ordering[EventCursor].lteq(spo.eventCursor, this.cursor)) self // Ignore if the event its already process
+    if Ordering[EventCursor].lteq(spo.eventCursor, this.cursor) then self // Ignore if the event its already process
     else
       {
-        if (!ssi.checkVdrSignature(spo)) self
+        if !ssi.checkVdrSignature(spo) then self
         else {
           spo match
             case MySignedPrismEvent(tx, b, o, signedWith, signature, protobuf) =>
               spo.event match
                 case event @ CreateStorageEntryOP(didPrism, nonce, newData, unknownFields) =>
-                  if (latestVDRHash.isDefined) self
+                  if latestVDRHash.isDefined then self
                   else
                     assert(
                       self.id == RefVDR.fromEventHash(spo.eventHash),

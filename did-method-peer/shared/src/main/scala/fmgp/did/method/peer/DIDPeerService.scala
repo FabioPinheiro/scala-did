@@ -71,9 +71,9 @@ case class DIDPeerServiceEncodedNew(base64: Base64) extends DIDPeerServiceEncode
     val DIDCommMessaging = DIDService.TYPE_DIDCommMessaging
     def serviceId(typeName: String) = {
       s"${didSubject.string}#" + {
-        if (typeName.equalsIgnoreCase(DIDCommMessaging)) "service"
+        if typeName.equalsIgnoreCase(DIDCommMessaging) then "service"
         else typeName.toLowerCase().replace(" ", "")
-      } + { if (index == 0) "" else s"-$index" }
+      } + { if index == 0 then "" else s"-$index" }
     }
 
     json.fields.collectFirst {
@@ -173,10 +173,10 @@ case class DIDPeerServiceEncodedOld(
     Seq(getDIDServiceAux(id = id, index = previouslyNumberOfService))
 
   def getDIDServiceAux(id: DIDSubject, index: Int): DIDService =
-    if (this.t == "dm" || this.t == DIDService.TYPE_DIDCommMessaging)
+    if this.t == "dm" || this.t == DIDService.TYPE_DIDCommMessaging then
       DIDServiceDIDCommMessaging(
         // before the id was s"${id.string}#didcommmessaging-$index"
-        id = if (index == 0) s"${id.string}#service" else s"${id.string}#service-$index",
+        id = if index == 0 then s"${id.string}#service" else s"${id.string}#service-$index",
         DIDCommMessagingServiceEndpoint(
           uri = this.s,
           routingKeys = Some(this.r.toSet.flatten).filterNot(_.isEmpty),

@@ -86,7 +86,7 @@ object RecipientUpdate {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, RecipientUpdate] =
-    if (msg.`type` != piuri) Left(s"No able to create RecipientUpdate from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create RecipientUpdate from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
@@ -165,7 +165,7 @@ object RecipientResponse {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, RecipientResponse] =
-    if (msg.`type` != piuri) Left(s"No able to create RecipientResponse from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create RecipientResponse from a Message of type '${msg.`type`}'")
     else
       msg.thid match
         case None       => Left(s"'$piuri' MUST have field 'thid'")
@@ -251,7 +251,7 @@ object RecipientQuery {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, RecipientQuery] =
-    if (msg.`type` != piuri) Left(s"No able to create RecipientQuery from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create RecipientQuery from a Message of type '${msg.`type`}'")
     else
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
@@ -357,7 +357,7 @@ object Recipient {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, Recipient] =
-    if (msg.`type` != piuri) Left(s"No able to create Recipient from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create Recipient from a Message of type '${msg.`type`}'")
     else
       msg.thid match
         case None       => Left(s"'$piuri' MUST have field 'thid'")

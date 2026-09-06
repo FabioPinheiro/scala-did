@@ -33,7 +33,7 @@ object CrytoUtil {
     val fact = KeyFactory.getInstance("ECDSA", provider)
     val curve = params.getCurve
     val ellipticCurve = EC5Util.convertCurve(curve, params.getSeed)
-    for {
+    for
       point <- Try(ECPointUtil.decodePoint(ellipticCurve, com.toArray)) match
         case Failure(exception: java.lang.IllegalArgumentException)
             if (exception.getMessage().contains("Invalid point encoding")) => // like: Invalid point encoding 0x-72
@@ -46,7 +46,7 @@ object CrytoUtil {
         case Failure(exception: java.security.spec.InvalidKeySpecException) => Left(exception.getMessage())
         case Failure(exception)                                             => Left(exception.getMessage())
         case Success(value)                                                 => Right(value)
-    } yield publicKey
+    yield publicKey
   }
 
   def unsafeFromByteCoordinates(x: Array[Byte], y: Array[Byte]): Either[String, java.security.PublicKey] = {

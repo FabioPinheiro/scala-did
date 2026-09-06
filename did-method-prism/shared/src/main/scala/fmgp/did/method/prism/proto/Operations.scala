@@ -13,12 +13,12 @@ sealed trait OP {
   def isStorageEvent: Boolean
 
   def asDIDEvent =
-    if (this.isInstanceOf[OP.TypeDIDEvent])
+    if this.isInstanceOf[OP.TypeDIDEvent] then
       Right(this.asInstanceOf[OP.TypeDIDEvent])
     else Left("OP is not a DIDEvent type")
 
   def asStorageEntryEvent =
-    if (this.isInstanceOf[OP.TypeStorageEntryEvent])
+    if this.isInstanceOf[OP.TypeStorageEntryEvent] then
       Right(this.asInstanceOf[OP.TypeStorageEntryEvent])
     else Left("OP is not a StorageEntryEvent type")
 

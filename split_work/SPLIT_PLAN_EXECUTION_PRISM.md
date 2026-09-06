@@ -85,9 +85,9 @@ The detailed CLI guide was moved from
 - `sbt -v cardanoPrismCli/assembly`
 - Verified `cip30/bundle.js` and `cip30/bundle.js.map` in the assembled jar
   with `unzip -Z1`.
-- `java -jar cardano-prism-cli/target/scala-3.3.8/cardano-prism.jar version`
+- `java -jar cardano-prism-cli/target/scala-3.9.0/cardano-prism.jar version`
   (`1.0`)
-- `java -jar cardano-prism-cli/target/scala-3.3.8/cardano-prism.jar --help`
+- `java -jar cardano-prism-cli/target/scala-3.9.0/cardano-prism.jar --help`
 - `git diff --check`
 
 The clean-cache JVM compile and assembled CLI consumed the Maven `0.1.1`

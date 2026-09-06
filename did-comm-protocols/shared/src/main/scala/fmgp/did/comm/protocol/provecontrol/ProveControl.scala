@@ -67,7 +67,7 @@ object RequestVerification {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, RequestVerification] =
-    if (msg.`type` != piuri) Left(s"No able to create RequestVerification from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create RequestVerification from a Message of type '${msg.`type`}'")
     else {
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
@@ -149,7 +149,7 @@ object VerificationChallenge {
     given encoder: JsonEncoder[Body] = DeriveJsonEncoder.gen[Body]
   }
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, VerificationChallenge] =
-    if (msg.`type` != piuri) Left(s"No able to create VerificationChallenge from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create VerificationChallenge from a Message of type '${msg.`type`}'")
     else {
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
@@ -221,7 +221,7 @@ object Prove {
     given encoder: JsonEncoder[Body] = DeriveJsonEncoder.gen[Body]
   }
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, Prove] =
-    if (msg.`type` != piuri) Left(s"No able to create Prove from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create Prove from a Message of type '${msg.`type`}'")
     else {
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
@@ -271,7 +271,7 @@ case class ConfirmVerification(
       from = Some(from),
       thid = Some(thid),
       body = Some(ConfirmVerification.Body(verificationType, subject).toJSON_RFC7159),
-      attachments = if (attachments.nonEmpty) Some(attachments) else None,
+      attachments = if attachments.nonEmpty then Some(attachments) else None,
     )
 
 }
@@ -291,7 +291,7 @@ object ConfirmVerification {
   }
 
   def fromPlaintextMessage(msg: PlaintextMessage): Either[String, ConfirmVerification] =
-    if (msg.`type` != piuri) Left(s"No able to create ConfirmVerification from a Message of type '${msg.`type`}'")
+    if msg.`type` != piuri then Left(s"No able to create ConfirmVerification from a Message of type '${msg.`type`}'")
     else {
       msg.to.toSeq.flatten match // Note: toSeq is from the match
         case Seq()            => Left(s"'$piuri' MUST have field 'to' with one element")
