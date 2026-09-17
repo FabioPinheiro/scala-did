@@ -501,8 +501,7 @@ lazy val didResolverPrism = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += D.scalusTest.value,
   )
   .jvmSettings( // scalus
-    // libraryDependencies += compilerPlugin(D.scalusPlugin.value cross CrossVersion.full),
-    libraryDependencies += compilerPlugin("org.scalus" % "scalus-plugin_3.8.4" % V.scalus), // FIXME
+    libraryDependencies += compilerPlugin(D.scalusPlugin.value cross CrossVersion.full),
     libraryDependencies += D.scalusBloxbean.value,
   )
   .jvmSettings(libraryDependencies += D.zioHttp.value)
