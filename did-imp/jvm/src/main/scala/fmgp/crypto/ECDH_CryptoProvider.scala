@@ -28,6 +28,15 @@ import fmgp.util.*
 import fmgp.crypto.JWERecipient
 import fmgp.crypto.error.*
 import com.nimbusds.jose.crypto.impl.JWEHeaderValidation
+import com.nimbusds.jose.JWEObject
+
+/** https://bitbucket.org/connect2id/nimbus-jose-jwt/branches/compare/release-10.10%0Drelease-10.9.1#diff
+  *
+  * public static final int MAX_DECOMPRESSED_PLAIN_TEXT_LENGTH = 1_000_000;
+  */
+private[crypto] object ECDH_Provider_AUX {
+  inline val MAX_DECOMPRESSED_PLAIN_TEXT_LENGTH = JWEObject.MAX_DECOMPRESSED_PLAIN_TEXT_LENGTH * 3
+}
 
 /** Elliptic-curve Diffie–Hellman */
 case class ECDH_AnonCryptoProvider(val curve: JWKCurve, val cek: SecretKey) extends ECDHCryptoProvider(curve, cek) {
@@ -89,7 +98,16 @@ case class ECDH_AnonCryptoProvider(val curve: JWKCurve, val cek: SecretKey) exte
         .map(_.encryptedKey)
         .map(encryptedKey =>
           Try(
-            decryptWithZ(header, aad, secretKey, encryptedKey, iv.base64, cipherText.base64, authTag.base64)
+            decryptWithZ(
+              header,
+              aad,
+              secretKey,
+              encryptedKey,
+              iv.base64,
+              cipherText.base64,
+              authTag.base64,
+              ECDH_Provider_AUX.MAX_DECOMPRESSED_PLAIN_TEXT_LENGTH
+            )
           ).toEither.left
             .map {
               case ex: com.nimbusds.jose.JOSEException if ex.getMessage == "MAC check failed" => MACCheckFailed
@@ -168,7 +186,16 @@ case class ECDH_AuthCryptoProvider(val curve: JWKCurve, val cek: SecretKey) exte
         .map(_.encryptedKey)
         .map(encryptedKey =>
           Try(
-            decryptWithZ(header, aad, secretKey, encryptedKey, iv.base64, cipherText.base64, authTag.base64)
+            decryptWithZ(
+              header,
+              aad,
+              secretKey,
+              encryptedKey,
+              iv.base64,
+              cipherText.base64,
+              authTag.base64,
+              ECDH_Provider_AUX.MAX_DECOMPRESSED_PLAIN_TEXT_LENGTH
+            )
           ).toEither.left
             .map {
               case ex: com.nimbusds.jose.JOSEException if ex.getMessage == "MAC check failed" => MACCheckFailed
