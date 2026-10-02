@@ -148,7 +148,7 @@ lazy val V = new {
 
   val bullet = "1.18.0"
 
-  val reactivemongo = "1.1.0-RC19"
+  val reactivemongo = "1.1.0-pekko.noshaded.RC21"
 
   val logbackClassic = "1.2.10"
   val scalaLogging = "3.9.4"
