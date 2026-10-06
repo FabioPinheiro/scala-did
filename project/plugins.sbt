@@ -42,4 +42,4 @@ addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.6.1") // https://github.com/sb
 
 // ScalaPB for did:prism
 addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.8")
-libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.20"
+libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.21"
