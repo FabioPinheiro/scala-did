@@ -463,62 +463,6 @@ node5 -> node1;
           </div>
          </div>
         </div>
-        <div class="documentableElement" id="readOrElseTry-1bd" data-f-inherited="BSONReader">
-         <div class="documentableElement-expander">
-          <button class="icon-button ar show-content"></button>
-          <div class="header monospace mono-medium">
-           <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="DataModels$$given_BSONDocumentReader_MySignedPrismEvent$.html#readOrElseTry-1bd" t="n" class="documentableName ">readOrElseTry</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">bson</span>: <span data-unresolved-link="" t="t">BSONValue</span>, <span t="k"></span><span data-unresolved-link="" t="n">default</span>: <span t="k">=&gt;</span> <a href="../proto/MySignedPrismEvent.html" t="t">MySignedPrismEvent</a>[<a href="../proto/OP.html" t="t">OP</a>]): <span data-unresolved-link="" t="t">Try</span>[<a href="../proto/MySignedPrismEvent.html" t="t">MySignedPrismEvent</a>[<a href="../proto/OP.html" t="t">OP</a>]]
-           </div>
-          </div>
-         </div>
-         <div class="docs">
-          <span class="modifiers"></span>
-          <div>
-           <div class="originInfo"></div>
-           <div class="memberDocumentation">
-            <div class="documentableBrief doc">
-             <p>'''EXPERIMENTAL'''</p>
-            </div>
-            <div class="cover">
-             <div class="doc">
-              <p>'''EXPERIMENTAL'''</p>
-              <p>Reads the given <span data-unresolved-link="">BSONValue</span> with this reader, or returns the given default value if null is encountered.</p>
-              <p>Contrary to <span data-unresolved-link="">readTry</span>, a failed read is replaced with a successful result containing the default value.</p>
-              <div class="snippet mono-small-block">
-               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>import reactivemongo.api.bson.{ BSONInteger, BSONNull, BSONReader }
-</span><span line-number="2" class=""><span class="tooltip-container"></span>
-</span><span line-number="3" class=""><span class="tooltip-container"></span>val reader = implicitly[BSONReader[Int]]
-</span><span line-number="4" class=""><span class="tooltip-container"></span>
-</span><span line-number="5" class=""><span class="tooltip-container"></span>reader.readOrElseTry(BSONInteger(1), -1) // Success(1)
-</span><span line-number="6" class=""><span class="tooltip-container"></span>reader.readOrElseTry(BSONNull, -1) // Success(-1), as the value is BSONNull
-</span></code></pre>
-               <div class="buttons"></div>
-              </div>
-             </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">bson</dt>
-              <dd class="body-medium">
-               <p>the BSON value to be read</p>
-              </dd>
-              <dt class="body-small">default</dt>
-              <dd class="body-medium">
-               <p>the default value (must be safe)</p>
-              </dd>
-             </dl>
-             <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">Inherited from:</dt>
-              <dd class="body-medium">
-               <span data-unresolved-link="">BSONReader</span>
-              </dd>
-             </dl>
-            </div>
-           </div>
-          </div>
-         </div>
-        </div>
         <div class="documentableElement" id="readTry-841" data-f-keywords="final" data-f-inherited="BSONDocumentReader">
          <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>
