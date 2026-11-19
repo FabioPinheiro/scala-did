@@ -1,4 +1,4 @@
-val scalaJSVersion = sys.env.getOrElse("SCALAJS_VERSION", "1.22.0")
+val scalaJSVersion = sys.env.getOrElse("SCALAJS_VERSION", "1.23.0")
 
 // JVM/Scala.js cross-projects and Scala.js linking - https://github.com/portable-scala/sbt-crossproject/tags
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.4.0")
