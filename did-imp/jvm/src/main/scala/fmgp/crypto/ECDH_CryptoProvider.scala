@@ -30,7 +30,7 @@ import fmgp.crypto.error.*
 import com.nimbusds.jose.crypto.impl.JWEHeaderValidation
 import com.nimbusds.jose.JWEObject
 
-/** https://bitbucket.org/connect2id/nimbus-jose-jwt/branches/compare/release-10.10%0Drelease-10.9.1#diff
+/** https://bitbucket.org/connect2id/nimbus-jose-jwt/branches/compare/release-10.11%0Drelease-10.9.1#diff
   *
   * public static final int MAX_DECOMPRESSED_PLAIN_TEXT_LENGTH = 1_000_000;
   */
